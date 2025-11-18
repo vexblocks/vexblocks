@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "./colors.css";
+@import "./typography.css";
+@import "./spacing.css";
+@import "./effects.css";
+@import "./responsive.css";
+
+.root {
+	isolation: isolate;
+}
+/* Print Styles */
+@page {
+	size: auto;
+	margin: 0mm;
+	@top-center {
+		content: none;
+	}
+	@top-left {
+		content: none;
+	}
+	@top-right {
+		content: none;
+	}
+	@bottom-center {
+		content: none;
+	}
+	@bottom-left {
+		content: none;
+	}
+	@bottom-right {
+		content: none;
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"name": "vexblocks-monorepo",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "pnpm@10.21.0",
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"dev": "turbo run dev",
+		"dev:web": "turbo run dev --filter=web",
+		"dev:admin": "turbo run dev --filter=admin",
+		"build": "turbo run build",
+		"build:web": "turbo run build --filter=web",
+		"build:admin": "turbo run build --filter=admin",
+		"start": "turbo run start --parallel",
+		"start:web": "turbo run start --filter=web",
+		"start:admin": "turbo run start --filter=admin",
+		"lint": "turbo run lint",
+		"lint:fix": "biome lint . --apply",
+		"format:fix": "biome format . --write",
+		"typecheck": "turbo run typecheck"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.5",
+		"turbo": "^2.6.1"
+	},
+	"dependencies": {
+		"lottie-react": "^2.4.1"
+	}
+}

@@ -1,0 +1,93 @@
+@theme {
+	/* Custom Spacing */
+	--spacing-15: 3.75rem;
+	--spacing-19: 4.75rem;
+	--spacing-4_5: 1.125rem;
+	--spacing-5_5: 1.375rem;
+	--spacing-profile: 60px;
+
+	/* Custom Heights */
+	--size-500: 500px;
+	--size-hero: 750px;
+	--size-header: 72px;
+	--size-hero-mobile: 680px;
+
+	/* Custom Widths */
+	--size-430: 430px;
+
+	/* Custom Min Widths */
+	--size-podcast: 200px;
+}
+
+@layer utilities {
+	/* Custom Spacing Utilities */
+
+	/* Padding */
+	.p-15 {
+		padding: var(--spacing-15);
+	}
+
+	.p-19 {
+		padding: var(--spacing-19);
+	}
+
+	.p-4_5 {
+		padding: var(--spacing-4_5);
+	}
+
+	.p-5_5 {
+		padding: var(--spacing-5_5);
+	}
+
+	.p-profile {
+		padding: var(--spacing-profile);
+	}
+
+	/* Margin */
+	.m-15 {
+		margin: var(--spacing-15);
+	}
+
+	.m-19 {
+		margin: var(--spacing-19);
+	}
+
+	.m-4_5 {
+		margin: var(--spacing-4_5);
+	}
+
+	.m-5_5 {
+		margin: var(--spacing-5_5);
+	}
+
+	.m-profile {
+		margin: var(--spacing-profile);
+	}
+
+	/* Custom Height Utilities */
+	.h-500 {
+		height: var(--size-500);
+	}
+
+	.h-hero {
+		height: var(--size-hero);
+	}
+
+	.h-header {
+		height: var(--size-header);
+	}
+
+	.h-hero-mobile {
+		height: var(--size-hero-mobile);
+	}
+
+	/* Custom Width Utilities */
+	.w-430 {
+		width: var(--size-430);
+	}
+
+	/* Custom Min Width Utilities */
+	.min-w-podcast {
+		min-width: var(--size-podcast);
+	}
+}

@@ -1,0 +1,36 @@
+@theme {
+	/* Custom Breakpoints */
+	--breakpoint-lg-down: 1023.95px;
+}
+
+@layer utilities {
+	/* Custom Media Query Utilities */
+	@media (max-width: 1023.95px) {
+		/* lg-down styles - Add your responsive styles here */
+		.lg-down\:hidden {
+			display: none;
+		}
+
+		.lg-down\:block {
+			display: block;
+		}
+	}
+
+	@media (hover: none) {
+		/* touchscreen styles - Add your touch-specific styles here */
+		.touchscreen\:pointer-events-none {
+			pointer-events: none;
+		}
+	}
+
+	@media print {
+		/* print styles - Add your print-specific styles here */
+		.print\:hidden {
+			display: none;
+		}
+
+		.print\:block {
+			display: block;
+		}
+	}
+}

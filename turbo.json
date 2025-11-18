@@ -1,0 +1,47 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"globalDependencies": ["**/.env.*local"],
+	"globalEnv": [
+		"CONVEX_DEPLOYMENT",
+		"NEXT_PUBLIC_CONVEX_URL",
+		"NEXT_PUBLIC_CONVEX_SITE_URL",
+		"FRONT_SITE_URL",
+		"CLOUDFLARE_ACCOUNT_ID",
+		"CLOUDFLARE_SECRET_TOKEN"
+	],
+	"ui": "tui",
+	"tasks": {
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": [".next/**", "dist/**"],
+			"cache": true,
+			"persistent": false
+		},
+		"@apps/web#build": {
+			"dependsOn": ["^build"],
+			"outputs": [".next/**", "!.next/cache/**"],
+			"cache": true,
+			"env": [
+				"CONVEX_DEPLOYMENT",
+				"NEXT_PUBLIC_CONVEX_URL",
+				"NEXT_PUBLIC_CONVEX_SITE_URL",
+				"FRONT_SITE_URL",
+				"CLOUDFLARE_ACCOUNT_ID",
+				"CLOUDFLARE_SECRET_TOKEN"
+			]
+		},
+
+		"start": {
+			"cache": false,
+			"persistent": true
+		},
+		"lint": {
+			"outputs": []
+		}
+	}
+}

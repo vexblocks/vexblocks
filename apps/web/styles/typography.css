@@ -1,0 +1,144 @@
+@theme {
+	/* Font Family */
+
+	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+	/* Heading Font Sizes */
+	--fontSize-h1: 6.125rem;
+	--fontSize-h2: 4.5rem;
+	--fontSize-h3: 4rem;
+	--fontSize-h4: 3rem;
+
+	/* Title Font Sizes */
+	--fontSize-title1: 2.25rem;
+	--fontSize-title2: 2rem;
+	--fontSize-title3: 1.5rem;
+	--fontSize-title4: 1.5rem;
+
+	/* Subtitle Font Sizes */
+	--fontSize-subtitle1: 1.25rem;
+	--fontSize-subtitle2: 1.125rem;
+	--fontSize-subtitle3: 1.125rem;
+
+	/* Body Font Sizes */
+	--fontSize-body1: 1rem;
+	--fontSize-body2: 1rem;
+	--fontSize-body3: 0.875rem;
+
+	/* Label Font Sizes */
+	--fontSize-label1: 0.75rem;
+	--fontSize-label2: 0.75rem;
+
+	/* Special Font Sizes */
+	--fontSize-size-inherit: inherit;
+}
+
+/* Typography Utility Classes */
+
+/* Headings */
+@utility text-h1 {
+	font-size: var(--fontSize-h1);
+	line-height: 1;
+	font-weight: 800;
+	letter-spacing: -0.04em;
+}
+
+@utility text-h2 {
+	font-size: var(--fontSize-h2);
+	line-height: 1.11;
+	font-weight: 800;
+	letter-spacing: -0.04em;
+}
+
+@utility text-h3 {
+	font-size: var(--fontSize-h3);
+	line-height: 1.125;
+	font-weight: 700;
+	letter-spacing: -0.04em;
+}
+
+@utility text-h4 {
+	font-size: var(--fontSize-h4);
+	line-height: 1.17;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+}
+
+/* Titles */
+@utility text-title1 {
+	font-size: var(--fontSize-title1);
+	line-height: 1.33;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+@utility text-title2 {
+	font-size: var(--fontSize-title2);
+	line-height: 1.5;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+}
+
+@utility text-title3 {
+	font-size: var(--fontSize-title3);
+	line-height: 1.5;
+	font-weight: 500;
+}
+
+@utility text-title4 {
+	font-size: var(--fontSize-title4);
+	line-height: 1.33;
+	font-weight: 800;
+}
+
+/* Subtitles */
+@utility text-subtitle1 {
+	font-size: var(--fontSize-subtitle1);
+	line-height: 1.4;
+	font-weight: 600;
+}
+
+@utility text-subtitle2 {
+	font-size: var(--fontSize-subtitle2);
+	line-height: 1.44;
+	font-weight: 500;
+}
+
+@utility text-subtitle3 {
+	font-size: var(--fontSize-subtitle3);
+	line-height: 1.44;
+}
+
+/* Body Text */
+@utility text-body1 {
+	font-size: var(--fontSize-body1);
+	line-height: 1.5;
+}
+
+@utility text-body2 {
+	font-size: var(--fontSize-body2);
+	line-height: 1.5;
+	font-weight: 500;
+}
+
+@utility text-body3 {
+	font-size: var(--fontSize-body3);
+	line-height: 1.43;
+}
+
+/* Labels */
+@utility text-label1 {
+	font-size: var(--fontSize-label1);
+	line-height: 1.33;
+	font-weight: 500;
+}
+
+@utility text-label2 {
+	font-size: var(--fontSize-label2);
+	line-height: 1.33;
+}
+
+/* Special */
+@utility text-size-inherit {
+	font-size: var(--fontSize-size-inherit);
+}

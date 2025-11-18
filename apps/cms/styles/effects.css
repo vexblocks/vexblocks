@@ -1,0 +1,28 @@
+@theme {
+	/* Border Radius */
+	--radius: 0.5rem;
+	--radius-48: 48px;
+	--radius-extra-large: 32px;
+	--radius-lg: var(--radius);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-sm: calc(var(--radius) - 4px);
+
+	/* Animations */
+	--animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer utilities {
+	/* Custom Border Radius Utilities */
+	.rounded-48 {
+		border-radius: var(--radius-48);
+	}
+
+	.rounded-extra-large {
+		border-radius: var(--radius-extra-large);
+	}
+
+	/* Custom Animation Utilities */
+	.animate-pulse-fast {
+		animation: var(--animate-pulse-fast);
+	}
+}
