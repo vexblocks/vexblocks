@@ -1,5 +1,6 @@
 "use client"
 
+import { TOGGLE_LINK_COMMAND } from "@lexical/link"
 import {
 	INSERT_ORDERED_LIST_COMMAND,
 	INSERT_UNORDERED_LIST_COMMAND,
@@ -25,6 +26,7 @@ import {
 	Heading2,
 	Heading3,
 	Italic,
+	Link as LinkIcon,
 	List,
 	ListOrdered,
 	Quote,
@@ -88,6 +90,13 @@ export default function ToolbarPlugin() {
 		})
 		setBlockType("quote")
 	}
+
+	const insertLink = useCallback(() => {
+		const url = prompt("Enter the URL:")
+		if (url) {
+			editor.dispatchCommand(TOGGLE_LINK_COMMAND, url)
+		}
+	}, [editor])
 
 	return (
 		<div className="flex flex-wrap items-center gap-1 border-grey-200 border-b p-2">
@@ -213,6 +222,18 @@ export default function ToolbarPlugin() {
 				title="Quote"
 			>
 				<Quote className="h-4 w-4" />
+			</button>
+
+			<div className="mx-2 h-6 w-px bg-grey-300" />
+
+			{/* Link */}
+			<button
+				type="button"
+				onClick={insertLink}
+				className="rounded p-2 transition-colors hover:bg-grey-100"
+				title="Insert Link"
+			>
+				<LinkIcon className="h-4 w-4" />
 			</button>
 		</div>
 	)

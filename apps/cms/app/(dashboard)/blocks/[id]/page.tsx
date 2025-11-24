@@ -3,7 +3,15 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, useQuery } from "convex/react"
-import { AlertTriangle, ArrowLeft, Plus, Save, Trash2 } from "lucide-react"
+import {
+	AlertTriangle,
+	ArrowDown,
+	ArrowLeft,
+	ArrowUp,
+	Plus,
+	Save,
+	Trash2,
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { use, useEffect, useState } from "react"
@@ -14,6 +22,7 @@ type FieldType =
 	| "richText"
 	| "media"
 	| "url"
+	| "youtubeUrl"
 	| "boolean"
 	| "number"
 	| "date"
@@ -38,44 +47,83 @@ function SimpleFieldEditor({
 	index,
 	onUpdate,
 	onRemove,
+	onMove,
+	totalFields,
 }: {
 	field: Field
 	index: number
 	onUpdate: (index: number, updates: Partial<Field>) => void
 	onRemove: (index: number) => void
+	onMove: (index: number, direction: "up" | "down") => void
+	totalFields: number
 }) {
+	// Track if field name has been manually edited
+	const [hasEditedName, setHasEditedName] = useState(false)
+
+	const generateFieldName = (label: string) => {
+		return label
+			.toLowerCase()
+			.replace(/[áàäâã]/g, "a")
+			.replace(/[éèëê]/g, "e")
+			.replace(/[íìïî]/g, "i")
+			.replace(/[óòöôõ]/g, "o")
+			.replace(/[úùüû]/g, "u")
+			.replace(/[ñ]/g, "n")
+			.replace(/[^a-z0-9\s]/g, "")
+			.replace(/\s+/g, "_")
+			.trim()
+	}
+
+	const handleLabelChange = (value: string) => {
+		onUpdate(index, { label: value })
+		if (!hasEditedName && !field.isExisting) {
+			onUpdate(index, { name: generateFieldName(value) })
+		}
+	}
+
+	const handleNameChange = (value: string) => {
+		onUpdate(index, { name: value })
+		setHasEditedName(true)
+	}
+
 	return (
 		<div className="rounded-lg border border-grey-200 bg-white p-4">
 			<div className="mb-3 flex items-center justify-between">
 				<span className="font-medium text-grey-700 text-sm">
 					Field #{index + 1}
 				</span>
-				<button
-					type="button"
-					onClick={() => onRemove(index)}
-					className="text-error hover:text-error/80"
-				>
-					<Trash2 className="h-4 w-4" />
-				</button>
+				<div className="flex items-center gap-2">
+					<div className="flex flex-col gap-1">
+						<button
+							type="button"
+							onClick={() => onMove(index, "up")}
+							disabled={index === 0}
+							className="text-grey-500 transition-colors hover:text-primary disabled:opacity-30"
+							title="Move up"
+						>
+							<ArrowUp className="h-4 w-4" />
+						</button>
+						<button
+							type="button"
+							onClick={() => onMove(index, "down")}
+							disabled={index === totalFields - 1}
+							className="text-grey-500 transition-colors hover:text-primary disabled:opacity-30"
+							title="Move down"
+						>
+							<ArrowDown className="h-4 w-4" />
+						</button>
+					</div>
+					<button
+						type="button"
+						onClick={() => onRemove(index)}
+						className="text-error hover:text-error/80"
+					>
+						<Trash2 className="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			<div className="grid gap-3 md:grid-cols-2">
-				<div>
-					<label
-						htmlFor={`field-name-${field.id}`}
-						className="mb-1 block text-grey-600 text-xs"
-					>
-						Field Name
-					</label>
-					<input
-						id={`field-name-${field.id}`}
-						type="text"
-						value={field.name}
-						onChange={(e) => onUpdate(index, { name: e.target.value })}
-						placeholder="title"
-						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
-					/>
-				</div>
 				<div>
 					<label
 						htmlFor={`field-label-${field.id}`}
@@ -87,10 +135,33 @@ function SimpleFieldEditor({
 						id={`field-label-${field.id}`}
 						type="text"
 						value={field.label}
-						onChange={(e) => onUpdate(index, { label: e.target.value })}
-						placeholder="Title"
+						onChange={(e) => handleLabelChange(e.target.value)}
+						placeholder="Post Title"
 						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 					/>
+				</div>
+				<div className="relative pb-6">
+					<label
+						htmlFor={`field-name-${field.id}`}
+						className="mb-1 block text-grey-600 text-xs"
+					>
+						Field Name
+					</label>
+					<input
+						id={`field-name-${field.id}`}
+						type="text"
+						value={field.name}
+						onChange={(e) => handleNameChange(e.target.value)}
+						placeholder="post_title"
+						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+					/>
+					<div className="absolute top-full left-0 mt-1">
+						{!hasEditedName && field.label && (
+							<p className="text-red-600 text-xs">
+								✨ Auto-generated from "Label"
+							</p>
+						)}
+					</div>
 				</div>
 				<div>
 					<label
@@ -114,6 +185,7 @@ function SimpleFieldEditor({
 						<option value="boolean">Boolean</option>
 						<option value="date">Date</option>
 						<option value="url">URL</option>
+						<option value="youtubeUrl">YouTube URL</option>
 						<option value="media">Media</option>
 						<option value="select">Select</option>
 					</select>
@@ -190,7 +262,6 @@ export default function BlockDetailPage({
 
 	const [displayName, setDisplayName] = useState("")
 	const [description, setDescription] = useState("")
-	const [icon, setIcon] = useState("")
 	const [category, setCategory] = useState("")
 	const [fields, setFields] = useState<Field[]>([])
 
@@ -198,7 +269,6 @@ export default function BlockDetailPage({
 		if (block) {
 			setDisplayName(block.displayName)
 			setDescription(block.description || "")
-			setIcon(block.icon || "")
 			setCategory(block.category || "")
 			setFields(
 				block.fields.map((f: any, i: number) => ({
@@ -222,6 +292,11 @@ export default function BlockDetailPage({
 				isExisting: false,
 			},
 		])
+
+		// Scroll to bottom smoothly after adding field
+		setTimeout(() => {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+		}, 100)
 	}
 
 	const handleUpdateField = (index: number, updates: Partial<Field>) => {
@@ -232,6 +307,20 @@ export default function BlockDetailPage({
 
 	const handleRemoveField = (index: number) => {
 		setFields((prev) => prev.filter((_, i) => i !== index))
+	}
+
+	const handleMoveField = (index: number, direction: "up" | "down") => {
+		setFields((prevFields) => {
+			const newIndex = direction === "up" ? index - 1 : index + 1
+			if (newIndex < 0 || newIndex >= prevFields.length) return prevFields
+
+			const newFields = [...prevFields]
+			;[newFields[index], newFields[newIndex]] = [
+				newFields[newIndex],
+				newFields[index],
+			]
+			return newFields
+		})
 	}
 
 	const mapFieldsForSave = (fieldsArray: Field[]): any[] => {
@@ -250,10 +339,21 @@ export default function BlockDetailPage({
 		setError("")
 
 		try {
+			// Check for duplicate field names
+			const fieldNames = new Set<string>()
 			for (const field of fields) {
 				if (!field.name.trim() || !field.label.trim()) {
 					throw new Error("All fields must have a name and label")
 				}
+
+				// Check for duplicate field name
+				if (fieldNames.has(field.name)) {
+					throw new Error(
+						`Duplicate field name "${field.name}" found. Each field must have a unique name.`,
+					)
+				}
+				fieldNames.add(field.name)
+
 				if (
 					field.type === "select" &&
 					(!field.options || field.options.length === 0)
@@ -267,7 +367,6 @@ export default function BlockDetailPage({
 				displayName: displayName || undefined,
 				description: description || undefined,
 				fields: mapFieldsForSave(fields),
-				icon: icon || undefined,
 				category: category || undefined,
 			})
 
@@ -315,9 +414,7 @@ export default function BlockDetailPage({
 
 			<div className="mb-6 flex items-start justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">
-						{block.displayName}
-					</h1>
+					<h1 className="font-bold text-3xl">{block.displayName}</h1>
 					{block.category && (
 						<p className="mt-2 text-grey-500">{block.category}</p>
 					)}
@@ -350,7 +447,6 @@ export default function BlockDetailPage({
 									if (block) {
 										setDisplayName(block.displayName)
 										setDescription(block.description || "")
-										setIcon(block.icon || "")
 										setCategory(block.category || "")
 										setFields(
 											block.fields.map((f: any, i: number) => ({
@@ -453,37 +549,20 @@ export default function BlockDetailPage({
 									className="w-full rounded border border-grey-300 px-3 py-2"
 								/>
 							</div>
-							<div className="grid gap-4 md:grid-cols-2">
-								<div>
-									<label
-										htmlFor="edit-icon"
-										className="mb-1 block text-grey-700 text-sm"
-									>
-										Icon (emoji)
-									</label>
-									<input
-										id="edit-icon"
-										type="text"
-										value={icon}
-										onChange={(e) => setIcon(e.target.value)}
-										className="w-full rounded border border-grey-300 px-3 py-2"
-									/>
-								</div>
-								<div>
-									<label
-										htmlFor="edit-category"
-										className="mb-1 block text-grey-700 text-sm"
-									>
-										Category
-									</label>
-									<input
-										id="edit-category"
-										type="text"
-										value={category}
-										onChange={(e) => setCategory(e.target.value)}
-										className="w-full rounded border border-grey-300 px-3 py-2"
-									/>
-								</div>
+							<div>
+								<label
+									htmlFor="edit-category"
+									className="mb-1 block text-grey-700 text-sm"
+								>
+									Category
+								</label>
+								<input
+									id="edit-category"
+									type="text"
+									value={category}
+									onChange={(e) => setCategory(e.target.value)}
+									className="w-full rounded border border-grey-300 px-3 py-2"
+								/>
 							</div>
 						</div>
 					) : (
@@ -529,6 +608,8 @@ export default function BlockDetailPage({
 										index={index}
 										onUpdate={handleUpdateField}
 										onRemove={handleRemoveField}
+										onMove={handleMoveField}
+										totalFields={fields.length}
 									/>
 								))
 							: fields.map((field) => (

@@ -1,12 +1,17 @@
 "use client"
 
+import { convexQuery } from "@convex-dev/react-query"
+import { useAtom } from "@lfades/atom"
 import { authClient } from "@repo/backend/better-auth/client"
 import { api } from "@repo/backend/convex/_generated/api"
-import { useQuery } from "convex/react"
+import { CFImage } from "@repo/cms-shared"
+import { useQuery } from "@tanstack/react-query"
 import { OTPInput, type SlotProps } from "input-otp"
+import { Shield } from "lucide-react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useRef, useState, useTransition } from "react"
+import { authAtom } from "@/lib/auth-atom"
 import { cn } from "@/lib/utils"
 
 type ExtendedSlotProps = SlotProps & {
@@ -48,8 +53,25 @@ function AdminLoginContent() {
 	const error = searchParams.get("error")
 	const redirectTo = searchParams.get("redirectTo") || "/"
 
-	// Check if user is already authenticated
-	const currentUser = useQuery(api.auth.getCurrentUser)
+	// Check if user is already authenticated using the atom
+	const [authState] = useAtom(authAtom)
+
+	// Fetch appearance settings (public query, no auth required)
+	const { data: settings, isLoading: isLoadingSettings } = useQuery(
+		convexQuery(api.settings.getPublic, { key: "appearance" }),
+	)
+
+	const dashboardName = settings?.dashboardName || "VexBlocks"
+	const logoId = settings?.logoId
+
+	const { data: logoMedia, isLoading: isLoadingLogo } = useQuery(
+		convexQuery(
+			api.cms.media.getPublic,
+			logoId ? { id: logoId as any } : "skip",
+		),
+	)
+
+	const isLoading = isLoadingSettings || (!!logoId && isLoadingLogo)
 
 	const [isPending, startTransition] = useTransition()
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -62,15 +84,19 @@ function AdminLoginContent() {
 
 	const otpInput = useRef<HTMLInputElement>(null)
 
-	const [isRedirecting, setIsRedirecting] = useState(false)
-
-	// Redirect if already authenticated and is admin
+	// Reset form when user logs out (user becomes null after being initialized)
 	useEffect(() => {
-		if (currentUser && currentUser.role === "admin") {
-			setIsRedirecting(true)
-			router.push(redirectTo)
+		if (authState.isInitialized && !authState.user) {
+			// Reset all form state to initial values
+			setEmail("")
+			setIsEmailSent(false)
+			setOtp("")
+			setIsVerifying(false)
+			setErrorMessage(null)
+			setCountdown(30)
+			setIsResendDisabled(true)
 		}
-	}, [currentUser, router, redirectTo])
+	}, [authState.isInitialized, authState.user])
 
 	useEffect(() => {
 		if (countdown > 0 && isEmailSent) {
@@ -166,8 +192,10 @@ function AdminLoginContent() {
 				throw new Error(error.message)
 			}
 
+			await new Promise((resolve) => setTimeout(resolve, 300))
+
 			// Redirect to the original page or dashboard
-			router.push(redirectTo)
+			router.replace(redirectTo)
 		} catch (_err) {
 			setErrorMessage(
 				"Invalid code. Please check your code or request a new one.",
@@ -176,26 +204,82 @@ function AdminLoginContent() {
 		}
 	}
 
-	// Show loading while checking auth OR while redirecting
-	// This prevents the flash of the login form when user is already authenticated
-	if (currentUser === undefined || isRedirecting) {
+	// If user is authenticated but NOT admin, show access pending message
+	if (authState.user && authState.user.role !== "admin") {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary to-primary-800">
-				<div className="text-center">
-					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
-					<p className="text-white">Loading...</p>
-				</div>
-			</div>
-		)
-	}
+			<div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary to-primary-800 px-4">
+				<div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+					{/* Logo */}
+					<div className="mb-8 text-center">
+						<div className="mb-4 flex h-16 justify-center">
+							{isLoading ? (
+								<div className="h-16 w-16 animate-pulse rounded-lg bg-grey-200" />
+							) : logoMedia ? (
+								<CFImage
+									assetId={logoMedia.cloudflareId}
+									alt="Logo"
+									width={64}
+									height={64}
+									className="h-16 w-16 object-contain"
+								/>
+							) : (
+								<Image
+									src="/vexblocks-logotype.png"
+									alt="Logo"
+									width={64}
+									height={64}
+									className="h-16 w-16 object-contain"
+								/>
+							)}
+						</div>
+						{isLoading ? (
+							<div className="mx-auto mb-1 h-9 w-48 animate-pulse rounded-lg bg-grey-200" />
+						) : (
+							<h2 className="mb-1 font-bold text-3xl text-grey-900">
+								{dashboardName}
+							</h2>
+						)}
+						<p className="mb-2 font-medium text-primary text-sm">
+							Headless CMS
+						</p>
+					</div>
 
-	// Don't render login form if user is authenticated (will redirect via useEffect)
-	if (currentUser && currentUser.role === "admin") {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary to-primary-800">
-				<div className="text-center">
-					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
-					<p className="text-white">Redirecting...</p>
+					{/* Access Pending Message */}
+					<div className="mb-6 rounded-lg border-2 border-orange-200 bg-orange-50 p-6 text-center">
+						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
+							<Shield className="h-8 w-8 text-orange-600" />
+						</div>
+						<h2 className="mb-2 font-bold text-orange-900 text-xl">
+							Access Pending
+						</h2>
+						<p className="mb-4 text-orange-700 text-sm">
+							Your account is registered but doesn't have admin access yet.
+							Please wait for an administrator to grant you access.
+						</p>
+						<div className="rounded-lg bg-white p-3">
+							<p className="font-medium text-grey-700 text-xs">
+								Logged in as: <strong>{authState.user.email}</strong>
+							</p>
+						</div>
+					</div>
+
+					{/* Sign Out Button */}
+					<button
+						type="button"
+						onClick={async () => {
+							await authClient.signOut()
+							router.refresh()
+						}}
+						className="w-full rounded-lg border-2 border-grey-300 bg-white px-4 py-3 font-medium text-grey-700 transition-colors hover:bg-grey-50"
+					>
+						Sign Out
+					</button>
+
+					<div className="mt-6 rounded-lg bg-grey-100 p-4">
+						<p className="text-center text-grey-500 text-sm">
+							💡 Contact your system administrator to request admin access
+						</p>
+					</div>
 				</div>
 			</div>
 		)
@@ -207,15 +291,34 @@ function AdminLoginContent() {
 				<div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
 					{/* Logo */}
 					<div className="mb-8 text-center">
-						<div className="mb-4 flex justify-center">
-							<Image
-								src="/logotype.png"
-								alt="VexBlocks"
-								width={40}
-								height={40}
-							/>
+						<div className="mb-4 flex h-16 justify-center">
+							{isLoading ? (
+								<div className="h-16 w-16 animate-pulse rounded-lg bg-grey-200" />
+							) : logoMedia ? (
+								<CFImage
+									assetId={logoMedia.cloudflareId}
+									alt="Logo"
+									width={64}
+									height={64}
+									className="h-16 w-16 object-contain"
+								/>
+							) : (
+								<Image
+									src="/vexblocks-logotype.png"
+									alt="Logo"
+									width={64}
+									height={64}
+									className="h-16 w-16 object-contain"
+								/>
+							)}
 						</div>
-						<h1 className="mb-1 font-bold text-3xl text-grey-900">VexBlocks</h1>
+						{isLoading ? (
+							<div className="mx-auto mb-1 h-9 w-48 animate-pulse rounded-lg bg-grey-200" />
+						) : (
+							<h2 className="mb-1 font-bold text-3xl text-grey-900">
+								{dashboardName}
+							</h2>
+						)}
 						<p className="mb-2 font-medium text-primary text-sm">
 							Headless CMS
 						</p>
@@ -286,7 +389,23 @@ function AdminLoginContent() {
 				{/* Logo */}
 				<div className="mb-8 text-center">
 					<div className="mb-4 flex justify-center">
-						<Image src="/logotype.png" alt="VexBlocks" width={40} height={40} />
+						{logoMedia ? (
+							<CFImage
+								assetId={logoMedia.cloudflareId}
+								alt="Logo"
+								width={64}
+								height={64}
+								className="h-16 w-16 object-contain"
+							/>
+						) : (
+							<Image
+								src="/vexblocks-logotype.png"
+								alt="Logo"
+								width={64}
+								height={64}
+								className="h-16 w-16 object-contain"
+							/>
+						)}
 					</div>
 					<h1 className="mb-2 font-bold text-2xl text-grey-900">
 						Enter verification code
@@ -387,16 +506,7 @@ function AdminLoginContent() {
 
 export default function AdminLogin() {
 	return (
-		<Suspense
-			fallback={
-				<div className="flex min-h-screen items-center justify-center bg-linear-to-br from-primary to-primary-800">
-					<div className="text-center">
-						<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
-						<p className="text-white">Loading...</p>
-					</div>
-				</div>
-			}
-		>
+		<Suspense fallback={null}>
 			<AdminLoginContent />
 		</Suspense>
 	)

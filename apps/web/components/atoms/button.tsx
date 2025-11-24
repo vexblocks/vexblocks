@@ -3,18 +3,21 @@ import { cn } from "@/lib/utils"
 import { ArrowRightIcon } from "../icons/arrow-right"
 
 const buttonVariants = cva(
-	"group inline-flex cursor-pointer items-center justify-center gap-1 rounded-md font-medium transition-all focus:outline-none",
+	"group inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
 	{
 		variants: {
 			variant: {
 				primary:
-					"bg-linear-to-b from-blue-700 to-blue-800 text-white shadow-[0px_1px_4px_0px_rgba(24,55,236,0.32),0px_1px_1px_0px_rgba(0,12,72,0.2),0px_0px_0px_0.5px_rgba(24,55,236,0.16)] hover:from-[#1531d1] hover:to-[#162b82]",
-				ghost: "text-gray-400 hover:text-white",
-				link: "text-white hover:underline",
+					"bg-linear-to-b from-red-600 to-red-700 text-white shadow-sm hover:shadow-md hover:from-red-700 hover:to-red-800",
+				secondary:
+					"border border-gray-300 bg-white text-gray-700 shadow-sm hover:border-gray-400 hover:bg-gray-50",
+				ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+				link: "text-red-600 hover:text-red-700 hover:underline",
 			},
 			size: {
-				sm: "gap-1 px-3 py-2 text-sm",
-				md: "h-10.5 gap-1.5 px-4 py-3 text-base",
+				sm: "px-3 py-1.5 text-sm",
+				md: "px-4 py-2 text-sm",
+				lg: "px-6 py-3 text-base",
 			},
 		},
 		defaultVariants: {

@@ -2,7 +2,7 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import { useMutation } from "convex/react"
-import { ArrowLeft, Plus, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowLeft, ArrowUp, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -13,6 +13,7 @@ type FieldType =
 	| "richText"
 	| "media"
 	| "url"
+	| "youtubeUrl"
 	| "boolean"
 	| "number"
 	| "date"
@@ -38,6 +39,8 @@ const FieldEditor = ({
 	onUpdateField,
 	onRemoveField,
 	onAddNestedField,
+	onMoveField,
+	totalFields,
 }: {
 	field: Field
 	index: number
@@ -50,11 +53,46 @@ const FieldEditor = ({
 	) => void
 	onRemoveField: (id: string, parentPath: string[]) => void
 	onAddNestedField: (parentId: string, parentPath: string[]) => void
+	onMoveField: (
+		id: string,
+		direction: "up" | "down",
+		parentPath: string[],
+	) => void
+	totalFields: number
 }) => {
 	const currentPath = [...parentPath, field.id]
 	const indentClass = depth > 0 ? `ml-${depth * 4}` : ""
 	const borderColor = depth === 0 ? "border-grey-200" : "border-primary/30"
 	const bgColor = depth === 0 ? "bg-white" : "bg-primary/5"
+
+	// Track if field name has been manually edited
+	const [hasEditedName, setHasEditedName] = useState(false)
+
+	const generateFieldName = (label: string) => {
+		return label
+			.toLowerCase()
+			.replace(/[áàäâã]/g, "a")
+			.replace(/[éèëê]/g, "e")
+			.replace(/[íìïî]/g, "i")
+			.replace(/[óòöôõ]/g, "o")
+			.replace(/[úùüû]/g, "u")
+			.replace(/[ñ]/g, "n")
+			.replace(/[^a-z0-9\s]/g, "")
+			.replace(/\s+/g, "_")
+			.trim()
+	}
+
+	const handleLabelChange = (value: string) => {
+		onUpdateField(field.id, { label: value }, parentPath)
+		if (!hasEditedName) {
+			onUpdateField(field.id, { name: generateFieldName(value) }, parentPath)
+		}
+	}
+
+	const handleNameChange = (value: string) => {
+		onUpdateField(field.id, { name: value }, parentPath)
+		setHasEditedName(true)
+	}
 
 	return (
 		<div className={indentClass}>
@@ -75,35 +113,38 @@ const FieldEditor = ({
 							</span>
 						)}
 					</div>
-					<button
-						type="button"
-						onClick={() => onRemoveField(field.id, parentPath)}
-						className="text-error transition-colors hover:text-error-light"
-					>
-						<Trash2 className="h-4 w-4" />
-					</button>
+					<div className="flex items-center gap-2">
+						<div className="flex flex-col gap-1">
+							<button
+								type="button"
+								onClick={() => onMoveField(field.id, "up", parentPath)}
+								disabled={index === 0}
+								className="text-grey-500 transition-colors hover:text-primary disabled:opacity-30"
+								title="Move up"
+							>
+								<ArrowUp className="h-4 w-4" />
+							</button>
+							<button
+								type="button"
+								onClick={() => onMoveField(field.id, "down", parentPath)}
+								disabled={index === totalFields - 1}
+								className="text-grey-500 transition-colors hover:text-primary disabled:opacity-30"
+								title="Move down"
+							>
+								<ArrowDown className="h-4 w-4" />
+							</button>
+						</div>
+						<button
+							type="button"
+							onClick={() => onRemoveField(field.id, parentPath)}
+							className="text-error transition-colors hover:text-error-light"
+						>
+							<Trash2 className="h-4 w-4" />
+						</button>
+					</div>
 				</div>
 
 				<div className="grid gap-4 md:grid-cols-2">
-					<div>
-						<label
-							htmlFor={`field-name-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
-						>
-							Field Name
-						</label>
-						<input
-							id={`field-name-${field.id}`}
-							type="text"
-							value={field.name}
-							onChange={(e) =>
-								onUpdateField(field.id, { name: e.target.value }, parentPath)
-							}
-							placeholder="title"
-							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
-						/>
-					</div>
-
 					<div>
 						<label
 							htmlFor={`field-label-${field.id}`}
@@ -115,12 +156,34 @@ const FieldEditor = ({
 							id={`field-label-${field.id}`}
 							type="text"
 							value={field.label}
-							onChange={(e) =>
-								onUpdateField(field.id, { label: e.target.value }, parentPath)
-							}
+							onChange={(e) => handleLabelChange(e.target.value)}
 							placeholder="Post Title"
 							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 						/>
+					</div>
+
+					<div className="relative pb-6">
+						<label
+							htmlFor={`field-name-${field.id}`}
+							className="mb-1 block font-medium text-grey-500 text-xs"
+						>
+							Field Name
+						</label>
+						<input
+							id={`field-name-${field.id}`}
+							type="text"
+							value={field.name}
+							onChange={(e) => handleNameChange(e.target.value)}
+							placeholder="post_title"
+							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+						/>
+						<div className="-mt-3 absolute top-full left-0">
+							{!hasEditedName && field.label && (
+								<p className="text-red-600 text-xs">
+									✨ Auto-generated from "Label"
+								</p>
+							)}
+						</div>
 					</div>
 
 					<div>
@@ -151,6 +214,7 @@ const FieldEditor = ({
 							<option value="boolean">Boolean</option>
 							<option value="date">Date</option>
 							<option value="url">URL</option>
+							<option value="youtubeUrl">YouTube URL</option>
 							<option value="media">Media</option>
 							<option value="select">Select</option>
 							{depth < 1 && <option value="group">Group</option>}
@@ -272,6 +336,8 @@ const FieldEditor = ({
 										onUpdateField={onUpdateField}
 										onRemoveField={onRemoveField}
 										onAddNestedField={onAddNestedField}
+										onMoveField={onMoveField}
+										totalFields={field.fields?.length || 0}
 									/>
 								))}
 							</div>
@@ -297,14 +363,41 @@ export default function NewBlockPage() {
 	const [error, setError] = useState("")
 
 	// Block basic info
-	const [name, setName] = useState("")
 	const [displayName, setDisplayName] = useState("")
+	const [name, setName] = useState("")
 	const [description, setDescription] = useState("")
-	const [icon, setIcon] = useState("")
 	const [category, setCategory] = useState("")
+	const [hasEditedName, setHasEditedName] = useState(false)
 
 	// Fields
 	const [fields, setFields] = useState<Field[]>([])
+
+	// Auto-generate name from display name
+	const generateName = (display: string) => {
+		return display
+			.toLowerCase()
+			.replace(/[áàäâã]/g, "a")
+			.replace(/[éèëê]/g, "e")
+			.replace(/[íìïî]/g, "i")
+			.replace(/[óòöôõ]/g, "o")
+			.replace(/[úùüû]/g, "u")
+			.replace(/[ñ]/g, "n")
+			.replace(/[^a-z0-9\s]/g, "")
+			.replace(/\s+/g, "_")
+			.trim()
+	}
+
+	const handleDisplayNameChange = (value: string) => {
+		setDisplayName(value)
+		if (!hasEditedName) {
+			setName(generateName(value))
+		}
+	}
+
+	const handleNameChange = (value: string) => {
+		setName(value)
+		setHasEditedName(true)
+	}
 
 	const handleAddField = () => {
 		const newField: Field = {
@@ -315,6 +408,11 @@ export default function NewBlockPage() {
 			required: false,
 		}
 		setFields([...fields, newField])
+
+		// Scroll to bottom smoothly after adding field
+		setTimeout(() => {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+		}, 100)
 	}
 
 	// Helper function to update nested fields recursively
@@ -452,6 +550,59 @@ export default function NewBlockPage() {
 					})),
 				)
 			}
+
+			// Scroll to bottom smoothly after adding nested field
+			setTimeout(() => {
+				window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+			}, 100)
+		},
+		[updateNestedFields],
+	)
+
+	const handleMoveField = useCallback(
+		(id: string, direction: "up" | "down", parentPath: string[] = []) => {
+			if (parentPath.length === 0) {
+				// Top-level field
+				setFields((prevFields) => {
+					const index = prevFields.findIndex((f) => f.id === id)
+					if (index === -1) return prevFields
+
+					const newIndex = direction === "up" ? index - 1 : index + 1
+					if (newIndex < 0 || newIndex >= prevFields.length) return prevFields
+
+					const newFields = [...prevFields]
+					;[newFields[index], newFields[newIndex]] = [
+						newFields[newIndex],
+						newFields[index],
+					]
+					return newFields
+				})
+			} else {
+				// Nested field
+				setFields((prevFields) =>
+					updateNestedFields(prevFields, parentPath, (parentField) => {
+						if (!parentField.fields) return parentField
+
+						const index = parentField.fields.findIndex((f) => f.id === id)
+						if (index === -1) return parentField
+
+						const newIndex = direction === "up" ? index - 1 : index + 1
+						if (newIndex < 0 || newIndex >= parentField.fields.length)
+							return parentField
+
+						const newNestedFields = [...parentField.fields]
+						;[newNestedFields[index], newNestedFields[newIndex]] = [
+							newNestedFields[newIndex],
+							newNestedFields[index],
+						]
+
+						return {
+							...parentField,
+							fields: newNestedFields,
+						}
+					}),
+				)
+			}
 		},
 		[updateNestedFields],
 	)
@@ -496,6 +647,8 @@ export default function NewBlockPage() {
 
 			// Validate fields recursively
 			const validateFields = (fieldsArray: Field[], level = 0): void => {
+				// Check for duplicate field names at this level
+				const fieldNames = new Set<string>()
 				for (const field of fieldsArray) {
 					if (!field.name.trim()) {
 						throw new Error("All fields must have a name")
@@ -503,6 +656,15 @@ export default function NewBlockPage() {
 					if (!field.label.trim()) {
 						throw new Error("All fields must have a label")
 					}
+
+					// Check for duplicate field name
+					if (fieldNames.has(field.name)) {
+						throw new Error(
+							`Duplicate field name "${field.name}" found. Each field must have a unique name.`,
+						)
+					}
+					fieldNames.add(field.name)
+
 					if (
 						field.type === "select" &&
 						(!field.options || field.options.length === 0)
@@ -527,11 +689,10 @@ export default function NewBlockPage() {
 
 			// Create block with nested fields
 			const blockId = await createBlock({
-				name: name.toLowerCase().replace(/\s+/g, "_"),
+				name,
 				displayName,
 				description: description || undefined,
 				fields: mapFieldsForSave(fields),
-				icon: icon || undefined,
 				category: category || undefined,
 			})
 
@@ -557,9 +718,7 @@ export default function NewBlockPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl text-primary">
-					Create Reusable Block
-				</h1>
+				<h1 className="font-bold text-3xl">Create Reusable Block</h1>
 				<p className="mt-2 text-grey-500">
 					Define a reusable component with its own fields
 				</p>
@@ -574,32 +733,9 @@ export default function NewBlockPage() {
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Basic Info */}
 				<div className="rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-lg text-primary">
-						Basic Information
-					</h2>
+					<h2 className="mb-4 font-semibold text-lg">Basic Information</h2>
 
 					<div className="space-y-4">
-						<div>
-							<label
-								htmlFor="block-name"
-								className="mb-2 block font-medium text-grey-500 text-sm"
-							>
-								Block Name <span className="text-error">*</span>
-							</label>
-							<input
-								id="block-name"
-								type="text"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-								placeholder="call_to_action"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-								required
-							/>
-							<p className="mt-1 text-grey-400 text-xs">
-								Unique identifier (lowercase, underscores only)
-							</p>
-						</div>
-
 						<div>
 							<label
 								htmlFor="block-display-name"
@@ -611,11 +747,40 @@ export default function NewBlockPage() {
 								id="block-display-name"
 								type="text"
 								value={displayName}
-								onChange={(e) => setDisplayName(e.target.value)}
+								onChange={(e) => handleDisplayNameChange(e.target.value)}
 								placeholder="Call to Action"
 								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 								required
 							/>
+						</div>
+
+						<div className="relative pb-6">
+							<label
+								htmlFor="block-name"
+								className="mb-2 block font-medium text-grey-500 text-sm"
+							>
+								Block Name <span className="text-error">*</span>
+							</label>
+							<input
+								id="block-name"
+								type="text"
+								value={name}
+								onChange={(e) => handleNameChange(e.target.value)}
+								placeholder="call_to_action"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								required
+							/>
+							<div className="-mt-3 absolute top-full left-0">
+								{!hasEditedName && displayName ? (
+									<p className="text-red-600 text-xs">
+										✨ Auto-generated from "Display Name"
+									</p>
+								) : (
+									<p className="text-grey-400 text-xs">
+										Unique identifier (lowercase, underscores only)
+									</p>
+								)}
+							</div>
 						</div>
 
 						<div>
@@ -635,58 +800,31 @@ export default function NewBlockPage() {
 							/>
 						</div>
 
-						<div className="grid gap-4 md:grid-cols-2">
-							<div>
-								<label
-									htmlFor="block-icon"
-									className="mb-2 block font-medium text-grey-500 text-sm"
-								>
-									Icon (emoji)
-								</label>
-								<input
-									id="block-icon"
-									type="text"
-									value={icon}
-									onChange={(e) => setIcon(e.target.value)}
-									placeholder="📢"
-									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-								/>
-							</div>
-
-							<div>
-								<label
-									htmlFor="block-category"
-									className="mb-2 block font-medium text-grey-500 text-sm"
-								>
-									Category
-								</label>
-								<input
-									id="block-category"
-									type="text"
-									value={category}
-									onChange={(e) => setCategory(e.target.value)}
-									placeholder="Marketing"
-									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-								/>
-							</div>
+						<div>
+							<label
+								htmlFor="block-category"
+								className="mb-2 block font-medium text-grey-500 text-sm"
+							>
+								Category
+							</label>
+							<input
+								id="block-category"
+								type="text"
+								value={category}
+								onChange={(e) => setCategory(e.target.value)}
+								placeholder="Marketing"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							/>
 						</div>
 					</div>
 				</div>
 
 				{/* Fields */}
-				<div className="rounded-lg bg-white p-6 shadow">
+				<div className="mb-24 rounded-lg bg-white p-6 shadow">
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-lg text-primary">
+						<h2 className="font-semibold text-lg">
 							Fields <span className="text-error">*</span>
 						</h2>
-						<button
-							type="button"
-							onClick={handleAddField}
-							className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm text-white transition-colors hover:bg-secondary-dark"
-						>
-							<Plus className="h-4 w-4" />
-							Add Field
-						</button>
 					</div>
 
 					{fields.length === 0 ? (
@@ -707,27 +845,42 @@ export default function NewBlockPage() {
 									onUpdateField={handleUpdateField}
 									onRemoveField={handleRemoveField}
 									onAddNestedField={handleAddNestedField}
+									onMoveField={handleMoveField}
+									totalFields={fields.length}
 								/>
 							))}
 						</div>
 					)}
 				</div>
 
-				{/* Submit */}
-				<div className="flex items-center justify-end gap-4">
-					<Link
-						href="/blocks"
-						className="rounded-lg border border-grey-300 px-6 py-3 text-grey-500 transition-colors hover:bg-grey-100"
-					>
-						Cancel
-					</Link>
-					<button
-						type="submit"
-						disabled={loading || fields.length === 0}
-						className="rounded-lg bg-primary px-6 py-3 text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
-					>
-						{loading ? "Creating..." : "Create Block"}
-					</button>
+				{/* Floating Action Buttons */}
+				<div className="fixed inset-x-0 bottom-0 z-10 border-grey-200 border-t bg-white p-4 shadow-lg">
+					<div className="mx-auto flex max-w-4xl items-center justify-between">
+						<button
+							type="button"
+							onClick={handleAddField}
+							className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm text-white transition-colors hover:bg-secondary-dark"
+						>
+							<Plus className="h-4 w-4" />
+							Add Field
+						</button>
+
+						<div className="flex items-center gap-4">
+							<Link
+								href="/blocks"
+								className="rounded-lg border border-grey-300 px-6 py-2 text-grey-500 transition-colors hover:bg-grey-100"
+							>
+								Cancel
+							</Link>
+							<button
+								type="submit"
+								disabled={loading || fields.length === 0}
+								className="rounded-lg bg-primary px-6 py-2 text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
+							>
+								{loading ? "Creating..." : "Create Block"}
+							</button>
+						</div>
+					</div>
 				</div>
 			</form>
 		</div>

@@ -7,7 +7,42 @@ import { authComponent } from "../auth"
 // ================================
 
 /**
- * Get all CMS schemas
+ * Get all CMS schemas (public, for type generation)
+ * This query is used by the type generator and doesn't require authentication
+ */
+export const listPublic = query({
+	args: {},
+	returns: v.array(
+		v.object({
+			_id: v.id("cmsSchemas"),
+			_creationTime: v.number(),
+			name: v.string(),
+			displayName: v.string(),
+			type: v.union(
+				v.literal("global"),
+				v.literal("page"),
+				v.literal("collection"),
+			),
+			description: v.optional(v.string()),
+			fields: v.array(v.any()),
+			viewConfig: v.optional(
+				v.object({
+					previewField: v.optional(v.string()),
+					additionalFields: v.optional(v.array(v.string())),
+				}),
+			),
+			icon: v.optional(v.string()),
+			createdBy: v.id("users"),
+			updatedAt: v.number(),
+		}),
+	),
+	handler: async (ctx) => {
+		return await ctx.db.query("cmsSchemas").collect()
+	},
+})
+
+/**
+ * Get all CMS schemas (requires admin authentication)
  */
 export const list = query({
 	args: {},
@@ -25,7 +60,12 @@ export const list = query({
 				),
 				description: v.optional(v.string()),
 				fields: v.array(v.any()),
-				slugField: v.optional(v.string()),
+				viewConfig: v.optional(
+					v.object({
+						previewField: v.optional(v.string()),
+						additionalFields: v.optional(v.array(v.string())),
+					}),
+				),
 				icon: v.optional(v.string()),
 				createdBy: v.id("users"),
 				updatedAt: v.number(),
@@ -71,7 +111,12 @@ export const get = query({
 			),
 			description: v.optional(v.string()),
 			fields: v.array(v.any()),
-			slugField: v.optional(v.string()),
+			viewConfig: v.optional(
+				v.object({
+					previewField: v.optional(v.string()),
+					additionalFields: v.optional(v.array(v.string())),
+				}),
+			),
 			icon: v.optional(v.string()),
 			createdBy: v.id("users"),
 			updatedAt: v.number(),
@@ -98,6 +143,21 @@ export const get = query({
 })
 
 /**
+ * Get schema ID by name (public access for web apps)
+ */
+export const getIdByName = query({
+	args: { name: v.string() },
+	returns: v.union(v.id("cmsSchemas"), v.null()),
+	handler: async (ctx, args) => {
+		const schema = await ctx.db
+			.query("cmsSchemas")
+			.withIndex("by_name", (q) => q.eq("name", args.name))
+			.unique()
+		return schema?._id ?? null
+	},
+})
+
+/**
  * Get schema by name
  */
 export const getByName = query({
@@ -115,7 +175,12 @@ export const getByName = query({
 			),
 			description: v.optional(v.string()),
 			fields: v.array(v.any()),
-			slugField: v.optional(v.string()),
+			viewConfig: v.optional(
+				v.object({
+					previewField: v.optional(v.string()),
+					additionalFields: v.optional(v.array(v.string())),
+				}),
+			),
 			icon: v.optional(v.string()),
 			createdBy: v.id("users"),
 			updatedAt: v.number(),
@@ -182,7 +247,6 @@ export const create = mutation({
 		),
 		description: v.optional(v.string()),
 		fields: v.array(v.any()),
-		slugField: v.optional(v.string()),
 		icon: v.optional(v.string()),
 	},
 	returns: v.id("cmsSchemas"),
@@ -222,7 +286,6 @@ export const create = mutation({
 			type: args.type,
 			description: args.description,
 			fields: args.fields,
-			slugField: args.slugField,
 			icon: args.icon,
 			createdBy: dbUser._id,
 			updatedAt: Date.now(),
@@ -239,7 +302,12 @@ export const update = mutation({
 		displayName: v.optional(v.string()),
 		description: v.optional(v.string()),
 		fields: v.optional(v.array(v.any())),
-		slugField: v.optional(v.string()),
+		viewConfig: v.optional(
+			v.object({
+				previewField: v.optional(v.string()),
+				additionalFields: v.optional(v.array(v.string())),
+			}),
+		),
 		icon: v.optional(v.string()),
 	},
 	returns: v.null(),
@@ -267,7 +335,7 @@ export const update = mutation({
 			...(args.displayName && { displayName: args.displayName }),
 			...(args.description !== undefined && { description: args.description }),
 			...(args.fields && { fields: args.fields }),
-			...(args.slugField !== undefined && { slugField: args.slugField }),
+			...(args.viewConfig !== undefined && { viewConfig: args.viewConfig }),
 			...(args.icon !== undefined && { icon: args.icon }),
 			updatedAt: Date.now(),
 		})

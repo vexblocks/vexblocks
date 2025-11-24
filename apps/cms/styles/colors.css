@@ -1,7 +1,7 @@
 @theme {
-	--color-primary: #0c1227;
-	--color-primary-800: #2d3964;
-	--color-primary-900: #1c274e;
+	--color-primary: #d60032;
+	--color-primary-800: #b8002b;
+	--color-primary-900: #9a0024;
 	--color-primary-foreground: hsl(0 0% 98%);
 
 	--color-secondary: #51c0b1;
@@ -45,6 +45,16 @@
 	/* Landing page specific colors */
 	--color-blue-700: #1837ec;
 	--color-blue-800: #1b3294;
+	
+	--color-red-50: #fef2f2;
+	--color-red-100: #fee2e2;
+	--color-red-200: #fecaca;
+	--color-red-300: #fca5a5;
+	--color-red-500: #ff1744;
+	--color-red-600: #d60032;
+	--color-red-700: #b8002b;
+	--color-red-800: #9a0024;
+	--color-red-900: #7d001e;
 	--color-gray-400: #a1a1aa;
 	--color-gray-700: #3f3f46;
 	--color-gray-900: #1d1d20;

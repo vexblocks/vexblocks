@@ -79,7 +79,7 @@ export const listAll = query({
 })
 
 /**
- * Get content by ID
+ * Get content by ID (admin only)
  */
 export const get = query({
 	args: { id: v.id("cmsContent") },
@@ -104,7 +104,66 @@ export const get = query({
 })
 
 /**
+ * Helper function to normalize flexible blocks structure
+ * Transforms {_id, type, data} to {type, value} for consistency with types
+ */
+function normalizeFlexibleBlocks(data: any): any {
+	if (!data || typeof data !== "object") return data
+
+	// If it's an array, process each item
+	if (Array.isArray(data)) {
+		return data.map((item: any) => {
+			// Check if this is a flexible block with {_id, type, data} structure
+			if (
+				item &&
+				typeof item === "object" &&
+				"_id" in item &&
+				"type" in item &&
+				"data" in item
+			) {
+				// Transform to {type, value} structure
+				const { _id, data: blockData, ...rest } = item
+				return { ...rest, value: blockData }
+			}
+			// Recursively process nested objects/arrays
+			return normalizeFlexibleBlocks(item)
+		})
+	}
+
+	// If it's an object, process each property
+	const normalized: any = {}
+	for (const [key, value] of Object.entries(data)) {
+		normalized[key] = normalizeFlexibleBlocks(value)
+	}
+	return normalized
+}
+
+/**
+ * Get published content by ID (public access)
+ * For use in web apps to fetch referenced content like authors, related posts, etc.
+ */
+export const getPublishedById = query({
+	args: { id: v.id("cmsContent") },
+	returns: v.union(v.any(), v.null()),
+	handler: async (ctx, args) => {
+		const content = await ctx.db.get(args.id)
+
+		// Only return published content
+		if (!content || content.status !== "published") {
+			return null
+		}
+
+		// Normalize flexible blocks in data
+		return {
+			...content,
+			data: normalizeFlexibleBlocks(content.data),
+		}
+	},
+})
+
+/**
  * Get content by slug (for published content - public access)
+ * Searches both in root slug field and data.slug field
  */
 export const getBySlug = query({
 	args: {
@@ -113,13 +172,38 @@ export const getBySlug = query({
 	},
 	returns: v.union(v.any(), v.null()),
 	handler: async (ctx, args) => {
-		return await ctx.db
+		// Try to find by root slug field first
+		let content = await ctx.db
 			.query("cmsContent")
 			.withIndex("by_schema_and_slug", (q) =>
 				q.eq("schemaId", args.schemaId).eq("slug", args.slug),
 			)
 			.filter((q) => q.eq(q.field("status"), "published"))
 			.unique()
+
+		// If not found, search by data.slug
+		if (!content) {
+			const allContent = await ctx.db
+				.query("cmsContent")
+				.withIndex("by_schema_and_status", (q) =>
+					q.eq("schemaId", args.schemaId).eq("status", "published"),
+				)
+				.collect()
+
+			content =
+				allContent.find((c) => {
+					const data = c.data as any
+					return data.slug === args.slug
+				}) || null
+		}
+
+		if (!content) return null
+
+		// Normalize flexible blocks in data
+		return {
+			...content,
+			data: normalizeFlexibleBlocks(content.data),
+		}
 	},
 })
 
@@ -130,6 +214,7 @@ export const listPublished = query({
 	args: {
 		schemaId: v.id("cmsSchemas"),
 		limit: v.optional(v.number()),
+		tags: v.optional(v.array(v.string())),
 	},
 	returns: v.array(v.any()),
 	handler: async (ctx, args) => {
@@ -140,11 +225,59 @@ export const listPublished = query({
 			)
 			.order("desc")
 
-		if (args.limit) {
-			return await query.take(args.limit)
+		const results = args.limit
+			? await query.take(args.limit)
+			: await query.collect()
+
+		// Normalize flexible blocks in all results
+		const normalizedResults = results.map((content) => ({
+			...content,
+			data: normalizeFlexibleBlocks(content.data),
+		}))
+
+		// Filter by tags if provided (post-query filtering to handle embedded tag data)
+		if (args.tags && args.tags.length > 0) {
+			return normalizedResults.filter((content) => {
+				const contentTags = (content.data as any).tags
+				if (!contentTags || !Array.isArray(contentTags)) return false
+
+				// Check if any of the specified tag IDs match
+				return args.tags!.some((tagId: string) => {
+					return contentTags.some((tag: any) => {
+						// Handle both ID strings and embedded objects
+						if (typeof tag === "string") {
+							return tag === tagId
+						}
+						// Check embedded object _id
+						return (tag as any)?._id === tagId
+					})
+				})
+			})
 		}
 
-		return await query.collect()
+		return normalizedResults
+	},
+})
+
+/**
+ * Get featured content (first published content with is_featured flag)
+ */
+export const getFeatured = query({
+	args: {
+		schemaId: v.id("cmsSchemas"),
+	},
+	returns: v.union(v.any(), v.null()),
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query("cmsContent")
+			.withIndex("by_schema_and_status", (q) =>
+				q.eq("schemaId", args.schemaId).eq("status", "published"),
+			)
+			.filter((q) => {
+				const data = q.field("data") as any
+				return q.eq(data.is_featured, true)
+			})
+			.first()
 	},
 })
 
@@ -273,11 +406,15 @@ export const listCollection = query({
 			)
 			.order("desc")
 
-		if (args.limit) {
-			return await query.take(args.limit)
-		}
+		const results = args.limit
+			? await query.take(args.limit)
+			: await query.collect()
 
-		return await query.collect()
+		// Normalize flexible blocks in all results
+		return results.map((content) => ({
+			...content,
+			data: normalizeFlexibleBlocks(content.data),
+		}))
 	},
 })
 
@@ -375,6 +512,7 @@ export const create = mutation({
 				internal.cms.content.triggerRevalidationAction,
 				{
 					contentId,
+					slug: args.slug,
 				},
 			)
 		}
@@ -482,6 +620,7 @@ export const update = mutation({
 				internal.cms.content.triggerRevalidationAction,
 				{
 					contentId: args.id,
+					slug: args.slug ?? content.slug,
 				},
 			)
 		}
@@ -578,12 +717,17 @@ export const duplicate = mutation({
  * This is triggered by the scheduler after content is published
  */
 export const triggerRevalidationAction = internalAction({
-	args: { contentId: v.id("cmsContent") },
+	args: {
+		contentId: v.id("cmsContent"),
+		slug: v.optional(v.string()),
+	},
 	handler: async (_ctx, args) => {
-		// Get the deployment URL
-		const deploymentUrl = process.env.CONVEX_SITE_URL
+		// Get the deployment URL (prefer FRONTEND_URL for web app, fallback to SITE_URL)
+		const deploymentUrl = process.env.FRONTEND_URL || process.env.SITE_URL
 		if (!deploymentUrl) {
-			console.warn("CONVEX_SITE_URL not configured, skipping revalidation")
+			console.warn(
+				"FRONTEND_URL or SITE_URL not configured, skipping revalidation",
+			)
 			return
 		}
 
@@ -595,13 +739,16 @@ export const triggerRevalidationAction = internalAction({
 
 		try {
 			// Call the HTTP webhook
-			const response = await fetch(`${deploymentUrl}/cms/revalidate`, {
+			// Ensure no double slashes and correct API path
+			const baseUrl = deploymentUrl.replace(/\/$/, "")
+			const response = await fetch(`${baseUrl}/api/revalidate`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
 					contentId: args.contentId,
+					slug: args.slug,
 					secret: revalidateSecret,
 				}),
 			})

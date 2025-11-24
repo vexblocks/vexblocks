@@ -46,7 +46,7 @@ export default function BlocksPage() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">Reusable Blocks</h1>
+					<h1 className="font-bold text-3xl">Reusable Blocks</h1>
 					<p className="mt-2 text-grey-500">
 						Create and manage reusable components for your content
 					</p>

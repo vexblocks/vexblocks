@@ -1,20 +1,20 @@
 @theme {
-	--color-primary: #0c1227;
-	--color-primary-800: #2d3964;
-	--color-primary-900: #1c274e;
+	--color-primary: #d60032;
+	--color-primary-800: #b8002b;
+	--color-primary-900: #9a0024;
 	--color-primary-foreground: hsl(0 0% 98%);
 
 	--color-alpha-light-100: rgba(26, 26, 26, 0.08);
 	--color-alpha-light-200: rgba(26, 26, 26, 0.12);
 	--color-alpha-light-300: rgba(255, 255, 255, 0.26);
 
-	--color-secondary: #51c0b1;
-	--color-secondary-light: #7bdccf;
-	--color-secondary-dark: #4bb8a9;
-	--color-secondary-foreground: hsl(0 0% 9%);
+	--color-secondary: #ff1744;
+	--color-secondary-light: #ff5c7c;
+	--color-secondary-dark: #c4001d;
+	--color-secondary-foreground: hsl(0 0% 98%);
 
-	--color-tertiary: #7b7cbb;
-	--color-tertiary-light: #9fa0d1;
+	--color-tertiary: #e91e63;
+	--color-tertiary-light: #f06292;
 
 	--color-error: #e63d3d;
 	--color-error-light: #ff5b5b;
@@ -48,6 +48,12 @@
 	/* Landing page specific colors */
 	--color-blue-700: #1837ec;
 	--color-blue-800: #1b3294;
+	
+	--color-red-500: #ff1744;
+	--color-red-600: #d60032;
+	--color-red-700: #b8002b;
+	--color-red-800: #9a0024;
+	--color-red-900: #7d001e;
 
 	--color-gray-400: #a1a1aa;
 	--color-gray-500: #7a7a83;

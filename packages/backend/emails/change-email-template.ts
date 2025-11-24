@@ -7,7 +7,7 @@ export const changeEmailTemplate = (url: string) => `
         <table style="width:100%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
           <tbody>
             <tr>
-              <td><img alt="VexBlocks" src="https://res.cloudinary.com/https-tinloof-com/image/upload/v1673766585/Goalimpact/logo_x0dls9.png" width="80" height="80" style="display:block;outline:none;border:none;text-decoration:none;margin:80px auto 20px">
+              <td><img alt="Vexblocks" src="https://res.cloudinary.com/https-tinloof-com/image/upload/v1673766585/Goalimpact/logo_x0dls9.png" width="80" height="80" style="display:block;outline:none;border:none;text-decoration:none;margin:80px auto 20px">
                 <p style="font-size:24px;line-height:24px;margin:30px 0;color:#000;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;font-weight:normal;text-align:center;padding:0">Verify your email change</p>
               </td>
             </tr>
@@ -51,4 +51,4 @@ export const changeEmailTemplate = (url: string) => `
     </tr>
   </tbody>
 </table>
-`
+`;

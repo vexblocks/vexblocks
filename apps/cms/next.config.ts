@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
 		externalDir: true,
 	},
 	reactCompiler: true,
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "imagedelivery.net",
+			},
+		],
+	},
 }
 
 export default nextConfig

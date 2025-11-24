@@ -3,7 +3,9 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import { useMutation, useQuery } from "convex/react"
 import {
+	ArrowDown,
 	ArrowLeft,
+	ArrowUp,
 	Calendar,
 	FileText,
 	Folder,
@@ -16,10 +18,27 @@ import {
 	ToggleLeft,
 	Trash2,
 	Type,
+	Video,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+
+// Utility function to generate field name from label
+function generateFieldName(label: string): string {
+	return label
+		.toLowerCase()
+		.normalize("NFD") // Decompose accented characters
+		.replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+		.replace(/[^a-z0-9\s_]/g, "") // Remove special characters
+		.trim()
+		.replace(/\s+/g, "_") // Replace spaces with underscores
+}
+
+// Validate field name format
+function validateFieldName(name: string): boolean {
+	return /^[a-z0-9_]+$/.test(name)
+}
 
 type FieldType =
 	| "shortText"
@@ -27,6 +46,7 @@ type FieldType =
 	| "richText"
 	| "media"
 	| "url"
+	| "youtubeUrl"
 	| "boolean"
 	| "number"
 	| "date"
@@ -55,6 +75,7 @@ type Field = {
 		| "richText"
 		| "media"
 		| "url"
+		| "youtubeUrl"
 		| "boolean"
 		| "number"
 		| "date"
@@ -68,6 +89,19 @@ type Field = {
 	// For shortText slug
 	isSlug?: boolean
 	slugSource?: string
+	// Track if field name has been manually edited
+	nameManuallyEdited?: boolean
+}
+
+// Helper to check for duplicate field names
+const checkDuplicateFieldName = (
+	fields: Field[],
+	currentFieldId: string,
+	fieldName: string,
+): boolean => {
+	return fields.some(
+		(f) => f.id !== currentFieldId && f.name === fieldName && fieldName !== "",
+	)
 }
 
 // Recursive component to render field editors (moved outside to prevent re-creation)
@@ -79,6 +113,8 @@ const FieldEditor = ({
 	onUpdateField,
 	onRemoveField,
 	onAddNestedField,
+	onMoveField,
+	totalFields,
 	availableBlocks = [],
 	allSchemas = [],
 	allFields = [],
@@ -95,6 +131,12 @@ const FieldEditor = ({
 	) => void
 	onRemoveField: (id: string, parentPath: string[]) => void
 	onAddNestedField: (parentId: string, parentPath: string[]) => void
+	onMoveField?: (
+		id: string,
+		direction: "up" | "down",
+		parentPath: string[],
+	) => void
+	totalFields?: number
 	availableBlocks?: Array<{ _id: string; name: string; displayName: string }>
 	allSchemas?: Array<{ _id: string; name: string; displayName: string }>
 }) => {
@@ -108,6 +150,9 @@ const FieldEditor = ({
 				: "border-accent/30"
 	const bgColor =
 		depth === 0 ? "bg-white" : depth === 1 ? "bg-primary/5" : "bg-accent/5"
+
+	// Check if this field name is duplicated
+	const isDuplicate = checkDuplicateFieldName(allFields, field.id, field.name)
 
 	return (
 		<div className={indentClass}>
@@ -128,35 +173,42 @@ const FieldEditor = ({
 							</span>
 						)}
 					</div>
-					<button
-						type="button"
-						onClick={() => onRemoveField(field.id, parentPath)}
-						className="text-error transition-colors hover:text-error-light"
-					>
-						<Trash2 className="h-4 w-4" />
-					</button>
+					<div className="flex items-center gap-2">
+						{/* Reorder buttons */}
+						{onMoveField && totalFields && totalFields > 1 && (
+							<div className="flex gap-1">
+								<button
+									type="button"
+									onClick={() => onMoveField(field.id, "up", parentPath)}
+									disabled={index === 0}
+									className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 disabled:cursor-not-allowed disabled:opacity-30"
+									title="Move up"
+								>
+									<ArrowUp className="h-4 w-4" />
+								</button>
+								<button
+									type="button"
+									onClick={() => onMoveField(field.id, "down", parentPath)}
+									disabled={index === totalFields - 1}
+									className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 disabled:cursor-not-allowed disabled:opacity-30"
+									title="Move down"
+								>
+									<ArrowDown className="h-4 w-4" />
+								</button>
+							</div>
+						)}
+						<button
+							type="button"
+							onClick={() => onRemoveField(field.id, parentPath)}
+							className="text-error transition-colors hover:text-error-light"
+							title="Remove field"
+						>
+							<Trash2 className="h-4 w-4" />
+						</button>
+					</div>
 				</div>
 
 				<div className="grid gap-4 md:grid-cols-2">
-					<div>
-						<label
-							htmlFor={`field-name-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
-						>
-							Field Name
-						</label>
-						<input
-							id={`field-name-${field.id}`}
-							type="text"
-							value={field.name}
-							onChange={(e) =>
-								onUpdateField(field.id, { name: e.target.value }, parentPath)
-							}
-							placeholder="title"
-							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
-						/>
-					</div>
-
 					<div>
 						<label
 							htmlFor={`field-label-${field.id}`}
@@ -168,12 +220,67 @@ const FieldEditor = ({
 							id={`field-label-${field.id}`}
 							type="text"
 							value={field.label}
-							onChange={(e) =>
-								onUpdateField(field.id, { label: e.target.value }, parentPath)
-							}
+							onChange={(e) => {
+								const newLabel = e.target.value
+								const updates: Partial<Field> = { label: newLabel }
+
+								// Auto-generate field name if it hasn't been manually edited
+								if (!field.nameManuallyEdited) {
+									updates.name = generateFieldName(newLabel)
+								}
+
+								onUpdateField(field.id, updates, parentPath)
+							}}
 							placeholder="Post Title"
 							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 						/>
+					</div>
+
+					<div className="relative pb-6">
+						<label
+							htmlFor={`field-name-${field.id}`}
+							className="mb-1 block font-medium text-grey-500 text-xs"
+						>
+							Field Name
+						</label>
+						<input
+							id={`field-name-${field.id}`}
+							type="text"
+							value={field.name}
+							onChange={(e) => {
+								const newName = e.target.value
+								// Validate and sanitize input
+								const sanitizedName = newName
+									.toLowerCase()
+									.replace(/[^a-z0-9_]/g, "")
+								onUpdateField(
+									field.id,
+									{ name: sanitizedName, nameManuallyEdited: true },
+									parentPath,
+								)
+							}}
+							placeholder="post_title"
+							className={`w-full rounded border px-3 py-2 text-sm ${
+								isDuplicate || (!validateFieldName(field.name) && field.name)
+									? "border-red-500"
+									: "border-grey-300"
+							}`}
+						/>
+						<div className="-mt-3 absolute top-full left-0">
+							{isDuplicate ? (
+								<p className="text-red-500 text-xs">
+									⚠️ Duplicate field name - must be unique
+								</p>
+							) : field.name && !validateFieldName(field.name) ? (
+								<p className="text-red-500 text-xs">
+									Only lowercase letters, numbers, and underscores allowed
+								</p>
+							) : !field.nameManuallyEdited && field.label ? (
+								<p className="text-red-600 text-xs">
+									✨ Auto-generated from "Label"
+								</p>
+							) : null}
+						</div>
 					</div>
 
 					<div>
@@ -204,6 +311,7 @@ const FieldEditor = ({
 							<option value="boolean">Boolean</option>
 							<option value="date">Date</option>
 							<option value="url">URL</option>
+							<option value="youtubeUrl">YouTube URL</option>
 							<option value="media">Media</option>
 							<option value="select">Select</option>
 							<option value="reference">Reference</option>
@@ -343,46 +451,68 @@ const FieldEditor = ({
 										{ value: "richText", label: "Rich Text" },
 										{ value: "media", label: "Media" },
 										{ value: "url", label: "URL" },
+										{ value: "youtubeUrl", label: "YouTube URL" },
 										{ value: "boolean", label: "Boolean" },
 										{ value: "number", label: "Number" },
 										{ value: "date", label: "Date" },
 										{ value: "select", label: "Select" },
 										{ value: "group", label: "Group" },
 										{ value: "blockReference", label: "Block Reference" },
-									].map((blockType) => (
-										<label
-											key={blockType.value}
-											className="flex items-center gap-2 text-sm"
-										>
-											<input
-												type="checkbox"
-												checked={
-													!field.allowedBlocks ||
-													field.allowedBlocks.includes(blockType.value as any)
-												}
-												onChange={(e) => {
-													const currentAllowed = field.allowedBlocks || []
-													const newAllowed = e.target.checked
-														? [...currentAllowed, blockType.value]
-														: currentAllowed.filter(
-																(t) => t !== blockType.value,
-															)
-													onUpdateField(
-														field.id,
-														{
-															allowedBlocks:
-																newAllowed.length === 0
-																	? undefined
-																	: (newAllowed as any),
-														},
-														parentPath,
-													)
-												}}
-												className="h-4 w-4"
-											/>
-											<span>{blockType.label}</span>
-										</label>
-									))}
+									].map((blockType) => {
+										const allBlockTypes = [
+											"shortText",
+											"longText",
+											"richText",
+											"media",
+											"url",
+											"youtubeUrl",
+											"boolean",
+											"number",
+											"date",
+											"select",
+											"group",
+											"blockReference",
+										]
+
+										return (
+											<label
+												key={blockType.value}
+												className="flex items-center gap-2 text-sm"
+											>
+												<input
+													type="checkbox"
+													checked={
+														!field.allowedBlocks ||
+														field.allowedBlocks.includes(blockType.value as any)
+													}
+													onChange={(e) => {
+														// If allowedBlocks is undefined (all types allowed), initialize with all types
+														const currentAllowed =
+															field.allowedBlocks || (allBlockTypes as any[])
+
+														const newAllowed = e.target.checked
+															? [...currentAllowed, blockType.value]
+															: currentAllowed.filter(
+																	(t) => t !== blockType.value,
+																)
+
+														onUpdateField(
+															field.id,
+															{
+																allowedBlocks:
+																	newAllowed.length === allBlockTypes.length
+																		? undefined // All types selected = undefined (no restriction)
+																		: (newAllowed as any),
+															},
+															parentPath,
+														)
+													}}
+													className="h-4 w-4"
+												/>
+												<span>{blockType.label}</span>
+											</label>
+										)
+									})}
 								</div>
 							</div>
 							<div>
@@ -456,7 +586,7 @@ const FieldEditor = ({
 
 					{field.type === "shortText" && depth === 0 && (
 						<div className="space-y-3 md:col-span-2">
-							<div className="flex items-center gap-3 rounded border border-blue-200 bg-blue-50 p-3">
+							<div className="flex items-center gap-3 rounded border border-red-200 bg-red-50 p-3">
 								<input
 									type="checkbox"
 									id={`field-isSlug-${field.id}`}
@@ -476,7 +606,7 @@ const FieldEditor = ({
 								/>
 								<label
 									htmlFor={`field-isSlug-${field.id}`}
-									className="cursor-pointer text-blue-800 text-sm"
+									className="cursor-pointer text-red-800 text-sm"
 								>
 									<strong>Use as Slug Field</strong> - Auto-generate
 									URL-friendly slugs
@@ -582,6 +712,8 @@ const FieldEditor = ({
 										onUpdateField={onUpdateField}
 										onRemoveField={onRemoveField}
 										onAddNestedField={onAddNestedField}
+										onMoveField={onMoveField}
+										totalFields={field.fields?.length}
 										availableBlocks={availableBlocks || []}
 										allSchemas={allSchemas || []}
 										allFields={allFields}
@@ -614,6 +746,7 @@ export default function NewSchemaPage() {
 	// Schema basic info
 	const [name, setName] = useState("")
 	const [displayName, setDisplayName] = useState("")
+	const [hasEditedName, setHasEditedName] = useState(false)
 	const [type, setType] = useState<"global" | "page" | "collection">(
 		"collection",
 	)
@@ -621,6 +754,15 @@ export default function NewSchemaPage() {
 
 	// Fields
 	const [fields, setFields] = useState<Field[]>([])
+
+	const handleDisplayNameChange = (value: string) => {
+		setDisplayName(value)
+		// Auto-generate name if it hasn't been manually edited
+		if (!hasEditedName) {
+			const generatedName = generateFieldName(value)
+			setName(generatedName)
+		}
+	}
 
 	const handleAddField = () => {
 		const newField: Field = {
@@ -631,6 +773,11 @@ export default function NewSchemaPage() {
 			required: false,
 		}
 		setFields([...fields, newField])
+
+		// Scroll to bottom smoothly after adding field
+		setTimeout(() => {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+		}, 100)
 	}
 
 	// Helper function to update nested fields recursively
@@ -742,6 +889,50 @@ export default function NewSchemaPage() {
 		[updateNestedFields],
 	)
 
+	const handleMoveField = useCallback(
+		(id: string, direction: "up" | "down", parentPath: string[] = []) => {
+			if (parentPath.length === 0) {
+				// Top-level field
+				setFields((prevFields) => {
+					const index = prevFields.findIndex((f) => f.id === id)
+					if (index === -1) return prevFields
+
+					const newIndex = direction === "up" ? index - 1 : index + 1
+					if (newIndex < 0 || newIndex >= prevFields.length) return prevFields
+
+					const newFields = [...prevFields]
+					const [removed] = newFields.splice(index, 1)
+					newFields.splice(newIndex, 0, removed)
+					return newFields
+				})
+			} else {
+				// Nested field
+				setFields((prevFields) =>
+					updateNestedFields(prevFields, parentPath, (parentField) => {
+						if (!parentField.fields) return parentField
+
+						const index = parentField.fields.findIndex((f) => f.id === id)
+						if (index === -1) return parentField
+
+						const newIndex = direction === "up" ? index - 1 : index + 1
+						if (newIndex < 0 || newIndex >= parentField.fields.length)
+							return parentField
+
+						const newFields = [...parentField.fields]
+						const [removed] = newFields.splice(index, 1)
+						newFields.splice(newIndex, 0, removed)
+
+						return {
+							...parentField,
+							fields: newFields,
+						}
+					}),
+				)
+			}
+		},
+		[updateNestedFields],
+	)
+
 	const handleAddNestedField = useCallback(
 		(parentId: string, parentPath: string[] = []) => {
 			const newField: Field = {
@@ -782,6 +973,11 @@ export default function NewSchemaPage() {
 					})),
 				)
 			}
+
+			// Scroll to bottom smoothly after adding nested field
+			setTimeout(() => {
+				window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+			}, 100)
 		},
 		[updateNestedFields],
 	)
@@ -801,6 +997,8 @@ export default function NewSchemaPage() {
 				return <Calendar className="h-4 w-4" />
 			case "url":
 				return <LinkIcon className="h-4 w-4" />
+			case "youtubeUrl":
+				return <Video className="h-4 w-4" />
 			case "media":
 				return <Image className="h-4 w-4" />
 			case "select":
@@ -881,6 +1079,8 @@ export default function NewSchemaPage() {
 
 			// Validate fields recursively
 			const validateFields = (fieldsArray: Field[], level = 0): void => {
+				// Check for duplicate field names at this level
+				const fieldNames = new Set<string>()
 				for (const field of fieldsArray) {
 					if (!field.name.trim()) {
 						throw new Error("All fields must have a name")
@@ -888,6 +1088,15 @@ export default function NewSchemaPage() {
 					if (!field.label.trim()) {
 						throw new Error("All fields must have a label")
 					}
+
+					// Check for duplicate field name
+					if (fieldNames.has(field.name)) {
+						throw new Error(
+							`Duplicate field name "${field.name}" found. Each field must have a unique name.`,
+						)
+					}
+					fieldNames.add(field.name)
+
 					if (
 						field.type === "select" &&
 						(!field.options || field.options.length === 0)
@@ -930,9 +1139,16 @@ export default function NewSchemaPage() {
 
 			validateFields(fields)
 
+			// Validate schema name format
+			if (!validateFieldName(name)) {
+				throw new Error(
+					"Schema name must contain only lowercase letters, numbers, and underscores",
+				)
+			}
+
 			// Create schema with nested fields
 			const schemaId = await createSchema({
-				name: name.toLowerCase().replace(/\s+/g, "_"),
+				name,
 				displayName,
 				type,
 				description: description || undefined,
@@ -961,7 +1177,7 @@ export default function NewSchemaPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl text-primary">Create New Schema</h1>
+				<h1 className="font-bold text-3xl">Create New Schema</h1>
 				<p className="mt-2 text-grey-500">
 					Define a new content type for your CMS
 				</p>
@@ -976,32 +1192,9 @@ export default function NewSchemaPage() {
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Basic Info */}
 				<div className="rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-lg text-primary">
-						Basic Information
-					</h2>
+					<h2 className="mb-4 font-semibold text-lg">Basic Information</h2>
 
 					<div className="space-y-4">
-						<div>
-							<label
-								htmlFor="schema-name"
-								className="mb-2 block font-medium text-grey-500 text-sm"
-							>
-								Schema Name <span className="text-error">*</span>
-							</label>
-							<input
-								id="schema-name"
-								type="text"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-								placeholder="blog_posts"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-								required
-							/>
-							<p className="mt-1 text-grey-400 text-xs">
-								Unique identifier (lowercase, underscores only)
-							</p>
-						</div>
-
 						<div>
 							<label
 								htmlFor="schema-display-name"
@@ -1013,11 +1206,58 @@ export default function NewSchemaPage() {
 								id="schema-display-name"
 								type="text"
 								value={displayName}
-								onChange={(e) => setDisplayName(e.target.value)}
+								onChange={(e) => handleDisplayNameChange(e.target.value)}
 								placeholder="Blog Posts"
 								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 								required
 							/>
+						</div>
+
+						<div className="relative pb-6">
+							<label
+								htmlFor="schema-name"
+								className="mb-2 block font-medium text-grey-500 text-sm"
+							>
+								Schema Name <span className="text-error">*</span>
+							</label>
+							<input
+								id="schema-name"
+								type="text"
+								value={name}
+								onFocus={() => {
+									setHasEditedName(true)
+								}}
+								onChange={(e) => {
+									const newName = e.target.value
+									// Validate and sanitize input
+									const sanitizedName = newName
+										.toLowerCase()
+										.replace(/[^a-z0-9_]/g, "")
+									setName(sanitizedName)
+								}}
+								placeholder="blog_posts"
+								className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+									!validateFieldName(name) && name
+										? "border-red-500"
+										: "border-grey-300"
+								}`}
+								required
+							/>
+							<div className="-mt-3 absolute top-full left-0">
+								{name && !validateFieldName(name) ? (
+									<p className="text-red-500 text-xs">
+										Only lowercase letters, numbers, and underscores allowed
+									</p>
+								) : !hasEditedName && displayName ? (
+									<p className="text-red-600 text-xs">
+										✨ Auto-generated from "Display Name"
+									</p>
+								) : (
+									<p className="text-grey-400 text-xs">
+										Unique identifier (lowercase, underscores only)
+									</p>
+								)}
+							</div>
 						</div>
 
 						<div>
@@ -1068,7 +1308,7 @@ export default function NewSchemaPage() {
 				{/* Fields */}
 				<div className="rounded-lg bg-white p-6 shadow">
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-lg text-primary">
+						<h2 className="font-semibold text-lg">
 							Fields <span className="text-error">*</span>
 						</h2>
 						<button
@@ -1099,6 +1339,8 @@ export default function NewSchemaPage() {
 									onUpdateField={handleUpdateField}
 									onRemoveField={handleRemoveField}
 									onAddNestedField={handleAddNestedField}
+									onMoveField={handleMoveField}
+									totalFields={fields.length}
 									availableBlocks={availableBlocks || []}
 									allSchemas={allSchemas || []}
 									allFields={fields}
@@ -1108,22 +1350,56 @@ export default function NewSchemaPage() {
 					)}
 				</div>
 
-				{/* Submit */}
-				<div className="flex items-center justify-end gap-4">
-					<Link
-						href="/schemas"
-						className="rounded-lg border border-grey-300 px-6 py-3 text-grey-500 transition-colors hover:bg-grey-100"
-					>
-						Cancel
-					</Link>
-					<button
-						type="submit"
-						disabled={loading || fields.length === 0}
-						className="rounded-lg bg-primary px-6 py-3 text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
-					>
-						{loading ? "Creating..." : "Create Schema"}
-					</button>
+				{/* Fixed bottom bar with action buttons */}
+				<div className="fixed right-0 bottom-0 left-0 z-50 border-grey-200 border-t bg-white shadow-lg">
+					<div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
+						<button
+							type="button"
+							onClick={() => {
+								setFields((prev) => [
+									...prev,
+									{
+										id: `field_${Date.now()}`,
+										name: "",
+										label: "",
+										type: "shortText",
+										required: false,
+									},
+								])
+
+								// Scroll to bottom smoothly after adding field
+								setTimeout(() => {
+									window.scrollTo({
+										top: document.body.scrollHeight,
+										behavior: "smooth",
+									})
+								}, 100)
+							}}
+							className="inline-flex items-center gap-2 rounded-lg border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-primary/5"
+						>
+							<Plus className="h-4 w-4" />
+							Add Field
+						</button>
+						<div className="flex items-center gap-4">
+							<Link
+								href="/schemas"
+								className="rounded-lg border border-grey-300 px-6 py-3 text-grey-500 transition-colors hover:bg-grey-100"
+							>
+								Cancel
+							</Link>
+							<button
+								type="submit"
+								disabled={loading || fields.length === 0}
+								className="rounded-lg bg-primary px-6 py-3 text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
+							>
+								{loading ? "Creating..." : "Create Schema"}
+							</button>
+						</div>
+					</div>
 				</div>
+
+				{/* Spacer to prevent content from being hidden behind fixed bar */}
+				<div className="h-24" />
 			</form>
 		</div>
 	)

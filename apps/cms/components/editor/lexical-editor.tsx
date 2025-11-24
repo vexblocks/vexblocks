@@ -3,20 +3,14 @@
 import { LinkNode } from "@lexical/link"
 import { ListItemNode, ListNode } from "@lexical/list"
 import { LexicalComposer } from "@lexical/react/LexicalComposer"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { ContentEditable } from "@lexical/react/LexicalContentEditable"
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary"
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin"
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin"
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
-import {
-	$createParagraphNode,
-	$createTextNode,
-	$getRoot,
-	type EditorState,
-} from "lexical"
-import { useEffect } from "react"
+import type { EditorState } from "lexical"
 import ToolbarPlugin from "./toolbar-plugin"
 
 type LexicalEditorProps = {
@@ -25,38 +19,27 @@ type LexicalEditorProps = {
 	placeholder?: string
 }
 
-// Plugin to set initial content
-function InitialContentPlugin({ content }: { content: string }) {
-	const [editor] = useLexicalComposerContext()
-
-	useEffect(() => {
-		if (content) {
-			editor.update(() => {
-				try {
-					const editorState = editor.parseEditorState(content)
-					editor.setEditorState(editorState)
-				} catch (_e) {
-					// If parsing fails, set as plain text
-					const root = $getRoot()
-					root.clear()
-					const paragraph = $createParagraphNode()
-					paragraph.append($createTextNode(content))
-					root.append(paragraph)
-				}
-			})
-		}
-	}, [editor, content])
-
-	return null
-}
-
 export default function LexicalEditor({
 	value,
 	onChange,
 	placeholder = "Enter some text...",
 }: LexicalEditorProps) {
+	// Parse initial editor state from value
+	const getInitialEditorState = () => {
+		if (!value) return undefined
+
+		try {
+			// Try to parse as JSON (Lexical format)
+			return value
+		} catch {
+			// If parsing fails, return undefined and let Lexical handle it as empty
+			return undefined
+		}
+	}
+
 	const initialConfig = {
 		namespace: "CMSEditor",
+		editorState: getInitialEditorState(),
 		theme: {
 			paragraph: "mb-2",
 			heading: {
@@ -102,8 +85,8 @@ export default function LexicalEditor({
 				</div>
 			</div>
 			<HistoryPlugin />
+			<LinkPlugin />
 			<OnChangePlugin onChange={handleChange} />
-			{value && <InitialContentPlugin content={value} />}
 		</LexicalComposer>
 	)
 }

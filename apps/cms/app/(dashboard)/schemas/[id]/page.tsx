@@ -5,17 +5,47 @@ import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
+	ArrowDown,
 	ArrowLeft,
+	ArrowUp,
 	Folder,
 	Layers,
 	Plus,
 	Save,
 	Trash2,
 	Type,
+	Video,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { use, useCallback, useEffect, useState } from "react"
+
+// Utility function to generate field name from label
+function generateFieldName(label: string): string {
+	return label
+		.toLowerCase()
+		.normalize("NFD") // Decompose accented characters
+		.replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+		.replace(/[^a-z0-9\s_]/g, "") // Remove special characters
+		.trim()
+		.replace(/\s+/g, "_") // Replace spaces with underscores
+}
+
+// Validate field name format
+function validateFieldName(name: string): boolean {
+	return /^[a-z0-9_]+$/.test(name)
+}
+
+// Helper to check for duplicate field names
+function checkDuplicateFieldName(
+	fields: Field[],
+	currentFieldId: string,
+	fieldName: string,
+): boolean {
+	return fields.some(
+		(f) => f.id !== currentFieldId && f.name === fieldName && fieldName !== "",
+	)
+}
 
 type FieldType =
 	| "shortText"
@@ -23,6 +53,7 @@ type FieldType =
 	| "richText"
 	| "media"
 	| "url"
+	| "youtubeUrl"
 	| "boolean"
 	| "number"
 	| "date"
@@ -52,6 +83,7 @@ type Field = {
 		| "richText"
 		| "media"
 		| "url"
+		| "youtubeUrl"
 		| "boolean"
 		| "number"
 		| "date"
@@ -65,6 +97,8 @@ type Field = {
 	// For shortText slug
 	isSlug?: boolean
 	slugSource?: string
+	// Track if field name has been manually edited
+	nameManuallyEdited?: boolean
 }
 
 // Recursive FieldEditor component (defined outside to prevent re-renders)
@@ -75,6 +109,9 @@ type FieldEditorProps = {
 	onUpdateField: (path: number[], updates: Partial<Field>) => void
 	onRemoveField: (path: number[]) => void
 	onAddNestedField: (path: number[]) => void
+	onMoveField?: (path: number[], direction: "up" | "down") => void
+	totalFields?: number
+	fieldIndex?: number
 	isNameLocked?: boolean
 	availableBlocks?: Array<{ _id: string; name: string; displayName: string }>
 	allSchemas?: Array<{ _id: string; name: string; displayName: string }>
@@ -88,6 +125,9 @@ function FieldEditor({
 	onUpdateField,
 	onRemoveField,
 	onAddNestedField,
+	onMoveField,
+	totalFields,
+	fieldIndex = 0,
 	isNameLocked = false,
 	availableBlocks = [],
 	allSchemas = [],
@@ -97,12 +137,18 @@ function FieldEditor({
 		level < 3 && (field.type === "group" || field.type === "repeater")
 	const hasNestedFields = canNest && field.fields && field.fields.length > 0
 
+	// Check if this field name is duplicated
+	const isDuplicate =
+		!isNameLocked && checkDuplicateFieldName(allFields, field.id, field.name)
+
 	const getFieldIcon = (type: FieldType) => {
 		switch (type) {
 			case "group":
-				return <Folder className="h-4 w-4 text-primary" />
+				return <Folder className="h-4 w-4" />
 			case "repeater":
-				return <Layers className="h-4 w-4 text-primary" />
+				return <Layers className="h-4 w-4" />
+			case "youtubeUrl":
+				return <Video className="h-4 w-4" />
 			default:
 				return <Type className="h-4 w-4" />
 		}
@@ -120,43 +166,47 @@ function FieldEditor({
 						Field #{path[path.length - 1] + 1}
 					</h3>
 					{(field.type === "group" || field.type === "repeater") && (
-						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-xs">
 							{field.type === "group" ? "Group" : "Repeater"}
 						</span>
 					)}
 				</div>
-				<button
-					type="button"
-					onClick={() => onRemoveField(path)}
-					className="text-error hover:text-error/80"
-				>
-					<Trash2 className="h-4 w-4" />
-				</button>
+				<div className="flex items-center gap-2">
+					{/* Reorder buttons */}
+					{onMoveField && totalFields && totalFields > 1 && (
+						<div className="flex gap-1">
+							<button
+								type="button"
+								onClick={() => onMoveField(path, "up")}
+								disabled={fieldIndex === 0}
+								className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 disabled:cursor-not-allowed disabled:opacity-30"
+								title="Move up"
+							>
+								<ArrowUp className="h-4 w-4" />
+							</button>
+							<button
+								type="button"
+								onClick={() => onMoveField(path, "down")}
+								disabled={fieldIndex === totalFields - 1}
+								className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 disabled:cursor-not-allowed disabled:opacity-30"
+								title="Move down"
+							>
+								<ArrowDown className="h-4 w-4" />
+							</button>
+						</div>
+					)}
+					<button
+						type="button"
+						onClick={() => onRemoveField(path)}
+						className="text-error hover:text-error/80"
+						title="Remove field"
+					>
+						<Trash2 className="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			<div className="grid grid-cols-2 gap-4">
-				<div>
-					<label
-						htmlFor={`field-name-${field.id}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
-					>
-						Field Name {isNameLocked && "(locked)"}
-					</label>
-					<input
-						type="text"
-						id={`field-name-${field.id}`}
-						value={field.name}
-						onChange={(e) => onUpdateField(path, { name: e.target.value })}
-						placeholder="e.g. post_title"
-						disabled={isNameLocked}
-						className="w-full rounded border border-grey-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-grey-100"
-					/>
-					{isNameLocked && (
-						<p className="mt-1 text-grey-500 text-xs">
-							Field name cannot be changed to prevent data loss
-						</p>
-					)}
-				</div>
 				<div>
 					<label
 						htmlFor={`field-label-${field.id}`}
@@ -168,10 +218,74 @@ function FieldEditor({
 						type="text"
 						id={`field-label-${field.id}`}
 						value={field.label}
-						onChange={(e) => onUpdateField(path, { label: e.target.value })}
+						onChange={(e) => {
+							const newLabel = e.target.value
+							const updates: Partial<Field> = { label: newLabel }
+
+							// Auto-generate field name if it hasn't been manually edited and not locked
+							if (!field.nameManuallyEdited && !isNameLocked) {
+								updates.name = generateFieldName(newLabel)
+							}
+
+							onUpdateField(path, updates)
+						}}
 						placeholder="e.g. Post Title"
 						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 					/>
+				</div>
+				<div className="relative pb-6">
+					<label
+						htmlFor={`field-name-${field.id}`}
+						className="mb-1 block font-medium text-grey-700 text-sm"
+					>
+						Field Name
+						{isNameLocked && (
+							<span className="ml-1 text-grey-500 text-xs">(locked)</span>
+						)}
+					</label>
+					<input
+						type="text"
+						id={`field-name-${field.id}`}
+						value={field.name}
+						onChange={(e) => {
+							const newName = e.target.value
+							// Validate and sanitize input
+							const sanitizedName = newName
+								.toLowerCase()
+								.replace(/[^a-z0-9_]/g, "")
+							onUpdateField(path, {
+								name: sanitizedName,
+								nameManuallyEdited: true,
+							})
+						}}
+						placeholder="e.g. post_title"
+						disabled={isNameLocked}
+						className={`w-full rounded border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-grey-100 ${
+							isDuplicate ||
+							(!validateFieldName(field.name) && field.name && !isNameLocked)
+								? "border-red-500"
+								: "border-grey-300"
+						}`}
+					/>
+					<div className="-mt-3 absolute top-full left-0">
+						{isNameLocked ? (
+							<p className="text-grey-500 text-xs">
+								Field name cannot be changed to prevent data loss
+							</p>
+						) : isDuplicate ? (
+							<p className="text-red-500 text-xs">
+								⚠️ Duplicate field name - must be unique
+							</p>
+						) : field.name && !validateFieldName(field.name) ? (
+							<p className="text-red-500 text-xs">
+								Only lowercase letters, numbers, and underscores allowed
+							</p>
+						) : !field.nameManuallyEdited && field.label ? (
+							<p className="text-red-600 text-xs">
+								✨ Auto-generated from "Label"
+							</p>
+						) : null}
+					</div>
 				</div>
 			</div>
 
@@ -198,6 +312,7 @@ function FieldEditor({
 						<option value="boolean">Boolean</option>
 						<option value="date">Date</option>
 						<option value="url">URL</option>
+						<option value="youtubeUrl">YouTube URL</option>
 						<option value="media">Media</option>
 						<option value="select">Select</option>
 						<option value="reference">Reference</option>
@@ -309,40 +424,62 @@ function FieldEditor({
 								{ value: "richText", label: "Rich Text" },
 								{ value: "media", label: "Media" },
 								{ value: "url", label: "URL" },
+								{ value: "youtubeUrl", label: "YouTube URL" },
 								{ value: "boolean", label: "Boolean" },
 								{ value: "number", label: "Number" },
 								{ value: "date", label: "Date" },
 								{ value: "select", label: "Select" },
 								{ value: "group", label: "Group" },
 								{ value: "blockReference", label: "Block Reference" },
-							].map((blockType) => (
-								<label
-									key={blockType.value}
-									className="flex items-center gap-2 text-sm"
-								>
-									<input
-										type="checkbox"
-										checked={
-											!field.allowedBlocks ||
-											field.allowedBlocks.includes(blockType.value as any)
-										}
-										onChange={(e) => {
-											const currentAllowed = field.allowedBlocks || []
-											const newAllowed = e.target.checked
-												? [...currentAllowed, blockType.value]
-												: currentAllowed.filter((t) => t !== blockType.value)
-											onUpdateField(path, {
-												allowedBlocks:
-													newAllowed.length === 0
-														? undefined
-														: (newAllowed as any),
-											})
-										}}
-										className="h-4 w-4"
-									/>
-									<span>{blockType.label}</span>
-								</label>
-							))}
+							].map((blockType) => {
+								const allBlockTypes = [
+									"shortText",
+									"longText",
+									"richText",
+									"media",
+									"url",
+									"youtubeUrl",
+									"boolean",
+									"number",
+									"date",
+									"select",
+									"group",
+									"blockReference",
+								]
+
+								return (
+									<label
+										key={blockType.value}
+										className="flex items-center gap-2 text-sm"
+									>
+										<input
+											type="checkbox"
+											checked={
+												!field.allowedBlocks ||
+												field.allowedBlocks.includes(blockType.value as any)
+											}
+											onChange={(e) => {
+												// If allowedBlocks is undefined (all types allowed), initialize with all types
+												const currentAllowed =
+													field.allowedBlocks || (allBlockTypes as any[])
+
+												const newAllowed = e.target.checked
+													? [...currentAllowed, blockType.value]
+													: currentAllowed.filter((t) => t !== blockType.value)
+
+												onUpdateField(path, {
+													allowedBlocks:
+														newAllowed.length === allBlockTypes.length
+															? undefined // All types selected = undefined (no restriction)
+															: (newAllowed as any),
+												})
+											}}
+											className="h-4 w-4"
+										/>
+										<span>{blockType.label}</span>
+									</label>
+								)
+							})}
 						</div>
 					</div>
 					<div>
@@ -406,7 +543,7 @@ function FieldEditor({
 
 			{field.type === "shortText" && level === 0 && (
 				<div className="mt-4 space-y-3">
-					<div className="flex items-center gap-3 rounded border border-blue-200 bg-blue-50 p-3">
+					<div className="flex items-center gap-3 rounded border border-red-200 bg-red-50 p-3">
 						<input
 							type="checkbox"
 							id={`field-isSlug-${path.join("-")}`}
@@ -422,7 +559,7 @@ function FieldEditor({
 						/>
 						<label
 							htmlFor={`field-isSlug-${path.join("-")}`}
-							className="cursor-pointer text-blue-800 text-sm"
+							className="cursor-pointer text-red-800 text-sm"
 						>
 							<strong>Use as Slug Field</strong> - Auto-generate URL-friendly
 							slugs
@@ -459,7 +596,7 @@ function FieldEditor({
 										</option>
 									))}
 							</select>
-							<p className="mt-1 text-blue-600 text-xs">
+							<p className="mt-1 text-red-600 text-xs">
 								The slug will be auto-generated from the selected field (e.g.,
 								"My Post Title" → "my-post-title")
 							</p>
@@ -519,6 +656,9 @@ function FieldEditor({
 							onUpdateField={onUpdateField}
 							onRemoveField={onRemoveField}
 							onAddNestedField={onAddNestedField}
+							onMoveField={onMoveField}
+							totalFields={field.fields?.length}
+							fieldIndex={index}
 							isNameLocked={nestedField.isExisting ?? false}
 							availableBlocks={availableBlocks}
 							allSchemas={allSchemas}
@@ -660,7 +800,75 @@ export default function SchemaDetailPage({
 
 	const handleAddNestedField = useCallback((path: number[]) => {
 		setFields((prev) => addNestedField(prev, path))
+
+		// Scroll to bottom smoothly after adding nested field
+		setTimeout(() => {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+		}, 100)
 	}, [])
+
+	const handleMoveField = useCallback(
+		(path: number[], direction: "up" | "down") => {
+			setFields((prev) => {
+				if (path.length === 1) {
+					// Top-level field
+					const index = path[0]
+					if (index === undefined) return prev
+
+					const newIndex = direction === "up" ? index - 1 : index + 1
+					if (newIndex < 0 || newIndex >= prev.length) return prev
+
+					const newFields = [...prev]
+					const [removed] = newFields.splice(index, 1)
+					newFields.splice(newIndex, 0, removed)
+					return newFields
+				}
+
+				// Nested field - need to manually traverse and rebuild
+				const moveInNestedFields = (
+					fields: Field[],
+					currentPath: number[],
+				): Field[] => {
+					if (currentPath.length === 0) return fields
+
+					const [first, ...rest] = currentPath
+
+					return fields.map((f, i) => {
+						if (i !== first) return f
+
+						if (rest.length === 0) {
+							// This is the parent, move the child
+							if (!f.fields) return f
+
+							const fieldIndex = path[path.length - 1]
+							if (fieldIndex === undefined) return f
+
+							const newIndex =
+								direction === "up" ? fieldIndex - 1 : fieldIndex + 1
+							if (newIndex < 0 || newIndex >= f.fields.length) return f
+
+							const newFields = [...f.fields]
+							const [removed] = newFields.splice(fieldIndex, 1)
+							newFields.splice(newIndex, 0, removed)
+
+							return { ...f, fields: newFields }
+						}
+
+						// Keep traversing
+						if (!f.fields) return f
+						return {
+							...f,
+							fields: moveInNestedFields(f.fields, rest),
+						}
+					})
+				}
+
+				const parentPath = path.slice(0, -1)
+				return moveInNestedFields(prev, parentPath)
+			})
+		},
+		[],
+	)
 
 	const handleAddField = () => {
 		const newField: Field = {
@@ -672,6 +880,11 @@ export default function SchemaDetailPage({
 			isExisting: false, // Mark as new field (not locked)
 		}
 		setFields([...fields, newField])
+
+		// Scroll to bottom smoothly after adding field
+		setTimeout(() => {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+		}, 100)
 	}
 
 	// Helper function to map fields recursively (including nested fields)
@@ -728,6 +941,8 @@ export default function SchemaDetailPage({
 		try {
 			// Validate fields recursively
 			const validateFields = (fieldsArray: Field[], level = 0): void => {
+				// Check for duplicate field names at this level
+				const fieldNames = new Set<string>()
 				for (const field of fieldsArray) {
 					if (!field.name.trim()) {
 						throw new Error("All fields must have a name")
@@ -735,6 +950,15 @@ export default function SchemaDetailPage({
 					if (!field.label.trim()) {
 						throw new Error("All fields must have a label")
 					}
+
+					// Check for duplicate field name
+					if (fieldNames.has(field.name)) {
+						throw new Error(
+							`Duplicate field name "${field.name}" found. Each field must have a unique name.`,
+						)
+					}
+					fieldNames.add(field.name)
+
 					if (
 						field.type === "select" &&
 						(!field.options || field.options.length === 0)
@@ -817,9 +1041,11 @@ export default function SchemaDetailPage({
 	const getFieldIcon = (type: FieldType) => {
 		switch (type) {
 			case "group":
-				return <Folder className="h-4 w-4 text-primary" />
+				return <Folder className="h-4 w-4" />
 			case "repeater":
-				return <Layers className="h-4 w-4 text-primary" />
+				return <Layers className="h-4 w-4" />
+			case "youtubeUrl":
+				return <Video className="h-4 w-4" />
 			default:
 				return <Type className="h-4 w-4" />
 		}
@@ -839,9 +1065,7 @@ export default function SchemaDetailPage({
 
 			<div className="mb-6 flex items-start justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">
-						{schema.displayName}
-					</h1>
+					<h1 className="font-bold text-3xl">{schema.displayName}</h1>
 					<p className="mt-2 text-grey-500">
 						{schema.type === "global"
 							? "Global Component"
@@ -1021,6 +1245,9 @@ export default function SchemaDetailPage({
 										onUpdateField={handleUpdateField}
 										onRemoveField={handleRemoveField}
 										onAddNestedField={handleAddNestedField}
+										onMoveField={handleMoveField}
+										totalFields={fields.length}
+										fieldIndex={index}
 										isNameLocked={field.isExisting ?? false} // Lock only existing fields to prevent data loss
 										availableBlocks={availableBlocks || []}
 										allSchemas={allSchemas || []}
@@ -1110,6 +1337,68 @@ export default function SchemaDetailPage({
 						Manage Content →
 					</Link>
 				</div>
+			)}
+
+			{/* Fixed bottom bar with action buttons (only in edit mode) */}
+			{editing && (
+				<>
+					<div className="fixed right-0 bottom-0 left-0 z-50 border-grey-200 border-t bg-white shadow-lg">
+						<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+							<button
+								type="button"
+								onClick={() => {
+									handleAddField()
+									// Scroll to bottom smoothly after adding field
+									setTimeout(() => {
+										window.scrollTo({
+											top: document.body.scrollHeight,
+											behavior: "smooth",
+										})
+									}, 100)
+								}}
+								className="inline-flex items-center gap-2 rounded-lg border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-primary/5"
+							>
+								<Plus className="h-4 w-4" />
+								Add Field
+							</button>
+							<div className="flex items-center gap-4">
+								<button
+									type="button"
+									onClick={() => {
+										setEditing(false)
+										setError("")
+										// Reset fields
+										if (schema) {
+											setDisplayName(schema.displayName)
+											setDescription(schema.description || "")
+											setFields(
+												schema.fields.map((f: any, i: number) => ({
+													id: `field_${i}`,
+													...f,
+												})),
+											)
+										}
+									}}
+									className="rounded-lg border border-grey-300 px-6 py-3 text-grey-700 hover:bg-grey-50"
+								>
+									Cancel
+								</button>
+								<button
+									type="button"
+									onClick={handleSave}
+									disabled={loading}
+									className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-white hover:bg-primary/90 disabled:opacity-50"
+								>
+									<Save className="h-4 w-4" />
+									{loading ? "Saving..." : "Save Changes"}
+								</button>
+							</div>
+						</div>
+					</div>
+
+					{/* Spacer to prevent content from being hidden behind fixed bar */}
+					<div className="h-24" />
+				</>
 			)}
 		</div>
 	)

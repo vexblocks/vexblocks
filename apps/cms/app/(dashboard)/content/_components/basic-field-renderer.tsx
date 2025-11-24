@@ -1,0 +1,401 @@
+"use client"
+
+import { CFImage } from "@repo/cms-shared"
+import { Image as ImageIcon, X } from "lucide-react"
+import dynamic from "next/dynamic"
+import { useState } from "react"
+import type { Field } from "./types"
+
+// Dynamic import for Lexical to avoid SSR issues
+const LexicalEditor = dynamic(
+	() => import("@/components/editor/lexical-editor"),
+	{ ssr: false },
+)
+
+// Dynamic import for MediaSelector to avoid SSR issues
+const MediaSelector = dynamic(
+	() =>
+		import("../../media/_components/media-selector").then(
+			(mod) => mod.MediaSelector,
+		),
+	{ ssr: false },
+)
+
+type BasicFieldRendererProps = {
+	field: Field
+	value: any
+	onChange: (value: any) => void
+	fieldId: string
+	allSchemas?: any[]
+	allContent?: Record<string, any[]>
+}
+
+export function BasicFieldRenderer({
+	field,
+	value,
+	onChange,
+	fieldId,
+	allSchemas,
+	allContent,
+}: BasicFieldRendererProps) {
+	const [showMediaSelector, setShowMediaSelector] = useState(false)
+
+	// Provide consistent default based on type to prevent uncontrolled component warnings
+	const defaultValue =
+		value ??
+		(field.type === "number" ? 0 : field.type === "boolean" ? false : "")
+
+	switch (field.type) {
+		case "shortText":
+			return (
+				<div>
+					<input
+						type="text"
+						id={fieldId}
+						value={defaultValue}
+						onChange={(e) => onChange(e.target.value)}
+						placeholder={field.helpText}
+						required={field.required}
+						readOnly={field.isSlug}
+						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+							field.isSlug
+								? "border-red-300 bg-red-50 text-red-900"
+								: "border-grey-300 text-grey-500"
+						}`}
+					/>
+					{field.isSlug && field.slugSource && (
+						<p className="mt-1 text-red-600 text-xs">
+							✨ Auto-generated from "{field.slugSource}"
+						</p>
+					)}
+				</div>
+			)
+
+		case "longText":
+			return (
+				<textarea
+					id={fieldId}
+					value={defaultValue}
+					onChange={(e) => onChange(e.target.value)}
+					placeholder={field.helpText}
+					required={field.required}
+					rows={4}
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				/>
+			)
+
+		case "richText":
+			return (
+				<LexicalEditor
+					key={fieldId}
+					value={defaultValue}
+					onChange={onChange}
+					placeholder={field.helpText || "Enter rich text content..."}
+				/>
+			)
+
+		case "number":
+			return (
+				<input
+					type="number"
+					id={fieldId}
+					value={defaultValue}
+					onChange={(e) => onChange(Number.parseFloat(e.target.value))}
+					placeholder={field.helpText}
+					required={field.required}
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				/>
+			)
+
+		case "boolean":
+			return (
+				<label htmlFor={fieldId} className="flex items-center gap-3">
+					<input
+						type="checkbox"
+						id={fieldId}
+						checked={defaultValue || false}
+						onChange={(e) => onChange(e.target.checked)}
+						className="h-5 w-5 rounded border-grey-300"
+					/>
+					<span className="text-grey-500">{field.helpText || "Enable"}</span>
+				</label>
+			)
+
+		case "date":
+			return (
+				<input
+					type="date"
+					id={fieldId}
+					value={defaultValue}
+					onChange={(e) => onChange(e.target.value)}
+					required={field.required}
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				/>
+			)
+
+		case "url":
+			return (
+				<input
+					type="text"
+					id={fieldId}
+					value={defaultValue}
+					onChange={(e) => onChange(e.target.value)}
+					placeholder={field.helpText || "https://example.com or /about"}
+					required={field.required}
+					pattern="^(https?:\/\/.+|\/.*|#.*)$"
+					title="Enter a full URL (https://...) or a relative path (/about, #section)"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				/>
+			)
+
+		case "youtubeUrl":
+			return (
+				<div className="space-y-2">
+					<input
+						type="text"
+						id={fieldId}
+						value={defaultValue}
+						onChange={(e) => onChange(e.target.value)}
+						placeholder={
+							field.helpText ||
+							"https://www.youtube.com/watch?v=... or https://youtu.be/..."
+						}
+						required={field.required}
+						pattern="^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+$"
+						title="Enter a YouTube video URL"
+						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					/>
+					{defaultValue && (
+						<div className="rounded-lg border border-grey-200 bg-grey-50 p-2">
+							<p className="text-grey-600 text-xs">Preview:</p>
+							<div className="mt-2 aspect-video w-full overflow-hidden rounded">
+								<iframe
+									src={defaultValue
+										.replace("watch?v=", "embed/")
+										.replace("youtu.be/", "youtube.com/embed/")}
+									title="YouTube video preview"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+									allowFullScreen
+									className="h-full w-full"
+								/>
+							</div>
+						</div>
+					)}
+				</div>
+			)
+
+		case "select":
+			return (
+				<select
+					id={fieldId}
+					value={defaultValue}
+					onChange={(e) => onChange(e.target.value)}
+					required={field.required}
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				>
+					<option value="">Select an option...</option>
+					{field.options?.map((option: string) => (
+						<option key={option} value={option}>
+							{option}
+						</option>
+					))}
+				</select>
+			)
+
+		case "media":
+			return (
+				<>
+					<div className="space-y-4">
+						{value ? (
+							<div className="inline-flex w-full flex-col items-center">
+								<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+									<div className="relative overflow-hidden bg-grey-100">
+										<CFImage
+											assetId={value}
+											alt={field.label}
+											width={600}
+											height={600}
+											variant="public"
+											className="h-auto max-h-96 w-auto transition-transform duration-300 group-hover:scale-105"
+										/>
+										<button
+											type="button"
+											onClick={() => onChange("")}
+											className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-error text-white shadow-lg transition-all hover:scale-110 hover:bg-error/90"
+											title="Remove image"
+										>
+											<X className="h-4 w-4" />
+										</button>
+									</div>
+									<div className="border-grey-200 border-t bg-white p-3">
+										<button
+											type="button"
+											onClick={() => setShowMediaSelector(true)}
+											className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+										>
+											Change Image
+										</button>
+									</div>
+								</div>
+							</div>
+						) : (
+							<button
+								type="button"
+								onClick={() => setShowMediaSelector(true)}
+								className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-12 transition-all hover:border-primary hover:bg-primary/5"
+							>
+								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
+									<ImageIcon className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
+								</div>
+								<div className="text-center">
+									<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+										Select from Media Library
+									</p>
+									<p className="mt-1 text-grey-500 text-xs">
+										Click to browse and choose an image
+									</p>
+								</div>
+							</button>
+						)}
+					</div>
+
+					{showMediaSelector && (
+						<MediaSelector
+							selectedCloudflareId={value}
+							onSelect={(media) => {
+								onChange(media.cloudflareId)
+								setShowMediaSelector(false)
+							}}
+							onClose={() => setShowMediaSelector(false)}
+						/>
+					)}
+				</>
+			)
+
+		case "reference": {
+			const referencedSchema = allSchemas?.find(
+				(s) => s.name === field.referenceSchema,
+			)
+			const referencedContent = allContent?.[field.referenceSchema || ""] || []
+
+			if (!referencedSchema) {
+				return (
+					<div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+						<p className="text-sm text-yellow-700">
+							Referenced schema "{field.referenceSchema}" not found. Please
+							create it first.
+						</p>
+					</div>
+				)
+			}
+
+			return (
+				<select
+					id={fieldId}
+					value={value || ""}
+					onChange={(e) => onChange(e.target.value || null)}
+					required={field.required}
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				>
+					<option value="">Select {referencedSchema.displayName}...</option>
+					{referencedContent.map((item: any) => {
+						const displayValue =
+							item.data?.title ||
+							item.data?.name ||
+							item.data?.displayName ||
+							item.slug ||
+							item._id
+						return (
+							<option key={item._id} value={item._id}>
+								{displayValue}
+							</option>
+						)
+					})}
+				</select>
+			)
+		}
+
+		case "multiReference": {
+			const referencedSchema = allSchemas?.find(
+				(s) => s.name === field.referenceSchema,
+			)
+			const referencedContent = allContent?.[field.referenceSchema || ""] || []
+
+			if (!referencedSchema) {
+				return (
+					<div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+						<p className="text-sm text-yellow-700">
+							Referenced schema "{field.referenceSchema}" not found. Please
+							create it first.
+						</p>
+					</div>
+				)
+			}
+
+			const selectedIds = (value || []) as string[]
+
+			return (
+				<div className="space-y-2">
+					<div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border border-grey-300 p-3">
+						{referencedContent.length === 0 ? (
+							<p className="text-grey-400 text-sm">
+								No {referencedSchema.displayName} available. Create some first.
+							</p>
+						) : (
+							referencedContent.map((item: any) => {
+								const displayValue =
+									item.data?.title ||
+									item.data?.name ||
+									item.data?.displayName ||
+									item.slug ||
+									item._id
+								const isSelected = selectedIds.includes(item._id)
+
+								return (
+									<label
+										key={item._id}
+										className="flex cursor-pointer items-center gap-3 rounded border border-grey-200 p-2 transition-colors hover:bg-grey-50"
+									>
+										<input
+											type="checkbox"
+											checked={isSelected}
+											onChange={(e) => {
+												if (e.target.checked) {
+													onChange([...selectedIds, item._id])
+												} else {
+													onChange(selectedIds.filter((id) => id !== item._id))
+												}
+											}}
+											className="h-4 w-4 rounded"
+										/>
+										<span className="text-grey-700 text-sm">
+											{displayValue}
+										</span>
+									</label>
+								)
+							})
+						)}
+					</div>
+					{selectedIds.length > 0 && (
+						<p className="text-grey-400 text-xs">
+							{selectedIds.length} {referencedSchema.displayName} selected
+						</p>
+					)}
+				</div>
+			)
+		}
+
+		default:
+			return (
+				<input
+					type="text"
+					id={fieldId}
+					value={defaultValue}
+					onChange={(e) => onChange(e.target.value)}
+					placeholder={field.helpText}
+					required={field.required}
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+				/>
+			)
+	}
+}

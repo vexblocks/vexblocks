@@ -2,8 +2,8 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import { useQuery } from "convex/react"
+import { FileText, Grid3x3, Layers, Plus } from "lucide-react"
 import Link from "next/link"
-import { Plus, Layers, FileText, Grid3x3 } from "lucide-react"
 
 export default function SchemasPage() {
 	const schemas = useQuery(api.cms.schemas.list)
@@ -38,7 +38,7 @@ export default function SchemasPage() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-primary">Schemas</h1>
+					<h1 className="font-bold text-3xl">Schemas</h1>
 					<p className="mt-2 text-grey-500">
 						Define content types for your CMS
 					</p>
@@ -66,9 +66,7 @@ export default function SchemasPage() {
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-grey-100">
 						<Layers className="h-8 w-8 text-grey-400" />
 					</div>
-					<h3 className="mb-2 text-xl font-semibold text-primary">
-						No schemas yet
-					</h3>
+					<h3 className="mb-2 font-semibold text-xl">No schemas yet</h3>
 					<p className="mb-6 text-grey-500">
 						Get started by creating your first content schema
 					</p>
@@ -98,34 +96,34 @@ export default function SchemasPage() {
 									{getTypeIcon(schema.type)}
 								</div>
 								<span
-									className={`rounded-full px-3 py-1 text-xs font-semibold ${
+									className={`rounded-full px-3 py-1 font-semibold text-xs ${
 										schema.type === "global"
 											? "bg-purple-light text-purple"
 											: schema.type === "page"
 												? "bg-tertiary-light text-tertiary"
-												: "bg-secondary-light text-secondary"
+												: "bg-secondary-light"
 									}`}
 								>
 									{schema.type}
 								</span>
 							</div>
 
-							<h3 className="mb-2 text-xl font-semibold text-primary group-hover:text-primary-800">
+							<h3 className="mb-2 font-semibold text-xl group-hover:text-primary-800">
 								{schema.displayName}
 							</h3>
 
 							{schema.description && (
-								<p className="mb-4 text-sm text-grey-500 line-clamp-2">
+								<p className="mb-4 line-clamp-2 text-grey-500 text-sm">
 									{schema.description}
 								</p>
 							)}
 
-							<div className="flex items-center justify-between border-t border-grey-200 pt-4 text-sm">
+							<div className="flex items-center justify-between border-grey-200 border-t pt-4 text-sm">
 								<span className="text-grey-500">
 									{schema.fields.length} field
 									{schema.fields.length !== 1 ? "s" : ""}
 								</span>
-								<span className="font-medium text-primary group-hover:underline">
+								<span className="font-medium group-hover:underline">
 									Edit →
 								</span>
 							</div>
@@ -142,7 +140,7 @@ export default function SchemasPage() {
 							<Grid3x3 className="h-5 w-5 text-purple" />
 							<h4 className="font-semibold text-purple">Global Components</h4>
 						</div>
-						<p className="text-sm text-grey-500">
+						<p className="text-grey-500 text-sm">
 							Singleton content like headers, footers, or site settings
 						</p>
 					</div>
@@ -152,7 +150,7 @@ export default function SchemasPage() {
 							<FileText className="h-5 w-5 text-tertiary" />
 							<h4 className="font-semibold text-tertiary">Pages</h4>
 						</div>
-						<p className="text-sm text-grey-500">
+						<p className="text-grey-500 text-sm">
 							Unique pages with their own URLs (about, contact, etc.)
 						</p>
 					</div>
@@ -162,7 +160,7 @@ export default function SchemasPage() {
 							<Layers className="h-5 w-5 text-secondary" />
 							<h4 className="font-semibold text-secondary">Collections</h4>
 						</div>
-						<p className="text-sm text-grey-500">
+						<p className="text-grey-500 text-sm">
 							Repeatable content like blog posts, products, or team members
 						</p>
 					</div>

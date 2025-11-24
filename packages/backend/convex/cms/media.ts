@@ -1,71 +1,91 @@
-import { v } from "convex/values"
-import { mutation, query } from "../_generated/server"
-import { authComponent } from "../auth"
-
-// ================================
-// QUERIES
-// ================================
+import { ConvexError, v } from "convex/values"
+import { internal } from "../_generated/api"
+import { internalMutation, mutation, query } from "../_generated/server"
+import { getAuthenticatedAdminUser } from "../utils"
 
 /**
- * List all media files
+ * List all media with optional filters
  */
 export const list = query({
 	args: {
-		folder: v.optional(v.string()),
-		limit: v.optional(v.number()),
+		search: v.optional(v.string()),
+		tags: v.optional(v.array(v.string())),
 	},
-	returns: v.union(v.array(v.any()), v.null()),
+	returns: v.array(
+		v.object({
+			_id: v.id("cmsMedia"),
+			_creationTime: v.number(),
+			cloudflareId: v.string(),
+			filename: v.string(),
+			mimeType: v.string(),
+			size: v.number(),
+			width: v.optional(v.number()),
+			height: v.optional(v.number()),
+			caption: v.string(),
+			alt: v.optional(v.string()),
+			tags: v.optional(v.array(v.string())),
+			uploadedBy: v.id("users"),
+			uploadedAt: v.number(),
+		}),
+	),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			return null
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
 		}
 
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
+		let mediaItems = await ctx.db.query("cmsMedia").order("desc").collect()
 
-		if (!dbUser || dbUser.role !== "admin") {
-			return null
+		// Filter by search term (caption or filename)
+		if (args.search) {
+			const searchLower = args.search.toLowerCase()
+			mediaItems = mediaItems.filter(
+				(item) =>
+					item.caption.toLowerCase().includes(searchLower) ||
+					item.filename.toLowerCase().includes(searchLower),
+			)
 		}
 
-		let query = ctx.db.query("cmsMedia").order("desc")
-
-		if (args.folder) {
-			query = ctx.db
-				.query("cmsMedia")
-				.withIndex("by_folder", (q) => q.eq("folder", args.folder))
-				.order("desc")
+		// Filter by tags (media must have ALL specified tags)
+		if (args.tags && args.tags.length > 0) {
+			mediaItems = mediaItems.filter((item) =>
+				args.tags!.every((tag) => (item.tags || []).includes(tag)),
+			)
 		}
 
-		if (args.limit) {
-			return await query.take(args.limit)
-		}
-
-		return await query.collect()
+		return mediaItems
 	},
 })
 
 /**
- * Get media by ID
+ * Get a single media item by ID
  */
 export const get = query({
-	args: { id: v.id("cmsMedia") },
-	returns: v.union(v.any(), v.null()),
+	args: {
+		id: v.id("cmsMedia"),
+	},
+	returns: v.union(
+		v.object({
+			_id: v.id("cmsMedia"),
+			_creationTime: v.number(),
+			cloudflareId: v.string(),
+			filename: v.string(),
+			mimeType: v.string(),
+			size: v.number(),
+			width: v.optional(v.number()),
+			height: v.optional(v.number()),
+			caption: v.string(),
+			alt: v.optional(v.string()),
+			tags: v.optional(v.array(v.string())),
+			uploadedBy: v.id("users"),
+			uploadedAt: v.number(),
+		}),
+		v.null(),
+	),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			return null
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			return null
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
 		}
 
 		return await ctx.db.get(args.id)
@@ -73,291 +93,382 @@ export const get = query({
 })
 
 /**
- * Get media by Cloudflare ID (public access)
+ * Get a single media item by ID (Public access)
+ */
+export const getPublic = query({
+	args: {
+		id: v.id("cmsMedia"),
+	},
+	returns: v.union(
+		v.object({
+			_id: v.id("cmsMedia"),
+			_creationTime: v.number(),
+			cloudflareId: v.string(),
+			filename: v.string(),
+			mimeType: v.string(),
+			size: v.number(),
+			width: v.optional(v.number()),
+			height: v.optional(v.number()),
+			caption: v.string(),
+			alt: v.optional(v.string()),
+			tags: v.optional(v.array(v.string())),
+			uploadedBy: v.id("users"),
+			uploadedAt: v.number(),
+		}),
+		v.null(),
+	),
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.id)
+	},
+})
+
+/**
+ * Get media by Cloudflare ID
  */
 export const getByCloudflareId = query({
-	args: { cloudflareId: v.string() },
-	returns: v.union(v.any(), v.null()),
+	args: {
+		cloudflareId: v.string(),
+	},
+	returns: v.union(
+		v.object({
+			_id: v.id("cmsMedia"),
+			_creationTime: v.number(),
+			cloudflareId: v.string(),
+			filename: v.string(),
+			mimeType: v.string(),
+			size: v.number(),
+			width: v.optional(v.number()),
+			height: v.optional(v.number()),
+			caption: v.string(),
+			alt: v.optional(v.string()),
+			tags: v.optional(v.array(v.string())),
+			uploadedBy: v.id("users"),
+			uploadedAt: v.number(),
+		}),
+		v.null(),
+	),
 	handler: async (ctx, args) => {
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
+		}
+
 		return await ctx.db
 			.query("cmsMedia")
 			.withIndex("by_cloudflare_id", (q) =>
 				q.eq("cloudflareId", args.cloudflareId),
 			)
-			.unique()
+			.first()
 	},
 })
 
 /**
- * Get all folders (unique folder names)
- */
-export const listFolders = query({
-	args: {},
-	returns: v.array(v.string()),
-	handler: async (ctx) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
-		}
-
-		const allMedia = await ctx.db.query("cmsMedia").collect()
-		const folders = new Set<string>()
-
-		for (const media of allMedia) {
-			if (media.folder) {
-				folders.add(media.folder)
-			}
-		}
-
-		return Array.from(folders).sort()
-	},
-})
-
-/**
- * Search media by filename or alt text
- */
-export const search = query({
-	args: { query: v.string() },
-	returns: v.array(v.any()),
-	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
-		}
-
-		const allMedia = await ctx.db.query("cmsMedia").collect()
-		const searchLower = args.query.toLowerCase()
-
-		return allMedia.filter((media) => {
-			const filenameMatch = media.filename.toLowerCase().includes(searchLower)
-			const altMatch = media.alt?.toLowerCase().includes(searchLower)
-			const captionMatch = media.caption?.toLowerCase().includes(searchLower)
-
-			return filenameMatch || altMatch || captionMatch
-		})
-	},
-})
-
-// ================================
-// MUTATIONS
-// ================================
-
-/**
- * Generate upload URL for Convex storage
- */
-export const generateUploadUrl = mutation({
-	args: {},
-	returns: v.string(),
-	handler: async (ctx) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
-		}
-
-		return await ctx.storage.generateUploadUrl()
-	},
-})
-
-/**
- * Create media entry after upload
+ * Create a new media entry after uploading to Cloudflare
  */
 export const create = mutation({
 	args: {
-		storageId: v.id("_storage"),
-		cloudflareId: v.optional(v.string()),
+		cloudflareId: v.string(),
 		filename: v.string(),
 		mimeType: v.string(),
 		size: v.number(),
 		width: v.optional(v.number()),
 		height: v.optional(v.number()),
+		caption: v.string(),
 		alt: v.optional(v.string()),
-		caption: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())),
-		folder: v.optional(v.string()),
 	},
 	returns: v.id("cmsMedia"),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
 		}
 
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
+		// Normalize tags
+		const normalizedTags = args.tags
+			? args.tags.map((tag) => tag.toLowerCase().trim())
+			: []
 
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
+		// Update tag usage counts
+		for (const tag of normalizedTags) {
+			await ctx.scheduler.runAfter(0, internal.cms.media.updateTagUsage, {
+				tagName: tag,
+				increment: true,
+			})
 		}
 
-		return await ctx.db.insert("cmsMedia", {
-			storageId: args.storageId,
+		const mediaId = await ctx.db.insert("cmsMedia", {
 			cloudflareId: args.cloudflareId,
 			filename: args.filename,
 			mimeType: args.mimeType,
 			size: args.size,
 			width: args.width,
 			height: args.height,
-			alt: args.alt,
 			caption: args.caption,
-			tags: args.tags,
-			folder: args.folder,
-			uploadedBy: dbUser._id,
+			alt: args.alt,
+			tags: normalizedTags.length > 0 ? normalizedTags : undefined,
+			uploadedBy: admin._id,
 			uploadedAt: Date.now(),
 		})
+
+		return mediaId
 	},
 })
 
 /**
- * Update media metadata
+ * Update media metadata (caption, alt, tags)
  */
 export const update = mutation({
 	args: {
 		id: v.id("cmsMedia"),
-		cloudflareId: v.optional(v.string()),
-		alt: v.optional(v.string()),
 		caption: v.optional(v.string()),
+		alt: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())),
-		folder: v.optional(v.string()),
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
 		}
 
 		const media = await ctx.db.get(args.id)
 		if (!media) {
-			throw new Error("Media not found")
+			throw new ConvexError("Media not found")
 		}
 
-		await ctx.db.patch(args.id, {
-			...(args.cloudflareId !== undefined && {
-				cloudflareId: args.cloudflareId,
-			}),
-			...(args.alt !== undefined && { alt: args.alt }),
-			...(args.caption !== undefined && { caption: args.caption }),
-			...(args.tags !== undefined && { tags: args.tags }),
-			...(args.folder !== undefined && { folder: args.folder }),
-		})
+		const updates: any = {}
 
+		if (args.caption !== undefined) {
+			updates.caption = args.caption
+		}
+
+		if (args.alt !== undefined) {
+			updates.alt = args.alt
+		}
+
+		// Handle tag updates (increment/decrement usage counts)
+		if (args.tags !== undefined) {
+			const normalizedNewTags = args.tags.map((tag) => tag.toLowerCase().trim())
+			const oldTags = media.tags || []
+
+			// Find added and removed tags
+			const addedTags = normalizedNewTags.filter(
+				(tag) => !oldTags.includes(tag),
+			)
+			const removedTags = oldTags.filter(
+				(tag) => !normalizedNewTags.includes(tag),
+			)
+
+			// Update usage counts
+			for (const tag of addedTags) {
+				await ctx.scheduler.runAfter(0, internal.cms.media.updateTagUsage, {
+					tagName: tag,
+					increment: true,
+				})
+			}
+
+			for (const tag of removedTags) {
+				await ctx.scheduler.runAfter(0, internal.cms.media.updateTagUsage, {
+					tagName: tag,
+					increment: false,
+				})
+			}
+
+			updates.tags = normalizedNewTags
+		}
+
+		await ctx.db.patch(args.id, updates)
 		return null
 	},
 })
 
 /**
- * Delete media file
+ * Check if media is referenced in any content
+ */
+export const checkReferences = query({
+	args: {
+		cloudflareId: v.string(),
+	},
+	returns: v.object({
+		isReferenced: v.boolean(),
+		referenceCount: v.number(),
+		references: v.array(
+			v.object({
+				contentId: v.id("cmsContent"),
+				schemaName: v.string(),
+				contentTitle: v.string(),
+			}),
+		),
+	}),
+	handler: async (ctx, args) => {
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
+		}
+
+		const allContent = await ctx.db.query("cmsContent").collect()
+		const references: Array<{
+			contentId: any
+			schemaName: string
+			contentTitle: string
+		}> = []
+
+		// Recursively search for cloudflareId in content data
+		function searchInObject(obj: any): boolean {
+			if (!obj || typeof obj !== "object") return false
+
+			for (const value of Object.values(obj)) {
+				if (value === args.cloudflareId) {
+					return true
+				}
+				if (Array.isArray(value)) {
+					for (const item of value) {
+						if (searchInObject(item)) return true
+					}
+				} else if (typeof value === "object") {
+					if (searchInObject(value)) return true
+				}
+			}
+			return false
+		}
+
+		for (const content of allContent) {
+			if (searchInObject(content.data)) {
+				const schema = await ctx.db.get(content.schemaId)
+				references.push({
+					contentId: content._id,
+					schemaName: schema?.displayName || "Unknown",
+					contentTitle:
+						content.data?.title ||
+						content.data?.name ||
+						content.slug ||
+						"Untitled",
+				})
+			}
+		}
+
+		return {
+			isReferenced: references.length > 0,
+			referenceCount: references.length,
+			references,
+		}
+	},
+})
+
+/**
+ * Delete media (only if not referenced)
  */
 export const remove = mutation({
 	args: {
 		id: v.id("cmsMedia"),
-		deleteFromStorage: v.optional(v.boolean()),
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
+		const admin = await getAuthenticatedAdminUser(ctx)
+		if (!admin) {
+			throw new ConvexError("Unauthorized: Admin access required")
 		}
 
 		const media = await ctx.db.get(args.id)
 		if (!media) {
-			throw new Error("Media not found")
+			throw new ConvexError("Media not found")
 		}
 
-		// Delete from Convex storage if requested
-		if (args.deleteFromStorage && media.storageId) {
-			await ctx.storage.delete(media.storageId)
+		// Check if media is referenced
+		const allContent = await ctx.db.query("cmsContent").collect()
+		const cloudflareIdToCheck = media.cloudflareId
+
+		function searchInObject(obj: any): boolean {
+			if (!obj || typeof obj !== "object") return false
+
+			for (const value of Object.values(obj)) {
+				if (value === cloudflareIdToCheck) {
+					return true
+				}
+				if (Array.isArray(value)) {
+					for (const item of value) {
+						if (searchInObject(item)) return true
+					}
+				} else if (typeof value === "object") {
+					if (searchInObject(value)) return true
+				}
+			}
+			return false
 		}
 
-		// Delete from database
+		for (const content of allContent) {
+			if (searchInObject(content.data)) {
+				throw new ConvexError(
+					"Cannot delete media: it is being used in content. Please remove all references first.",
+				)
+			}
+		}
+
+		// Decrement tag usage counts
+		for (const tag of media.tags || []) {
+			await ctx.scheduler.runAfter(0, internal.cms.media.updateTagUsage, {
+				tagName: tag,
+				increment: false,
+			})
+		}
+
+		// Delete from Cloudflare
+		await ctx.scheduler.runAfter(
+			0,
+			internal.cms.mediaActions.deleteFromCloudflare,
+			{
+				cloudflareId: media.cloudflareId,
+			},
+		)
+
+		// Delete from Convex
 		await ctx.db.delete(args.id)
-
-		// Note: Cloudflare Images deletion should be handled separately
-		// via API call in the frontend or a separate action
 
 		return null
 	},
 })
 
 /**
- * Bulk delete media files
+ * Internal mutation to update tag usage count
  */
-export const bulkRemove = mutation({
+export const updateTagUsage = internalMutation({
 	args: {
-		ids: v.array(v.id("cmsMedia")),
-		deleteFromStorage: v.optional(v.boolean()),
+		tagName: v.string(),
+		increment: v.boolean(),
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
-		if (!user) {
-			throw new Error("Unauthorized")
-		}
+		const tag = await ctx.db
+			.query("cmsMediaTags")
+			.withIndex("by_name", (q) => q.eq("name", args.tagName))
+			.first()
 
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
+		if (tag) {
+			const newCount = args.increment
+				? tag.usageCount + 1
+				: Math.max(0, tag.usageCount - 1)
 
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
-		}
+			await ctx.db.patch(tag._id, {
+				usageCount: newCount,
+			})
+		} else if (args.increment) {
+			// Create tag if it doesn't exist and we're incrementing
+			const admin = await ctx.auth.getUserIdentity()
+			if (admin) {
+				const user = await ctx.db
+					.query("users")
+					.withIndex("authId", (q) => q.eq("authId", admin.subject))
+					.first()
 
-		for (const id of args.ids) {
-			const media = await ctx.db.get(id)
-			if (media) {
-				if (args.deleteFromStorage && media.storageId) {
-					await ctx.storage.delete(media.storageId)
+				if (user) {
+					await ctx.db.insert("cmsMediaTags", {
+						name: args.tagName,
+						usageCount: 1,
+						createdBy: user._id,
+						createdAt: Date.now(),
+					})
 				}
-				await ctx.db.delete(id)
 			}
 		}
 

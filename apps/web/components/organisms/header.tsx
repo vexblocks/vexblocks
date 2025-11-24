@@ -14,20 +14,20 @@ export function Header() {
 					<div className="flex items-center gap-6">
 						<Link
 							href="/"
-							className="font-medium text-sm transition-colors hover:text-blue-600"
+							className="font-medium text-sm transition-colors hover:text-red-600"
 						>
 							Home
 						</Link>
 						<Link
 							href="/blog"
-							className="font-medium text-sm transition-colors hover:text-blue-600"
+							className="font-medium text-sm transition-colors hover:text-red-600"
 						>
 							Blog
 						</Link>
 						<a
 							href="http://localhost:3001"
 							target="_blank"
-							className="font-medium text-sm transition-colors hover:text-blue-600"
+							className="font-medium text-sm transition-colors hover:text-red-600"
 							rel="noopener"
 						>
 							Get Started

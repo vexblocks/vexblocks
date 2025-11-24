@@ -9,11 +9,17 @@ const users = defineTable({
 	name: v.optional(v.string()),
 	email: v.string(),
 	authId: v.string(),
-	role: v.union(v.literal("admin"), v.literal("user")),
+	role: v.union(
+		v.literal("admin"),
+		v.literal("editor"),
+		v.literal("developer"),
+		v.literal("user"),
+	),
 	profilePictureUrl: v.optional(v.string()),
 })
 	.index("email", ["email"])
 	.index("authId", ["authId"])
+	.index("by_role", ["role"])
 
 const todos = defineTable({
 	text: v.string(),
@@ -34,6 +40,7 @@ const fieldDefinition: any = v.object({
 		v.literal("richText"),
 		v.literal("media"),
 		v.literal("url"),
+		v.literal("youtubeUrl"),
 		v.literal("boolean"),
 		v.literal("number"),
 		v.literal("date"),
@@ -62,6 +69,7 @@ const fieldDefinition: any = v.object({
 				v.literal("richText"),
 				v.literal("media"),
 				v.literal("url"),
+				v.literal("youtubeUrl"),
 				v.literal("boolean"),
 				v.literal("number"),
 				v.literal("date"),
@@ -101,8 +109,13 @@ const cmsSchemas = defineTable({
 	),
 	description: v.optional(v.string()),
 	fields: v.array(fieldDefinition),
-	// For collections and pages
-	slugField: v.optional(v.string()), // Which field to use as slug
+	// View configuration for content list
+	viewConfig: v.optional(
+		v.object({
+			previewField: v.optional(v.string()), // Field to show in main content column
+			additionalFields: v.optional(v.array(v.string())), // Up to 3 additional fields to show as columns
+		}),
+	),
 	// Metadata
 	icon: v.optional(v.string()), // Icon for UI
 	createdBy: v.id("users"),
@@ -140,25 +153,33 @@ const cmsContent = defineTable({
 
 // Media library
 const cmsMedia = defineTable({
-	storageId: v.id("_storage"), // Convex storage ID (for temporary storage)
-	cloudflareId: v.optional(v.string()), // Cloudflare Images ID
+	cloudflareId: v.string(), // Cloudflare Images ID (required)
 	filename: v.string(),
 	mimeType: v.string(),
 	size: v.number(), // File size in bytes
 	width: v.optional(v.number()),
 	height: v.optional(v.number()),
 	// Metadata
-	alt: v.optional(v.string()),
-	caption: v.optional(v.string()),
-	tags: v.optional(v.array(v.string())),
-	folder: v.optional(v.string()), // Organize in folders
+	caption: v.string(), // Descriptive name/caption (required)
+	alt: v.optional(v.string()), // Alt text for accessibility
+	tags: v.optional(v.array(v.string())), // Array of tag names (optional)
 	// Upload info
 	uploadedBy: v.id("users"),
 	uploadedAt: v.number(),
 })
 	.index("by_uploaded_by", ["uploadedBy"])
-	.index("by_folder", ["folder"])
 	.index("by_cloudflare_id", ["cloudflareId"])
+
+// Media tags (for autocomplete and management)
+const cmsMediaTags = defineTable({
+	name: v.string(), // Tag name (unique)
+	color: v.optional(v.string()), // Optional color for UI
+	usageCount: v.number(), // How many images use this tag
+	createdBy: v.id("users"),
+	createdAt: v.number(),
+})
+	.index("by_name", ["name"])
+	.index("by_usage_count", ["usageCount"])
 
 // Reusable blocks (components that can be referenced in schemas)
 const cmsBlocks = defineTable({
@@ -177,13 +198,23 @@ const cmsBlocks = defineTable({
 	.index("by_category", ["category"])
 	.index("by_created_by", ["createdBy"])
 
+// Global settings (appearance, site config, etc.)
+const cmsSettings = defineTable({
+	key: v.string(), // e.g., "appearance"
+	value: v.any(), // JSON object with specific settings
+	updatedBy: v.id("users"),
+	updatedAt: v.number(),
+}).index("by_key", ["key"])
+
 const schema = defineSchema({
 	users,
 	todos,
 	cmsSchemas,
 	cmsContent,
 	cmsMedia,
+	cmsMediaTags,
 	cmsBlocks,
+	cmsSettings,
 })
 
 export default schema

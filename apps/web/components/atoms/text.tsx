@@ -4,25 +4,29 @@ import { cn } from "@/lib/utils"
 const textVariants = cva("", {
 	variants: {
 		variant: {
-			body: "font-normal leading-5.5 tracking-[0.32px]",
-			small: "font-normal leading-3.5",
-			caption: "font-normal leading-5.5 tracking-[0.32px]",
+			body: "font-normal leading-7",
+			small: "font-normal text-sm leading-relaxed",
+			caption: "font-medium text-xs uppercase tracking-wider",
+			lead: "font-normal text-lg leading-8 md:text-xl md:leading-9",
 		},
 		size: {
+			xs: "text-xs",
 			sm: "text-sm",
 			base: "text-base",
-			lg: "leading-7 tracking-[0.36px] md:text-lg",
-			xl: "text-lg leading-7 md:text-xl",
-			"2xl": "text-xl leading-8 tracking-[-0.6px] md:text-2xl",
+			lg: "text-lg",
+			xl: "text-xl",
+			"2xl": "text-2xl",
 		},
 		color: {
-			default: "text-gray-700",
+			default: "text-gray-600",
 			black: "text-black",
 			light: "text-white",
 			gray: "text-gray-400",
+			"gray-500": "text-gray-500",
 			"light-70": "text-white/70",
 			"dark-700": "text-dark-700",
 			"dark-900": "text-dark-900",
+			muted: "text-gray-500",
 		},
 	},
 	defaultVariants: {

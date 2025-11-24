@@ -21,3 +21,17 @@ export const getAuthenticatedUser = async (ctx: QueryCtx) => {
 	// takes precedence over authUser._id (Id<"user">)
 	return { ...authUser, ...user }
 }
+
+export const getAuthenticatedAdminUser = async (ctx: QueryCtx) => {
+	const user = await getAuthenticatedUser(ctx)
+
+	if (!user) {
+		return null
+	}
+
+	if (user.role !== "admin") {
+		throw new ConvexError("Unauthorized: Admin access required")
+	}
+
+	return user
+}

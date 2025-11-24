@@ -1,19 +1,21 @@
 import { cva, type VariantProps } from "cva"
 import { cn } from "@/lib/utils"
 
-const headingVariants = cva("font-serif", {
+const headingVariants = cva("font-bold", {
 	variants: {
 		size: {
-			"6xl": "text-6xl leading-14 tracking-[-1.2px]",
-			"4xl": "text-3xl leading-10.5 tracking-[-0.75px] md:text-4xl",
-			"3xl": "text-2xl leading-9 tracking-[-0.75px] md:text-3xl",
-			"2xl": "text-xl leading-8 tracking-[-0.5px] md:text-2xl",
-			xl: "text-xl leading-normal tracking-[-0.5px]",
-			lg: "font-bold text-lg leading-7 tracking-normal md:text-xl",
+			"6xl": "text-4xl leading-tight tracking-tight md:text-5xl lg:text-6xl",
+			"5xl": "text-3xl leading-tight tracking-tight md:text-4xl lg:text-5xl",
+			"4xl": "text-2xl leading-tight tracking-tight md:text-3xl lg:text-4xl",
+			"3xl": "text-xl leading-tight tracking-tight md:text-2xl lg:text-3xl",
+			"2xl": "text-lg leading-tight tracking-tight md:text-xl lg:text-2xl",
+			xl: "text-base leading-tight tracking-tight md:text-lg lg:text-xl",
+			lg: "text-base leading-normal md:text-lg",
 		},
 		color: {
-			default: "text-dark-900",
+			default: "text-gray-900",
 			light: "text-white",
+			muted: "text-gray-600",
 		},
 	},
 	defaultVariants: {
