@@ -72,12 +72,12 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
         {/* Content */}
         <div className="flex flex-col justify-center">
           <div className="mb-3 inline-flex items-center gap-2">
-            <span className="rounded-full bg-red-50 px-3 py-1 font-medium text-red-700 text-sm">
+            <span className="rounded-full bg-teal-50 px-3 py-1 font-medium text-teal-700 text-sm">
               Featured
             </span>
           </div>
 
-          <h2 className="mb-4 font-normal font-serif text-3xl text-gray-900 transition-colors group-hover:text-red-600 md:text-4xl lg:text-5xl">
+          <h2 className="mb-4 font-normal font-serif text-3xl text-gray-900 transition-colors group-hover:text-teal-700 md:text-4xl lg:text-5xl">
             {post.data.title}
           </h2>
 

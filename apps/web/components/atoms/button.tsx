@@ -3,16 +3,16 @@ import { cn } from "@/lib/utils"
 import { ArrowRightIcon } from "../icons/arrow-right"
 
 const buttonVariants = cva(
-	"group inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+	"group inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
 	{
 		variants: {
 			variant: {
 				primary:
-					"bg-linear-to-b from-red-600 to-red-700 text-white shadow-sm hover:shadow-md hover:from-red-700 hover:to-red-800",
+					"bg-linear-to-b from-teal-600 to-teal-700 text-white shadow-sm hover:shadow-md hover:from-teal-700 hover:to-teal-800",
 				secondary:
 					"border border-gray-300 bg-white text-gray-700 shadow-sm hover:border-gray-400 hover:bg-gray-50",
 				ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-				link: "text-red-600 hover:text-red-700 hover:underline",
+				link: "text-teal-700 hover:text-teal-800 hover:underline",
 			},
 			size: {
 				sm: "px-3 py-1.5 text-sm",

@@ -22,7 +22,7 @@ export default function AppearanceSettingsPage() {
 	const updateSettings = useMutation(api.settings.update)
 
 	const [dashboardName, setDashboardName] = useState("VexBlocks")
-	const [primaryColor, setPrimaryColor] = useState("#d60032") // Default red-600
+	const [primaryColor, setPrimaryColor] = useState("#108e88") // Default teal-600
 	const [logoId, setLogoId] = useState<Id<"cmsMedia"> | null>(null)
 	const [showMediaPicker, setShowMediaPicker] = useState(false)
 	const [showUploader, setShowUploader] = useState(false)

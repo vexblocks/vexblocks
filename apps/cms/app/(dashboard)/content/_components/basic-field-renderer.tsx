@@ -57,16 +57,16 @@ export function BasicFieldRenderer({
 						placeholder={field.helpText}
 						required={field.required}
 						readOnly={field.isSlug}
-						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-							field.isSlug
-								? "border-red-300 bg-red-50 text-red-900"
-								: "border-grey-300 text-grey-500"
-						}`}
-					/>
-					{field.isSlug && field.slugSource && (
-						<p className="mt-1 text-red-600 text-xs">
-							✨ Auto-generated from "{field.slugSource}"
-						</p>
+					className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+						field.isSlug
+							? "border-teal-300 bg-teal-50 text-teal-900"
+							: "border-grey-300 text-grey-500"
+					}`}
+				/>
+				{field.isSlug && field.slugSource && (
+					<p className="mt-1 text-teal-700 text-xs">
+						✨ Auto-generated from "{field.slugSource}"
+					</p>
 					)}
 				</div>
 			)

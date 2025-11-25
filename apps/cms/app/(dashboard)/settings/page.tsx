@@ -87,16 +87,16 @@ export default function SettingsPage() {
 			</div>
 
 			{/* Quick Info */}
-			<div className="mt-12 rounded-lg border border-red-200 bg-red-50 p-6">
+			<div className="mt-12 rounded-lg border border-teal-200 bg-teal-50 p-6">
 				<div className="flex items-start gap-3">
-					<div className="rounded-full bg-red-100 p-2">
-						<Settings className="h-5 w-5 text-red-600" />
+					<div className="rounded-full bg-teal-100 p-2">
+						<Settings className="h-5 w-5 text-teal-600" />
 					</div>
 					<div>
-						<h4 className="mb-1 font-semibold text-red-900">
+						<h4 className="mb-1 font-semibold text-teal-900">
 							Need Help with Settings?
 						</h4>
-						<p className="text-red-700 text-sm">
+						<p className="text-teal-700 text-sm">
 							Each setting is designed to give you full control over your CMS.
 							Click on any card to configure specific features.
 						</p>

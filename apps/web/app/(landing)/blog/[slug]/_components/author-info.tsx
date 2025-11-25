@@ -57,7 +57,7 @@ export function AuthorInfo({ author: authorData }: AuthorInfoProps) {
             />
           </div>
         ) : (
-          <div className="flex size-full items-center justify-center bg-linar-to-br from-red-500 to-red-700 font-semibold text-2xl text-white">
+          <div className="flex size-full items-center justify-center bg-linar-to-br from-teal-500 to-teal-700 font-semibold text-2xl text-white">
             {initials}
           </div>
         )}

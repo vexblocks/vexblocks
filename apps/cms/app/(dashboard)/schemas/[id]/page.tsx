@@ -263,7 +263,7 @@ function FieldEditor({
 						className={`w-full rounded border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-grey-100 ${
 							isDuplicate ||
 							(!validateFieldName(field.name) && field.name && !isNameLocked)
-								? "border-red-500"
+								? "border-teal-500"
 								: "border-grey-300"
 						}`}
 					/>
@@ -273,15 +273,15 @@ function FieldEditor({
 								Field name cannot be changed to prevent data loss
 							</p>
 						) : isDuplicate ? (
-							<p className="text-red-500 text-xs">
+							<p className="text-teal-500 text-xs">
 								⚠️ Duplicate field name - must be unique
 							</p>
 						) : field.name && !validateFieldName(field.name) ? (
-							<p className="text-red-500 text-xs">
+							<p className="text-teal-500 text-xs">
 								Only lowercase letters, numbers, and underscores allowed
 							</p>
 						) : !field.nameManuallyEdited && field.label ? (
-							<p className="text-red-600 text-xs">
+							<p className="text-teal-600 text-xs">
 								✨ Auto-generated from "Label"
 							</p>
 						) : null}
@@ -543,7 +543,7 @@ function FieldEditor({
 
 			{field.type === "shortText" && level === 0 && (
 				<div className="mt-4 space-y-3">
-					<div className="flex items-center gap-3 rounded border border-red-200 bg-red-50 p-3">
+					<div className="flex items-center gap-3 rounded border border-teal-200 bg-teal-50 p-3">
 						<input
 							type="checkbox"
 							id={`field-isSlug-${path.join("-")}`}
@@ -559,7 +559,7 @@ function FieldEditor({
 						/>
 						<label
 							htmlFor={`field-isSlug-${path.join("-")}`}
-							className="cursor-pointer text-red-800 text-sm"
+							className="cursor-pointer text-teal-800 text-sm"
 						>
 							<strong>Use as Slug Field</strong> - Auto-generate URL-friendly
 							slugs
@@ -596,7 +596,7 @@ function FieldEditor({
 										</option>
 									))}
 							</select>
-							<p className="mt-1 text-red-600 text-xs">
+							<p className="mt-1 text-teal-600 text-xs">
 								The slug will be auto-generated from the selected field (e.g.,
 								"My Post Title" → "my-post-title")
 							</p>
@@ -1130,7 +1130,7 @@ export default function SchemaDetailPage({
 			</div>
 
 			{error && (
-				<div className="mb-6 rounded-lg bg-red-50 p-4">
+				<div className="mb-6 rounded-lg bg-teal-50 p-4">
 					<p className="text-error text-sm">{error}</p>
 				</div>
 			)}

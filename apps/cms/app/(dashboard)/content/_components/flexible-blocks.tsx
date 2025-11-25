@@ -36,10 +36,10 @@ export function FlexibleBlockItem({
 	const fieldId = `field-${path}-${block._id}`.replace(/[.\[\]]/g, "-")
 
 	return (
-		<div className="rounded-lg border border-red-300 bg-white p-4 shadow-sm">
+		<div className="rounded-lg border border-teal-300 bg-white p-4 shadow-sm">
 			<div className="mb-3 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<span className="rounded bg-red-100 px-2 py-0.5 font-mono text-red-600 text-xs">
+					<span className="rounded bg-teal-100 px-2 py-0.5 font-mono text-teal-700 text-xs">
 						{block.type}
 					</span>
 					<span className="text-grey-500 text-xs">Block #{index + 1}</span>
@@ -177,14 +177,14 @@ export function FlexibleBlocksField({
 	return (
 		<div
 			ref={containerRef}
-			className="rounded-lg border-2 border-red-200 bg-red-50 p-4"
+			className="rounded-lg border-2 border-teal-200 bg-teal-50 p-4"
 			style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 		>
 			<div className="mb-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<Layers className="h-5 w-5 text-red-600" />
+					<Layers className="h-5 w-5 text-teal-700" />
 					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
-					<span className="rounded-full bg-red-100 px-2 py-0.5 font-medium text-red-600 text-xs">
+					<span className="rounded-full bg-teal-100 px-2 py-0.5 font-medium text-teal-700 text-xs">
 						Flexible Blocks
 					</span>
 					{field.required && <span className="text-error text-sm">*</span>}
@@ -198,7 +198,7 @@ export function FlexibleBlocksField({
 									e.target.value = ""
 								}
 							}}
-							className="rounded border border-red-300 bg-white px-3 py-1.5 text-red-600 text-sm transition-colors hover:bg-red-50"
+							className="rounded border border-teal-300 bg-white px-3 py-1.5 text-teal-700 text-sm transition-colors hover:bg-teal-50"
 						>
 							<option value="">+ Add Block</option>
 							{allowedTypes.map((type) => (

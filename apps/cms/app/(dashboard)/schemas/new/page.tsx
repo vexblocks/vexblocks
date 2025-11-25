@@ -262,21 +262,21 @@ const FieldEditor = ({
 							placeholder="post_title"
 							className={`w-full rounded border px-3 py-2 text-sm ${
 								isDuplicate || (!validateFieldName(field.name) && field.name)
-									? "border-red-500"
+									? "border-teal-500"
 									: "border-grey-300"
 							}`}
 						/>
 						<div className="-mt-3 absolute top-full left-0">
 							{isDuplicate ? (
-								<p className="text-red-500 text-xs">
+								<p className="text-teal-500 text-xs">
 									⚠️ Duplicate field name - must be unique
 								</p>
 							) : field.name && !validateFieldName(field.name) ? (
-								<p className="text-red-500 text-xs">
+								<p className="text-teal-500 text-xs">
 									Only lowercase letters, numbers, and underscores allowed
 								</p>
 							) : !field.nameManuallyEdited && field.label ? (
-								<p className="text-red-600 text-xs">
+								<p className="text-teal-600 text-xs">
 									✨ Auto-generated from "Label"
 								</p>
 							) : null}
@@ -586,7 +586,7 @@ const FieldEditor = ({
 
 					{field.type === "shortText" && depth === 0 && (
 						<div className="space-y-3 md:col-span-2">
-							<div className="flex items-center gap-3 rounded border border-red-200 bg-red-50 p-3">
+							<div className="flex items-center gap-3 rounded border border-teal-200 bg-teal-50 p-3">
 								<input
 									type="checkbox"
 									id={`field-isSlug-${field.id}`}
@@ -606,7 +606,7 @@ const FieldEditor = ({
 								/>
 								<label
 									htmlFor={`field-isSlug-${field.id}`}
-									className="cursor-pointer text-red-800 text-sm"
+									className="cursor-pointer text-teal-800 text-sm"
 								>
 									<strong>Use as Slug Field</strong> - Auto-generate
 									URL-friendly slugs
@@ -1238,18 +1238,18 @@ export default function NewSchemaPage() {
 								placeholder="blog_posts"
 								className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
 									!validateFieldName(name) && name
-										? "border-red-500"
+										? "border-teal-500"
 										: "border-grey-300"
 								}`}
 								required
 							/>
 							<div className="-mt-3 absolute top-full left-0">
 								{name && !validateFieldName(name) ? (
-									<p className="text-red-500 text-xs">
+									<p className="text-teal-500 text-xs">
 										Only lowercase letters, numbers, and underscores allowed
 									</p>
 								) : !hasEditedName && displayName ? (
-									<p className="text-red-600 text-xs">
+									<p className="text-teal-600 text-xs">
 										✨ Auto-generated from "Display Name"
 									</p>
 								) : (

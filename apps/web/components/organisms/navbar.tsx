@@ -139,7 +139,7 @@ export function Navbar() {
 				<div className="hidden lg:flex">
 					<Link
 						href="/cms"
-						className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-red-600 to-red-700 px-4 py-2 font-medium text-sm text-white leading-4 shadow-sm transition-all hover:from-red-700 hover:to-red-800 hover:shadow-md"
+						className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-teal-600 to-teal-700 px-4 py-2 font-medium text-sm text-white leading-4 shadow-sm transition-all hover:from-teal-700 hover:to-teal-800 hover:shadow-md"
 					>
 						<span>Get Started</span>
 						<ArrowRightIcon className="relative top-px h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -243,7 +243,7 @@ export function Navbar() {
 						<div className="mt-4">
 							<Link
 								href="/cms"
-								className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-red-600 to-red-700 px-3 py-2 font-medium text-sm text-white leading-4 shadow-sm hover:shadow-md"
+								className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-teal-600 to-teal-700 px-3 py-2 font-medium text-sm text-white leading-4 shadow-sm hover:shadow-md"
 								onClick={() => setMobileMenuOpen(false)}
 							>
 								<span>Get Started</span>

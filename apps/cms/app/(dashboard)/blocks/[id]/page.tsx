@@ -157,7 +157,7 @@ function SimpleFieldEditor({
 					/>
 					<div className="absolute top-full left-0 mt-1">
 						{!hasEditedName && field.label && (
-							<p className="text-red-600 text-xs">
+							<p className="text-teal-700 text-xs">
 								✨ Auto-generated from "Label"
 							</p>
 						)}

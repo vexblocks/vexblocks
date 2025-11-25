@@ -64,7 +64,7 @@ export function PostContent({ post }: PostContentProps) {
 								href={value}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="text-lg text-red-600 hover:underline"
+								className="text-lg text-teal-700 hover:underline"
 							>
 								{value}
 							</a>

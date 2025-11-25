@@ -102,7 +102,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
 						</span>
 					</div>
 
-					<h3 className="mb-2 font-medium text-gray-900 text-xl transition-colors group-hover:text-red-700">
+					<h3 className="mb-2 font-medium text-gray-900 text-xl transition-colors group-hover:text-teal-700">
 						{post.data.title}
 					</h3>
 
@@ -112,7 +112,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
 						</p>
 					)}
 
-					<div className="flex items-center gap-1 text-gray-900 text-sm transition-colors group-hover:text-red-600">
+					<div className="flex items-center gap-1 text-gray-900 text-sm transition-colors group-hover:text-teal-700">
 						<span>Read more</span>
 						<ArrowRightIcon />
 					</div>

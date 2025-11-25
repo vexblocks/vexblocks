@@ -111,8 +111,8 @@ export function FieldRenderer({
 						</span>
 						{field.required && <span className="text-error text-sm">*</span>}
 					</div>
-				<div className="rounded-lg border border-red-300 bg-white p-4 text-center">
-					<div className="mb-2 inline-block h-6 w-6 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
+				<div className="rounded-lg border border-teal-300 bg-white p-4 text-center">
+					<div className="mb-2 inline-block h-6 w-6 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" />
 						<p className="text-grey-500 text-sm">Loading block...</p>
 					</div>
 				</div>
@@ -138,7 +138,7 @@ export function FieldRenderer({
 				{field.helpText && (
 					<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
 				)}
-				<div className="space-y-4 rounded-lg border border-red-300 bg-white p-4">
+				<div className="space-y-4 rounded-lg border border-teal-300 bg-white p-4">
 					{block.fields.map((blockField: Field) => {
 						const blockFieldPath = `${path}.${blockField.name}`
 						const blockFieldValue = blockValue[blockField.name]

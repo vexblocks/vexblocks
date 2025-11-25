@@ -19,13 +19,13 @@ export default function HomePage() {
 	return (
 		<>
 			{/* Hero Section */}
-			<section className="bg-linear-to-b from-white to-red-50 py-20 md:py-32">
+			<section className="bg-linear-to-b from-white to-teal-50 py-20 md:py-32">
 				<Container>
 					<div className="mx-auto max-w-4xl text-center">
 						<Heading as="h1" size="6xl" className="mb-6">
 							The Open Source Headless CMS
 							<br />
-							<span className="text-red-600">Built for Convex</span>
+							<span className="text-teal-700">Built for Convex</span>
 						</Heading>
 						<Text className="mx-auto mb-8 max-w-2xl text-gray-600 text-xl">
 							VexBlocks is a powerful, type-safe headless CMS built on Convex
@@ -58,9 +58,9 @@ export default function HomePage() {
 
 					<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 						{/* Feature 1 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Database className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Database className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Powered by Convex
@@ -72,9 +72,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 2 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Blocks className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Blocks className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Flexible Content Types
@@ -86,9 +86,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 3 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Zap className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Zap className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Real-time Updates
@@ -100,9 +100,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 4 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<FileText className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<FileText className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Rich Text Editor
@@ -114,9 +114,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 5 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Lock className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Lock className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Draft & Publish Workflow
@@ -128,9 +128,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 6 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<RefreshCw className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<RefreshCw className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								ISR Revalidation
@@ -142,9 +142,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 7 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Globe className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Globe className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								SEO Optimized
@@ -156,9 +156,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 8 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Code2 className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Code2 className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Type-Safe API
@@ -170,9 +170,9 @@ export default function HomePage() {
 						</div>
 
 						{/* Feature 9 */}
-						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-red-300 hover:shadow-lg">
-							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
-								<Layers className="h-6 w-6 text-red-600" />
+						<div className="rounded-lg border border-gray-200 p-6 transition-all hover:border-teal-300 hover:shadow-lg">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50">
+								<Layers className="h-6 w-6 text-teal-700" />
 							</div>
 							<Heading as="h3" className="mb-2 text-xl">
 								Turborepo Monorepo
@@ -187,7 +187,7 @@ export default function HomePage() {
 			</section>
 
 			{/* Content Types Section */}
-			<section className="bg-linear-to-b from-red-50 to-white py-20">
+			<section className="bg-linear-to-b from-teal-50 to-white py-20">
 				<Container>
 					<div className="mb-16 text-center">
 						<Heading as="h2" className="mb-4 text-4xl">
@@ -200,7 +200,9 @@ export default function HomePage() {
 
 					<div className="grid gap-8 md:grid-cols-3">
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-red-600 text-sm">GLOBAL</div>
+							<div className="mb-2 font-bold text-teal-700 text-sm">
+								GLOBAL
+							</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Singleton Content
 							</Heading>
@@ -210,22 +212,22 @@ export default function HomePage() {
 							</Text>
 							<ul className="space-y-2 text-gray-600 text-sm">
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>Only 1 published instance</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>No slug required</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>Multiple drafts allowed</span>
 								</li>
 							</ul>
 						</div>
 
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-red-600 text-sm">PAGE</div>
+							<div className="mb-2 font-bold text-teal-700 text-sm">PAGE</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Unique Pages
 							</Heading>
@@ -235,22 +237,22 @@ export default function HomePage() {
 							</Text>
 							<ul className="space-y-2 text-gray-600 text-sm">
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>1 instance per unique slug</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>SEO metadata supported</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>Slug required and unique</span>
 								</li>
 							</ul>
 						</div>
 
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-red-600 text-sm">
+							<div className="mb-2 font-bold text-teal-700 text-sm">
 								COLLECTION
 							</div>
 							<Heading as="h3" className="mb-4 text-2xl">
@@ -262,15 +264,15 @@ export default function HomePage() {
 							</Text>
 							<ul className="space-y-2 text-gray-600 text-sm">
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>Unlimited instances</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>SEO metadata supported</span>
 								</li>
 								<li className="flex items-start gap-2">
-									<span className="mt-1 text-red-600">✓</span>
+									<span className="mt-1 text-teal-700">✓</span>
 									<span>Unique slug per instance</span>
 								</li>
 							</ul>
@@ -280,13 +282,13 @@ export default function HomePage() {
 			</section>
 
 			{/* CTA Section */}
-			<section className="bg-red-600 py-20 text-white">
+			<section className="bg-primary py-20 text-white">
 				<Container>
 					<div className="mx-auto max-w-3xl text-center">
 						<Heading as="h2" size="4xl" color="light" className="mb-4">
 							Ready to build something amazing?
 						</Heading>
-						<Text className="mb-8 text-red-100 text-xl">
+						<Text className="mb-8 text-teal-100 text-xl">
 							See VexBlocks in action with our blog demo, or start building your
 							own content-driven application today.
 						</Text>

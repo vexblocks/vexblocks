@@ -179,7 +179,7 @@ const FieldEditor = ({
 						/>
 						<div className="-mt-3 absolute top-full left-0">
 							{!hasEditedName && field.label && (
-								<p className="text-red-600 text-xs">
+								<p className="text-teal-700 text-xs">
 									✨ Auto-generated from "Label"
 								</p>
 							)}
@@ -772,7 +772,7 @@ export default function NewBlockPage() {
 							/>
 							<div className="-mt-3 absolute top-full left-0">
 								{!hasEditedName && displayName ? (
-									<p className="text-red-600 text-xs">
+									<p className="text-teal-700 text-xs">
 										✨ Auto-generated from "Display Name"
 									</p>
 								) : (
