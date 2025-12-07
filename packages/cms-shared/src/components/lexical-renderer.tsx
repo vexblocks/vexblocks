@@ -1,6 +1,7 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { type ReactNode, useState } from "react"
+import { usePreview } from "../preview/preview-context"
 
 type LexicalNode = {
 	type: string
@@ -69,24 +70,139 @@ type LexicalContent = {
 type LexicalRendererProps = {
 	content: string
 	className?: string
+	/** Field path for preview mode - enables paragraph-level selection */
+	fieldPath?: string
 }
 
-export function LexicalRenderer({ content, className }: LexicalRendererProps) {
+// Track element indices for preview mode
+type ElementCounters = {
+	paragraph: number
+	heading: number
+	list: number
+	quote: number
+	code: number
+}
+
+// Wrapper component for editable elements in preview mode
+function EditableElement({
+	children,
+	fieldPath,
+	elementIndex,
+	elementType,
+}: {
+	children: ReactNode
+	fieldPath: string
+	elementIndex: number
+	elementType: string
+}) {
+	const { isPreviewMode, highlightedField, onFieldClick, onFieldHover } =
+		usePreview()
+	const [isHovered, setIsHovered] = useState(false)
+
+	// Create a unique field path for this element (e.g., "blocks[0].p[2]")
+	const elementFieldPath = `${fieldPath}.${elementType}[${elementIndex}]`
+	const isHighlighted = highlightedField === elementFieldPath
+
+	const handleClick = (e: React.MouseEvent) => {
+		if (!isPreviewMode) return
+		e.preventDefault()
+		e.stopPropagation()
+		onFieldClick(elementFieldPath)
+	}
+
+	const handleMouseEnter = () => {
+		if (isPreviewMode) {
+			setIsHovered(true)
+			onFieldHover(elementFieldPath)
+		}
+	}
+
+	const handleMouseLeave = () => {
+		if (isPreviewMode) {
+			setIsHovered(false)
+			onFieldHover(null)
+		}
+	}
+
+	if (!isPreviewMode) {
+		return <>{children}</>
+	}
+
+	const getOutlineStyle = () => {
+		if (isHighlighted) return "2px solid #6366f1"
+		if (isHovered) return "2px dashed #6366f1"
+		return "none"
+	}
+
+	return (
+		<div
+			data-cms-field={elementFieldPath}
+			data-cms-editable="true"
+			onClick={handleClick}
+			role="button"
+			tabIndex={0}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			style={{
+				cursor: "pointer",
+				outline: getOutlineStyle(),
+				outlineOffset: "2px",
+				borderRadius: "4px",
+				transition: "outline 0.15s ease-in-out",
+			}}
+		>
+			{children}
+		</div>
+	)
+}
+
+export function LexicalRenderer({
+	content,
+	className,
+	fieldPath,
+}: LexicalRendererProps) {
 	try {
 		const parsed: LexicalContent = JSON.parse(content)
-		return <div className={className}>{renderNode(parsed.root, "root")}</div>
+		const counters: ElementCounters = {
+			paragraph: 0,
+			heading: 0,
+			list: 0,
+			quote: 0,
+			code: 0,
+		}
+		return (
+			<div className={className}>
+				{renderNode(parsed.root, "root", fieldPath, counters)}
+			</div>
+		)
 	} catch (error) {
 		console.error("Error parsing Lexical content:", error)
 		return <div className={className}>Failed to load content</div>
 	}
 }
 
-function renderNode(node: LexicalNode, key: string): ReactNode {
+function renderNode(
+	node: LexicalNode,
+	key: string,
+	fieldPath?: string,
+	counters: ElementCounters = {
+		paragraph: 0,
+		heading: 0,
+		list: 0,
+		quote: 0,
+		code: 0,
+	},
+): ReactNode {
 	if (!node) return null
 
 	switch (node.type) {
 		case "root":
-			return renderChildren((node as ElementNode).children, key)
+			return renderChildren(
+				(node as ElementNode).children,
+				key,
+				fieldPath,
+				counters,
+			)
 
 		case "paragraph": {
 			const paragraphNode = node as ParagraphNode
@@ -97,65 +213,147 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 					paragraphNode.children[0].type === "text" &&
 					!(paragraphNode.children[0] as TextNode).text)
 
-			// Empty paragraphs create spacing, non-empty paragraphs have minimal spacing
-			return (
+			const elementIndex = counters.paragraph++
+			const paragraphElement = (
 				<p key={key} className={isEmpty ? "mb-6" : "mb-0"}>
-					{renderChildren(paragraphNode.children, key)}
+					{renderChildren(paragraphNode.children, key, undefined, counters)}
 				</p>
 			)
+
+			// Wrap with editable element if in preview mode and has fieldPath
+			if (fieldPath && !isEmpty) {
+				return (
+					<EditableElement
+						key={key}
+						fieldPath={fieldPath}
+						elementIndex={elementIndex}
+						elementType="p"
+					>
+						{paragraphElement}
+					</EditableElement>
+				)
+			}
+
+			return paragraphElement
 		}
 
 		case "heading": {
 			const headingNode = node as HeadingNode
 			const Tag = headingNode.tag || "h2"
-			return (
+			const elementIndex = counters.heading++
+			const headingElement = (
 				<Tag key={key} className="mt-8 mb-4">
-					{renderChildren(headingNode.children, key)}
+					{renderChildren(headingNode.children, key, undefined, counters)}
 				</Tag>
 			)
+
+			if (fieldPath) {
+				return (
+					<EditableElement
+						key={key}
+						fieldPath={fieldPath}
+						elementIndex={elementIndex}
+						elementType="h"
+					>
+						{headingElement}
+					</EditableElement>
+				)
+			}
+
+			return headingElement
 		}
 
 		case "list": {
 			const listNode = node as ListNode
 			const ListTag = listNode.listType === "number" ? "ol" : "ul"
-			return (
+			const elementIndex = counters.list++
+			const listElement = (
 				<ListTag key={key} className="mb-6 ml-6">
-					{renderChildren(listNode.children, key)}
+					{renderChildren(listNode.children, key, undefined, counters)}
 				</ListTag>
 			)
+
+			if (fieldPath) {
+				return (
+					<EditableElement
+						key={key}
+						fieldPath={fieldPath}
+						elementIndex={elementIndex}
+						elementType="list"
+					>
+						{listElement}
+					</EditableElement>
+				)
+			}
+
+			return listElement
 		}
 
 		case "listitem": {
 			const listItemNode = node as ListItemNode
 			return (
 				<li key={key} className="mb-2">
-					{renderChildren(listItemNode.children, key)}
+					{renderChildren(listItemNode.children, key, undefined, counters)}
 				</li>
 			)
 		}
 
 		case "quote": {
 			const quoteNode = node as QuoteNode
-			return (
+			const elementIndex = counters.quote++
+			const quoteElement = (
 				<blockquote
 					key={key}
 					className="mb-6 border-gray-300 border-l-4 pl-4 text-gray-700 italic"
 				>
-					{renderChildren(quoteNode.children, key)}
+					{renderChildren(quoteNode.children, key, undefined, counters)}
 				</blockquote>
 			)
+
+			if (fieldPath) {
+				return (
+					<EditableElement
+						key={key}
+						fieldPath={fieldPath}
+						elementIndex={elementIndex}
+						elementType="quote"
+					>
+						{quoteElement}
+					</EditableElement>
+				)
+			}
+
+			return quoteElement
 		}
 
 		case "code": {
 			const codeNode = node as CodeNode
-			return (
+			const elementIndex = counters.code++
+			const codeElement = (
 				<pre
 					key={key}
 					className="mb-6 overflow-x-auto rounded-lg bg-gray-900 p-4 text-gray-100"
 				>
-					<code>{renderChildren(codeNode.children, key)}</code>
+					<code>
+						{renderChildren(codeNode.children, key, undefined, counters)}
+					</code>
 				</pre>
 			)
+
+			if (fieldPath) {
+				return (
+					<EditableElement
+						key={key}
+						fieldPath={fieldPath}
+						elementIndex={elementIndex}
+						elementType="code"
+					>
+						{codeElement}
+					</EditableElement>
+				)
+			}
+
+			return codeElement
 		}
 
 		case "link": {
@@ -168,7 +366,7 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 					rel={linkNode.rel || "noopener noreferrer"}
 					className="text-purple-600 hover:underline"
 				>
-					{renderChildren(linkNode.children, key)}
+					{renderChildren(linkNode.children, key, undefined, counters)}
 				</a>
 			)
 		}
@@ -178,19 +376,16 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 			let text: ReactNode = textNode.text
 
 			// Format flags (bitwise)
-			// 1 = bold, 2 = italic, 4 = strikethrough, 8 = underline, 16 = code, 32 = subscript, 64 = superscript
+			// 1 = bold, 2 = italic, 4 = strikethrough, 8 = underline, 16 = code
 			const format = textNode.format || 0
 
 			if (format & 1) {
-				// Bold
 				text = <strong key={`${key}-bold`}>{text}</strong>
 			}
 			if (format & 2) {
-				// Italic
 				text = <em key={`${key}-italic`}>{text}</em>
 			}
 			if (format & 4) {
-				// Strikethrough
 				text = (
 					<span key={`${key}-strike`} className="line-through">
 						{text}
@@ -198,7 +393,6 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 				)
 			}
 			if (format & 8) {
-				// Underline
 				text = (
 					<span key={`${key}-underline`} className="underline">
 						{text}
@@ -206,7 +400,6 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 				)
 			}
 			if (format & 16) {
-				// Code
 				text = (
 					<code
 						key={`${key}-code`}
@@ -232,10 +425,12 @@ function renderNode(node: LexicalNode, key: string): ReactNode {
 function renderChildren(
 	children: LexicalNode[] | undefined,
 	parentKey: string,
+	fieldPath?: string,
+	counters?: ElementCounters,
 ): ReactNode[] {
 	if (!children || !Array.isArray(children)) return []
 
 	return children.map((child, index) =>
-		renderNode(child, `${parentKey}-${index}`),
+		renderNode(child, `${parentKey}-${index}`, fieldPath, counters),
 	)
 }

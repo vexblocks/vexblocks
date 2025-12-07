@@ -31,6 +31,12 @@ export const listPublic = query({
 					additionalFields: v.optional(v.array(v.string())),
 				}),
 			),
+			previewConfig: v.optional(
+				v.object({
+					urlPattern: v.string(),
+					enabled: v.optional(v.boolean()),
+				}),
+			),
 			icon: v.optional(v.string()),
 			createdBy: v.id("users"),
 			updatedAt: v.number(),
@@ -64,6 +70,12 @@ export const list = query({
 					v.object({
 						previewField: v.optional(v.string()),
 						additionalFields: v.optional(v.array(v.string())),
+					}),
+				),
+				previewConfig: v.optional(
+					v.object({
+						urlPattern: v.string(),
+						enabled: v.optional(v.boolean()),
 					}),
 				),
 				icon: v.optional(v.string()),
@@ -115,6 +127,12 @@ export const get = query({
 				v.object({
 					previewField: v.optional(v.string()),
 					additionalFields: v.optional(v.array(v.string())),
+				}),
+			),
+			previewConfig: v.optional(
+				v.object({
+					urlPattern: v.string(),
+					enabled: v.optional(v.boolean()),
 				}),
 			),
 			icon: v.optional(v.string()),
@@ -179,6 +197,12 @@ export const getByName = query({
 				v.object({
 					previewField: v.optional(v.string()),
 					additionalFields: v.optional(v.array(v.string())),
+				}),
+			),
+			previewConfig: v.optional(
+				v.object({
+					urlPattern: v.string(),
+					enabled: v.optional(v.boolean()),
 				}),
 			),
 			icon: v.optional(v.string()),
@@ -248,6 +272,12 @@ export const create = mutation({
 		description: v.optional(v.string()),
 		fields: v.array(v.any()),
 		icon: v.optional(v.string()),
+		previewConfig: v.optional(
+			v.object({
+				urlPattern: v.string(),
+				enabled: v.optional(v.boolean()),
+			}),
+		),
 	},
 	returns: v.id("cmsSchemas"),
 	handler: async (ctx, args) => {
@@ -287,6 +317,7 @@ export const create = mutation({
 			description: args.description,
 			fields: args.fields,
 			icon: args.icon,
+			previewConfig: args.previewConfig,
 			createdBy: dbUser._id,
 			updatedAt: Date.now(),
 		})
@@ -306,6 +337,12 @@ export const update = mutation({
 			v.object({
 				previewField: v.optional(v.string()),
 				additionalFields: v.optional(v.array(v.string())),
+			}),
+		),
+		previewConfig: v.optional(
+			v.object({
+				urlPattern: v.string(),
+				enabled: v.optional(v.boolean()),
 			}),
 		),
 		icon: v.optional(v.string()),
@@ -336,6 +373,7 @@ export const update = mutation({
 			...(args.description !== undefined && { description: args.description }),
 			...(args.fields && { fields: args.fields }),
 			...(args.viewConfig !== undefined && { viewConfig: args.viewConfig }),
+			...(args.previewConfig !== undefined && { previewConfig: args.previewConfig }),
 			...(args.icon !== undefined && { icon: args.icon }),
 			updatedAt: Date.now(),
 		})

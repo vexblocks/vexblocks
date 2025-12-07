@@ -86,6 +86,8 @@ const fieldDefinition: any = v.object({
 	// For shortText type - slug configuration
 	isSlug: v.optional(v.boolean()), // Mark this field as a slug field
 	slugSource: v.optional(v.string()), // Which field to use as source for slug generation
+	// Localization
+	translatable: v.optional(v.boolean()), // Mark this field as translatable (for i18n)
 	// Additional validation rules
 	validation: v.optional(
 		v.object({
@@ -114,6 +116,13 @@ const cmsSchemas = defineTable({
 		v.object({
 			previewField: v.optional(v.string()), // Field to show in main content column
 			additionalFields: v.optional(v.array(v.string())), // Up to 3 additional fields to show as columns
+		}),
+	),
+	// Live preview configuration
+	previewConfig: v.optional(
+		v.object({
+			urlPattern: v.string(), // URL pattern with placeholders, e.g., "/blog/{slug}"
+			enabled: v.optional(v.boolean()), // Whether preview is enabled for this schema
 		}),
 	),
 	// Metadata
@@ -189,6 +198,7 @@ const cmsBlocks = defineTable({
 	fields: v.array(fieldDefinition), // Fields that make up this block
 	// Preview/thumbnail
 	icon: v.optional(v.string()), // Icon for UI
+	previewImage: v.optional(v.string()), // Cloudflare Image ID for visual preview
 	category: v.optional(v.string()), // Category for organization (e.g., "Marketing", "Content")
 	// Metadata
 	createdBy: v.id("users"),

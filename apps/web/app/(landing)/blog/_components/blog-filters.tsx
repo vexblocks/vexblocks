@@ -1,54 +1,65 @@
 "use client"
 
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 type BlogFiltersProps = {
 	tags: Array<{ _id: string; name: string }>
-	selectedTags: string[]
-	onTagToggle: (tagId: string) => void
 }
 
-export function BlogFilters({
-	tags,
-	selectedTags,
-	onTagToggle,
-}: BlogFiltersProps) {
+/**
+ * BlogFilters - Client Component for interactive tag filtering
+ *
+ * Uses URL searchParams for state - when a tag is clicked, it updates
+ * the URL which triggers a server-side re-render with filtered content.
+ * This keeps the actual filtering logic on the server.
+ */
+export function BlogFilters({ tags }: BlogFiltersProps) {
+	const searchParams = useSearchParams()
+	const currentTags = searchParams.get("tags")?.split(",").filter(Boolean) ?? []
+
+	// Build URL for toggling a tag
+	const buildTagUrl = (tagId: string) => {
+		const newTags = currentTags.includes(tagId)
+			? currentTags.filter((id) => id !== tagId)
+			: [...currentTags, tagId]
+
+		if (newTags.length === 0) {
+			return "/blog"
+		}
+		return `/blog?tags=${newTags.join(",")}`
+	}
+
 	return (
 		<div className="flex flex-wrap gap-3">
-			<button
-				type="button"
-				onClick={() => {
-					// Clear all filters by toggling all selected tags
-					for (const tag of selectedTags) {
-						onTagToggle(tag)
-					}
-				}}
+			<Link
+				href="/blog"
 				className={cn(
-					"rounded px-5 py-2 font-normal text-sm transition-all",
-					selectedTags.length === 0
-						? "bg-black text-white"
-						: "bg-gray-100 text-gray-900 hover:bg-gray-200",
+					"cursor-pointer rounded px-3 py-2 font-medium text-sm transition-all",
+					currentTags.length === 0
+						? "bg-blue-200 text-blue-900"
+						: "text-dark-700 hover:bg-blue-200/40",
 				)}
 			>
 				All Posts
-			</button>
+			</Link>
 
 			{tags.map((tag) => {
-				const isSelected = selectedTags.includes(tag._id)
+				const isSelected = currentTags.includes(tag._id)
 				return (
-					<button
+					<Link
 						key={tag._id}
-						type="button"
-						onClick={() => onTagToggle(tag._id)}
+						href={buildTagUrl(tag._id)}
 						className={cn(
-							"rounded px-5 py-2 font-normal text-sm transition-all",
+							"cursor-pointer rounded px-5 py-2 font-medium text-sm transition-all",
 							isSelected
-								? "bg-black text-white"
-								: "bg-gray-100 text-gray-900 hover:bg-gray-200",
+								? "bg-blue-200 text-blue-900"
+								: "text-dark-700 hover:bg-blue-200/40",
 						)}
 					>
 						{tag.name}
-					</button>
+					</Link>
 				)
 			})}
 		</div>

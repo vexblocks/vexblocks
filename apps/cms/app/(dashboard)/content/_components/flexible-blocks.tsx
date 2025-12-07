@@ -1,9 +1,14 @@
 "use client"
 
-import { useRef } from "react"
-import { Layers, Trash2 } from "lucide-react"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
+import { useQuery } from "convex/react"
+import { useRef, useState } from "react"
+import { Layers, Plus, Trash2 } from "lucide-react"
 import type { Field } from "./types"
 import { BasicFieldRenderer } from "./basic-field-renderer"
+import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
 
 type FlexibleBlockItemProps = {
 	block: { _id: string; type: string; data: any }
@@ -17,6 +22,106 @@ type FlexibleBlockItemProps = {
 	onMoveDown: () => void
 	allSchemas?: any[]
 	contentBySchema?: Record<string, any[]>
+}
+
+// Component to render a block reference inside FlexibleBlocks
+function BlockReferenceContent({
+	blockId,
+	data,
+	onChange,
+	path,
+	allSchemas,
+	contentBySchema,
+}: {
+	blockId: string
+	data: any
+	onChange: (data: any) => void
+	path: string
+	allSchemas?: any[]
+	contentBySchema?: Record<string, any[]>
+}) {
+	const referencedBlock = useQuery(api.cms.blocks.get, {
+		id: blockId as Id<"cmsBlocks">,
+	})
+
+	if (!referencedBlock) {
+		return (
+			<div className="flex items-center justify-center rounded-lg border border-blue-300 bg-blue-50 p-4">
+				<div className="flex items-center gap-2">
+					<div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+					<span className="text-blue-600 text-sm">Loading block...</span>
+				</div>
+			</div>
+		)
+	}
+
+	// The data for the block fields (excluding the blockId metadata)
+	const blockFieldsData = data?.fields || {}
+
+	const handleFieldChange = (fieldName: string, value: any) => {
+		onChange({
+			blockId,
+			fields: {
+				...blockFieldsData,
+				[fieldName]: value,
+			},
+		})
+	}
+
+	return (
+		<div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+			<div className="flex items-center gap-2">
+				{referencedBlock.previewImage ? (
+					<CFImage
+						assetId={referencedBlock.previewImage}
+						alt={referencedBlock.displayName}
+						width={48}
+						height={32}
+						variant="public"
+						className="h-8 w-12 rounded object-cover"
+					/>
+				) : (
+					<div className="flex h-8 w-12 items-center justify-center rounded bg-blue-100">
+						<Layers className="h-4 w-4 text-blue-500" />
+					</div>
+				)}
+				<div>
+					<p className="font-medium text-blue-900 text-sm">
+						{referencedBlock.displayName}
+					</p>
+					<p className="text-blue-600 text-xs">{referencedBlock.name}</p>
+				</div>
+			</div>
+			<div className="space-y-3 rounded-lg bg-white p-3">
+				{referencedBlock.fields.map((blockField: any) => {
+					const fieldId = `${path}-${blockField.name}`.replace(/[.\[\]]/g, "-")
+					return (
+						<div key={blockField.name}>
+							<label className="mb-1 block font-medium text-grey-700 text-sm">
+								{blockField.label}
+								{blockField.required && (
+									<span className="ml-1 text-error">*</span>
+								)}
+							</label>
+							{blockField.helpText && (
+								<p className="mb-2 text-grey-500 text-xs">
+									{blockField.helpText}
+								</p>
+							)}
+							<BasicFieldRenderer
+								field={blockField}
+								value={blockFieldsData[blockField.name]}
+								onChange={(value) => handleFieldChange(blockField.name, value)}
+								fieldId={fieldId}
+								allSchemas={allSchemas}
+								allContent={contentBySchema}
+							/>
+						</div>
+					)
+				})}
+			</div>
+		</div>
+	)
 }
 
 export function FlexibleBlockItem({
@@ -35,12 +140,22 @@ export function FlexibleBlockItem({
 	// Generate stable fieldId using block._id which never changes
 	const fieldId = `field-${path}-${block._id}`.replace(/[.\[\]]/g, "-")
 
+	// Check if this is a blockReference type
+	const isBlockReference = block.type === "blockReference"
+	const blockId = isBlockReference ? block.data?.blockId : null
+
+	// Create the field path for this block (e.g., "blocks[0]")
+	const blockFieldPath = `${path}[${index}]`
+
 	return (
-		<div className="rounded-lg border border-teal-300 bg-white p-4 shadow-sm">
+		<div 
+			className="rounded-lg border border-purple-300 bg-white p-4 shadow-sm"
+			data-field-path={blockFieldPath}
+		>
 			<div className="mb-3 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<span className="rounded bg-teal-100 px-2 py-0.5 font-mono text-teal-700 text-xs">
-						{block.type}
+					<span className="rounded bg-purple-100 px-2 py-0.5 font-mono text-purple-600 text-xs">
+						{isBlockReference ? "blockReference" : block.type}
 					</span>
 					<span className="text-grey-500 text-xs">Block #{index + 1}</span>
 				</div>
@@ -74,14 +189,25 @@ export function FlexibleBlockItem({
 					</button>
 				</div>
 			</div>
-			<BasicFieldRenderer
-				field={{ ...field, type: block.type as any, required: false }}
-				value={block.data}
-				onChange={onUpdate}
-				fieldId={fieldId}
-				allSchemas={allSchemas}
-				allContent={contentBySchema}
-			/>
+			{isBlockReference && blockId ? (
+				<BlockReferenceContent
+					blockId={blockId}
+					data={block.data}
+					onChange={onUpdate}
+					path={`${path}.${block._id}`}
+					allSchemas={allSchemas}
+					contentBySchema={contentBySchema}
+				/>
+			) : (
+				<BasicFieldRenderer
+					field={{ ...field, type: block.type as any, required: false }}
+					value={block.data}
+					onChange={onUpdate}
+					fieldId={fieldId}
+					allSchemas={allSchemas}
+					allContent={contentBySchema}
+				/>
+			)}
 		</div>
 	)
 }
@@ -96,6 +222,22 @@ type FlexibleBlocksFieldProps = {
 	contentBySchema?: Record<string, any[]>
 }
 
+// Pretty type names for display
+const typeLabels: Record<string, string> = {
+	shortText: "Short Text",
+	longText: "Long Text",
+	richText: "Rich Text",
+	media: "Media",
+	url: "URL",
+	youtubeUrl: "YouTube URL",
+	boolean: "Boolean",
+	number: "Number",
+	date: "Date",
+	select: "Select",
+	group: "Group",
+	blockReference: "Block Reference",
+}
+
 export function FlexibleBlocksField({
 	field,
 	value,
@@ -106,6 +248,8 @@ export function FlexibleBlocksField({
 	contentBySchema,
 }: FlexibleBlocksFieldProps) {
 	const containerRef = useRef<HTMLDivElement>(null)
+	const [showAddMenu, setShowAddMenu] = useState(false)
+	const [showBlockSelector, setShowBlockSelector] = useState(false)
 	
 	const blocks = (value || []) as Array<{
 		_id: string
@@ -127,14 +271,15 @@ export function FlexibleBlocksField({
 		"blockReference",
 	]
 
-	const addBlock = (blockType: string) => {
+	const addBlock = (blockType: string, blockId?: string) => {
 		const newBlock = {
 			_id: `block_${Date.now()}`,
 			type: blockType,
-			data: blockType === "boolean" ? false : blockType === "number" ? 0 : "",
+			data: blockType === "boolean" ? false : blockType === "number" ? 0 : blockType === "blockReference" ? { blockId } : "",
 		}
 		const newBlocks = [...blocks, newBlock]
 		onChange(path, newBlocks)
+		setShowAddMenu(false)
 		
 		// Scroll to bottom of the flexible blocks container smoothly
 		setTimeout(() => {
@@ -145,6 +290,16 @@ export function FlexibleBlocksField({
 				window.scrollTo({ top: absoluteBottom - window.innerHeight + 100, behavior: "smooth" })
 			}
 		}, 100)
+	}
+
+	const handleAddBlockType = (blockType: string) => {
+		if (blockType === "blockReference") {
+			// Show block selector dialog for block references
+			setShowBlockSelector(true)
+			setShowAddMenu(false)
+		} else {
+			addBlock(blockType)
+		}
 	}
 
 	const removeBlock = (blockId: string) => {
@@ -177,36 +332,57 @@ export function FlexibleBlocksField({
 	return (
 		<div
 			ref={containerRef}
-			className="rounded-lg border-2 border-teal-200 bg-teal-50 p-4"
+			data-field-path={field.name}
+			className="rounded-lg border-2 border-purple-200 bg-purple-50 p-4 transition-all duration-200"
 			style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 		>
 			<div className="mb-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<Layers className="h-5 w-5 text-teal-700" />
+					<Layers className="h-5 w-5 text-purple-600" />
 					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
-					<span className="rounded-full bg-teal-100 px-2 py-0.5 font-medium text-teal-700 text-xs">
+					<span className="rounded-full bg-purple-100 px-2 py-0.5 font-medium text-purple-600 text-xs">
 						Flexible Blocks
 					</span>
 					{field.required && <span className="text-error text-sm">*</span>}
 				</div>
 				{canAddMore && (
 					<div className="relative">
-						<select
-							onChange={(e) => {
-								if (e.target.value) {
-									addBlock(e.target.value)
-									e.target.value = ""
-								}
-							}}
-							className="rounded border border-teal-300 bg-white px-3 py-1.5 text-teal-700 text-sm transition-colors hover:bg-teal-50"
+						<button
+							type="button"
+							onClick={() => setShowAddMenu(!showAddMenu)}
+							className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-1.5 text-purple-600 text-sm transition-colors hover:bg-purple-50"
 						>
-							<option value="">+ Add Block</option>
-							{allowedTypes.map((type) => (
-								<option key={type} value={type}>
-									{type}
-								</option>
-							))}
-						</select>
+							<Plus className="h-4 w-4" />
+							Add Block
+						</button>
+						
+						{/* Dropdown menu for block types */}
+						{showAddMenu && (
+							<>
+								<div
+									className="fixed inset-0 z-10"
+									onClick={() => setShowAddMenu(false)}
+								/>
+								<div className="absolute top-full right-0 z-20 mt-1 min-w-48 rounded-lg border border-grey-200 bg-white py-1 shadow-lg">
+									{allowedTypes.map((type) => (
+										<button
+											key={type}
+											type="button"
+											onClick={() => handleAddBlockType(type)}
+											className="flex w-full items-center gap-2 px-4 py-2 text-left text-grey-700 text-sm transition-colors hover:bg-grey-50"
+										>
+											{type === "blockReference" && (
+												<Layers className="h-4 w-4 text-purple-500" />
+											)}
+											<span>{typeLabels[type] || type}</span>
+											{type === "blockReference" && (
+												<span className="ml-auto text-grey-400 text-xs">→</span>
+											)}
+										</button>
+									))}
+								</div>
+							</>
+						)}
 					</div>
 				)}
 			</div>
@@ -223,7 +399,7 @@ export function FlexibleBlocksField({
 			{blocks.length === 0 ? (
 				<div className="rounded-lg border-2 border-grey-300 border-dashed bg-white p-8 text-center">
 					<p className="text-grey-400 text-sm">
-						No blocks yet. Select a block type to add.
+						No blocks yet. Click "Add Block" to add content.
 					</p>
 				</div>
 			) : (
@@ -245,6 +421,18 @@ export function FlexibleBlocksField({
 						/>
 					))}
 				</div>
+			)}
+
+			{/* Block Selector Dialog for blockReference */}
+			{showBlockSelector && (
+				<BlockSelectorDialog
+					title="Select Reusable Block"
+					onSelect={(block) => {
+						addBlock("blockReference", block._id)
+						setShowBlockSelector(false)
+					}}
+					onClose={() => setShowBlockSelector(false)}
+				/>
 			)}
 		</div>
 	)

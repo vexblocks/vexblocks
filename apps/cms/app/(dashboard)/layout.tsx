@@ -1,27 +1,33 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense } from "react"
 import { DashboardHeader } from "@/components/molecules/dashboard-header"
 import { DashboardSidenav } from "@/components/molecules/dashboard-sidenav"
+import { useSidebar } from "@/contexts/sidebar-context"
 
 /**
- * The actual dashboard UI - only renders after auth is verified
+ * Dashboard Layout
+ * Uses @lfades/atom for sidebar state - no provider needed
  */
-function DashboardContent({ children }: { children: React.ReactNode }) {
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+export default function DashboardLayout({
+	children,
+}: {
+	children: React.ReactNode
+}) {
+	const { isCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar()
 
 	return (
 		<div className="flex min-h-screen bg-grey-50">
 			{/* Mobile Sidebar Overlay */}
-			{isSidebarOpen && (
+			{isMobileOpen && (
 				<div
 					role="button"
 					tabIndex={0}
 					className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-					onClick={() => setIsSidebarOpen(false)}
+					onClick={() => setIsMobileOpen(false)}
 					onKeyDown={(e) => {
 						if (e.key === "Enter" || e.key === " ") {
-							setIsSidebarOpen(false)
+							setIsMobileOpen(false)
 						}
 					}}
 				/>
@@ -29,16 +35,20 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
 			{/* Sidebar */}
 			<DashboardSidenav
-				isOpen={isSidebarOpen}
-				onClose={() => setIsSidebarOpen(false)}
+				isOpen={isMobileOpen}
+				onClose={() => setIsMobileOpen(false)}
 			/>
 
 			{/* Main content - Add left margin to account for fixed sidebar */}
-			<main className="flex-1 overflow-y-auto lg:ml-64">
+			<main
+				className={`flex-1 transition-all duration-300 ${
+					isCollapsed ? "lg:ml-[72px]" : "lg:ml-64"
+				}`}
+			>
 				{/* Header */}
 				<DashboardHeader
-					isSidebarOpen={isSidebarOpen}
-					onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+					isSidebarOpen={isMobileOpen}
+					onToggleSidebar={() => setIsMobileOpen(!isMobileOpen)}
 				/>
 
 				{/* Page Content */}
@@ -48,12 +58,4 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 			</main>
 		</div>
 	)
-}
-
-export default function DashboardLayout({
-	children,
-}: {
-	children: React.ReactNode
-}) {
-	return <DashboardContent>{children}</DashboardContent>
 }

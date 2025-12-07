@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Globe, Lock, Palette, Settings, Users } from "lucide-react"
+import { Bell, Eye, Globe, Languages, Palette, Settings, Users } from "lucide-react"
 import Link from "next/link"
 
 type SettingCard = {
@@ -21,6 +21,19 @@ export default function SettingsPage() {
 			badge: "Admin Only",
 		},
 		{
+			title: "Localization",
+			description: "Configure languages for multi-language content",
+			icon: <Languages className="h-6 w-6" />,
+			href: "/settings/localization",
+		},
+		{
+			title: "Live Preview",
+			description: "Configure live preview for content editing",
+			icon: <Eye className="h-6 w-6" />,
+			href: "/settings/preview",
+			badge: "New",
+		},
+		{
 			title: "General",
 			description: "Configure general settings and preferences",
 			icon: <Settings className="h-6 w-6" />,
@@ -32,12 +45,7 @@ export default function SettingsPage() {
 			icon: <Globe className="h-6 w-6" />,
 			href: "/settings/site",
 		},
-		{
-			title: "Security",
-			description: "Manage authentication and security settings",
-			icon: <Lock className="h-6 w-6" />,
-			href: "/settings/security",
-		},
+
 		{
 			title: "Notifications",
 			description: "Configure email and push notifications",
@@ -55,7 +63,7 @@ export default function SettingsPage() {
 	return (
 		<div className="mx-auto max-w-6xl">
 			<div className="mb-8">
-				<h1 className="font-bold text-3xl">Settings</h1>
+				<h1 className="font-bold text-3xl text-primary">Settings</h1>
 				<p className="mt-2 text-grey-500">
 					Manage your CMS configuration and preferences
 				</p>
@@ -87,16 +95,16 @@ export default function SettingsPage() {
 			</div>
 
 			{/* Quick Info */}
-			<div className="mt-12 rounded-lg border border-teal-200 bg-teal-50 p-6">
+			<div className="mt-12 rounded-lg border border-blue-200 bg-blue-50 p-6">
 				<div className="flex items-start gap-3">
-					<div className="rounded-full bg-teal-100 p-2">
-						<Settings className="h-5 w-5 text-teal-600" />
+					<div className="rounded-full bg-blue-100 p-2">
+						<Settings className="h-5 w-5 text-blue-600" />
 					</div>
 					<div>
-						<h4 className="mb-1 font-semibold text-teal-900">
+						<h4 className="mb-1 font-semibold text-blue-900">
 							Need Help with Settings?
 						</h4>
-						<p className="text-teal-700 text-sm">
+						<p className="text-blue-700 text-sm">
 							Each setting is designed to give you full control over your CMS.
 							Click on any card to configure specific features.
 						</p>

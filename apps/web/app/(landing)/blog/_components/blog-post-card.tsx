@@ -1,82 +1,49 @@
-"use client"
-
-import { useQuery } from "convex/react"
-import { api } from "vexblocks-backend/convex/_generated/api"
-import type { Id } from "vexblocks-backend/convex/_generated/dataModel"
+import type { BlogPostsContent } from "@repo/cms-shared"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import Link from "next/link"
+import { Heading } from "@/components/atoms/heading"
+import { Text } from "@/components/atoms/text"
 import { ArrowRightIcon } from "@/components/icons/arrow-right"
-import { CFImage } from "@repo/cms-shared"
-
-import type {
-	BlogTagsContent,
-	ContentAuthorsContent,
-	BlogPostsContent,
-} from "@repo/cms-shared"
 
 type BlogPostCardProps = {
 	post: BlogPostsContent
+	tagName?: string | null
 }
 
-export function BlogPostCard({ post }: BlogPostCardProps) {
-	// Handle author data - can be either an ID string or embedded object
-	const authorData = post.data.author
-	const isAuthorString = typeof authorData === "string"
-
-	// Always call useQuery, but conditionally skip it
-	const fetchedAuthor = useQuery(
-		api.cms.content.getPublishedById,
-		isAuthorString && authorData
-			? { id: authorData as Id<"cmsContent"> }
-			: "skip",
-	) as ContentAuthorsContent | null | undefined
-
-	// Determine which author data to use
-	const _author: ContentAuthorsContent | null | undefined = isAuthorString
-		? fetchedAuthor
-		: (authorData as ContentAuthorsContent)
-
-	// Handle first tag - can be either an ID string or embedded object
-	const firstTagData = post.data.tags?.[0]
-	const isTagString = typeof firstTagData === "string"
-
-	// Fetch tag if it's an ID string
-	const fetchedTag = useQuery(
-		api.cms.content.getPublishedById,
-		isTagString && firstTagData
-			? { id: firstTagData as Id<"cmsContent"> }
-			: "skip",
-	) as BlogTagsContent | null | undefined
-
-	// Determine which tag data to use
-	const firstTag: BlogTagsContent | null | undefined = isTagString
-		? fetchedTag
-		: (firstTagData as BlogTagsContent)
-
-	const tagContent = firstTag?.data?.name || null
-
+/**
+ * BlogPostCard - Server Component
+ * No client-side data fetching, all data passed as props
+ */
+export function BlogPostCard({ post, tagName }: BlogPostCardProps) {
 	// Extract short description from first richText block
 	const richTextBlock = post.data.blocks?.find(
-		(block: any) => block.type === "richText",
+		(block: { type: string }) => block.type === "richText",
 	)
 
 	// Handle both normalized (value) and non-normalized (data) formats
 	const lexicalJson = richTextBlock
-		? (richTextBlock as any).value || (richTextBlock as any).data
+		? ((richTextBlock as { value?: string; data?: string }).value ??
+			(richTextBlock as { value?: string; data?: string }).data)
 		: null
 
 	const shortDescription = lexicalJson
 		? extractTextFromLexical(lexicalJson)
 		: ""
 
+	const title = getStringValue(post.data.title)
+
 	return (
-		<Link href={`/blog/${post.data.slug || post.slug}`} className="group block">
-			<article className="flex flex-col">
+		<Link
+			href={`/blog/${post.data.slug || post.slug}`}
+			className="group block h-full rounded-lg bg-white p-2"
+		>
+			<article className="flex h-full flex-col">
 				{/* Image */}
-				<div className="relative aspect-16/10 overflow-hidden rounded-xl bg-gray-200">
+				<div className="relative aspect-16/10 max-h-[210px] overflow-hidden rounded-sm bg-gray-200">
 					{post.data.featured_image ? (
 						<CFImage
 							assetId={post.data.featured_image}
-							alt={post.data.title || "Blog post"}
+							alt={title || "Blog post"}
 							width={600}
 							height={375}
 							className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -89,32 +56,35 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
 				</div>
 
 				{/* Content */}
-				<div className="mt-4 flex flex-col gap-2 lg:gap-3">
+				<div className="mt-5 mb-3 flex flex-1 flex-col gap-2 px-4 lg:gap-4">
 					{/* Tag and Read Time */}
-					<div className="mb-2 flex items-center gap-2">
-						{tagContent && (
-							<span className="rounded bg-black px-2 py-1 font-normal text-white text-xs">
-								{tagContent}
+					<div className="flex items-center gap-2">
+						{tagName && (
+							<span className="rounded-lg bg-blue-200 px-2 py-1 font-medium text-blue-900 text-sm">
+								{tagName}
 							</span>
 						)}
-						<span className="text-gray-600 text-xs">
+						<span className="font-medium text-base text-dark-700 leading-normal">
 							{calculateReadingTime(post)}
 						</span>
 					</div>
 
-					<h3 className="mb-2 font-medium text-gray-900 text-xl transition-colors group-hover:text-teal-700">
-						{post.data.title}
-					</h3>
+					<Heading
+						size="xl"
+						className="font-medium font-sans text-gray-900 leading-5.5 transition-colors group-hover:text-blue-700"
+					>
+						{title}
+					</Heading>
 
 					{shortDescription && (
-						<p className="mb-3 line-clamp-3 text-gray-500 text-sm">
+						<Text className="line-clamp-3 text-dark-700 leading-5.5">
 							{shortDescription}
-						</p>
+						</Text>
 					)}
 
-					<div className="flex items-center gap-1 text-gray-900 text-sm transition-colors group-hover:text-teal-700">
+					<div className="mt-auto flex items-center gap-1 text-dark-900 transition-colors group-hover:text-blue-600">
 						<span>Read more</span>
-						<ArrowRightIcon />
+						<ArrowRightIcon className="transition-transform group-hover:translate-x-1" />
 					</div>
 				</div>
 			</article>
@@ -134,13 +104,17 @@ function extractTextFromLexical(
 		if (!root || !root.children) return ""
 
 		let text = ""
-		const extractFromNode = (node: any): void => {
+		const extractFromNode = (node: {
+			type?: string
+			text?: string
+			children?: unknown[]
+		}): void => {
 			if (node.type === "text" && node.text) {
 				text += `${node.text} `
 			}
 			if (node.children && Array.isArray(node.children)) {
 				for (const child of node.children) {
-					extractFromNode(child)
+					extractFromNode(child as typeof node)
 				}
 			}
 		}
@@ -160,22 +134,28 @@ function extractTextFromLexical(
 function calculateReadingTime(post: BlogPostsContent): string {
 	let totalWords = 0
 
-	// Extract text from title
-	if (post.data.title) {
-		totalWords += post.data.title.split(/\s+/).filter(Boolean).length
+	// Extract text from title (handle both string and localized object format)
+	const title = getStringValue(post.data.title)
+	if (title) {
+		totalWords += title.split(/\s+/).filter(Boolean).length
 	}
 
 	// Extract text from all richText blocks
 	if (post.data.blocks) {
 		for (const block of post.data.blocks) {
 			if (block.type === "richText") {
-				const lexicalJson = (block as any).value || (block as any).data
+				const lexicalJson =
+					(block as { value?: string }).value ??
+					(block as { data?: string }).data
 				if (lexicalJson) {
-					const text = extractTextFromLexical(lexicalJson, true)
+					const text = extractTextFromLexical(lexicalJson as string, true)
 					totalWords += text.split(/\s+/).filter(Boolean).length
 				}
 			} else if (block.type === "longText" || block.type === "shortText") {
-				const text = (block as any).value || (block as any).data || ""
+				const text =
+					(block as { value?: string }).value ??
+					(block as { data?: string }).data ??
+					""
 				totalWords += String(text).split(/\s+/).filter(Boolean).length
 			}
 		}

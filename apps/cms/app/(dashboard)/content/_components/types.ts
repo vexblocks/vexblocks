@@ -33,5 +33,19 @@ export type Field = {
 	// For shortText slug configuration
 	isSlug?: boolean
 	slugSource?: string
+	// Localization
+	translatable?: boolean
+}
+
+export type Locale = {
+	code: string
+	name: string
+	isDefault: boolean
+}
+
+export type LocalizationSettings = {
+	enabled: boolean
+	locales: Locale[]
+	defaultLocale: string
 }
 

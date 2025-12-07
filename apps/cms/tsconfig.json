@@ -5,6 +5,7 @@
 		"jsx": "preserve",
 		"module": "esnext",
 		"moduleResolution": "bundler",
+		"noImplicitAny": false,
 		"plugins": [{ "name": "next" }],
 		"paths": {
 			"@/*": ["./*"],

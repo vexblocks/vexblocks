@@ -41,19 +41,19 @@ export function ContentSidebar({
 		switch (type) {
 			case "global":
 				return (
-					<span className="rounded-full bg-teal-100 px-2 py-0.5 text-teal-700 text-xs">
+					<span className="rounded-full bg-purple-100 px-2 py-0.5 text-purple-700 text-xs">
 						Global
 					</span>
 				)
 			case "page":
 				return (
-					<span className="rounded-full bg-teal-50 px-2 py-0.5 text-teal-700 text-xs">
+					<span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
 						Page
 					</span>
 				)
 			case "collection":
 				return (
-					<span className="rounded-full bg-teal-100 px-2 py-0.5 text-teal-700 text-xs">
+					<span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700 text-xs">
 						Collection
 					</span>
 				)

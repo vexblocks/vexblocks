@@ -3,13 +3,14 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, useQuery } from "convex/react"
-import { ArrowLeft, Save } from "lucide-react"
+import { ArrowLeft, Globe, Save } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { getCleanErrorMessage } from "@/lib/error-utils"
 import { FieldRenderer } from "../_components/field-renderer"
-import type { Field } from "../_components/types"
+import { LocaleSelector } from "../_components/locale-selector"
+import type { Field, LocalizationSettings } from "../_components/types"
 import { getNestedValue, setNestedValue } from "../_components/utils"
 
 // Validate fields recursively
@@ -56,10 +57,17 @@ export default function NewContentPage() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const preselectedSchema = searchParams.get("schema")
+	
+	// Build back URL with schema param for proper navigation
+	const backUrl = preselectedSchema 
+		? `/content?schema=${preselectedSchema}` 
+		: "/content"
 
 	const schemas = useQuery(api.cms.schemas.list)
-	const _availableBlocks = useQuery(api.cms.blocks.list)
 	const allContent = useQuery(api.cms.content.listAll) // Load all content for references
+	const localizationSettings = useQuery(api.settings.get, {
+		key: "localization",
+	}) as LocalizationSettings | null | undefined
 	const createContent = useMutation(api.cms.content.create)
 
 	const [loading, setLoading] = useState(false)
@@ -72,6 +80,19 @@ export default function NewContentPage() {
 	const [contentData, setContentData] = useState<Record<string, any>>({})
 	const [seoTitle, setSeoTitle] = useState("")
 	const [seoDescription, setSeoDescription] = useState("")
+
+	// i18n state
+	const hasLocales = (localizationSettings?.locales?.length ?? 0) > 0
+	const locales = localizationSettings?.locales ?? []
+	const defaultLocale = localizationSettings?.defaultLocale ?? ""
+	const [currentLocale, setCurrentLocale] = useState<string>("")
+
+	// Set default locale when settings load
+	useEffect(() => {
+		if (defaultLocale && !currentLocale) {
+			setCurrentLocale(defaultLocale)
+		}
+	}, [defaultLocale, currentLocale])
 
 	const selectedSchema = schemas?.find((s) => s._id === selectedSchemaId)
 
@@ -116,8 +137,66 @@ export default function NewContentPage() {
 		}
 	}, [contentData, selectedSchema])
 
+	// Helper to check if a field at a path is translatable
+	const isFieldTranslatable = (fieldPath: string): boolean => {
+		if (!hasLocales || !selectedSchema) return false
+
+		const pathParts = fieldPath.split(".")
+		let currentFields = selectedSchema.fields || []
+		let isTranslatable = false
+
+		for (const part of pathParts) {
+			// Skip array indices like [0]
+			const cleanPart = part.replace(/\[\d+\]/g, "")
+			if (!cleanPart) continue
+
+			const field = currentFields.find((f: Field) => f.name === cleanPart)
+			if (field) {
+				isTranslatable = field.translatable ?? false
+				// Navigate into nested fields
+				if (field.fields) {
+					currentFields = field.fields
+				}
+			}
+		}
+
+		return isTranslatable
+	}
+
+	// Helper to get localized value
+	const getLocalizedValue = (path: string) => {
+		const rawValue = getNestedValue(contentData, path)
+
+		if (!hasLocales || !isFieldTranslatable(path)) {
+			return rawValue
+		}
+
+		// For translatable fields, get the value for current locale
+		if (rawValue && typeof rawValue === "object" && !Array.isArray(rawValue)) {
+			return rawValue[currentLocale] ?? rawValue[defaultLocale] ?? ""
+		}
+
+		// Fallback: might be old content without locale structure
+		return rawValue ?? ""
+	}
+
 	const handleFieldChange = (path: string, value: any) => {
-		setContentData((prev) => setNestedValue(prev, path, value))
+		setContentData((prev) => {
+			if (!hasLocales || !isFieldTranslatable(path)) {
+				return setNestedValue(prev, path, value)
+			}
+
+			// For translatable fields, set value for current locale
+			const currentValue = getNestedValue(prev, path)
+			const localizedValue =
+				currentValue &&
+				typeof currentValue === "object" &&
+				!Array.isArray(currentValue)
+					? { ...currentValue, [currentLocale]: value }
+					: { [currentLocale]: value }
+
+			return setNestedValue(prev, path, localizedValue)
+		})
 	}
 
 	const handleAddRepeaterItem = (path: string) => {
@@ -168,7 +247,7 @@ export default function NewContentPage() {
 						: undefined,
 			})
 
-			router.push("/content")
+			router.push(`/content?schema=${selectedSchemaId}`)
 		} catch (err) {
 			setError(getCleanErrorMessage(err, "Failed to create content"))
 			// Scroll to top to show error message
@@ -182,7 +261,7 @@ export default function NewContentPage() {
 		<div className="mx-auto max-w-4xl">
 			<div className="mb-6">
 				<Link
-					href="/content"
+					href={backUrl}
 					className="inline-flex items-center gap-2 text-grey-500 hover:text-primary"
 				>
 					<ArrowLeft className="h-4 w-4" />
@@ -191,7 +270,7 @@ export default function NewContentPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl">Create New Content</h1>
+				<h1 className="font-bold text-3xl text-primary">Create New Content</h1>
 				<p className="mt-2 text-grey-500">Add a new content entry</p>
 			</div>
 
@@ -232,29 +311,69 @@ export default function NewContentPage() {
 				{/* Content Fields */}
 				{selectedSchema && (
 					<>
+						{/* Locale Selector */}
+						{hasLocales && locales.length > 0 && (
+							<div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4">
+								<div className="flex items-center gap-2 text-blue-800">
+									<Globe className="h-5 w-5" />
+									<span className="font-medium">Editing language:</span>
+								</div>
+								<LocaleSelector
+									locales={locales}
+									currentLocale={currentLocale}
+									onChange={setCurrentLocale}
+									defaultLocale={defaultLocale}
+								/>
+							</div>
+						)}
+
 						<div className="rounded-lg bg-white p-6 shadow">
-							<h2 className="mb-4 font-semibold text-lg">Content Fields</h2>
+							<div className="mb-4 flex items-center justify-between">
+								<h2 className="font-semibold text-lg text-primary">
+									Content Fields
+								</h2>
+								{hasLocales && currentLocale && (
+									<span className="rounded-full bg-blue-100 px-3 py-1 font-mono text-blue-700 text-xs uppercase">
+										{currentLocale}
+									</span>
+								)}
+							</div>
 							<div className="space-y-6">
-								{selectedSchema.fields.map((field: any) => (
-									<FieldRenderer
-										key={field.name}
-										field={field}
-										path={field.name}
-										value={getNestedValue(contentData, field.name)}
-										onChange={handleFieldChange}
-										onAddRepeaterItem={handleAddRepeaterItem}
-										onRemoveRepeaterItem={handleRemoveRepeaterItem}
-										allSchemas={schemas || []}
-										contentBySchema={contentBySchema}
-									/>
-								))}
+								{selectedSchema.fields.map((field: any) => {
+									const isTranslatable = field.translatable && hasLocales
+									const value = isTranslatable
+										? getLocalizedValue(field.name)
+										: getNestedValue(contentData, field.name)
+
+									return (
+										<div key={field.name} className="relative">
+											{isTranslatable && (
+												<div className="absolute top-0 right-0 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
+													Translatable
+												</div>
+											)}
+											<FieldRenderer
+												field={field}
+												path={field.name}
+												value={value}
+												onChange={handleFieldChange}
+												onAddRepeaterItem={handleAddRepeaterItem}
+												onRemoveRepeaterItem={handleRemoveRepeaterItem}
+												allSchemas={schemas || []}
+												contentBySchema={contentBySchema}
+											/>
+										</div>
+									)
+								})}
 							</div>
 						</div>
 
 						{/* SEO (only for pages and collections, not global) */}
 						{selectedSchema.type !== "global" && (
 							<div className="rounded-lg bg-white p-6 shadow">
-								<h2 className="mb-4 font-semibold text-lg">SEO Metadata</h2>
+								<h2 className="mb-4 font-semibold text-lg text-primary">
+									SEO Metadata
+								</h2>
 								<div className="space-y-4">
 									<div>
 										<label
@@ -294,7 +413,9 @@ export default function NewContentPage() {
 
 						{/* Status */}
 						<div className="rounded-lg bg-white p-6 shadow">
-							<h2 className="mb-4 font-semibold text-lg">Publication Status</h2>
+							<h2 className="mb-4 font-semibold text-lg text-primary">
+								Publication Status
+							</h2>
 							<div className="flex gap-4">
 								<label className="flex flex-1 cursor-pointer items-center gap-3 rounded-lg border-2 border-grey-300 p-4 transition-colors hover:border-primary">
 									<input
@@ -306,7 +427,7 @@ export default function NewContentPage() {
 										className="h-4 w-4"
 									/>
 									<div>
-										<div className="font-medium">Draft</div>
+										<div className="font-medium text-primary">Draft</div>
 										<div className="text-grey-500 text-sm">
 											Save as draft (not visible publicly)
 										</div>
@@ -322,7 +443,7 @@ export default function NewContentPage() {
 										className="h-4 w-4"
 									/>
 									<div>
-										<div className="font-medium">Published</div>
+										<div className="font-medium text-primary">Published</div>
 										<div className="text-grey-500 text-sm">
 											Publish immediately (visible publicly)
 										</div>
@@ -337,7 +458,7 @@ export default function NewContentPage() {
 			{/* Floating Action Buttons */}
 			<div className="fixed right-8 bottom-8 z-10 flex gap-3">
 				<Link
-					href="/content"
+					href={backUrl}
 					className="rounded-lg border border-grey-300 bg-white px-6 py-3 text-grey-500 shadow-lg transition-colors hover:bg-grey-100"
 				>
 					Cancel

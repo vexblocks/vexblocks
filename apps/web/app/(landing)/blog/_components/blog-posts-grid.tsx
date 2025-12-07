@@ -1,13 +1,17 @@
-"use client"
-
-import type { ContentLibraryContent } from "@repo/cms-shared"
+import type { BlogPostsContent, BlogTagsContent } from "@repo/cms-shared"
+import { getStringValue } from "@repo/cms-shared"
 import { BlogPostCard } from "./blog-post-card"
 
 type BlogPostsGridProps = {
-	posts: ContentLibraryContent[]
+	posts: BlogPostsContent[]
+	tags: BlogTagsContent[]
 }
 
-export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
+/**
+ * BlogPostsGrid - Server Component
+ * Renders a grid of blog post cards with data-tags for client-side filtering
+ */
+export function BlogPostsGrid({ posts, tags }: BlogPostsGridProps) {
 	if (posts.length === 0) {
 		return (
 			<div className="py-20 text-center">
@@ -18,11 +22,34 @@ export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
 		)
 	}
 
+	// Create a map for quick tag lookup
+	const tagMap = new Map(
+		tags.map((tag) => [tag._id, getStringValue(tag.data.name)]),
+	)
+
 	return (
-		<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-			{posts.map((post) => (
-				<BlogPostCard key={post._id} post={post} />
-			))}
+		<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3" data-posts-grid>
+			{posts.map((post) => {
+				// Get all tag IDs for this post
+				const tagIds =
+					post.data.tags
+						?.map((t) => (typeof t === "string" ? t : t._id))
+						.join(",") ?? ""
+
+				// Get the first tag name for display
+				const firstTag = post.data.tags?.[0]
+				const tagName = firstTag
+					? typeof firstTag === "string"
+						? (tagMap.get(firstTag) ?? null)
+						: ((firstTag as BlogTagsContent).data?.name ?? null)
+					: null
+
+				return (
+					<div key={post._id} className="h-full" data-post-tags={tagIds}>
+						<BlogPostCard post={post} tagName={tagName} />
+					</div>
+				)
+			})}
 		</div>
 	)
 }

@@ -7,14 +7,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ConvexReactClient } from "convex/react"
 import type { PropsWithChildren } from "react"
 
-const convex = new ConvexReactClient(
-	process.env.NEXT_PUBLIC_CONVEX_URL as string,
-	{
-		// Don't pause queries globally - let components handle their own loading states
-		// This prevents the flickering issue with auth checks
-		verbose: process.env.NODE_ENV === "development",
-	},
-)
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL
+if (!convexUrl) {
+	console.error("❌ NEXT_PUBLIC_CONVEX_URL is not set!")
+}
+
+const convex = new ConvexReactClient(convexUrl as string, {
+	// Don't pause queries globally - let components handle their own loading states
+	// This prevents the flickering issue with auth checks
+	verbose: process.env.NODE_ENV === "development",
+})
 
 const convexQueryClient = new ConvexQueryClient(convex)
 

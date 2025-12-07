@@ -1,11 +1,13 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 import { useMutation } from "convex/react"
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowLeft, ArrowUp, ImageIcon, Plus, Trash2, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 
 type FieldType =
 	| "shortText"
@@ -179,7 +181,7 @@ const FieldEditor = ({
 						/>
 						<div className="-mt-3 absolute top-full left-0">
 							{!hasEditedName && field.label && (
-								<p className="text-teal-700 text-xs">
+								<p className="text-blue-600 text-xs">
 									✨ Auto-generated from "Label"
 								</p>
 							)}
@@ -361,12 +363,14 @@ export default function NewBlockPage() {
 
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
+	const [showMediaSelector, setShowMediaSelector] = useState(false)
 
 	// Block basic info
 	const [displayName, setDisplayName] = useState("")
 	const [name, setName] = useState("")
 	const [description, setDescription] = useState("")
 	const [category, setCategory] = useState("")
+	const [previewImage, setPreviewImage] = useState("")
 	const [hasEditedName, setHasEditedName] = useState(false)
 
 	// Fields
@@ -694,6 +698,7 @@ export default function NewBlockPage() {
 				description: description || undefined,
 				fields: mapFieldsForSave(fields),
 				category: category || undefined,
+				previewImage: previewImage || undefined,
 			})
 
 			// Redirect to block detail
@@ -718,7 +723,9 @@ export default function NewBlockPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl">Create Reusable Block</h1>
+				<h1 className="font-bold text-3xl text-primary">
+					Create Reusable Block
+				</h1>
 				<p className="mt-2 text-grey-500">
 					Define a reusable component with its own fields
 				</p>
@@ -733,7 +740,9 @@ export default function NewBlockPage() {
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Basic Info */}
 				<div className="rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-lg">Basic Information</h2>
+					<h2 className="mb-4 font-semibold text-lg text-primary">
+						Basic Information
+					</h2>
 
 					<div className="space-y-4">
 						<div>
@@ -772,7 +781,7 @@ export default function NewBlockPage() {
 							/>
 							<div className="-mt-3 absolute top-full left-0">
 								{!hasEditedName && displayName ? (
-									<p className="text-teal-700 text-xs">
+									<p className="text-blue-600 text-xs">
 										✨ Auto-generated from "Display Name"
 									</p>
 								) : (
@@ -816,13 +825,50 @@ export default function NewBlockPage() {
 								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 							/>
 						</div>
+
+						<div>
+							<label className="mb-2 block font-medium text-grey-500 text-sm">
+								Preview Image (optional)
+							</label>
+							<p className="mb-2 text-grey-400 text-xs">
+								Add an image to help users visually identify this block when selecting it
+							</p>
+							{previewImage ? (
+								<div className="relative inline-block">
+									<CFImage
+										assetId={previewImage}
+										alt="Preview"
+										width={192}
+										height={128}
+										variant="public"
+										className="h-32 w-48 rounded-lg border border-grey-200 object-cover"
+									/>
+									<button
+										type="button"
+										onClick={() => setPreviewImage("")}
+										className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+									>
+										<X className="h-4 w-4" />
+									</button>
+								</div>
+							) : (
+								<button
+									type="button"
+									onClick={() => setShowMediaSelector(true)}
+									className="flex items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-3 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+								>
+									<ImageIcon className="h-5 w-5" />
+									Select Preview Image
+								</button>
+							)}
+						</div>
 					</div>
 				</div>
 
 				{/* Fields */}
 				<div className="mb-24 rounded-lg bg-white p-6 shadow">
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-lg">
+						<h2 className="font-semibold text-lg text-primary">
 							Fields <span className="text-error">*</span>
 						</h2>
 					</div>
@@ -883,6 +929,18 @@ export default function NewBlockPage() {
 					</div>
 				</div>
 			</form>
+
+			{/* Media Selector Dialog */}
+			{showMediaSelector && (
+				<MediaSelector
+					selectedCloudflareId={previewImage}
+					onSelect={(media) => {
+						setPreviewImage(media.cloudflareId)
+						setShowMediaSelector(false)
+					}}
+					onClose={() => setShowMediaSelector(false)}
+				/>
+			)}
 		</div>
 	)
 }

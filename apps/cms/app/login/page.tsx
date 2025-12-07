@@ -427,15 +427,15 @@ function AdminLoginContent() {
 						ref={otpInput}
 						maxLength={6}
 						containerClassName="group flex items-center justify-center"
-						onComplete={async (value) => {
+						onComplete={async (value: string) => {
 							setOtp(value)
 							await handleVerifyOTP()
 						}}
-						onChange={(value) => {
+						onChange={(value: string) => {
 							setOtp(value)
 						}}
 						value={otp}
-						render={({ slots }) => (
+						render={({ slots }: { slots: SlotProps[] }) => (
 							<div className="flex items-center gap-2">
 								<div className="flex gap-2">
 									{slots.slice(0, 3).map((slot, idx) => (

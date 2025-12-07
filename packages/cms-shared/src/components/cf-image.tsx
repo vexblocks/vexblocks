@@ -45,7 +45,7 @@ export function CFImage({
 }: CFImageProps) {
 	return (
 		<Image
-			loader={({ src }) =>
+			loader={({ src }: { src: string }) =>
 				isPrivate
 					? src
 					: `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}/${src}/${variant}`

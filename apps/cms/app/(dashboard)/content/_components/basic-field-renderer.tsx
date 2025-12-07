@@ -1,6 +1,7 @@
 "use client"
 
-import { CFImage } from "@repo/cms-shared"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import { Image as ImageIcon, X } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState } from "react"
@@ -57,16 +58,16 @@ export function BasicFieldRenderer({
 						placeholder={field.helpText}
 						required={field.required}
 						readOnly={field.isSlug}
-					className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-						field.isSlug
-							? "border-teal-300 bg-teal-50 text-teal-900"
-							: "border-grey-300 text-grey-500"
-					}`}
-				/>
-				{field.isSlug && field.slugSource && (
-					<p className="mt-1 text-teal-700 text-xs">
-						✨ Auto-generated from "{field.slugSource}"
-					</p>
+						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+							field.isSlug
+								? "border-blue-300 bg-blue-50 text-blue-900"
+								: "border-grey-300 text-grey-500"
+						}`}
+					/>
+					{field.isSlug && field.slugSource && (
+						<p className="mt-1 text-blue-600 text-xs">
+							✨ Auto-generated from "{field.slugSource}"
+						</p>
 					)}
 				</div>
 			)
@@ -262,7 +263,10 @@ export function BasicFieldRenderer({
 					{showMediaSelector && (
 						<MediaSelector
 							selectedCloudflareId={value}
-							onSelect={(media) => {
+							onSelect={(media: {
+								id: Id<"cmsMedia">
+								cloudflareId: string
+							}) => {
 								onChange(media.cloudflareId)
 								setShowMediaSelector(false)
 							}}
@@ -300,9 +304,9 @@ export function BasicFieldRenderer({
 					<option value="">Select {referencedSchema.displayName}...</option>
 					{referencedContent.map((item: any) => {
 						const displayValue =
-							item.data?.title ||
-							item.data?.name ||
-							item.data?.displayName ||
+							getStringValue(item.data?.title) ||
+							getStringValue(item.data?.name) ||
+							getStringValue(item.data?.displayName) ||
 							item.slug ||
 							item._id
 						return (
@@ -344,9 +348,9 @@ export function BasicFieldRenderer({
 						) : (
 							referencedContent.map((item: any) => {
 								const displayValue =
-									item.data?.title ||
-									item.data?.name ||
-									item.data?.displayName ||
+									getStringValue(item.data?.title) ||
+									getStringValue(item.data?.name) ||
+									getStringValue(item.data?.displayName) ||
 									item.slug ||
 									item._id
 								const isSelected = selectedIds.includes(item._id)

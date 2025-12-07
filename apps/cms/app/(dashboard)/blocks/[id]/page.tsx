@@ -2,19 +2,23 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
 	ArrowDown,
 	ArrowLeft,
 	ArrowUp,
+	ImageIcon,
 	Plus,
 	Save,
 	Trash2,
+	X,
 } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { use, useEffect, useState } from "react"
+import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 
 type FieldType =
 	| "shortText"
@@ -157,7 +161,7 @@ function SimpleFieldEditor({
 					/>
 					<div className="absolute top-full left-0 mt-1">
 						{!hasEditedName && field.label && (
-							<p className="text-teal-700 text-xs">
+							<p className="text-blue-600 text-xs">
 								✨ Auto-generated from "Label"
 							</p>
 						)}
@@ -251,18 +255,31 @@ export default function BlockDetailPage({
 }) {
 	const { id } = use(params)
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const block = useQuery(api.cms.blocks.get, { id: id as Id<"cmsBlocks"> })
 	const updateBlock = useMutation(api.cms.blocks.update)
 	const deleteBlock = useMutation(api.cms.blocks.remove)
 
-	const [editing, setEditing] = useState(false)
+	// Use URL param to determine edit mode
+	const editing = searchParams.get("mode") === "edit"
+
+	const setEditing = (value: boolean) => {
+		if (value) {
+			router.push(`/blocks/${id}?mode=edit`)
+		} else {
+			router.push(`/blocks/${id}`)
+		}
+	}
+
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+	const [showMediaSelector, setShowMediaSelector] = useState(false)
 
 	const [displayName, setDisplayName] = useState("")
 	const [description, setDescription] = useState("")
 	const [category, setCategory] = useState("")
+	const [previewImage, setPreviewImage] = useState("")
 	const [fields, setFields] = useState<Field[]>([])
 
 	useEffect(() => {
@@ -270,6 +287,7 @@ export default function BlockDetailPage({
 			setDisplayName(block.displayName)
 			setDescription(block.description || "")
 			setCategory(block.category || "")
+			setPreviewImage(block.previewImage || "")
 			setFields(
 				block.fields.map((f: any, i: number) => ({
 					id: `field_${i}`,
@@ -368,6 +386,7 @@ export default function BlockDetailPage({
 				description: description || undefined,
 				fields: mapFieldsForSave(fields),
 				category: category || undefined,
+				previewImage: previewImage || undefined,
 			})
 
 			setEditing(false)
@@ -414,7 +433,9 @@ export default function BlockDetailPage({
 
 			<div className="mb-6 flex items-start justify-between">
 				<div>
-					<h1 className="font-bold text-3xl">{block.displayName}</h1>
+					<h1 className="font-bold text-3xl text-primary">
+						{block.displayName}
+					</h1>
 					{block.category && (
 						<p className="mt-2 text-grey-500">{block.category}</p>
 					)}
@@ -564,6 +585,42 @@ export default function BlockDetailPage({
 									className="w-full rounded border border-grey-300 px-3 py-2"
 								/>
 							</div>
+							<div>
+								<label className="mb-1 block text-grey-700 text-sm">
+									Preview Image (optional)
+								</label>
+								<p className="mb-2 text-grey-500 text-xs">
+									Add an image to help users visually identify this block when selecting it
+								</p>
+							{previewImage ? (
+								<div className="relative inline-block">
+									<CFImage
+										assetId={previewImage}
+										alt="Preview"
+										width={192}
+										height={128}
+										variant="public"
+										className="h-32 w-48 rounded-lg border border-grey-200 object-cover"
+									/>
+									<button
+										type="button"
+										onClick={() => setPreviewImage("")}
+										className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+									>
+										<X className="h-4 w-4" />
+									</button>
+								</div>
+							) : (
+								<button
+									type="button"
+									onClick={() => setShowMediaSelector(true)}
+									className="flex items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-3 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+								>
+									<ImageIcon className="h-5 w-5" />
+									Select Preview Image
+								</button>
+							)}
+							</div>
 						</div>
 					) : (
 						<div className="space-y-2">
@@ -576,10 +633,20 @@ export default function BlockDetailPage({
 									{block.description}
 								</p>
 							)}
-							{block.icon && (
-								<p className="text-grey-600">
-									<span className="font-medium">Icon:</span> {block.icon}
-								</p>
+							{block.previewImage && (
+								<div className="mt-3">
+									<span className="font-medium text-grey-600">Preview:</span>
+									<div className="mt-2">
+										<CFImage
+											assetId={block.previewImage}
+											alt="Block preview"
+											width={144}
+											height={96}
+											variant="public"
+											className="h-24 w-36 rounded-lg border border-grey-200 object-cover"
+										/>
+									</div>
+								</div>
 							)}
 						</div>
 					)}
@@ -641,6 +708,18 @@ export default function BlockDetailPage({
 					</div>
 				</div>
 			</div>
+
+			{/* Media Selector Dialog */}
+			{showMediaSelector && (
+				<MediaSelector
+					selectedCloudflareId={previewImage}
+					onSelect={(media) => {
+						setPreviewImage(media.cloudflareId)
+						setShowMediaSelector(false)
+					}}
+					onClose={() => setShowMediaSelector(false)}
+				/>
+			)}
 		</div>
 	)
 }

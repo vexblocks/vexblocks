@@ -38,7 +38,7 @@ export default function SchemasPage() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl">Schemas</h1>
+					<h1 className="font-bold text-3xl text-primary">Schemas</h1>
 					<p className="mt-2 text-grey-500">
 						Define content types for your CMS
 					</p>
@@ -66,7 +66,9 @@ export default function SchemasPage() {
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-grey-100">
 						<Layers className="h-8 w-8 text-grey-400" />
 					</div>
-					<h3 className="mb-2 font-semibold text-xl">No schemas yet</h3>
+					<h3 className="mb-2 font-semibold text-primary text-xl">
+						No schemas yet
+					</h3>
 					<p className="mb-6 text-grey-500">
 						Get started by creating your first content schema
 					</p>
@@ -84,50 +86,54 @@ export default function SchemasPage() {
 			{schemas && schemas.length > 0 && (
 				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{schemas.map((schema) => (
-						<Link
+						<div
 							key={schema._id}
-							href={`/schemas/${schema._id}`}
 							className="group block rounded-lg bg-white p-6 shadow transition-all hover:shadow-lg"
 						>
-							<div className="mb-4 flex items-start justify-between">
-								<div
-									className={`flex h-12 w-12 items-center justify-center rounded-lg ${getTypeColor(schema.type)}`}
-								>
-									{getTypeIcon(schema.type)}
+							<Link href={`/schemas/${schema._id}`}>
+								<div className="mb-4 flex items-start justify-between">
+									<div
+										className={`flex h-12 w-12 items-center justify-center rounded-lg ${getTypeColor(schema.type)}`}
+									>
+										{getTypeIcon(schema.type)}
+									</div>
+									<span
+										className={`rounded-full px-3 py-1 font-semibold text-xs ${
+											schema.type === "global"
+												? "bg-purple-light text-purple"
+												: schema.type === "page"
+													? "bg-tertiary-light text-tertiary"
+													: "bg-secondary-light text-primary"
+										}`}
+									>
+										{schema.type}
+									</span>
 								</div>
-								<span
-									className={`rounded-full px-3 py-1 font-semibold text-xs ${
-										schema.type === "global"
-											? "bg-purple-light text-purple"
-											: schema.type === "page"
-												? "bg-tertiary-light text-tertiary"
-												: "bg-secondary-light"
-									}`}
-								>
-									{schema.type}
-								</span>
-							</div>
 
-							<h3 className="mb-2 font-semibold text-xl group-hover:text-primary-800">
-								{schema.displayName}
-							</h3>
+								<h3 className="mb-2 font-semibold text-primary text-xl group-hover:text-primary-800">
+									{schema.displayName}
+								</h3>
 
-							{schema.description && (
-								<p className="mb-4 line-clamp-2 text-grey-500 text-sm">
-									{schema.description}
-								</p>
-							)}
+								{schema.description && (
+									<p className="mb-4 line-clamp-2 text-grey-500 text-sm">
+										{schema.description}
+									</p>
+								)}
+							</Link>
 
 							<div className="flex items-center justify-between border-grey-200 border-t pt-4 text-sm">
 								<span className="text-grey-500">
 									{schema.fields.length} field
 									{schema.fields.length !== 1 ? "s" : ""}
 								</span>
-								<span className="font-medium group-hover:underline">
+								<Link
+									href={`/schemas/${schema._id}?mode=edit`}
+									className="font-medium text-primary hover:underline"
+								>
 									Edit →
-								</span>
+								</Link>
 							</div>
-						</Link>
+						</div>
 					))}
 				</div>
 			)}

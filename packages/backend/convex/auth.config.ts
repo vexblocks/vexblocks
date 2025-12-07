@@ -1,4 +1,3 @@
-console.log("CONVEX_SITE_URL", process.env.CONVEX_SITE_URL)
 export default {
 	providers: [
 		{

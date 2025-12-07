@@ -2,6 +2,7 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -17,8 +18,10 @@ import {
 	Video,
 } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { use, useCallback, useEffect, useState } from "react"
+import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
+import { triggerTypeGeneration } from "@/lib/use-type-generation"
 
 // Utility function to generate field name from label
 function generateFieldName(label: string): string {
@@ -34,6 +37,12 @@ function generateFieldName(label: string): string {
 // Validate field name format
 function validateFieldName(name: string): boolean {
 	return /^[a-z0-9_]+$/.test(name)
+}
+
+// Check if a field type can be translatable
+// Only text-based fields make sense to translate
+function isTranslatableFieldType(type: FieldType): boolean {
+	return ["shortText", "longText", "richText", "select"].includes(type)
 }
 
 // Helper to check for duplicate field names
@@ -99,6 +108,103 @@ type Field = {
 	slugSource?: string
 	// Track if field name has been manually edited
 	nameManuallyEdited?: boolean
+	// Localization
+	translatable?: boolean
+}
+
+// Block type for selection
+type AvailableBlock = {
+	_id: string
+	name: string
+	displayName: string
+	description?: string
+	previewImage?: string
+	category?: string
+	fields: any[]
+}
+
+// BlockReferenceSelector component (to handle state for dialog)
+function BlockReferenceSelector({
+	field,
+	path,
+	availableBlocks,
+	onUpdateField,
+}: {
+	field: Field
+	path: number[]
+	availableBlocks: AvailableBlock[]
+	onUpdateField: (path: number[], updates: Partial<Field>) => void
+}) {
+	const [showBlockSelector, setShowBlockSelector] = useState(false)
+
+	const selectedBlock = availableBlocks.find((b) => b._id === field.blockId)
+
+	return (
+		<div className="mt-4">
+			<label className="mb-1 block font-medium text-grey-700 text-sm">
+				Select Reusable Block <span className="text-error">*</span>
+			</label>
+			{selectedBlock ? (
+				<div className="flex items-center gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
+					{selectedBlock.previewImage ? (
+						<CFImage
+							assetId={selectedBlock.previewImage}
+							alt={selectedBlock.displayName}
+							width={64}
+							height={48}
+							variant="public"
+							className="h-12 w-16 rounded object-cover"
+						/>
+					) : (
+						<div className="flex h-12 w-16 items-center justify-center rounded bg-grey-200">
+							<Layers className="h-6 w-6 text-grey-400" />
+						</div>
+					)}
+					<div className="flex-1">
+						<p className="font-medium text-grey-900">
+							{selectedBlock.displayName}
+						</p>
+						<p className="text-grey-500 text-xs">{selectedBlock.name}</p>
+					</div>
+					<button
+						type="button"
+						onClick={() => setShowBlockSelector(true)}
+						className="rounded-lg border border-grey-300 bg-white px-3 py-1.5 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+					>
+						Change
+					</button>
+				</div>
+			) : (
+				<button
+					type="button"
+					onClick={() => setShowBlockSelector(true)}
+					className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-4 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+				>
+					<Layers className="h-5 w-5" />
+					Click to select a block
+				</button>
+			)}
+			{availableBlocks.length === 0 && (
+				<p className="mt-1 text-grey-400 text-xs">
+					No reusable blocks available.{" "}
+					<Link href="/blocks/new" className="text-primary underline">
+						Create one first
+					</Link>
+				</p>
+			)}
+
+			{showBlockSelector && (
+				<BlockSelectorDialog
+					selectedBlockId={field.blockId}
+					onSelect={(block) => {
+						onUpdateField(path, { blockId: block._id })
+						setShowBlockSelector(false)
+					}}
+					onClose={() => setShowBlockSelector(false)}
+				/>
+			)}
+		</div>
+	)
 }
 
 // Recursive FieldEditor component (defined outside to prevent re-renders)
@@ -113,9 +219,10 @@ type FieldEditorProps = {
 	totalFields?: number
 	fieldIndex?: number
 	isNameLocked?: boolean
-	availableBlocks?: Array<{ _id: string; name: string; displayName: string }>
+	availableBlocks?: AvailableBlock[]
 	allSchemas?: Array<{ _id: string; name: string; displayName: string }>
 	allFields?: Field[]
+	hasLocales?: boolean
 }
 
 function FieldEditor({
@@ -132,6 +239,7 @@ function FieldEditor({
 	availableBlocks = [],
 	allSchemas = [],
 	allFields = [],
+	hasLocales = false,
 }: FieldEditorProps) {
 	const canNest =
 		level < 3 && (field.type === "group" || field.type === "repeater")
@@ -144,9 +252,9 @@ function FieldEditor({
 	const getFieldIcon = (type: FieldType) => {
 		switch (type) {
 			case "group":
-				return <Folder className="h-4 w-4" />
+				return <Folder className="h-4 w-4 text-primary" />
 			case "repeater":
-				return <Layers className="h-4 w-4" />
+				return <Layers className="h-4 w-4 text-primary" />
 			case "youtubeUrl":
 				return <Video className="h-4 w-4" />
 			default:
@@ -166,7 +274,7 @@ function FieldEditor({
 						Field #{path[path.length - 1] + 1}
 					</h3>
 					{(field.type === "group" || field.type === "repeater") && (
-						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-xs">
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
 							{field.type === "group" ? "Group" : "Repeater"}
 						</span>
 					)}
@@ -263,7 +371,7 @@ function FieldEditor({
 						className={`w-full rounded border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-grey-100 ${
 							isDuplicate ||
 							(!validateFieldName(field.name) && field.name && !isNameLocked)
-								? "border-teal-500"
+								? "border-red-500"
 								: "border-grey-300"
 						}`}
 					/>
@@ -273,15 +381,15 @@ function FieldEditor({
 								Field name cannot be changed to prevent data loss
 							</p>
 						) : isDuplicate ? (
-							<p className="text-teal-500 text-xs">
+							<p className="text-red-500 text-xs">
 								⚠️ Duplicate field name - must be unique
 							</p>
 						) : field.name && !validateFieldName(field.name) ? (
-							<p className="text-teal-500 text-xs">
+							<p className="text-red-500 text-xs">
 								Only lowercase letters, numbers, and underscores allowed
 							</p>
 						) : !field.nameManuallyEdited && field.label ? (
-							<p className="text-teal-600 text-xs">
+							<p className="text-blue-600 text-xs">
 								✨ Auto-generated from "Label"
 							</p>
 						) : null}
@@ -331,7 +439,7 @@ function FieldEditor({
 						)}
 					</select>
 				</div>
-				<div className="flex items-end">
+				<div className="flex items-end gap-6">
 					<label className="flex items-center gap-2">
 						<input
 							type="checkbox"
@@ -343,6 +451,19 @@ function FieldEditor({
 						/>
 						<span className="text-sm">Required</span>
 					</label>
+					{hasLocales && isTranslatableFieldType(field.type) && (
+						<label className="flex items-center gap-2">
+							<input
+								type="checkbox"
+								checked={field.translatable ?? false}
+								onChange={(e) =>
+									onUpdateField(path, { translatable: e.target.checked })
+								}
+								className="h-4 w-4 accent-blue-600"
+							/>
+							<span className="text-blue-700 text-sm">Translatable</span>
+						</label>
+					)}
 				</div>
 			</div>
 
@@ -509,41 +630,17 @@ function FieldEditor({
 			)}
 
 			{field.type === "blockReference" && (
-				<div className="mt-4">
-					<label
-						htmlFor={`field-blockId-${path.join("-")}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
-					>
-						Select Reusable Block <span className="text-error">*</span>
-					</label>
-					<select
-						id={`field-blockId-${path.join("-")}`}
-						value={field.blockId || ""}
-						onChange={(e) => onUpdateField(path, { blockId: e.target.value })}
-						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
-						required={field.type === "blockReference"}
-					>
-						<option value="">-- Select a block --</option>
-						{availableBlocks.map((block) => (
-							<option key={block._id} value={block._id}>
-								{block.displayName} ({block.name})
-							</option>
-						))}
-					</select>
-					{availableBlocks.length === 0 && (
-						<p className="mt-1 text-grey-400 text-xs">
-							No reusable blocks available.{" "}
-							<Link href="/blocks/new" className="text-primary underline">
-								Create one first
-							</Link>
-						</p>
-					)}
-				</div>
+				<BlockReferenceSelector
+					field={field}
+					path={path}
+					availableBlocks={availableBlocks}
+					onUpdateField={onUpdateField}
+				/>
 			)}
 
 			{field.type === "shortText" && level === 0 && (
 				<div className="mt-4 space-y-3">
-					<div className="flex items-center gap-3 rounded border border-teal-200 bg-teal-50 p-3">
+					<div className="flex items-center gap-3 rounded border border-blue-200 bg-blue-50 p-3">
 						<input
 							type="checkbox"
 							id={`field-isSlug-${path.join("-")}`}
@@ -559,7 +656,7 @@ function FieldEditor({
 						/>
 						<label
 							htmlFor={`field-isSlug-${path.join("-")}`}
-							className="cursor-pointer text-teal-800 text-sm"
+							className="cursor-pointer text-blue-800 text-sm"
 						>
 							<strong>Use as Slug Field</strong> - Auto-generate URL-friendly
 							slugs
@@ -596,7 +693,7 @@ function FieldEditor({
 										</option>
 									))}
 							</select>
-							<p className="mt-1 text-teal-600 text-xs">
+							<p className="mt-1 text-blue-600 text-xs">
 								The slug will be auto-generated from the selected field (e.g.,
 								"My Post Title" → "my-post-title")
 							</p>
@@ -663,6 +760,7 @@ function FieldEditor({
 							availableBlocks={availableBlocks}
 							allSchemas={allSchemas}
 							allFields={allFields}
+							hasLocales={hasLocales}
 						/>
 					))}
 				</div>
@@ -760,15 +858,32 @@ export default function SchemaDetailPage({
 }) {
 	const { id } = use(params)
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const schema = useQuery(api.cms.schemas.get, {
 		id: id as Id<"cmsSchemas">,
 	})
 	const availableBlocks = useQuery(api.cms.blocks.list)
 	const allSchemas = useQuery(api.cms.schemas.list)
+	const localizationSettings = useQuery(api.settings.get, {
+		key: "localization",
+	})
 	const updateSchema = useMutation(api.cms.schemas.update)
 	const deleteSchema = useMutation(api.cms.schemas.remove)
 
-	const [editing, setEditing] = useState(false)
+	// Check if locales are configured
+	const hasLocales = (localizationSettings as any)?.locales?.length > 0 || false
+
+	// Use URL param to determine edit mode
+	const editing = searchParams.get("mode") === "edit"
+
+	const setEditing = (value: boolean) => {
+		if (value) {
+			router.push(`/schemas/${id}?mode=edit`)
+		} else {
+			router.push(`/schemas/${id}`)
+		}
+	}
+
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -777,6 +892,9 @@ export default function SchemaDetailPage({
 	const [displayName, setDisplayName] = useState("")
 	const [description, setDescription] = useState("")
 	const [fields, setFields] = useState<Field[]>([])
+	// Preview configuration
+	const [previewEnabled, setPreviewEnabled] = useState(false)
+	const [previewUrlPattern, setPreviewUrlPattern] = useState("")
 
 	// Initialize edit state when schema loads
 	useEffect(() => {
@@ -784,6 +902,9 @@ export default function SchemaDetailPage({
 			setDisplayName(schema.displayName)
 			setDescription(schema.description || "")
 			setFields(markFieldsAsExisting(schema.fields))
+			// Initialize preview config
+			setPreviewEnabled(schema.previewConfig?.enabled ?? false)
+			setPreviewUrlPattern(schema.previewConfig?.urlPattern ?? "")
 		}
 	}, [schema])
 
@@ -925,6 +1046,11 @@ export default function SchemaDetailPage({
 				}
 			}
 
+			// Localization - mark field as translatable
+			if (f.translatable) {
+				mappedField.translatable = f.translatable
+			}
+
 			// Recursively include nested fields for group and repeater types
 			if ((f.type === "group" || f.type === "repeater") && f.fields) {
 				mappedField.fields = mapFieldsForSave(f.fields)
@@ -1006,7 +1132,13 @@ export default function SchemaDetailPage({
 				displayName: displayName || undefined,
 				description: description || undefined,
 				fields: mapFieldsForSave(fields),
+				previewConfig: previewUrlPattern
+					? { urlPattern: previewUrlPattern, enabled: previewEnabled }
+					: undefined,
 			})
+
+			// Trigger type generation in development
+			triggerTypeGeneration()
 
 			setEditing(false)
 		} catch (err) {
@@ -1020,6 +1152,10 @@ export default function SchemaDetailPage({
 		setLoading(true)
 		try {
 			await deleteSchema({ id: id as Id<"cmsSchemas"> })
+
+			// Trigger type generation in development
+			triggerTypeGeneration()
+
 			router.push("/schemas")
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to delete schema")
@@ -1041,9 +1177,9 @@ export default function SchemaDetailPage({
 	const getFieldIcon = (type: FieldType) => {
 		switch (type) {
 			case "group":
-				return <Folder className="h-4 w-4" />
+				return <Folder className="h-4 w-4 text-primary" />
 			case "repeater":
-				return <Layers className="h-4 w-4" />
+				return <Layers className="h-4 w-4 text-primary" />
 			case "youtubeUrl":
 				return <Video className="h-4 w-4" />
 			default:
@@ -1065,7 +1201,9 @@ export default function SchemaDetailPage({
 
 			<div className="mb-6 flex items-start justify-between">
 				<div>
-					<h1 className="font-bold text-3xl">{schema.displayName}</h1>
+					<h1 className="font-bold text-3xl text-primary">
+						{schema.displayName}
+					</h1>
 					<p className="mt-2 text-grey-500">
 						{schema.type === "global"
 							? "Global Component"
@@ -1109,6 +1247,8 @@ export default function SchemaDetailPage({
 												...f,
 											})),
 										)
+										setPreviewEnabled(schema.previewConfig?.enabled ?? false)
+										setPreviewUrlPattern(schema.previewConfig?.urlPattern ?? "")
 									}
 								}}
 								className="rounded border border-grey-300 px-4 py-2 text-grey-700 hover:bg-grey-50"
@@ -1130,7 +1270,7 @@ export default function SchemaDetailPage({
 			</div>
 
 			{error && (
-				<div className="mb-6 rounded-lg bg-teal-50 p-4">
+				<div className="mb-6 rounded-lg bg-red-50 p-4">
 					<p className="text-error text-sm">{error}</p>
 				</div>
 			)}
@@ -1220,6 +1360,83 @@ export default function SchemaDetailPage({
 					)}
 				</div>
 
+				{/* Preview Configuration */}
+				{editing && (
+					<div className="mb-6 border-grey-200 border-t pt-6">
+						<h2 className="mb-4 font-semibold text-xl">Live Preview</h2>
+						<div className="space-y-4">
+							<div className="flex items-center gap-4">
+								<label className="relative inline-flex cursor-pointer items-center">
+									<input
+										type="checkbox"
+										checked={previewEnabled}
+										onChange={(e) => setPreviewEnabled(e.target.checked)}
+										className="peer sr-only"
+									/>
+									<div className="peer h-6 w-11 rounded-full bg-grey-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20" />
+								</label>
+								<span className="font-medium text-grey-700">
+									Enable Live Preview
+								</span>
+							</div>
+							<div>
+								<label
+									htmlFor="preview-url-pattern"
+									className="mb-1 block font-medium text-grey-700 text-sm"
+								>
+									Preview URL Pattern
+								</label>
+								<input
+									type="text"
+									id="preview-url-pattern"
+									value={previewUrlPattern}
+									onChange={(e) => setPreviewUrlPattern(e.target.value)}
+									placeholder="/blog/{slug}"
+									className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+								/>
+								<p className="mt-1 text-grey-500 text-xs">
+									Use{" "}
+									<code className="rounded bg-grey-100 px-1">{"{slug}"}</code>{" "}
+									or{" "}
+									<code className="rounded bg-grey-100 px-1">
+										{"{fieldName}"}
+									</code>{" "}
+									as placeholders for dynamic values. Example:{" "}
+									<code className="rounded bg-grey-100 px-1">
+										/blog/{"{slug}"}
+									</code>
+								</p>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* Show preview config in read mode */}
+				{!editing && schema.previewConfig?.urlPattern && (
+					<div className="mb-6 border-grey-200 border-t pt-6">
+						<h2 className="mb-4 font-semibold text-xl">Live Preview</h2>
+						<div className="space-y-2">
+							<div className="flex items-center gap-2">
+								<span
+									className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
+										schema.previewConfig.enabled
+											? "bg-green-100 text-green-700"
+											: "bg-grey-100 text-grey-600"
+									}`}
+								>
+									{schema.previewConfig.enabled ? "Enabled" : "Disabled"}
+								</span>
+							</div>
+							<p className="text-grey-600">
+								<span className="font-medium">URL Pattern:</span>{" "}
+								<code className="rounded bg-grey-100 px-2 py-0.5 font-mono text-sm">
+									{schema.previewConfig.urlPattern}
+								</code>
+							</p>
+						</div>
+					</div>
+				)}
+
 				<div>
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="font-semibold text-xl">Fields</h2>
@@ -1252,6 +1469,7 @@ export default function SchemaDetailPage({
 										availableBlocks={availableBlocks || []}
 										allSchemas={allSchemas || []}
 										allFields={fields}
+										hasLocales={hasLocales}
 									/>
 								) : (
 									<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-md">
@@ -1278,6 +1496,9 @@ export default function SchemaDetailPage({
 													</span>
 													{field.required && (
 														<span className="text-error">Required</span>
+													)}
+													{field.translatable && (
+														<span className="text-blue-600">Translatable</span>
 													)}
 												</div>
 												{field.helpText && (
@@ -1376,6 +1597,10 @@ export default function SchemaDetailPage({
 													id: `field_${i}`,
 													...f,
 												})),
+											)
+											setPreviewEnabled(schema.previewConfig?.enabled ?? false)
+											setPreviewUrlPattern(
+												schema.previewConfig?.urlPattern ?? "",
 											)
 										}
 									}}

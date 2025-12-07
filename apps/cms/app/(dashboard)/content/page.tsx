@@ -2,16 +2,17 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage } from "@repo/cms-shared"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ContentSidebar } from "./_components/content-sidebar"
 import { ViewConfigModal } from "./_components/view-config-modal"
 
 export default function ContentPage() {
+	const router = useRouter()
 	const searchParams = useSearchParams()
 	const preselectedSchema = searchParams.get("schema")
 
@@ -20,6 +21,12 @@ export default function ContentPage() {
 		preselectedSchema || "",
 	)
 	const [showViewConfig, setShowViewConfig] = useState(false)
+
+	// Update URL when schema changes
+	const handleSelectSchema = (schemaId: string) => {
+		setSelectedSchemaId(schemaId)
+		router.push(`/content?schema=${schemaId}`, { scroll: false })
+	}
 
 	const content = useQuery(
 		api.cms.content.listBySchema,
@@ -33,9 +40,11 @@ export default function ContentPage() {
 	// Auto-select first schema if none selected
 	useEffect(() => {
 		if (schemas && schemas.length > 0 && !selectedSchemaId) {
-			setSelectedSchemaId(schemas[0]._id)
+			const firstSchemaId = schemas[0]._id
+			setSelectedSchemaId(firstSchemaId)
+			router.replace(`/content?schema=${firstSchemaId}`, { scroll: false })
 		}
-	}, [schemas, selectedSchemaId])
+	}, [schemas, selectedSchemaId, router])
 
 	const [searchQuery, setSearchQuery] = useState("")
 	const [statusFilter, setStatusFilter] = useState<
@@ -107,7 +116,7 @@ export default function ContentPage() {
 			<ContentSidebar
 				schemas={schemas}
 				selectedSchemaId={selectedSchemaId}
-				onSelectSchema={setSelectedSchemaId}
+				onSelectSchema={handleSelectSchema}
 			/>
 
 			{/* Main Content Area */}
@@ -116,7 +125,7 @@ export default function ContentPage() {
 					{/* Header */}
 					<div className="mb-6 flex items-center justify-between">
 						<div>
-							<h1 className="font-bold text-3xl">
+							<h1 className="font-bold text-3xl text-primary">
 								{selectedSchema?.displayName || "Content"}
 							</h1>
 							<p className="mt-2 text-grey-500">
@@ -212,7 +221,9 @@ export default function ContentPage() {
 							<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-grey-100">
 								<FileText className="h-8 w-8 text-grey-400" />
 							</div>
-							<h3 className="mb-2 font-semibold text-xl">No content yet</h3>
+							<h3 className="mb-2 font-semibold text-primary text-xl">
+								No content yet
+							</h3>
 							<p className="mb-6 text-grey-500">
 								Create your first content entry for{" "}
 								{selectedSchema?.displayName}
@@ -274,12 +285,12 @@ export default function ContentPage() {
 											return (
 												<tr key={item._id} className="hover:bg-grey-50">
 													<td className="px-6 py-4">
-														<div className="font-medium">
-															{previewText || "Untitled"}
+														<div className="font-medium text-primary">
+															{getStringValue(previewText) || "Untitled"}
 														</div>
 														{item.seo?.title && (
 															<div className="text-grey-500 text-sm">
-																{item.seo.title}
+																{getStringValue(item.seo.title)}
 															</div>
 														)}
 													</td>
@@ -295,14 +306,16 @@ export default function ContentPage() {
 																	return value ? "Yes" : "No"
 																}
 																if (field.type === "date") {
-																	return value
-																		? new Date(value).toLocaleDateString()
+																	const dateValue = getStringValue(value)
+																	return dateValue
+																		? new Date(dateValue).toLocaleDateString()
 																		: "-"
 																}
 																if (field.type === "media") {
-																	return value ? (
+																	const mediaValue = getStringValue(value)
+																	return mediaValue ? (
 																		<CFImage
-																			assetId={value}
+																			assetId={mediaValue}
 																			alt={field.label}
 																			width={80}
 																			height={80}
@@ -313,7 +326,7 @@ export default function ContentPage() {
 																		"-"
 																	)
 																}
-																return value || "-"
+																return getStringValue(value) || "-"
 															})()}
 														</td>
 													))}
@@ -330,9 +343,9 @@ export default function ContentPage() {
 													</td>
 													{slugField && (
 														<td className="px-6 py-4 text-grey-500 text-sm">
-															{item.data[slugField.name] ? (
+															{getStringValue(item.data[slugField.name]) ? (
 																<code className="rounded bg-grey-100 px-2 py-1 font-mono text-xs">
-																	/{item.data[slugField.name]}
+																	/{getStringValue(item.data[slugField.name])}
 																</code>
 															) : (
 																"-"
@@ -346,7 +359,7 @@ export default function ContentPage() {
 														<div className="flex items-center justify-end gap-2">
 															{item.status === "published" &&
 																slugField &&
-																item.data[slugField.name] && (
+																getStringValue(item.data[slugField.name]) && (
 																	<button
 																		type="button"
 																		className="rounded p-2 text-grey-500 transition-colors hover:bg-grey-100"
@@ -356,8 +369,8 @@ export default function ContentPage() {
 																	</button>
 																)}
 															<Link
-																href={`/content/${item._id}`}
-																className="rounded p-2 transition-colors hover:bg-primary/10"
+																href={`/content/${item._id}?schema=${selectedSchemaId}`}
+																className="rounded p-2 text-primary transition-colors hover:bg-primary/10"
 																title="Edit"
 															>
 																<Edit className="h-4 w-4" />

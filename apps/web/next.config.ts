@@ -1,8 +1,12 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+	cacheComponents: true,
 	experimental: {
 		externalDir: true,
+		browserDebugInfoInTerminal: true,
+		globalNotFound: true,
+		typedEnv: true,
 	},
 	images: {
 		// Configure allowed image qualities to fix build warnings

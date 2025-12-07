@@ -42,7 +42,7 @@ export default function AdminDashboard() {
 
 	return (
 		<div>
-			<h1 className="mb-6 font-bold text-3xl">Dashboard</h1>
+			<h1 className="mb-6 font-bold text-3xl text-primary">Dashboard</h1>
 
 			<div className="grid gap-6 md:grid-cols-3">
 				{/* Schema Stats */}
@@ -50,7 +50,9 @@ export default function AdminDashboard() {
 					<h3 className="mb-2 font-semibold text-grey-500 text-sm uppercase">
 						Total Schemas
 					</h3>
-					<p className="font-bold text-4xl">{schemas?.length || 0}</p>
+					<p className="font-bold text-4xl text-primary">
+						{schemas?.length || 0}
+					</p>
 				</div>
 
 				<div className="rounded-lg bg-white p-6 shadow">
@@ -83,7 +85,9 @@ export default function AdminDashboard() {
 
 			{/* Quick Actions */}
 			<div className="mt-8">
-				<h2 className="mb-4 font-semibold text-xl">Quick Actions</h2>
+				<h2 className="mb-4 font-semibold text-primary text-xl">
+					Quick Actions
+				</h2>
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 					<Link
 						href="/schemas/new"
@@ -122,7 +126,9 @@ export default function AdminDashboard() {
 			{/* Recent Schemas */}
 			{schemas.length > 0 && (
 				<div className="mt-8">
-					<h2 className="mb-4 font-semibold text-xl">Recent Schemas</h2>
+					<h2 className="mb-4 font-semibold text-primary text-xl">
+						Recent Schemas
+					</h2>
 					<div className="overflow-hidden rounded-lg bg-white shadow">
 						<table className="w-full">
 							<thead className="bg-grey-100">
@@ -144,7 +150,7 @@ export default function AdminDashboard() {
 							<tbody className="divide-y divide-grey-200">
 								{schemas.slice(0, 5).map((schema) => (
 									<tr key={schema._id} className="hover:bg-grey-50">
-										<td className="px-6 py-4 font-medium text-alpha-dark-900 text-sm">
+										<td className="px-6 py-4 font-medium text-primary text-sm">
 											{schema.displayName}
 										</td>
 										<td className="px-6 py-4 text-grey-500 text-sm">

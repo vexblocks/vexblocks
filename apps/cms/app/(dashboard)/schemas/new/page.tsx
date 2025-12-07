@@ -1,6 +1,7 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	ArrowDown,
@@ -23,6 +24,8 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+import { triggerTypeGeneration } from "@/lib/use-type-generation"
+import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
 
 // Utility function to generate field name from label
 function generateFieldName(label: string): string {
@@ -38,6 +41,12 @@ function generateFieldName(label: string): string {
 // Validate field name format
 function validateFieldName(name: string): boolean {
 	return /^[a-z0-9_]+$/.test(name)
+}
+
+// Check if a field type can be translatable
+// Only text-based fields make sense to translate
+function isTranslatableFieldType(type: FieldType): boolean {
+	return ["shortText", "longText", "richText", "select"].includes(type)
 }
 
 type FieldType =
@@ -91,6 +100,8 @@ type Field = {
 	slugSource?: string
 	// Track if field name has been manually edited
 	nameManuallyEdited?: boolean
+	// Localization
+	translatable?: boolean
 }
 
 // Helper to check for duplicate field names
@@ -101,6 +112,103 @@ const checkDuplicateFieldName = (
 ): boolean => {
 	return fields.some(
 		(f) => f.id !== currentFieldId && f.name === fieldName && fieldName !== "",
+	)
+}
+
+// Block type for selection
+type AvailableBlock = {
+	_id: string
+	name: string
+	displayName: string
+	description?: string
+	previewImage?: string
+	category?: string
+	fields: any[]
+}
+
+// BlockReferenceSelector component (to handle state for dialog)
+function BlockReferenceSelectorNew({
+	field,
+	fieldId,
+	parentPath,
+	availableBlocks,
+	onUpdateField,
+}: {
+	field: Field
+	fieldId: string
+	parentPath: string[]
+	availableBlocks: AvailableBlock[]
+	onUpdateField: (id: string, updates: Partial<Field>, parentPath: string[]) => void
+}) {
+	const [showBlockSelector, setShowBlockSelector] = useState(false)
+
+	const selectedBlock = availableBlocks.find((b) => b._id === field.blockId)
+
+	return (
+		<div className="md:col-span-2">
+			<label className="mb-1 block font-medium text-grey-500 text-xs">
+				Select Reusable Block <span className="text-error">*</span>
+			</label>
+			{selectedBlock ? (
+				<div className="flex items-center gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
+					{selectedBlock.previewImage ? (
+						<CFImage
+							assetId={selectedBlock.previewImage}
+							alt={selectedBlock.displayName}
+							width={64}
+							height={48}
+							variant="public"
+							className="h-12 w-16 rounded object-cover"
+						/>
+					) : (
+						<div className="flex h-12 w-16 items-center justify-center rounded bg-grey-200">
+							<Layers className="h-6 w-6 text-grey-400" />
+						</div>
+					)}
+					<div className="flex-1">
+						<p className="font-medium text-grey-900">
+							{selectedBlock.displayName}
+						</p>
+						<p className="text-grey-500 text-xs">{selectedBlock.name}</p>
+					</div>
+					<button
+						type="button"
+						onClick={() => setShowBlockSelector(true)}
+						className="rounded-lg border border-grey-300 bg-white px-3 py-1.5 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+					>
+						Change
+					</button>
+				</div>
+			) : (
+				<button
+					type="button"
+					onClick={() => setShowBlockSelector(true)}
+					className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-4 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+				>
+					<Layers className="h-5 w-5" />
+					Click to select a block
+				</button>
+			)}
+			{availableBlocks.length === 0 && (
+				<p className="mt-1 text-grey-400 text-xs">
+					No reusable blocks available.{" "}
+					<Link href="/blocks/new" className="text-primary underline">
+						Create one first
+					</Link>
+				</p>
+			)}
+
+			{showBlockSelector && (
+				<BlockSelectorDialog
+					selectedBlockId={field.blockId}
+					onSelect={(block) => {
+						onUpdateField(fieldId, { blockId: block._id }, parentPath)
+						setShowBlockSelector(false)
+					}}
+					onClose={() => setShowBlockSelector(false)}
+				/>
+			)}
+		</div>
 	)
 }
 
@@ -118,6 +226,7 @@ const FieldEditor = ({
 	availableBlocks = [],
 	allSchemas = [],
 	allFields = [],
+	hasLocales = false,
 }: {
 	field: Field
 	index: number
@@ -137,8 +246,9 @@ const FieldEditor = ({
 		parentPath: string[],
 	) => void
 	totalFields?: number
-	availableBlocks?: Array<{ _id: string; name: string; displayName: string }>
+	availableBlocks?: AvailableBlock[]
 	allSchemas?: Array<{ _id: string; name: string; displayName: string }>
+	hasLocales?: boolean
 }) => {
 	const currentPath = [...parentPath, field.id]
 	const indentClass = depth > 0 ? `ml-${depth * 4}` : ""
@@ -262,21 +372,21 @@ const FieldEditor = ({
 							placeholder="post_title"
 							className={`w-full rounded border px-3 py-2 text-sm ${
 								isDuplicate || (!validateFieldName(field.name) && field.name)
-									? "border-teal-500"
+									? "border-red-500"
 									: "border-grey-300"
 							}`}
 						/>
 						<div className="-mt-3 absolute top-full left-0">
 							{isDuplicate ? (
-								<p className="text-teal-500 text-xs">
+								<p className="text-red-500 text-xs">
 									⚠️ Duplicate field name - must be unique
 								</p>
 							) : field.name && !validateFieldName(field.name) ? (
-								<p className="text-teal-500 text-xs">
+								<p className="text-red-500 text-xs">
 									Only lowercase letters, numbers, and underscores allowed
 								</p>
 							) : !field.nameManuallyEdited && field.label ? (
-								<p className="text-teal-600 text-xs">
+								<p className="text-blue-600 text-xs">
 									✨ Auto-generated from "Label"
 								</p>
 							) : null}
@@ -336,7 +446,7 @@ const FieldEditor = ({
 						)}
 					</div>
 
-					<div className="flex items-end">
+					<div className="flex items-end gap-6">
 						<label
 							htmlFor={`field-required-${field.id}`}
 							className="flex items-center gap-2"
@@ -358,6 +468,27 @@ const FieldEditor = ({
 							/>
 							<span className="text-grey-500 text-sm">Required</span>
 						</label>
+						{hasLocales && isTranslatableFieldType(field.type) && (
+							<label
+								htmlFor={`field-translatable-${field.id}`}
+								className="flex items-center gap-2"
+							>
+								<input
+									id={`field-translatable-${field.id}`}
+									type="checkbox"
+									checked={field.translatable ?? false}
+									onChange={(e) =>
+										onUpdateField(
+											field.id,
+											{ translatable: e.target.checked },
+											parentPath,
+										)
+									}
+									className="h-4 w-4 rounded border-grey-300 accent-blue-600"
+								/>
+								<span className="text-blue-700 text-sm">Translatable</span>
+							</label>
+						)}
 					</div>
 
 					{field.type === "select" && (
@@ -546,47 +677,18 @@ const FieldEditor = ({
 					)}
 
 					{field.type === "blockReference" && (
-						<div className="md:col-span-2">
-							<label
-								htmlFor={`field-blockId-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
-							>
-								Select Reusable Block <span className="text-error">*</span>
-							</label>
-							<select
-								id={`field-blockId-${field.id}`}
-								value={field.blockId || ""}
-								onChange={(e) =>
-									onUpdateField(
-										field.id,
-										{ blockId: e.target.value },
-										parentPath,
-									)
-								}
-								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
-								required={field.type === "blockReference"}
-							>
-								<option value="">-- Select a block --</option>
-								{availableBlocks.map((block) => (
-									<option key={block._id} value={block._id}>
-										{block.displayName} ({block.name})
-									</option>
-								))}
-							</select>
-							{availableBlocks.length === 0 && (
-								<p className="mt-1 text-grey-400 text-xs">
-									No reusable blocks available.{" "}
-									<Link href="/blocks/new" className="text-primary underline">
-										Create one first
-									</Link>
-								</p>
-							)}
-						</div>
+						<BlockReferenceSelectorNew
+							field={field}
+							fieldId={field.id}
+							parentPath={parentPath}
+							availableBlocks={availableBlocks}
+							onUpdateField={onUpdateField}
+						/>
 					)}
 
 					{field.type === "shortText" && depth === 0 && (
 						<div className="space-y-3 md:col-span-2">
-							<div className="flex items-center gap-3 rounded border border-teal-200 bg-teal-50 p-3">
+							<div className="flex items-center gap-3 rounded border border-blue-200 bg-blue-50 p-3">
 								<input
 									type="checkbox"
 									id={`field-isSlug-${field.id}`}
@@ -606,7 +708,7 @@ const FieldEditor = ({
 								/>
 								<label
 									htmlFor={`field-isSlug-${field.id}`}
-									className="cursor-pointer text-teal-800 text-sm"
+									className="cursor-pointer text-blue-800 text-sm"
 								>
 									<strong>Use as Slug Field</strong> - Auto-generate
 									URL-friendly slugs
@@ -717,6 +819,7 @@ const FieldEditor = ({
 										availableBlocks={availableBlocks || []}
 										allSchemas={allSchemas || []}
 										allFields={allFields}
+										hasLocales={hasLocales}
 									/>
 								))}
 							</div>
@@ -739,6 +842,12 @@ export default function NewSchemaPage() {
 	const createSchema = useMutation(api.cms.schemas.create)
 	const availableBlocks = useQuery(api.cms.blocks.list)
 	const allSchemas = useQuery(api.cms.schemas.list)
+	const localizationSettings = useQuery(api.settings.get, {
+		key: "localization",
+	})
+
+	// Check if locales are configured
+	const hasLocales = (localizationSettings as any)?.locales?.length > 0 || false
 
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
@@ -1051,6 +1160,11 @@ export default function NewSchemaPage() {
 				}
 			}
 
+			// Localization - mark field as translatable
+			if (f.translatable) {
+				mappedField.translatable = f.translatable
+			}
+
 			// Recursively include nested fields for group and repeater types
 			if ((f.type === "group" || f.type === "repeater") && f.fields) {
 				mappedField.fields = mapFieldsForSave(f.fields)
@@ -1155,6 +1269,9 @@ export default function NewSchemaPage() {
 				fields: mapFieldsForSave(fields),
 			})
 
+			// Trigger type generation in development
+			triggerTypeGeneration()
+
 			// Redirect to schema detail
 			router.push(`/schemas/${schemaId}`)
 		} catch (err) {
@@ -1177,7 +1294,7 @@ export default function NewSchemaPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl">Create New Schema</h1>
+				<h1 className="font-bold text-3xl text-primary">Create New Schema</h1>
 				<p className="mt-2 text-grey-500">
 					Define a new content type for your CMS
 				</p>
@@ -1192,7 +1309,9 @@ export default function NewSchemaPage() {
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Basic Info */}
 				<div className="rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-lg">Basic Information</h2>
+					<h2 className="mb-4 font-semibold text-lg text-primary">
+						Basic Information
+					</h2>
 
 					<div className="space-y-4">
 						<div>
@@ -1238,18 +1357,18 @@ export default function NewSchemaPage() {
 								placeholder="blog_posts"
 								className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
 									!validateFieldName(name) && name
-										? "border-teal-500"
+										? "border-red-500"
 										: "border-grey-300"
 								}`}
 								required
 							/>
 							<div className="-mt-3 absolute top-full left-0">
 								{name && !validateFieldName(name) ? (
-									<p className="text-teal-500 text-xs">
+									<p className="text-red-500 text-xs">
 										Only lowercase letters, numbers, and underscores allowed
 									</p>
 								) : !hasEditedName && displayName ? (
-									<p className="text-teal-600 text-xs">
+									<p className="text-blue-600 text-xs">
 										✨ Auto-generated from "Display Name"
 									</p>
 								) : (
@@ -1308,7 +1427,7 @@ export default function NewSchemaPage() {
 				{/* Fields */}
 				<div className="rounded-lg bg-white p-6 shadow">
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-lg">
+						<h2 className="font-semibold text-lg text-primary">
 							Fields <span className="text-error">*</span>
 						</h2>
 						<button
@@ -1344,6 +1463,7 @@ export default function NewSchemaPage() {
 									availableBlocks={availableBlocks || []}
 									allSchemas={allSchemas || []}
 									allFields={fields}
+									hasLocales={hasLocales}
 								/>
 							))}
 						</div>

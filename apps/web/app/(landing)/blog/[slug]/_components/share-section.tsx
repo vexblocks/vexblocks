@@ -14,7 +14,7 @@ export function ShareSection({ title, slug }: ShareSectionProps) {
 
 	const shareUrl =
 		typeof window !== "undefined"
-			? `${window.location.origin}/content-library/${slug}`
+			? `${window.location.origin}/blog/${slug}`
 			: ""
 
 	const handleCopyLink = async () => {

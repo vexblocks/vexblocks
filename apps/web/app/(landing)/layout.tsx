@@ -1,22 +1,26 @@
-import { Toaster } from "sonner";
-
-import { Footer } from "@/components/organisms/footer";
-import { StickyHeader } from "@/components/organisms/sticky-header";
+import { PreviewBanner, PreviewProvider, VisualEditing } from "@repo/cms-shared"
+import { Toaster } from "sonner"
+import { Footer } from "@/components/organisms/footer"
+import { StickyHeader } from "@/components/organisms/sticky-header"
 
 export default function LandingLayout({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode
 }) {
-  return (
-    <main>
-      <StickyHeader />
+	return (
+		<PreviewProvider>
+			{/* VisualEditing handles clicks on data-cms-field elements globally */}
+			<VisualEditing />
+			<PreviewBanner />
+			<main>
+				<StickyHeader />
 
-      {children}
+				{children}
 
-      <Footer />
-
-      <Toaster />
-    </main>
-  );
+				<Footer />
+				<Toaster />
+			</main>
+		</PreviewProvider>
+	)
 }

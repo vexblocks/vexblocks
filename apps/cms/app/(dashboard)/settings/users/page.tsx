@@ -87,11 +87,11 @@ export default function UsersPage() {
 	const getRoleBadgeColor = (role: UserRole) => {
 		switch (role) {
 			case "admin":
-				return "bg-teal-100 text-teal-700"
+				return "bg-red-100 text-red-700"
 			case "editor":
-				return "bg-teal-50 text-teal-700"
+				return "bg-blue-100 text-blue-700"
 			case "developer":
-				return "bg-teal-100 text-teal-800"
+				return "bg-purple-100 text-purple-700"
 			default:
 				return "bg-grey-100 text-grey-700"
 		}
@@ -118,14 +118,14 @@ export default function UsersPage() {
 					</Link>
 				</div>
 
-				<div className="rounded-lg border-2 border-red-200 bg-teal-50 p-8 text-center">
-					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-teal-100">
-						<Shield className="h-8 w-8 text-teal-600" />
+				<div className="rounded-lg border-2 border-red-200 bg-red-50 p-8 text-center">
+					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+						<Shield className="h-8 w-8 text-red-600" />
 					</div>
-					<h2 className="mb-2 font-bold text-2xl text-teal-900">
+					<h2 className="mb-2 font-bold text-2xl text-red-900">
 						Access Denied
 					</h2>
-					<p className="mb-6 text-teal-700">
+					<p className="mb-6 text-red-700">
 						You don't have permission to access user management. This feature is
 						only available to administrators.
 					</p>
@@ -165,7 +165,7 @@ export default function UsersPage() {
 			</div>
 
 			<div className="mb-8">
-				<h1 className="font-bold text-3xl">User Management</h1>
+				<h1 className="font-bold text-3xl text-primary">User Management</h1>
 				<p className="mt-2 text-grey-500">
 					Manage user accounts, roles, and permissions
 				</p>
@@ -188,33 +188,33 @@ export default function UsersPage() {
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-grey-500 text-sm">Admins</p>
-							<p className="mt-1 font-bold text-2xl text-teal-700">
+							<p className="mt-1 font-bold text-2xl text-red-700">
 								{stats.admins}
 							</p>
 						</div>
-						<Shield className="h-8 w-8 text-teal-500" />
+						<Shield className="h-8 w-8 text-red-500" />
 					</div>
 				</div>
 				<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-grey-500 text-sm">Editors</p>
-							<p className="mt-1 font-bold text-2xl text-teal-700">
+							<p className="mt-1 font-bold text-2xl text-blue-700">
 								{stats.editors}
 							</p>
 						</div>
-						<Edit className="h-8 w-8 text-teal-500" />
+						<Edit className="h-8 w-8 text-blue-500" />
 					</div>
 				</div>
 				<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-grey-500 text-sm">Developers</p>
-							<p className="mt-1 font-bold text-2xl text-teal-800">
+							<p className="mt-1 font-bold text-2xl text-purple-700">
 								{stats.developers}
 							</p>
 						</div>
-						<Shield className="h-8 w-8 text-teal-600" />
+						<Shield className="h-8 w-8 text-purple-500" />
 					</div>
 				</div>
 			</div>
@@ -294,7 +294,7 @@ export default function UsersPage() {
 											<button
 												type="button"
 												onClick={() => setDeletingUser(user)}
-												className="rounded p-2 text-grey-500 transition-colors hover:bg-teal-50 hover:text-error"
+												className="rounded p-2 text-grey-500 transition-colors hover:bg-red-50 hover:text-error"
 												title="Delete user"
 											>
 												<Trash2 className="h-4 w-4" />
@@ -315,7 +315,7 @@ export default function UsersPage() {
 						<h2 className="mb-4 font-bold text-primary text-xl">Edit User</h2>
 
 						{error && (
-							<div className="mb-4 rounded-lg bg-teal-50 p-3">
+							<div className="mb-4 rounded-lg bg-red-50 p-3">
 								<p className="text-error text-sm">{error}</p>
 							</div>
 						)}
@@ -402,7 +402,7 @@ export default function UsersPage() {
 						</div>
 
 						{error && (
-							<div className="mb-4 rounded-lg bg-teal-50 p-3">
+							<div className="mb-4 rounded-lg bg-red-50 p-3">
 								<p className="text-error text-sm">{error}</p>
 							</div>
 						)}

@@ -1,135 +1,119 @@
-"use client";
-
-import type {
-  ContentAuthorsContent,
-  ContentLibraryContent,
-} from "@repo/cms-shared";
-import { CFImage } from "@repo/cms-shared";
-import { useQuery } from "convex/react";
-import { api } from "vexblocks-backend/convex/_generated/api";
-import type { Id } from "vexblocks-backend/convex/_generated/dataModel";
-import Link from "next/link";
+import type { BlogPostsContent } from "@repo/cms-shared"
+import { CFImage, getStringValue } from "@repo/cms-shared"
+import Link from "next/link"
 
 type FeaturedPostProps = {
-  post: ContentLibraryContent;
-};
+	post: BlogPostsContent
+	authorName?: string | null
+}
 
-export function FeaturedPost({ post }: FeaturedPostProps) {
-  // Handle author data - can be either an ID string or embedded object
-  const authorData = post.data.author;
-  const isAuthorString = typeof authorData === "string";
+/**
+ * FeaturedPost - Server Component
+ * No client-side data fetching, all data passed as props
+ */
+export function FeaturedPost({ post, authorName }: FeaturedPostProps) {
+	// Extract short description from first richText block
+	const richTextBlock = post.data.blocks?.find(
+		(block: { type: string }) => block.type === "richText",
+	)
 
-  // Always call useQuery, but conditionally skip it
-  const fetchedAuthor = useQuery(
-    api.cms.content.getPublishedById,
-    isAuthorString && authorData
-      ? { id: authorData as Id<"cmsContent"> }
-      : "skip"
-  ) as ContentAuthorsContent | null | undefined;
+	// Handle both normalized (value) and non-normalized (data) formats
+	const lexicalJson = richTextBlock
+		? ((richTextBlock as { value?: string; data?: string }).value ??
+			(richTextBlock as { value?: string; data?: string }).data)
+		: null
 
-  // Determine which author data to use
-  const author: ContentAuthorsContent | null | undefined = isAuthorString
-    ? fetchedAuthor
-    : (authorData as ContentAuthorsContent);
+	const shortDescription = lexicalJson
+		? extractTextFromLexical(lexicalJson)
+		: ""
 
-  // Extract short description from first richText block
-  const richTextBlock = post.data.blocks?.find(
-    (block: any) => block.type === "richText"
-  );
+	const title = getStringValue(post.data.title)
 
-  // Handle both normalized (value) and non-normalized (data) formats
-  const lexicalJson = richTextBlock
-    ? (richTextBlock as any).value || (richTextBlock as any).data
-    : null;
+	return (
+		<Link href={`/blog/${post.data.slug || post.slug}`} className="group block">
+			<article className="grid gap-8 md:grid-cols-2 md:gap-12">
+				{/* Image */}
+				<div className="relative aspect-16/10 overflow-hidden rounded-2xl bg-gray-200">
+					{post.data.featured_image ? (
+						<CFImage
+							assetId={post.data.featured_image}
+							alt={title || "Featured post"}
+							width={800}
+							height={500}
+							className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+						/>
+					) : (
+						<div className="flex h-full w-full items-center justify-center text-gray-400">
+							No image
+						</div>
+					)}
+				</div>
 
-  const shortDescription = lexicalJson
-    ? extractTextFromLexical(lexicalJson)
-    : "";
+				{/* Content */}
+				<div className="flex flex-col justify-center">
+					<div className="mb-3 inline-flex items-center gap-2">
+						<span className="rounded-full bg-purple-100 px-3 py-1 font-medium text-purple-700 text-sm">
+							Featured
+						</span>
+					</div>
 
-  return (
-    <Link
-      href={`/content-library/${post.data.slug || post.slug}`}
-      className="group block"
-    >
-      <article className="grid gap-8 md:grid-cols-2 md:gap-12">
-        {/* Image */}
-        <div className="relative aspect-16/10 overflow-hidden rounded-2xl bg-gray-200">
-          {post.data.featured_image ? (
-            <CFImage
-              assetId={post.data.featured_image}
-              alt={post.data.title || "Featured post"}
-              width={800}
-              height={500}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-400">
-              No image
-            </div>
-          )}
-        </div>
+					<h2 className="mb-4 font-normal font-serif text-3xl text-gray-900 transition-colors group-hover:text-purple-600 md:text-4xl lg:text-5xl">
+						{title}
+					</h2>
 
-        {/* Content */}
-        <div className="flex flex-col justify-center">
-          <div className="mb-3 inline-flex items-center gap-2">
-            <span className="rounded-full bg-teal-50 px-3 py-1 font-medium text-teal-700 text-sm">
-              Featured
-            </span>
-          </div>
+					{shortDescription && (
+						<p className="mb-6 line-clamp-3 text-gray-600 text-lg">
+							{shortDescription}
+						</p>
+					)}
 
-          <h2 className="mb-4 font-normal font-serif text-3xl text-gray-900 transition-colors group-hover:text-teal-700 md:text-4xl lg:text-5xl">
-            {post.data.title}
-          </h2>
-
-          {shortDescription && (
-            <p className="mb-6 line-clamp-3 text-gray-600 text-lg">
-              {shortDescription}
-            </p>
-          )}
-
-          <div className="flex items-center gap-4 text-gray-500 text-sm">
-            {author && <span className="font-medium">{author.data.name}</span>}
-            <time dateTime={new Date(post._creationTime).toISOString()}>
-              {new Date(post._creationTime).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </time>
-          </div>
-        </div>
-      </article>
-    </Link>
-  );
+					<div className="flex items-center gap-4 text-gray-500 text-sm">
+						{authorName && <span className="font-medium">{authorName}</span>}
+						<time dateTime={new Date(post._creationTime).toISOString()}>
+							{new Date(post._creationTime).toLocaleDateString("en-US", {
+								year: "numeric",
+								month: "long",
+								day: "numeric",
+							})}
+						</time>
+					</div>
+				</div>
+			</article>
+		</Link>
+	)
 }
 
 // Helper function to extract text from Lexical JSON
 function extractTextFromLexical(lexicalJson: string): string {
-  try {
-    const parsed = JSON.parse(lexicalJson);
-    const root = parsed.root;
+	try {
+		const parsed = JSON.parse(lexicalJson)
+		const root = parsed.root
 
-    if (!root || !root.children) return "";
+		if (!root || !root.children) return ""
 
-    let text = "";
-    const extractFromNode = (node: any): void => {
-      if (node.type === "text" && node.text) {
-        text += `${node.text} `;
-      }
-      if (node.children && Array.isArray(node.children)) {
-        for (const child of node.children) {
-          extractFromNode(child);
-        }
-      }
-    };
+		let text = ""
+		const extractFromNode = (node: {
+			type?: string
+			text?: string
+			children?: unknown[]
+		}): void => {
+			if (node.type === "text" && node.text) {
+				text += `${node.text} `
+			}
+			if (node.children && Array.isArray(node.children)) {
+				for (const child of node.children) {
+					extractFromNode(child as typeof node)
+				}
+			}
+		}
 
-    for (const child of root.children) {
-      extractFromNode(child);
-      if (text.length > 250) break; // Stop early if we have enough text
-    }
+		for (const child of root.children) {
+			extractFromNode(child)
+			if (text.length > 250) break // Stop early if we have enough text
+		}
 
-    return text.trim();
-  } catch {
-    return "";
-  }
+		return text.trim()
+	} catch {
+		return ""
+	}
 }

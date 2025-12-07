@@ -1,6 +1,7 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { Layers, Plus } from "lucide-react"
 import Link from "next/link"
@@ -46,7 +47,7 @@ export default function BlocksPage() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl">Reusable Blocks</h1>
+					<h1 className="font-bold text-3xl text-primary">Reusable Blocks</h1>
 					<p className="mt-2 text-grey-500">
 						Create and manage reusable components for your content
 					</p>
@@ -87,42 +88,59 @@ export default function BlocksPage() {
 								</h2>
 								<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 									{categoryBlocks.map((block) => (
-										<Link
+										<div
 											key={block._id}
-											href={`/blocks/${block._id}`}
-											className="group rounded-lg border border-grey-200 bg-white p-6 shadow-sm transition-all hover:border-primary hover:shadow-md"
+											className="group flex flex-col overflow-hidden rounded-lg border border-grey-200 bg-white shadow-sm transition-all hover:border-primary hover:shadow-md"
 										>
-											<div className="mb-3 flex items-start justify-between">
-												<div className="flex items-center gap-3">
-													{block.icon ? (
-														<span className="text-2xl">{block.icon}</span>
-													) : (
-														<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-															<Layers className="h-5 w-5 text-primary" />
-														</div>
-													)}
-													<div>
+											<Link href={`/blocks/${block._id}`} className="flex-1">
+												{/* Preview Image */}
+												{block.previewImage ? (
+													<div className="relative h-32 w-full overflow-hidden bg-grey-100">
+														<CFImage
+															assetId={block.previewImage}
+															alt={block.displayName}
+															fill
+															variant="public"
+															className="object-cover transition-transform group-hover:scale-105"
+														/>
+													</div>
+												) : (
+													<div className="flex h-32 w-full items-center justify-center bg-grey-50">
+														<Layers className="h-12 w-12 text-grey-300" />
+													</div>
+												)}
+												<div className="p-4">
+													<div className="mb-2 flex items-center gap-2">
+														{block.icon && (
+															<span className="text-lg">{block.icon}</span>
+														)}
 														<h3 className="font-semibold text-grey-900 text-lg group-hover:text-primary">
 															{block.displayName}
 														</h3>
-														<p className="text-grey-400 text-xs">
-															{block.fields.length} field
-															{block.fields.length !== 1 ? "s" : ""}
-														</p>
 													</div>
+													<p className="mb-2 text-grey-400 text-xs">
+														{block.fields.length} field
+														{block.fields.length !== 1 ? "s" : ""}
+													</p>
+													{block.description && (
+														<p className="line-clamp-2 text-grey-500 text-sm">
+															{block.description}
+														</p>
+													)}
 												</div>
-											</div>
-											{block.description && (
-												<p className="line-clamp-2 text-grey-500 text-sm">
-													{block.description}
-												</p>
-											)}
-											<div className="mt-3 border-grey-200 border-t pt-3">
+											</Link>
+											<div className="flex items-center justify-between border-grey-200 border-t px-4 py-3">
 												<code className="rounded bg-grey-100 px-2 py-1 font-mono text-grey-600 text-xs">
 													{block.name}
 												</code>
+												<Link
+													href={`/blocks/${block._id}?mode=edit`}
+													className="font-medium text-primary text-sm hover:underline"
+												>
+													Edit →
+												</Link>
 											</div>
-										</Link>
+										</div>
 									))}
 								</div>
 							</div>

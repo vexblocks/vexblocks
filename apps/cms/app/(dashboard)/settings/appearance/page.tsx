@@ -22,7 +22,7 @@ export default function AppearanceSettingsPage() {
 	const updateSettings = useMutation(api.settings.update)
 
 	const [dashboardName, setDashboardName] = useState("VexBlocks")
-	const [primaryColor, setPrimaryColor] = useState("#108e88") // Default teal-600
+	const [primaryColor, setPrimaryColor] = useState("#3b82f6") // Default blue-500
 	const [logoId, setLogoId] = useState<Id<"cmsMedia"> | null>(null)
 	const [showMediaPicker, setShowMediaPicker] = useState(false)
 	const [showUploader, setShowUploader] = useState(false)
@@ -82,7 +82,7 @@ export default function AppearanceSettingsPage() {
 					<ChevronLeft className="h-4 w-4" />
 					Back to Settings
 				</Link>
-				<h1 className="font-bold text-3xl">Appearance</h1>
+				<h1 className="font-bold text-3xl text-primary">Appearance</h1>
 				<p className="mt-2 text-grey-500">
 					Customize the look and feel of your admin dashboard
 				</p>
@@ -220,7 +220,9 @@ export default function AppearanceSettingsPage() {
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 					<div className="flex h-[80vh] w-full max-w-5xl flex-col rounded-lg bg-white shadow-xl">
 						<div className="flex items-center justify-between border-grey-200 border-b p-4">
-							<h3 className="font-semibold text-lg">Select Logo</h3>
+							<h3 className="font-semibold text-lg text-primary">
+								Select Logo
+							</h3>
 							<button
 								type="button"
 								onClick={() => setShowMediaPicker(false)}
@@ -246,7 +248,9 @@ export default function AppearanceSettingsPage() {
 			{showUploader && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 					<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-						<h2 className="mb-4 font-semibold text-lg">Upload Logo</h2>
+						<h2 className="mb-4 font-semibold text-lg text-primary">
+							Upload Logo
+						</h2>
 						<MediaUploader
 							onUploadComplete={(media) => {
 								setShowUploader(false)

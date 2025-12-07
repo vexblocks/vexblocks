@@ -15,7 +15,7 @@ export default function MediaPage() {
 			{/* Header */}
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl">Media Center</h1>
+					<h1 className="font-bold text-3xl text-primary">Media Center</h1>
 					<p className="mt-2 text-grey-500">
 						Manage images and media files for your content
 					</p>
@@ -49,7 +49,9 @@ export default function MediaPage() {
 			{showUploader && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 					<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-						<h2 className="mb-4 font-semibold text-lg">Upload New Image</h2>
+						<h2 className="mb-4 font-semibold text-lg text-primary">
+							Upload New Image
+						</h2>
 						<MediaUploader
 							onUploadComplete={() => setShowUploader(false)}
 							onCancel={() => setShowUploader(false)}

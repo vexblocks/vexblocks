@@ -20,6 +20,19 @@ echo "CONVEX_URL=https://your-deployment.convex.cloud" > ../../.env
 pnpm generate-types
 ```
 
+## Automatic Type Generation (Development)
+
+In development mode, types are automatically regenerated when schemas are created, updated, or deleted in the admin panel.
+
+### How it works
+
+1. When a schema is created/updated/deleted in the admin panel
+2. The admin frontend calls the `/api/generate-types` endpoint
+3. The endpoint runs the type generator
+4. Types are regenerated in `packages/cms-shared/src/types/generated.ts`
+
+This happens automatically - no configuration needed!
+
 ## What it does
 
 - Fetches all CMS schemas from Convex
@@ -69,6 +82,6 @@ function getContent<T extends CMSSchemaName>(
 
 ## When to Run
 
-- **Automatically**: Runs before `dev` and `build` scripts
-- **Manually**: Run `pnpm generate-types` when schemas change
-
+- **Automatically (Development)**: Types regenerate when schemas change in the admin panel
+- **Manually**: Run `pnpm generate-types` when needed
+- **Build time**: Runs before `dev` and `build` scripts
