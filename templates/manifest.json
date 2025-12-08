@@ -1,0 +1,116 @@
+{
+	"$schema": "https://vexblocks.dev/schema/manifest.json",
+	"version": "1.0.0",
+	"packages": {
+		"cms": {
+			"version": "1.0.0",
+			"description": "VexBlocks CMS Dashboard - Next.js admin interface",
+			"path": "apps/cms",
+			"dependencies": {
+				"@convex-dev/better-auth": "0.9.11",
+				"@convex-dev/react-query": "0.1.0",
+				"@lexical/link": "^0.38.2",
+				"@lexical/list": "^0.38.2",
+				"@lexical/react": "^0.38.2",
+				"@lexical/rich-text": "^0.38.2",
+				"@lexical/selection": "^0.38.2",
+				"@radix-ui/react-dialog": "^1.1.15",
+				"@tanstack/react-query": "^5.90.11",
+				"better-auth": "1.3.34",
+				"class-variance-authority": "^0.7.1",
+				"clsx": "^2.1.1",
+				"compressorjs": "^1.2.1",
+				"convex": "^1.30.0",
+				"geist": "^1.5.1",
+				"input-otp": "^1.4.2",
+				"lexical": "^0.38.2",
+				"lucide-react": "^0.555.0",
+				"nanoid": "^5.1.6",
+				"next": "16.0.7",
+				"react": "^19.2.1",
+				"react-dom": "^19.2.1",
+				"sonner": "^2.0.7",
+				"tailwind-merge": "^3.4.0",
+				"tailwindcss-animate": "^1.0.7"
+			},
+			"peerDependencies": ["backend", "shared"]
+		},
+		"backend": {
+			"version": "1.0.0",
+			"description": "Convex backend with CMS functions and Better Auth",
+			"path": "packages/backend",
+			"dependencies": {
+				"@convex-dev/better-auth": "^0.9.11",
+				"@convex-dev/migrations": "^0.3.1",
+				"@convex-dev/resend": "^0.2.0",
+				"better-auth": "1.3.34",
+				"convex": "^1.30.0",
+				"convex-helpers": "^0.1.106",
+				"zod": "^4.1.13"
+			}
+		},
+		"shared": {
+			"version": "1.0.0",
+			"description": "Shared utilities, components, and preview SDK",
+			"path": "packages/cms-shared",
+			"dependencies": {
+				"next": "^16.0.7",
+				"react": "^19.2.1"
+			}
+		},
+		"types": {
+			"version": "1.0.0",
+			"description": "TypeScript type generator for CMS schemas",
+			"path": "packages/type-generator",
+			"dependencies": {
+				"convex": "^1.28.2"
+			},
+			"peerDependencies": ["backend"]
+		}
+	},
+	"changelog": {
+		"1.0.0": [
+			"Initial release",
+			"CMS Dashboard with schema builder",
+			"Content management with drafts and publishing",
+			"Media library with Cloudflare Images",
+			"Live preview support",
+			"Multi-language (i18n) support",
+			"Flexible blocks for dynamic content",
+			"Better Auth integration",
+			"TypeScript type generation"
+		]
+	},
+	"requiredEnvVars": {
+		"cms": [
+			"CONVEX_DEPLOYMENT",
+			"NEXT_PUBLIC_CONVEX_URL",
+			"SITE_URL"
+		],
+		"backend": [
+			"CONVEX_DEPLOYMENT",
+			"NEXT_PUBLIC_CONVEX_URL",
+			"SITE_URL"
+		]
+	},
+	"optionalEnvVars": {
+		"backend": [
+			{
+				"name": "CLOUDFLARE_ACCOUNT_ID",
+				"description": "Required for media library (Cloudflare Images)"
+			},
+			{
+				"name": "CLOUDFLARE_SECRET_TOKEN",
+				"description": "Required for media library (Cloudflare Images)"
+			},
+			{
+				"name": "REVALIDATE_SECRET",
+				"description": "Required for ISR revalidation webhooks"
+			},
+			{
+				"name": "FRONTEND_URL",
+				"description": "Your frontend URL for revalidation"
+			}
+		]
+	}
+}

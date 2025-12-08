@@ -1,0 +1,250 @@
+import path from "node:path"
+import fs from "fs-extra"
+import pc from "picocolors"
+import ora from "ora"
+import { confirm } from "@inquirer/prompts"
+import { logger } from "../utils/logger.js"
+import { readManifest, writeManifest, type PackageConfig } from "../utils/manifest.js"
+import {
+	getLatestVersion,
+	getChangelog,
+	compareVersions,
+	downloadAndExtractPackage,
+} from "../utils/github.js"
+import { createBackup } from "../utils/fs.js"
+import { PACKAGE_NAMES, MANAGED_PACKAGES } from "../utils/constants.js"
+
+type PackageName = "cms" | "backend" | "shared" | "types"
+
+interface UpgradeOptions {
+	yes?: boolean
+	cwd?: string
+	check?: boolean
+	force?: boolean
+}
+
+export async function upgradeCommand(
+	packages: string[],
+	options: UpgradeOptions,
+): Promise<void> {
+	const cwd = options.cwd ? path.resolve(options.cwd) : process.cwd()
+
+	logger.title("⬆️  Upgrade VexBlocks Packages")
+
+	// Read manifest
+	const manifest = await readManifest(cwd)
+	if (!manifest) {
+		logger.error("No vexblocks.json found. Run `vexblocks init` first.")
+		process.exit(1)
+	}
+
+	// Get latest version
+	const spinner = ora("Checking for updates...").start()
+	const latestVersion = await getLatestVersion()
+	spinner.stop()
+
+	// Determine which packages to check
+	const installedPackages = Object.keys(manifest.packages) as PackageName[]
+
+	if (installedPackages.length === 0) {
+		logger.info("No packages installed. Run `vexblocks add <package>` first.")
+		return
+	}
+
+	let packagesToUpgrade: PackageName[]
+
+	if (packages.length === 0) {
+		packagesToUpgrade = installedPackages
+	} else {
+		packagesToUpgrade = packages.filter((p) =>
+			installedPackages.includes(p as PackageName),
+		) as PackageName[]
+
+		if (packagesToUpgrade.length === 0) {
+			logger.error("None of the specified packages are installed.")
+			return
+		}
+	}
+
+	// Check for updates
+	const updates: { pkg: PackageName; from: string; to: string }[] = []
+
+	for (const pkg of packagesToUpgrade) {
+		const config = manifest.packages[pkg]
+		if (!config) continue
+
+		const comparison = compareVersions(config.version, latestVersion)
+		if (comparison < 0) {
+			updates.push({
+				pkg,
+				from: config.version,
+				to: latestVersion,
+			})
+		}
+	}
+
+	if (updates.length === 0) {
+		logger.success("All packages are up to date!")
+		logger.info(`Current version: ${pc.cyan(latestVersion)}`)
+		return
+	}
+
+	// Show available updates
+	logger.log(pc.bold("\nAvailable updates:"))
+	logger.break()
+
+	for (const update of updates) {
+		const isManaged = MANAGED_PACKAGES.includes(update.pkg as any)
+		logger.log(
+			`  ${PACKAGE_NAMES[update.pkg]}`,
+			pc.dim(`${update.from} → `),
+			pc.green(update.to),
+			isManaged ? pc.yellow(" (managed)") : "",
+		)
+	}
+
+	// Show changelog
+	const changelog = await getChangelog(updates[0].from, latestVersion)
+	if (Object.keys(changelog).length > 0) {
+		logger.break()
+		logger.log(pc.bold("Changelog:"))
+		for (const [version, changes] of Object.entries(changelog)) {
+			logger.log(`\n  ${pc.cyan(version)}`)
+			for (const change of changes) {
+				logger.log(`    ${pc.dim("•")} ${change}`)
+			}
+		}
+	}
+
+	// Check only mode
+	if (options.check) {
+		logger.break()
+		logger.info(
+			`Run ${pc.cyan("npx vexblocks upgrade")} to apply these updates.`,
+		)
+		return
+	}
+
+	// Confirm upgrade
+	logger.break()
+	const proceed =
+		options.yes ||
+		(await confirm({
+			message: `Upgrade ${updates.length} package(s)?`,
+			default: true,
+		}))
+
+	if (!proceed) {
+		logger.info("Aborted.")
+		return
+	}
+
+	// Perform upgrades
+	for (const update of updates) {
+		await upgradePackage(cwd, update.pkg, update.to, manifest, options)
+	}
+
+	// Update manifest version
+	manifest.version = latestVersion
+	await writeManifest(cwd, manifest)
+
+	logger.break()
+	logger.success(`Upgraded to version ${pc.cyan(latestVersion)}`)
+	logger.info("Run your package manager's install command to update dependencies.")
+}
+
+async function upgradePackage(
+	cwd: string,
+	pkg: PackageName,
+	version: string,
+	manifest: ReturnType<typeof readManifest> extends Promise<infer T> ? NonNullable<T> : never,
+	options: UpgradeOptions,
+): Promise<void> {
+	const spinner = ora(`Upgrading ${PACKAGE_NAMES[pkg]}...`).start()
+
+	try {
+		const config = manifest.packages[pkg]
+		if (!config) {
+			spinner.skip(`${PACKAGE_NAMES[pkg]} not installed`)
+			return
+		}
+
+		const targetPath = path.join(cwd, config.path)
+
+		// Check if package exists
+		if (!(await fs.pathExists(targetPath))) {
+			spinner.warn(`${PACKAGE_NAMES[pkg]} directory not found at ${config.path}`)
+			return
+		}
+
+		// For managed packages, create backup and replace entirely
+		const isManaged = MANAGED_PACKAGES.includes(pkg as any)
+
+		if (isManaged || options.force) {
+			// Create backup
+			const backupPath = await createBackup(targetPath)
+			spinner.text = `Created backup at ${path.basename(backupPath)}`
+
+			// Remove existing
+			await fs.remove(targetPath)
+
+			// Download new version
+			const sourcePath = getSourcePath(pkg)
+			await downloadAndExtractPackage(sourcePath, targetPath, (file) => {
+				spinner.text = `Upgrading ${PACKAGE_NAMES[pkg]}... ${pc.dim(file)}`
+			})
+		} else {
+			// For non-managed packages (backend), only update CMS-specific files
+			spinner.text = `Upgrading CMS files in ${PACKAGE_NAMES[pkg]}...`
+
+			const cmsFiles = ["convex/cms", "convex/schema.cms.ts"]
+
+			for (const file of cmsFiles) {
+				const targetFilePath = path.join(targetPath, file)
+				const sourceFilePath = `packages/backend/${file}`
+
+				// Create backup
+				if (await fs.pathExists(targetFilePath)) {
+					await createBackup(targetFilePath)
+				}
+
+				// Download new version
+				try {
+					await fs.remove(targetFilePath)
+					await downloadAndExtractPackage(sourceFilePath, targetFilePath)
+				} catch {
+					// Skip if file doesn't exist in source
+				}
+			}
+		}
+
+		// Update manifest
+		const newConfig: PackageConfig = {
+			...config,
+			version,
+			installedAt: new Date().toISOString(),
+		}
+
+		manifest.packages[pkg] = newConfig
+
+		spinner.succeed(`Upgraded ${PACKAGE_NAMES[pkg]} to ${version}`)
+	} catch (error) {
+		spinner.fail(`Failed to upgrade ${PACKAGE_NAMES[pkg]}`)
+		throw error
+	}
+}
+
+function getSourcePath(pkg: PackageName): string {
+	switch (pkg) {
+		case "cms":
+			return "apps/cms"
+		case "backend":
+			return "packages/backend"
+		case "shared":
+			return "packages/cms-shared"
+		case "types":
+			return "packages/type-generator"
+		default:
+			throw new Error(`Unknown package: ${pkg}`)
+	}
+}

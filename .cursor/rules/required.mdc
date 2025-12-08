@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Always use English for comments, code, etc.
+Use functional programming patterns and best practices with React and TypeScript.
+Use types instead of interfaces.
+
+Avoid doing commits, I will do them for you.

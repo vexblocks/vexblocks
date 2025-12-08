@@ -1,0 +1,67 @@
+{
+	"name": "vexblocks",
+	"version": "1.0.0",
+	"description": "CLI for adding VexBlocks Headless CMS to your Turborepo project",
+	"keywords": [
+		"cms",
+		"headless-cms",
+		"convex",
+		"turborepo",
+		"nextjs",
+		"cli"
+	],
+	"homepage": "https://github.com/vexblocks/vexblocks#readme",
+	"bugs": {
+		"url": "https://github.com/vexblocks/vexblocks/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/vexblocks/vexblocks.git"
+	},
+	"license": "MIT",
+	"author": "VexBlocks",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"bin": {
+		"vexblocks": "./dist/index.js"
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
+		"lint": "biome check .",
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "pnpm run build"
+	},
+	"dependencies": {
+		"@inquirer/prompts": "^7.2.1",
+		"commander": "^13.0.0",
+		"diff": "^7.0.0",
+		"fs-extra": "^11.2.0",
+		"ora": "^8.1.1",
+		"picocolors": "^1.1.1",
+		"tar": "^7.4.3"
+	},
+	"devDependencies": {
+		"@types/diff": "^6.0.0",
+		"@types/fs-extra": "^11.0.4",
+		"@types/node": "^24.10.1",
+		"tsup": "^8.3.5",
+		"typescript": "^5.9.3"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

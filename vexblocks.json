@@ -1,0 +1,33 @@
+{
+	"$schema": "https://vexblocks.dev/schema/vexblocks.json",
+	"version": "1.0.0",
+	"description": "VexBlocks CMS - Source Repository",
+	"repository": "https://github.com/vexblocks/vexblocks",
+	"packages": {
+		"cms": {
+			"version": "1.0.0",
+			"path": "apps/cms",
+			"managed": true
+		},
+		"backend": {
+			"version": "1.0.0",
+			"path": "packages/backend",
+			"managed": false
+		},
+		"shared": {
+			"version": "1.0.0",
+			"path": "packages/cms-shared",
+			"managed": true
+		},
+		"types": {
+			"version": "1.0.0",
+			"path": "packages/type-generator",
+			"managed": true
+		},
+		"cli": {
+			"version": "1.0.0",
+			"path": "packages/cli",
+			"npm": "vexblocks"
+		}
+	}
+}
