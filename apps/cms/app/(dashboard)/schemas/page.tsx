@@ -1,12 +1,18 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
+import { useAtom } from "@lfades/atom"
 import { useQuery } from "convex/react"
 import { FileText, Grid3x3, Layers, Plus } from "lucide-react"
 import Link from "next/link"
+import { authAtom } from "@/lib/auth-atom"
 
 export default function SchemasPage() {
-	const schemas = useQuery(api.cms.schemas.list)
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
 
 	const getTypeIcon = (type: string) => {
 		switch (type) {

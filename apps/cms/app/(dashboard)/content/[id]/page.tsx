@@ -3,6 +3,7 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { getStringValue } from "@repo/cms-shared"
+import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -17,6 +18,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { use, useEffect, useState } from "react"
 import { useSidebar } from "@/contexts/sidebar-context"
+import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
 import { FieldRenderer } from "../_components/field-renderer"
 import { LivePreviewPanel } from "../_components/live-preview-panel"
@@ -70,27 +72,36 @@ export default function EditContentPage({
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const schemaFromUrl = searchParams.get("schema")
-	
-	const content = useQuery(api.cms.content.get, {
-		id: id as Id<"cmsContent">,
-	})
-	
+
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const content = useQuery(
+		api.cms.content.get,
+		isReady ? { id: id as Id<"cmsContent"> } : "skip",
+	)
+
 	// Build back URL with schema param for proper navigation
-	const backUrl = schemaFromUrl 
-		? `/content?schema=${schemaFromUrl}` 
-		: content?.schemaId 
-			? `/content?schema=${content.schemaId}` 
+	const backUrl = schemaFromUrl
+		? `/content?schema=${schemaFromUrl}`
+		: content?.schemaId
+			? `/content?schema=${content.schemaId}`
 			: "/content"
 	const schema = useQuery(
 		api.cms.schemas.get,
-		content ? { id: content.schemaId } : "skip",
+		isReady && content ? { id: content.schemaId } : "skip",
 	)
-	const schemas = useQuery(api.cms.schemas.list)
-	const allContent = useQuery(api.cms.content.listAll)
-	const localizationSettings = useQuery(api.settings.get, {
-		key: "localization",
-	}) as LocalizationSettings | null | undefined
-	const previewSettings = useQuery(api.settings.get, { key: "preview" }) as {
+	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
+	const allContent = useQuery(api.cms.content.listAll, isReady ? {} : "skip")
+	const localizationSettings = useQuery(
+		api.settings.get,
+		isReady ? { key: "localization" } : "skip",
+	) as LocalizationSettings | null | undefined
+	const previewSettings = useQuery(
+		api.settings.get,
+		isReady ? { key: "preview" } : "skip",
+	) as {
 		enabled: boolean
 		baseUrl: string
 		productionBaseUrl: string

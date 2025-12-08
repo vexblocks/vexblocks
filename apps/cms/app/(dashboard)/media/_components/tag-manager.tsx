@@ -2,17 +2,24 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import { Edit2, Plus, Save, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { authAtom } from "@/lib/auth-atom"
 
 type TagManagerProps = {
 	onClose?: () => void
 }
 
 export function TagManager({ onClose }: TagManagerProps) {
-	const tags = useQuery(api.cms.mediaTags.list)
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	// Query tags only when auth is ready
+	const tags = useQuery(api.cms.mediaTags.list, isReady ? {} : "skip")
 	const upsertTag = useMutation(api.cms.mediaTags.upsert)
 	const updateTag = useMutation(api.cms.mediaTags.update)
 	const removeTag = useMutation(api.cms.mediaTags.remove)

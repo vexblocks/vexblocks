@@ -3,6 +3,7 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage } from "@repo/cms-shared"
+import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -21,6 +22,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { use, useCallback, useEffect, useState } from "react"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
+import { authAtom } from "@/lib/auth-atom"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
 
 // Utility function to generate field name from label
@@ -859,14 +861,21 @@ export default function SchemaDetailPage({
 	const { id } = use(params)
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const schema = useQuery(api.cms.schemas.get, {
-		id: id as Id<"cmsSchemas">,
-	})
-	const availableBlocks = useQuery(api.cms.blocks.list)
-	const allSchemas = useQuery(api.cms.schemas.list)
-	const localizationSettings = useQuery(api.settings.get, {
-		key: "localization",
-	})
+
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const schema = useQuery(
+		api.cms.schemas.get,
+		isReady ? { id: id as Id<"cmsSchemas"> } : "skip",
+	)
+	const availableBlocks = useQuery(api.cms.blocks.list, isReady ? {} : "skip")
+	const allSchemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
+	const localizationSettings = useQuery(
+		api.settings.get,
+		isReady ? { key: "localization" } : "skip",
+	)
 	const updateSchema = useMutation(api.cms.schemas.update)
 	const deleteSchema = useMutation(api.cms.schemas.remove)
 

@@ -2,12 +2,14 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { useAtom } from "@lfades/atom"
 import Compressor from "compressorjs"
 import { useMutation, useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { nanoid } from "nanoid"
 import { useState } from "react"
 import { toast } from "sonner"
+import { authAtom } from "@/lib/auth-atom"
 
 type MediaUploaderProps = {
 	onUploadComplete?: (media: {
@@ -34,8 +36,12 @@ export function MediaUploader({
 	const [alt, setAlt] = useState("")
 	const [tags, setTags] = useState<string[]>(prefilledTags)
 
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
 	const createMedia = useMutation(api.cms.media.create)
-	const availableTags = useQuery(api.cms.mediaTags.list)
+	const availableTags = useQuery(api.cms.mediaTags.list, isReady ? {} : "skip")
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedFile = e.target.files?.[0]

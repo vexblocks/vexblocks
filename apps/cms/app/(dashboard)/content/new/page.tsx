@@ -2,11 +2,13 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import { ArrowLeft, Globe, Save } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
 import { FieldRenderer } from "../_components/field-renderer"
 import { LocaleSelector } from "../_components/locale-selector"
@@ -57,17 +59,25 @@ export default function NewContentPage() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const preselectedSchema = searchParams.get("schema")
-	
+
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
 	// Build back URL with schema param for proper navigation
-	const backUrl = preselectedSchema 
-		? `/content?schema=${preselectedSchema}` 
+	const backUrl = preselectedSchema
+		? `/content?schema=${preselectedSchema}`
 		: "/content"
 
-	const schemas = useQuery(api.cms.schemas.list)
-	const allContent = useQuery(api.cms.content.listAll) // Load all content for references
-	const localizationSettings = useQuery(api.settings.get, {
-		key: "localization",
-	}) as LocalizationSettings | null | undefined
+	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
+	const allContent = useQuery(
+		api.cms.content.listAll,
+		isReady ? {} : "skip",
+	) // Load all content for references
+	const localizationSettings = useQuery(
+		api.settings.get,
+		isReady ? { key: "localization" } : "skip",
+	) as LocalizationSettings | null | undefined
 	const createContent = useMutation(api.cms.content.create)
 
 	const [loading, setLoading] = useState(false)

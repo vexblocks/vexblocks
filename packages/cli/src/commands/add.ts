@@ -4,9 +4,7 @@ import pc from "picocolors"
 import ora from "ora"
 import { confirm, checkbox } from "@inquirer/prompts"
 import { logger } from "../utils/logger.js"
-import {
-	isTurborepoProject,
-} from "../utils/fs.js"
+import { isTurborepoProject } from "../utils/fs.js"
 import {
 	readManifest,
 	writeManifest,
@@ -159,14 +157,14 @@ export async function addCommand(
 	const version = await getLatestVersion()
 
 	for (const pkg of resolvedPackages) {
-		await installPackage(cwd, pkg, version, manifest, options)
+		await installPackage(cwd, pkg, version, manifest)
 	}
 
 	// Save manifest
 	await writeManifest(cwd, manifest)
 
 	// Show next steps
-	showNextSteps(cwd, resolvedPackages)
+	showNextSteps(resolvedPackages)
 }
 
 function resolveDependencies(packages: PackageName[]): PackageName[] {
@@ -221,17 +219,16 @@ async function installPackage(
 	pkg: PackageName,
 	version: string,
 	manifest: ReturnType<typeof createManifest>,
-	options: AddOptions,
 ): Promise<void> {
 	const spinner = ora(`Installing ${PACKAGE_NAMES[pkg]}...`).start()
-_options
+
 	try {
 		const targetPath = getPackageTargetPath(cwd, pkg)
 		const sourcePath = PACKAGE_PATHS[pkg]
 
 		// Special handling for backend with existing Convex project
 		if (pkg === "backend") {
-			await installBackendPackage(cwd, targetPath, sourcePath, version, spinner)
+			await installBackendPackage(targetPath, sourcePath, spinner)
 		} else {
 			// Standard package installation
 			await fs.ensureDir(targetPath)
@@ -259,13 +256,11 @@ _options
 }
 
 async function installBackendPackage(
-	cwd: string,
 	targetPath: string,
 	sourcePath: string,
-	_cwdsion: string,
 	spinner: ReturnType<typeof ora>,
 ): Promise<void> {
-	_versiononvexPath = path.join(targetPath, "convex")
+	const convexPath = path.join(targetPath, "convex")
 	const existingSchemaPath = path.join(convexPath, "schema.ts")
 
 	// Check if this is an existing Convex project with schema
@@ -338,10 +333,10 @@ async function installBackendPackage(
 	}
 }
 
-function showNextSteps(cwd: string, packages: PackageName[]): void {
+function showNextSteps(packages: PackageName[]): void {
 	const packageManager = "pnpm" // Default for Turborepo
 
-	logger.break()_cwd
+	logger.break()
 	logger.box("✅ Packages installed successfully!", [
 		"",
 		pc.bold("Next steps:"),

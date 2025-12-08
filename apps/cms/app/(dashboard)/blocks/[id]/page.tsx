@@ -3,6 +3,7 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage } from "@repo/cms-shared"
+import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -18,6 +19,7 @@ import {
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { use, useEffect, useState } from "react"
+import { authAtom } from "@/lib/auth-atom"
 import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 
 type FieldType =
@@ -256,7 +258,15 @@ export default function BlockDetailPage({
 	const { id } = use(params)
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const block = useQuery(api.cms.blocks.get, { id: id as Id<"cmsBlocks"> })
+
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const block = useQuery(
+		api.cms.blocks.get,
+		isReady ? { id: id as Id<"cmsBlocks"> } : "skip",
+	)
 	const updateBlock = useMutation(api.cms.blocks.update)
 	const deleteBlock = useMutation(api.cms.blocks.remove)
 
@@ -605,7 +615,7 @@ export default function BlockDetailPage({
 									<button
 										type="button"
 										onClick={() => setPreviewImage("")}
-										className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+										className="-top-2 -right-2 absolute rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
 									>
 										<X className="h-4 w-4" />
 									</button>

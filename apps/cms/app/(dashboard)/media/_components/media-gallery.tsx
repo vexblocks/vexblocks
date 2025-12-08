@@ -6,6 +6,8 @@ import { useMutation, useQuery } from "convex/react"
 import { AlertTriangle } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { useAtom } from "@lfades/atom"
+import { authAtom } from "@/lib/auth-atom"
 import { MediaCard } from "./media-card"
 import { MediaFilters } from "./media-filters"
 
@@ -27,17 +29,26 @@ export function MediaGallery({
 		null,
 	)
 
-	const mediaItems = useQuery(api.cms.media.list, {
-		search: searchTerm || undefined,
-		tags: selectedTags.length > 0 ? selectedTags : undefined,
-	})
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const mediaItems = useQuery(
+		api.cms.media.list,
+		isReady
+			? {
+					search: searchTerm || undefined,
+					tags: selectedTags.length > 0 ? selectedTags : undefined,
+				}
+			: "skip",
+	)
 
 	// const allTags = useQuery(api.cms.mediaTags.list) // Not currently used
 	const updateMedia = useMutation(api.cms.media.update)
 	const removeMedia = useMutation(api.cms.media.remove)
 	const checkReferences = useQuery(
 		api.cms.media.checkReferences,
-		deletingMedia
+		isReady && deletingMedia
 			? {
 					cloudflareId:
 						mediaItems?.find((m) => m._id === deletingMedia)?.cloudflareId ||
@@ -280,7 +291,11 @@ type EditMediaDialogProps = {
 }
 
 function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
-	const media = useQuery(api.cms.media.get, { id: mediaId })
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const media = useQuery(api.cms.media.get, isReady ? { id: mediaId } : "skip")
 	const [caption, setCaption] = useState("")
 	const [alt, setAlt] = useState("")
 	const [tagInput, setTagInput] = useState("")

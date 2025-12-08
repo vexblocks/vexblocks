@@ -2,6 +2,7 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared"
+import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import {
 	ArrowDown,
@@ -24,6 +25,7 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+import { authAtom } from "@/lib/auth-atom"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
 
@@ -839,12 +841,18 @@ const FieldEditor = ({
 
 export default function NewSchemaPage() {
 	const router = useRouter()
+
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
 	const createSchema = useMutation(api.cms.schemas.create)
-	const availableBlocks = useQuery(api.cms.blocks.list)
-	const allSchemas = useQuery(api.cms.schemas.list)
-	const localizationSettings = useQuery(api.settings.get, {
-		key: "localization",
-	})
+	const availableBlocks = useQuery(api.cms.blocks.list, isReady ? {} : "skip")
+	const allSchemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
+	const localizationSettings = useQuery(
+		api.settings.get,
+		isReady ? { key: "localization" } : "skip",
+	)
 
 	// Check if locales are configured
 	const hasLocales = (localizationSettings as any)?.locales?.length > 0 || false

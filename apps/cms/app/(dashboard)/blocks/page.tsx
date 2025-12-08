@@ -2,12 +2,18 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared"
+import { useAtom } from "@lfades/atom"
 import { useQuery } from "convex/react"
 import { Layers, Plus } from "lucide-react"
 import Link from "next/link"
+import { authAtom } from "@/lib/auth-atom"
 
 export default function BlocksPage() {
-	const blocks = useQuery(api.cms.blocks.list)
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const blocks = useQuery(api.cms.blocks.list, isReady ? {} : "skip")
 
 	if (blocks === undefined) {
 		return (

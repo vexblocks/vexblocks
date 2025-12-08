@@ -3,11 +3,13 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage, getStringValue } from "@repo/cms-shared"
+import { useAtom } from "@lfades/atom"
 import { useQuery } from "convex/react"
 import { Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { authAtom } from "@/lib/auth-atom"
 import { ContentSidebar } from "./_components/content-sidebar"
 import { ViewConfigModal } from "./_components/view-config-modal"
 
@@ -16,7 +18,11 @@ export default function ContentPage() {
 	const searchParams = useSearchParams()
 	const preselectedSchema = searchParams.get("schema")
 
-	const schemas = useQuery(api.cms.schemas.list)
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
+
+	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
 	const [selectedSchemaId, setSelectedSchemaId] = useState<string>(
 		preselectedSchema || "",
 	)
@@ -30,7 +36,7 @@ export default function ContentPage() {
 
 	const content = useQuery(
 		api.cms.content.listBySchema,
-		selectedSchemaId
+		isReady && selectedSchemaId
 			? { schemaId: selectedSchemaId as Id<"cmsSchemas"> }
 			: "skip",
 	)
