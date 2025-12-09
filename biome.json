@@ -21,13 +21,14 @@
 			"!**/pnpm-lock.yaml",
 			"!**/package-lock.json",
 			"!**/yarn.lock",
-			"!**/convex/_generated"
+			"!**/convex/_generated",
+			"!**/types/generated.ts"
 		]
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
-		"includes": ["**", "!**/convex/_generated"],
+		"includes": ["**", "!**/convex/_generated", "!**/types/generated.ts"],
 		"rules": {
 			"recommended": true,
 			"correctness": {
