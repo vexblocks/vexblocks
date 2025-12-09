@@ -1,5 +1,5 @@
-import fs from "fs-extra"
 import path from "node:path"
+import fs from "fs-extra"
 import { MANIFEST_FILE } from "./constants.js"
 
 /**

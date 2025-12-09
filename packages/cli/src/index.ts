@@ -9,10 +9,10 @@
 
 import { Command } from "commander"
 import pc from "picocolors"
-import { initCommand } from "./commands/init.js"
 import { addCommand } from "./commands/add.js"
-import { upgradeCommand } from "./commands/upgrade.js"
 import { diffCommand } from "./commands/diff.js"
+import { initCommand } from "./commands/init.js"
+import { upgradeCommand } from "./commands/upgrade.js"
 import { getPackageInfo } from "./utils/package-info.js"
 
 async function main() {

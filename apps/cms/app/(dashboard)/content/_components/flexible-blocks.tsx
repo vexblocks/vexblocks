@@ -4,11 +4,11 @@ import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
-import { useRef, useState } from "react"
 import { Layers, Plus, Trash2 } from "lucide-react"
-import type { Field } from "./types"
-import { BasicFieldRenderer } from "./basic-field-renderer"
+import { useRef, useState } from "react"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
+import { BasicFieldRenderer } from "./basic-field-renderer"
+import type { Field } from "./types"
 
 type FlexibleBlockItemProps = {
 	block: { _id: string; type: string; data: any }
@@ -94,7 +94,7 @@ function BlockReferenceContent({
 			</div>
 			<div className="space-y-3 rounded-lg bg-white p-3">
 				{referencedBlock.fields.map((blockField: any) => {
-					const fieldId = `${path}-${blockField.name}`.replace(/[.\[\]]/g, "-")
+					const fieldId = `${path}-${blockField.name}`.replace(/[.[\]]/g, "-")
 					return (
 						<div key={blockField.name}>
 							<label className="mb-1 block font-medium text-grey-700 text-sm">
@@ -138,7 +138,7 @@ export function FlexibleBlockItem({
 	contentBySchema,
 }: FlexibleBlockItemProps) {
 	// Generate stable fieldId using block._id which never changes
-	const fieldId = `field-${path}-${block._id}`.replace(/[.\[\]]/g, "-")
+	const fieldId = `field-${path}-${block._id}`.replace(/[.[\]]/g, "-")
 
 	// Check if this is a blockReference type
 	const isBlockReference = block.type === "blockReference"

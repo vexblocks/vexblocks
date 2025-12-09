@@ -1,8 +1,8 @@
 "use client"
 
+import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import { ArrowLeft, Globe, Save } from "lucide-react"
 import Link from "next/link"

@@ -1,8 +1,8 @@
 "use client"
 
+import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared"
-import { useAtom } from "@lfades/atom"
 import { useMutation, useQuery } from "convex/react"
 import {
 	ArrowDown,
@@ -25,9 +25,9 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
 import { authAtom } from "@/lib/auth-atom"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
-import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
 
 // Utility function to generate field name from label
 function generateFieldName(label: string): string {

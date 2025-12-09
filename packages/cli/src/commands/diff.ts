@@ -1,12 +1,12 @@
 import path from "node:path"
-import fs from "fs-extra"
-import pc from "picocolors"
-import ora from "ora"
 import { createTwoFilesPatch } from "diff"
+import fs from "fs-extra"
+import ora from "ora"
+import pc from "picocolors"
+import { PACKAGE_NAMES } from "../utils/constants.js"
+import { fetchFile, getPackageFiles } from "../utils/github.js"
 import { logger } from "../utils/logger.js"
 import { readManifest } from "../utils/manifest.js"
-import { fetchFile, getPackageFiles } from "../utils/github.js"
-import { PACKAGE_NAMES } from "../utils/constants.js"
 
 type PackageName = "cms" | "backend" | "shared" | "types"
 

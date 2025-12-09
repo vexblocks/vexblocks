@@ -1,13 +1,13 @@
 "use client"
 
-import { Folder, Layers, Plus, Trash2 } from "lucide-react"
-import { useQuery } from "convex/react"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import type { Field } from "./types"
-import { getNestedValue } from "./utils"
+import { useQuery } from "convex/react"
+import { Folder, Layers, Plus, Trash2 } from "lucide-react"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { FlexibleBlocksField } from "./flexible-blocks"
+import type { Field } from "./types"
+import { getNestedValue } from "./utils"
 
 type FieldRendererProps = {
 	field: Field
@@ -32,6 +32,13 @@ export function FieldRenderer({
 	allSchemas,
 	contentBySchema,
 }: FieldRendererProps) {
+	// Load block reference if needed (hook must be at top level)
+	const isBlockReference = field.type === "blockReference" && field.blockId
+	const block = useQuery(
+		api.cms.blocks.get,
+		isBlockReference ? { id: field.blockId as Id<"cmsBlocks"> } : "skip",
+	)
+
 	// Handle group fields
 	if (field.type === "group") {
 		return (
@@ -90,12 +97,7 @@ export function FieldRenderer({
 	}
 
 	// Handle blockReference fields
-	if (field.type === "blockReference" && field.blockId) {
-		// Load the referenced block
-		const block = useQuery(api.cms.blocks.get, {
-			id: field.blockId as Id<"cmsBlocks">,
-		})
-
+	if (isBlockReference) {
 		if (!block) {
 			return (
 				<div

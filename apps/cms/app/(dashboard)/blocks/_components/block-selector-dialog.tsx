@@ -82,7 +82,7 @@ export function BlockSelectorDialog({
 				{/* Search */}
 				<div className="border-grey-200 border-b px-6 py-3">
 					<div className="relative">
-						<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-grey-400" />
+						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-5 w-5 text-grey-400" />
 						<input
 							type="text"
 							value={search}

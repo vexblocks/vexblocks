@@ -1,13 +1,13 @@
 import path from "node:path"
-import fs from "fs-extra"
-import pc from "picocolors"
-import ora from "ora"
 import { confirm, input, select } from "@inquirer/prompts"
-import { logger } from "../utils/logger.js"
-import { isTurborepoProject, getPackageManager } from "../utils/fs.js"
-import { createManifest, writeManifest } from "../utils/manifest.js"
-import { getLatestVersion } from "../utils/github.js"
+import fs from "fs-extra"
+import ora from "ora"
+import pc from "picocolors"
 import { MANIFEST_FILE } from "../utils/constants.js"
+import { getPackageManager, isTurborepoProject } from "../utils/fs.js"
+import { getLatestVersion } from "../utils/github.js"
+import { logger } from "../utils/logger.js"
+import { createManifest, writeManifest } from "../utils/manifest.js"
 
 interface InitOptions {
 	yes?: boolean

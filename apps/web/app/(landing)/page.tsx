@@ -200,7 +200,7 @@ export default function HomePage() {
 
 					<div className="grid gap-8 md:grid-cols-3">
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-teal-700 text-sm">GLOBAL</div>
+							<div className="mb-2 font-bold text-sm text-teal-700">GLOBAL</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Singleton Content
 							</Heading>
@@ -225,7 +225,7 @@ export default function HomePage() {
 						</div>
 
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-teal-700 text-sm">PAGE</div>
+							<div className="mb-2 font-bold text-sm text-teal-700">PAGE</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Unique Pages
 							</Heading>
@@ -250,7 +250,7 @@ export default function HomePage() {
 						</div>
 
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-teal-700 text-sm">
+							<div className="mb-2 font-bold text-sm text-teal-700">
 								COLLECTION
 							</div>
 							<Heading as="h3" className="mb-4 text-2xl">

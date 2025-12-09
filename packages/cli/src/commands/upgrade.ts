@@ -1,22 +1,22 @@
 import path from "node:path"
-import fs from "fs-extra"
-import pc from "picocolors"
-import ora from "ora"
 import { confirm } from "@inquirer/prompts"
-import { logger } from "../utils/logger.js"
+import fs from "fs-extra"
+import ora from "ora"
+import pc from "picocolors"
+import { MANAGED_PACKAGES, PACKAGE_NAMES } from "../utils/constants.js"
+import { createBackup } from "../utils/fs.js"
 import {
-	readManifest,
-	writeManifest,
-	type PackageConfig,
-} from "../utils/manifest.js"
-import {
-	getLatestVersion,
-	getChangelog,
 	compareVersions,
 	downloadAndExtractPackage,
+	getChangelog,
+	getLatestVersion,
 } from "../utils/github.js"
-import { createBackup } from "../utils/fs.js"
-import { PACKAGE_NAMES, MANAGED_PACKAGES } from "../utils/constants.js"
+import { logger } from "../utils/logger.js"
+import {
+	type PackageConfig,
+	readManifest,
+	writeManifest,
+} from "../utils/manifest.js"
 
 type PackageName = "cms" | "backend" | "shared" | "types"
 
@@ -99,11 +99,9 @@ export async function upgradeCommand(
 
 	for (const update of updates) {
 		const isManaged = MANAGED_PACKAGES.includes(update.pkg as any)
+		const managedLabel = isManaged ? pc.yellow(" (managed)") : ""
 		logger.log(
-			`  ${PACKAGE_NAMES[update.pkg]}`,
-			pc.dim(`${update.from} → `),
-			pc.green(update.to),
-			isManaged ? pc.yellow(" (managed)") : "",
+			`  ${PACKAGE_NAMES[update.pkg]} ${pc.dim(`${update.from} → `)}${pc.green(update.to)}${managedLabel}`,
 		)
 	}
 
@@ -173,7 +171,7 @@ async function upgradePackage(
 	try {
 		const config = manifest.packages[pkg]
 		if (!config) {
-			spinner.skip(`${PACKAGE_NAMES[pkg]} not installed`)
+			spinner.info(`${PACKAGE_NAMES[pkg]} not installed`)
 			return
 		}
 

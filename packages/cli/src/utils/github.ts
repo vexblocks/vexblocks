@@ -1,6 +1,6 @@
-import fs from "fs-extra"
 import path from "node:path"
-import { GITHUB_REPO, GITHUB_BRANCH, GITHUB_RAW_URL } from "./constants.js"
+import fs from "fs-extra"
+import { GITHUB_BRANCH, GITHUB_RAW_URL, GITHUB_REPO } from "./constants.js"
 
 /**
  * Remote manifest structure from GitHub

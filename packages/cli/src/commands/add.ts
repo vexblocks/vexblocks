@@ -1,29 +1,29 @@
 import path from "node:path"
+import { checkbox, confirm } from "@inquirer/prompts"
 import fs from "fs-extra"
-import pc from "picocolors"
 import ora from "ora"
-import { confirm, checkbox } from "@inquirer/prompts"
-import { logger } from "../utils/logger.js"
+import pc from "picocolors"
+import {
+	MANIFEST_FILE,
+	OPTIONAL_ENV_VARS,
+	PACKAGE_DEPENDENCIES,
+	PACKAGE_NAMES,
+	PACKAGE_PATHS,
+	REQUIRED_ENV_VARS,
+} from "../utils/constants.js"
 import { isTurborepoProject } from "../utils/fs.js"
 import {
-	readManifest,
-	writeManifest,
+	downloadAndExtractPackage,
+	fetchFile,
+	getLatestVersion,
+} from "../utils/github.js"
+import { logger } from "../utils/logger.js"
+import {
 	createManifest,
 	type PackageConfig,
+	readManifest,
+	writeManifest,
 } from "../utils/manifest.js"
-import {
-	downloadAndExtractPackage,
-	getLatestVersion,
-	fetchFile,
-} from "../utils/github.js"
-import {
-	PACKAGE_PATHS,
-	PACKAGE_NAMES,
-	PACKAGE_DEPENDENCIES,
-	MANIFEST_FILE,
-	REQUIRED_ENV_VARS,
-	OPTIONAL_ENV_VARS,
-} from "../utils/constants.js"
 
 type PackageName = keyof typeof PACKAGE_PATHS
 

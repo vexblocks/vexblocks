@@ -1,9 +1,9 @@
 "use client"
 
+import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage, getStringValue } from "@repo/cms-shared"
-import { useAtom } from "@lfades/atom"
 import { useQuery } from "convex/react"
 import { Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
 import Link from "next/link"
