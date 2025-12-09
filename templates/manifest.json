@@ -1,5 +1,5 @@
 {
-	"$schema": "https://vexblocks.dev/schema/manifest.json",
+	"$schema": "https://vexblocks.com/schema/manifest.json",
 	"version": "1.0.0",
 	"packages": {
 		"cms": {

@@ -63,7 +63,7 @@ export async function writeManifest(
  */
 export function createManifest(version: string): VexBlocksManifest {
 	return {
-		$schema: "https://vexblocks.dev/schema/vexblocks.json",
+		$schema: "https://vexblocks.com/schema/vexblocks.json",
 		version,
 		packages: {},
 	}

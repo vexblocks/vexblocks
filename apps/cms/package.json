@@ -6,7 +6,8 @@
 		"dev": "next dev --port 3001",
 		"build": "next build",
 		"start": "next start --port 3001",
-		"lint": "biome check --files-ignore-unknown=true ."
+		"lint": "biome check --files-ignore-unknown=true .",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "0.9.11",

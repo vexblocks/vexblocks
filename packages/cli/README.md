@@ -190,9 +190,9 @@ export default defineSchema({
 
 ## Documentation
 
-- [VexBlocks Documentation](https://vexblocks.dev/docs)
+- [VexBlocks Documentation](https://vexblocks.com/docs)
 - [CMS Usage Guide](./CMS_USAGE_GUIDE.md)
-- [API Reference](https://vexblocks.dev/docs/api)
+- [API Reference](https://vexblocks.com/docs/api)
 
 ## License
 

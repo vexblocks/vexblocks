@@ -182,7 +182,7 @@ vexblocks/
 
 ```json
 {
-  "$schema": "https://vexblocks.dev/schema/vexblocks.json",
+  "$schema": "https://vexblocks.com/schema/vexblocks.json",
   "version": "1.0.0",
   "packages": {
     "cms": {

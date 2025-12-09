@@ -6,7 +6,8 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "biome check --files-ignore-unknown=true ."
+		"lint": "biome check --files-ignore-unknown=true .",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@base-ui-components/react": "1.0.0-beta.4",

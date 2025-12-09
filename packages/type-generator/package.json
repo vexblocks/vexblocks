@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"generate": "tsx src/generator.ts",
-		"generate:with-env": "bash scripts/generate-with-env.sh"
+		"generate:with-env": "bash scripts/generate-with-env.sh",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"convex": "^1.28.2"

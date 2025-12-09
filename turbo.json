@@ -42,6 +42,9 @@
 		},
 		"lint": {
 			"outputs": []
+		},
+		"typecheck": {
+			"outputs": []
 		}
 	}
 }

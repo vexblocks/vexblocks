@@ -6,7 +6,8 @@
 		"dev": "convex dev",
 		"build": "echo \"Nothing to build for Convex backend\"",
 		"start": "echo \"Use 'pnpm dev' to run Convex dev server\"",
-		"lint": "echo \"No lint configured for backend\""
+		"lint": "echo \"No lint configured for backend\"",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "^0.9.11",
