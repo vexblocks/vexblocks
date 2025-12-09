@@ -15,10 +15,8 @@ jobs:
   release:
     name: Build and Publish CLI
     runs-on: ubuntu-latest
-    # Required permissions for OIDC trusted publishing
     permissions:
       contents: write
-      id-token: write
 
     steps:
       - name: Checkout
@@ -69,14 +67,11 @@ jobs:
           VERSION="${{ inputs.version }}"
           node -e "const pkg = require('./package.json'); pkg.version = '$VERSION'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, '\t') + '\n')"
 
-      # Using OIDC Trusted Publishing
-      # Make sure to configure Trusted Publishing in npmjs.com:
-      # 1. Go to npmjs.com → Package Settings → Publishing access
-      # 2. Add GitHub Actions as a trusted publisher
-      # 3. Set: Repository owner: vexblocks, Repository: vexblocks, Workflow: release-cli.yml
-      - name: Publish to npm (OIDC)
+      - name: Publish to npm
         working-directory: packages/cli
-        run: npm publish --provenance --access public
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         if: github.event_name == 'push'
