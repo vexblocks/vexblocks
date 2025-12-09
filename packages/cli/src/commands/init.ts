@@ -32,7 +32,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
 			}))
 
 		if (!continueAnyway) {
-			logger.info("Run `vexblocks add <package>` to add packages.")
+			logger.info("Run `npx @vexblocks/cli add <package>` to add packages.")
 			return
 		}
 	}
@@ -242,7 +242,7 @@ FRONTEND_URL=http://localhost:3000
 			pc.bold("Next steps:"),
 			`1. ${pc.cyan(`cd ${projectName}`)}`,
 			`2. ${pc.cyan("pnpm install")}`,
-			`3. ${pc.cyan("npx vexblocks add all")}`,
+			`3. ${pc.cyan("npx @vexblocks/cli add all")}`,
 			"4. Set up your Convex project",
 			`5. ${pc.cyan("pnpm dev")}`,
 		])
@@ -257,7 +257,7 @@ FRONTEND_URL=http://localhost:3000
 
 		if (addPackages) {
 			logger.break()
-			logger.info(`Run: ${pc.cyan("npx vexblocks add all")}`)
+			logger.info(`Run: ${pc.cyan("npx @vexblocks/cli add all")}`)
 			logger.info("After navigating to your project directory.")
 		}
 	} catch (error) {
@@ -304,7 +304,7 @@ async function initializeExisting(
 			`Version: ${pc.cyan(version)}`,
 			"",
 			pc.bold("Next steps:"),
-			`1. ${pc.cyan("npx vexblocks add all")} - Add all CMS packages`,
+			`1. ${pc.cyan("npx @vexblocks/cli add all")} - Add all CMS packages`,
 			"2. Configure your environment variables",
 			`3. ${pc.cyan(`${packageManager} install`)}`,
 			`4. ${pc.cyan(`${packageManager === "npm" ? "npm run" : packageManager} dev`)}`,

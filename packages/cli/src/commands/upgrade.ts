@@ -38,7 +38,7 @@ export async function upgradeCommand(
 	// Read manifest
 	const manifest = await readManifest(cwd)
 	if (!manifest) {
-		logger.error("No vexblocks.json found. Run `vexblocks init` first.")
+		logger.error("No vexblocks.json found. Run `npx @vexblocks/cli init` first.")
 		process.exit(1)
 	}
 
@@ -51,7 +51,7 @@ export async function upgradeCommand(
 	const installedPackages = Object.keys(manifest.packages) as PackageName[]
 
 	if (installedPackages.length === 0) {
-		logger.info("No packages installed. Run `vexblocks add <package>` first.")
+		logger.info("No packages installed. Run `npx @vexblocks/cli add <package>` first.")
 		return
 	}
 
@@ -122,7 +122,7 @@ export async function upgradeCommand(
 	if (options.check) {
 		logger.break()
 		logger.info(
-			`Run ${pc.cyan("npx vexblocks upgrade")} to apply these updates.`,
+			`Run ${pc.cyan("npx @vexblocks/cli upgrade")} to apply these updates.`,
 		)
 		return
 	}

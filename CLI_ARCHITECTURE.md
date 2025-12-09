@@ -16,12 +16,12 @@ VexBlocks CLI is a command-line tool similar to Shadcn that allows developers to
 
 ## CLI Commands
 
-### `npx vexblocks init`
+### `npx @vexblocks/cli init`
 
 Initializes a new VexBlocks project or adds VexBlocks to an existing Turborepo.
 
 ```bash
-npx vexblocks init
+npx @vexblocks/cli init
 ```
 
 **Prompts:**
@@ -44,19 +44,19 @@ npx vexblocks init
 
 ---
 
-### `npx vexblocks add <package>`
+### `npx @vexblocks/cli add <package>`
 
 Adds a VexBlocks package to the project.
 
 ```bash
-npx vexblocks add cms           # Adds the CMS dashboard
-npx vexblocks add backend       # Adds Convex backend with CMS functions
-npx vexblocks add shared        # Adds shared utilities
-npx vexblocks add types         # Adds type generator
-npx vexblocks add all           # Adds everything
+npx @vexblocks/cli add cms           # Adds the CMS dashboard
+npx @vexblocks/cli add backend       # Adds Convex backend with CMS functions
+npx @vexblocks/cli add shared        # Adds shared utilities
+npx @vexblocks/cli add types         # Adds type generator
+npx @vexblocks/cli add all           # Adds everything
 ```
 
-**For `vexblocks add backend`:**
+**For `@vexblocks/cli add backend`:**
 
 1. Checks if `packages/backend` exists
 2. If exists, asks if user has existing Convex setup:
@@ -70,7 +70,7 @@ npx vexblocks add all           # Adds everything
    - `emails/` folder
    - Config files
 
-**For `vexblocks add cms`:**
+**For `@vexblocks/cli add cms`:**
 
 1. Checks dependencies (backend must exist)
 2. Copies entire `apps/cms` folder
@@ -79,14 +79,14 @@ npx vexblocks add all           # Adds everything
 
 ---
 
-### `npx vexblocks upgrade`
+### `npx @vexblocks/cli upgrade`
 
 Upgrades VexBlocks packages to the latest version.
 
 ```bash
-npx vexblocks upgrade           # Upgrade all packages
-npx vexblocks upgrade cms       # Upgrade specific package
-npx vexblocks upgrade --check   # Check for updates without upgrading
+npx @vexblocks/cli upgrade           # Upgrade all packages
+npx @vexblocks/cli upgrade cms       # Upgrade specific package
+npx @vexblocks/cli upgrade --check   # Check for updates without upgrading
 ```
 
 **Process:**
@@ -102,13 +102,13 @@ npx vexblocks upgrade --check   # Check for updates without upgrading
 
 ---
 
-### `npx vexblocks diff <package>`
+### `npx @vexblocks/cli diff <package>`
 
 Shows differences between local files and the latest template version.
 
 ```bash
-npx vexblocks diff cms
-npx vexblocks diff backend
+npx @vexblocks/cli diff cms
+npx @vexblocks/cli diff backend
 ```
 
 ---
@@ -308,7 +308,7 @@ export default defineSchema({
 })
 ```
 
-**After running `vexblocks add backend`:**
+**After running `npx @vexblocks/cli add backend`:**
 
 ```typescript
 import { defineSchema, defineTable } from "convex/server"
@@ -322,7 +322,7 @@ const products = defineTable({
 
 // === VEXBLOCKS CMS TABLES (DO NOT EDIT) ===
 // These tables are managed by VexBlocks CLI
-// Run `npx vexblocks upgrade` to update
+// Run `npx @vexblocks/cli upgrade` to update
 import { 
   cmsSchemas, 
   cmsContent, 
@@ -383,7 +383,7 @@ export default defineSchema({
 
 ### Recommended: Hybrid
 
-- **CLI** → Published to npm as `vexblocks` or `create-vexblocks`
+- **CLI** → Published to npm as `@vexblocks/cli`
 - **Templates** → Hosted on GitHub, fetched directly
 
 ---

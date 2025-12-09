@@ -48,7 +48,7 @@ export async function addCommand(
 	if (!isTurbo) {
 		logger.error("This is not a Turborepo project.")
 		logger.info(
-			`Run ${pc.cyan("npx vexblocks init")} first to set up your project.`,
+			`Run ${pc.cyan("npx @vexblocks/cli init")} first to set up your project.`,
 		)
 		process.exit(1)
 	}

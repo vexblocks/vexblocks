@@ -25,7 +25,7 @@ export async function diffCommand(
 	// Read manifest
 	const manifest = await readManifest(cwd)
 	if (!manifest) {
-		logger.error("No vexblocks.json found. Run `vexblocks init` first.")
+		logger.error("No vexblocks.json found. Run `npx @vexblocks/cli init` first.")
 		process.exit(1)
 	}
 
@@ -176,7 +176,7 @@ export async function diffCommand(
 
 			logger.break()
 			logger.info(
-				`Run ${pc.cyan("npx vexblocks upgrade")} to update to the latest version.`,
+				`Run ${pc.cyan("npx @vexblocks/cli upgrade")} to update to the latest version.`,
 			)
 		}
 	} catch (error) {

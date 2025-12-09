@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - VexBlocks CLI for easy project setup
-- `vexblocks init` - Initialize new projects
-- `vexblocks add` - Add packages to existing projects
-- `vexblocks upgrade` - Update to latest version
-- `vexblocks diff` - Show differences between versions
+- `@vexblocks/cli init` - Initialize new projects
+- `@vexblocks/cli add` - Add packages to existing projects
+- `@vexblocks/cli upgrade` - Update to latest version
+- `@vexblocks/cli diff` - Show differences between versions
 
 ## [1.0.0] - 2024-12-08
 
@@ -83,8 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This is the initial release. For new installations, use:
 
 ```bash
-npx vexblocks init
-npx vexblocks add all
+npx @vexblocks/cli init
+npx @vexblocks/cli add all
 ```
 
 ---

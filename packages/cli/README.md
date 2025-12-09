@@ -35,7 +35,7 @@ pnpm dev
 
 ## Commands
 
-### `vexblocks init`
+### `@vexblocks/cli init`
 
 Initialize a new VexBlocks project or add VexBlocks to an existing Turborepo.
 
@@ -44,7 +44,7 @@ npx @vexblocks/cli init
 npx @vexblocks/cli init --cwd ./my-project
 ```
 
-### `vexblocks add`
+### `@vexblocks/cli add`
 
 Add VexBlocks packages to your project.
 
@@ -73,7 +73,7 @@ npx @vexblocks/cli add cms --overwrite
 | `types`   | TypeScript type generator                      | `packages/type-generator` |
 | `all`     | All packages                                   | -                         |
 
-### `vexblocks upgrade`
+### `@vexblocks/cli upgrade`
 
 Upgrade VexBlocks packages to the latest version.
 
@@ -91,7 +91,7 @@ npx @vexblocks/cli upgrade cms
 npx @vexblocks/cli upgrade --force
 ```
 
-### `vexblocks diff`
+### `@vexblocks/cli diff`
 
 Show differences between local files and the latest version.
 
@@ -102,7 +102,7 @@ npx @vexblocks/cli diff backend
 
 ## Project Structure
 
-After running `vexblocks add all`, your project will have:
+After running `npx @vexblocks/cli add all`, your project will have:
 
 ```
 your-project/
