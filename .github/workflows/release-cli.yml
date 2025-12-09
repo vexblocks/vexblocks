@@ -59,13 +59,15 @@ jobs:
           # Extract version from tag (cli-v1.0.1 -> 1.0.1)
           VERSION=${GITHUB_REF_NAME#cli-v}
           echo "Updating to version: $VERSION"
-          npm version $VERSION --no-git-tag-version
+          # Use node to update package.json directly (avoids npm workspace: protocol issues)
+          node -e "const pkg = require('./package.json'); pkg.version = '$VERSION'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, '\t') + '\n')"
 
       - name: Update version (if manual trigger)
         if: github.event_name == 'workflow_dispatch'
         working-directory: packages/cli
         run: |
-          npm version ${{ inputs.version }} --no-git-tag-version
+          VERSION="${{ inputs.version }}"
+          node -e "const pkg = require('./package.json'); pkg.version = '$VERSION'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, '\t') + '\n')"
 
       # Using OIDC Trusted Publishing
       # Make sure to configure Trusted Publishing in npmjs.com:
