@@ -143,9 +143,9 @@ function BlockReferenceSelector({
 
 	return (
 		<div className="mt-4">
-			<label className="mb-1 block font-medium text-grey-700 text-sm">
+			<div className="mb-1 block font-medium text-grey-700 text-sm">
 				Select Reusable Block <span className="text-error">*</span>
-			</label>
+			</div>
 			{selectedBlock ? (
 				<div className="flex items-center gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
 					{selectedBlock.previewImage ? (

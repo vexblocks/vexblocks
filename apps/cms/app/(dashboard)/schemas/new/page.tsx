@@ -148,9 +148,9 @@ function BlockReferenceSelectorNew({
 
 	return (
 		<div className="md:col-span-2">
-			<label className="mb-1 block font-medium text-grey-500 text-xs">
+			<div className="mb-1 block font-medium text-grey-500 text-xs">
 				Select Reusable Block <span className="text-error">*</span>
-			</label>
+			</div>
 			{selectedBlock ? (
 				<div className="flex items-center gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
 					{selectedBlock.previewImage ? (
