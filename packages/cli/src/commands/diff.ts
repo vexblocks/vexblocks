@@ -25,7 +25,9 @@ export async function diffCommand(
 	// Read manifest
 	const manifest = await readManifest(cwd)
 	if (!manifest) {
-		logger.error("No vexblocks.json found. Run `npx @vexblocks/cli init` first.")
+		logger.error(
+			"No vexblocks.json found. Run `npx @vexblocks/cli init` first.",
+		)
 		process.exit(1)
 	}
 
