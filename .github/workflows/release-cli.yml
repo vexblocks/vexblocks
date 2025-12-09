@@ -52,13 +52,22 @@ jobs:
       - name: Build CLI
         run: pnpm build:cli
 
+      - name: Update version from tag
+        if: github.event_name == 'push'
+        working-directory: packages/cli
+        run: |
+          # Extract version from tag (cli-v1.0.1 -> 1.0.1)
+          VERSION=${GITHUB_REF_NAME#cli-v}
+          echo "Updating to version: $VERSION"
+          npm version $VERSION --no-git-tag-version
+
       - name: Update version (if manual trigger)
         if: github.event_name == 'workflow_dispatch'
         working-directory: packages/cli
         run: |
           npm version ${{ inputs.version }} --no-git-tag-version
 
-      # Using OIDC Trusted Publishing - no NPM_TOKEN needed!
+      # Using OIDC Trusted Publishing
       # Make sure to configure Trusted Publishing in npmjs.com:
       # 1. Go to npmjs.com → Package Settings → Publishing access
       # 2. Add GitHub Actions as a trusted publisher
