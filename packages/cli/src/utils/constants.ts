@@ -3,7 +3,7 @@
  */
 
 // GitHub repository for fetching templates
-export const GITHUB_REPO = "hipdev/vexblocks"
+export const GITHUB_REPO = "vexblocks/vexblocks"
 export const GITHUB_BRANCH = "main"
 export const GITHUB_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}`
 
