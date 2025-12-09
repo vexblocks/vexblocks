@@ -26,7 +26,9 @@ async function main() {
 	// Init command - Create new project or initialize in existing
 	program
 		.command("init")
-		.description("Initialize a new VexBlocks project or add to existing Turborepo")
+		.description(
+			"Initialize a new VexBlocks project or add to existing Turborepo",
+		)
 		.option("-y, --yes", "Skip confirmation prompts")
 		.option("--cwd <path>", "Working directory (defaults to current directory)")
 		.action(initCommand)

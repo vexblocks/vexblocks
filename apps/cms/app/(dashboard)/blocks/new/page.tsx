@@ -3,7 +3,15 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared"
 import { useMutation } from "convex/react"
-import { ArrowDown, ArrowLeft, ArrowUp, ImageIcon, Plus, Trash2, X } from "lucide-react"
+import {
+	ArrowDown,
+	ArrowLeft,
+	ArrowUp,
+	ImageIcon,
+	Plus,
+	Trash2,
+	X,
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -831,7 +839,8 @@ export default function NewBlockPage() {
 								Preview Image (optional)
 							</label>
 							<p className="mb-2 text-grey-400 text-xs">
-								Add an image to help users visually identify this block when selecting it
+								Add an image to help users visually identify this block when
+								selecting it
 							</p>
 							{previewImage ? (
 								<div className="relative inline-block">

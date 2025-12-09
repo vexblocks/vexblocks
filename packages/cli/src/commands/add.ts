@@ -47,7 +47,9 @@ export async function addCommand(
 	const isTurbo = await isTurborepoProject(cwd)
 	if (!isTurbo) {
 		logger.error("This is not a Turborepo project.")
-		logger.info(`Run ${pc.cyan("npx vexblocks init")} first to set up your project.`)
+		logger.info(
+			`Run ${pc.cyan("npx vexblocks init")} first to set up your project.`,
+		)
 		process.exit(1)
 	}
 
@@ -100,7 +102,9 @@ export async function addCommand(
 
 	if (resolvedPackages.length !== packagesToAdd.length) {
 		const added = resolvedPackages.filter((p) => !packagesToAdd.includes(p))
-		logger.info(`Adding dependencies: ${added.map((p) => PACKAGE_NAMES[p]).join(", ")}`)
+		logger.info(
+			`Adding dependencies: ${added.map((p) => PACKAGE_NAMES[p]).join(", ")}`,
+		)
 	}
 
 	// Check for existing packages
@@ -114,10 +118,12 @@ export async function addCommand(
 
 	if (existingPackages.length > 0 && !options.overwrite) {
 		logger.warn(`These packages already exist: ${existingPackages.join(", ")}`)
-		const overwrite = options.yes || await confirm({
-			message: "Overwrite existing packages?",
-			default: false,
-		})
+		const overwrite =
+			options.yes ||
+			(await confirm({
+				message: "Overwrite existing packages?",
+				default: false,
+			}))
 
 		if (!overwrite) {
 			// Filter out existing packages
@@ -139,14 +145,18 @@ export async function addCommand(
 	for (const pkg of resolvedPackages) {
 		const targetPath = getPackageTargetPath(cwd, pkg)
 		const relativePath = path.relative(cwd, targetPath)
-		logger.log(`  ${pc.green("+")} ${PACKAGE_NAMES[pkg]} → ${pc.dim(relativePath)}`)
+		logger.log(
+			`  ${pc.green("+")} ${PACKAGE_NAMES[pkg]} → ${pc.dim(relativePath)}`,
+		)
 	}
 	logger.break()
 
-	const proceed = options.yes || await confirm({
-		message: "Proceed with installation?",
-		default: true,
-	})
+	const proceed =
+		options.yes ||
+		(await confirm({
+			message: "Proceed with installation?",
+			default: true,
+		}))
 
 	if (!proceed) {
 		logger.info("Aborted.")

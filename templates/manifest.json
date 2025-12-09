@@ -82,16 +82,8 @@
 		]
 	},
 	"requiredEnvVars": {
-		"cms": [
-			"CONVEX_DEPLOYMENT",
-			"NEXT_PUBLIC_CONVEX_URL",
-			"SITE_URL"
-		],
-		"backend": [
-			"CONVEX_DEPLOYMENT",
-			"NEXT_PUBLIC_CONVEX_URL",
-			"SITE_URL"
-		]
+		"cms": ["CONVEX_DEPLOYMENT", "NEXT_PUBLIC_CONVEX_URL", "SITE_URL"],
+		"backend": ["CONVEX_DEPLOYMENT", "NEXT_PUBLIC_CONVEX_URL", "SITE_URL"]
 	},
 	"optionalEnvVars": {
 		"backend": [

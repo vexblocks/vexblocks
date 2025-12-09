@@ -99,8 +99,7 @@ export async function downloadAndExtractPackage(
 
 	// Filter files that match the package path
 	const files = data.tree.filter(
-		(item) =>
-			item.type === "blob" && item.path.startsWith(`${packagePath}/`),
+		(item) => item.type === "blob" && item.path.startsWith(`${packagePath}/`),
 	)
 
 	// Download each file
@@ -136,8 +135,7 @@ export async function getPackageFiles(packagePath: string): Promise<string[]> {
 
 	return data.tree
 		.filter(
-			(item) =>
-				item.type === "blob" && item.path.startsWith(`${packagePath}/`),
+			(item) => item.type === "blob" && item.path.startsWith(`${packagePath}/`),
 		)
 		.map((item) => item.path.slice(packagePath.length + 1))
 }

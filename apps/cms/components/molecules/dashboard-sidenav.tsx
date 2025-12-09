@@ -131,17 +131,13 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 						key={item.href}
 						href={item.href}
 						className={`group relative flex items-center rounded-lg text-grey-700 transition-all hover:bg-primary/5 hover:text-primary ${
-							isCollapsed
-								? "justify-center p-3"
-								: "gap-3 px-4 py-3"
+							isCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
 						}`}
 						onClick={onClose}
 						title={isCollapsed ? item.label : undefined}
 					>
 						<item.icon className="h-5 w-5 shrink-0" />
-						{!isCollapsed && (
-							<span className="font-medium">{item.label}</span>
-						)}
+						{!isCollapsed && <span className="font-medium">{item.label}</span>}
 						{/* Tooltip on hover when collapsed */}
 						{isCollapsed && (
 							<div className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg bg-grey-900 px-3 py-2 font-medium text-sm text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
@@ -175,7 +171,9 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 					title={isCollapsed ? "Sign Out" : undefined}
 				>
 					<LogOut className="h-4 w-4 shrink-0" />
-					{!isCollapsed && <span className="font-medium text-sm">Sign Out</span>}
+					{!isCollapsed && (
+						<span className="font-medium text-sm">Sign Out</span>
+					)}
 					{/* Tooltip on hover when collapsed */}
 					{isCollapsed && (
 						<div className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg bg-grey-900 px-3 py-2 font-medium text-sm text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">

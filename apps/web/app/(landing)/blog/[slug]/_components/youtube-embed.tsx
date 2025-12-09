@@ -55,4 +55,3 @@ export function YouTubeEmbed({ url, fieldPath }: YouTubeEmbedProps) {
 		</div>
 	)
 }
-

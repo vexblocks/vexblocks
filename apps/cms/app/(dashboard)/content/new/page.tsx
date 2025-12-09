@@ -70,10 +70,7 @@ export default function NewContentPage() {
 		: "/content"
 
 	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
-	const allContent = useQuery(
-		api.cms.content.listAll,
-		isReady ? {} : "skip",
-	) // Load all content for references
+	const allContent = useQuery(api.cms.content.listAll, isReady ? {} : "skip") // Load all content for references
 	const localizationSettings = useQuery(
 		api.settings.get,
 		isReady ? { key: "localization" } : "skip",

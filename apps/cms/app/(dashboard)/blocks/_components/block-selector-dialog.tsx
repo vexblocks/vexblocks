@@ -115,86 +115,88 @@ export function BlockSelectorDialog({
 						</div>
 					) : (
 						<div className="space-y-6">
-							{Object.entries(filteredGroups).map(([category, categoryBlocks]) => (
-								<div key={category}>
-									<h3 className="mb-3 font-semibold text-grey-700">
-										{category}
-									</h3>
-									<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-										{categoryBlocks?.map((block) => (
-											<button
-												key={block._id}
-												type="button"
-												onClick={() => onSelect(block)}
-												className={`group relative flex flex-col overflow-hidden rounded-lg border-2 bg-white text-left transition-all hover:border-primary hover:shadow-lg ${
-													selectedBlockId === block._id
-														? "border-primary ring-2 ring-primary/20"
-														: "border-grey-200"
-												}`}
-											>
-												{/* Preview Image or Placeholder */}
-												<div className="relative h-32 w-full bg-grey-100">
-													{block.previewImage ? (
-														<CFImage
-															assetId={block.previewImage}
-															alt={block.displayName}
-															fill
-															variant="public"
-															className="object-cover"
-														/>
-													) : (
-														<div className="flex h-full w-full items-center justify-center">
-															<Layers className="h-12 w-12 text-grey-300" />
-														</div>
-													)}
-													{selectedBlockId === block._id && (
-														<div className="absolute top-2 right-2 rounded-full bg-primary p-1 text-white">
-															<svg
-																className="h-4 w-4"
-																fill="none"
-																stroke="currentColor"
-																viewBox="0 0 24 24"
-															>
-																<path
-																	strokeLinecap="round"
-																	strokeLinejoin="round"
-																	strokeWidth={2}
-																	d="M5 13l4 4L19 7"
-																/>
-															</svg>
-														</div>
-													)}
-												</div>
-
-												{/* Block Info */}
-												<div className="flex flex-1 flex-col p-4">
-													<h4 className="mb-1 font-semibold text-grey-900 group-hover:text-primary">
-														{block.displayName}
-													</h4>
-													{block.description ? (
-														<p className="line-clamp-2 flex-1 text-grey-500 text-sm">
-															{block.description}
-														</p>
-													) : (
-														<p className="line-clamp-2 flex-1 text-grey-400 text-sm italic">
-															No description
-														</p>
-													)}
-													<div className="mt-2 flex items-center justify-between">
-														<code className="rounded bg-grey-100 px-2 py-0.5 font-mono text-grey-600 text-xs">
-															{block.name}
-														</code>
-														<span className="text-grey-400 text-xs">
-															{block.fields.length} field
-															{block.fields.length !== 1 ? "s" : ""}
-														</span>
+							{Object.entries(filteredGroups).map(
+								([category, categoryBlocks]) => (
+									<div key={category}>
+										<h3 className="mb-3 font-semibold text-grey-700">
+											{category}
+										</h3>
+										<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+											{categoryBlocks?.map((block) => (
+												<button
+													key={block._id}
+													type="button"
+													onClick={() => onSelect(block)}
+													className={`group relative flex flex-col overflow-hidden rounded-lg border-2 bg-white text-left transition-all hover:border-primary hover:shadow-lg ${
+														selectedBlockId === block._id
+															? "border-primary ring-2 ring-primary/20"
+															: "border-grey-200"
+													}`}
+												>
+													{/* Preview Image or Placeholder */}
+													<div className="relative h-32 w-full bg-grey-100">
+														{block.previewImage ? (
+															<CFImage
+																assetId={block.previewImage}
+																alt={block.displayName}
+																fill
+																variant="public"
+																className="object-cover"
+															/>
+														) : (
+															<div className="flex h-full w-full items-center justify-center">
+																<Layers className="h-12 w-12 text-grey-300" />
+															</div>
+														)}
+														{selectedBlockId === block._id && (
+															<div className="absolute top-2 right-2 rounded-full bg-primary p-1 text-white">
+																<svg
+																	className="h-4 w-4"
+																	fill="none"
+																	stroke="currentColor"
+																	viewBox="0 0 24 24"
+																>
+																	<path
+																		strokeLinecap="round"
+																		strokeLinejoin="round"
+																		strokeWidth={2}
+																		d="M5 13l4 4L19 7"
+																	/>
+																</svg>
+															</div>
+														)}
 													</div>
-												</div>
-											</button>
-										))}
+
+													{/* Block Info */}
+													<div className="flex flex-1 flex-col p-4">
+														<h4 className="mb-1 font-semibold text-grey-900 group-hover:text-primary">
+															{block.displayName}
+														</h4>
+														{block.description ? (
+															<p className="line-clamp-2 flex-1 text-grey-500 text-sm">
+																{block.description}
+															</p>
+														) : (
+															<p className="line-clamp-2 flex-1 text-grey-400 text-sm italic">
+																No description
+															</p>
+														)}
+														<div className="mt-2 flex items-center justify-between">
+															<code className="rounded bg-grey-100 px-2 py-0.5 font-mono text-grey-600 text-xs">
+																{block.name}
+															</code>
+															<span className="text-grey-400 text-xs">
+																{block.fields.length} field
+																{block.fields.length !== 1 ? "s" : ""}
+															</span>
+														</div>
+													</div>
+												</button>
+											))}
+										</div>
 									</div>
-								</div>
-							))}
+								),
+							)}
 						</div>
 					)}
 				</div>
@@ -216,4 +218,3 @@ export function BlockSelectorDialog({
 		</div>
 	)
 }
-

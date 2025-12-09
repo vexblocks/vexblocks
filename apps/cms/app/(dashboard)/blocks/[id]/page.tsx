@@ -600,36 +600,37 @@ export default function BlockDetailPage({
 									Preview Image (optional)
 								</label>
 								<p className="mb-2 text-grey-500 text-xs">
-									Add an image to help users visually identify this block when selecting it
+									Add an image to help users visually identify this block when
+									selecting it
 								</p>
-							{previewImage ? (
-								<div className="relative inline-block">
-									<CFImage
-										assetId={previewImage}
-										alt="Preview"
-										width={192}
-										height={128}
-										variant="public"
-										className="h-32 w-48 rounded-lg border border-grey-200 object-cover"
-									/>
+								{previewImage ? (
+									<div className="relative inline-block">
+										<CFImage
+											assetId={previewImage}
+											alt="Preview"
+											width={192}
+											height={128}
+											variant="public"
+											className="h-32 w-48 rounded-lg border border-grey-200 object-cover"
+										/>
+										<button
+											type="button"
+											onClick={() => setPreviewImage("")}
+											className="-top-2 -right-2 absolute rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+										>
+											<X className="h-4 w-4" />
+										</button>
+									</div>
+								) : (
 									<button
 										type="button"
-										onClick={() => setPreviewImage("")}
-										className="-top-2 -right-2 absolute rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+										onClick={() => setShowMediaSelector(true)}
+										className="flex items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-3 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
 									>
-										<X className="h-4 w-4" />
+										<ImageIcon className="h-5 w-5" />
+										Select Preview Image
 									</button>
-								</div>
-							) : (
-								<button
-									type="button"
-									onClick={() => setShowMediaSelector(true)}
-									className="flex items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-3 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
-								>
-									<ImageIcon className="h-5 w-5" />
-									Select Preview Image
-								</button>
-							)}
+								)}
 							</div>
 						</div>
 					) : (

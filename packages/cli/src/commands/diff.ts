@@ -5,7 +5,7 @@ import ora from "ora"
 import { createTwoFilesPatch } from "diff"
 import { logger } from "../utils/logger.js"
 import { readManifest } from "../utils/manifest.js"
-import { fetchFile, getPackageFiles, } from "../utils/github.js"
+import { fetchFile, getPackageFiles } from "../utils/github.js"
 import { PACKAGE_NAMES } from "../utils/constants.js"
 
 type PackageName = "cms" | "backend" | "shared" | "types"
@@ -163,7 +163,9 @@ export async function diffCommand(
 		// Summary
 		logger.break()
 		if (totalDiffs === 0) {
-			logger.success("No differences found. Local files match the latest version.")
+			logger.success(
+				"No differences found. Local files match the latest version.",
+			)
 		} else {
 			logger.log(pc.bold("Summary:"))
 			if (newFiles > 0) logger.log(`  ${pc.green(`+${newFiles}`)} new files`)
@@ -213,9 +215,7 @@ async function getLocalFiles(dir: string, base = ""): Promise<string[]> {
 		if (entry.isDirectory()) {
 			// Skip certain directories
 			if (
-				["node_modules", "dist", ".next", ".turbo", ".git"].includes(
-					entry.name,
-				)
+				["node_modules", "dist", ".next", ".turbo", ".git"].includes(entry.name)
 			) {
 				continue
 			}

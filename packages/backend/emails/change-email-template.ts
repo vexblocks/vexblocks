@@ -51,4 +51,4 @@ export const changeEmailTemplate = (url: string) => `
     </tr>
   </tbody>
 </table>
-`;
+`

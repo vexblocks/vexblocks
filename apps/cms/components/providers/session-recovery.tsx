@@ -26,7 +26,9 @@ export function SessionRecovery({ children }: PropsWithChildren) {
 	const pathname = usePathname()
 	const [authState] = useAtom(authAtom)
 	const [isStuck, setIsStuck] = useState(false)
-	const [stuckReason, setStuckReason] = useState<"timeout" | "no-user">("timeout")
+	const [stuckReason, setStuckReason] = useState<"timeout" | "no-user">(
+		"timeout",
+	)
 	const [isClearing, setIsClearing] = useState(false)
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const noUserTimeoutRef = useRef<NodeJS.Timeout | null>(null)

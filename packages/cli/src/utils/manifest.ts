@@ -32,7 +32,9 @@ export interface VexBlocksManifest {
 /**
  * Read the vexblocks.json manifest from a directory
  */
-export async function readManifest(cwd: string): Promise<VexBlocksManifest | null> {
+export async function readManifest(
+	cwd: string,
+): Promise<VexBlocksManifest | null> {
 	const manifestPath = path.join(cwd, MANIFEST_FILE)
 
 	try {

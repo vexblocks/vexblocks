@@ -4,7 +4,7 @@ import pc from "picocolors"
 import ora from "ora"
 import { confirm, input, select } from "@inquirer/prompts"
 import { logger } from "../utils/logger.js"
-import { isTurborepoProject, getPackageManager, } from "../utils/fs.js"
+import { isTurborepoProject, getPackageManager } from "../utils/fs.js"
 import { createManifest, writeManifest } from "../utils/manifest.js"
 import { getLatestVersion } from "../utils/github.js"
 import { MANIFEST_FILE } from "../utils/constants.js"
@@ -23,11 +23,13 @@ export async function initCommand(options: InitOptions): Promise<void> {
 	const manifestPath = path.join(cwd, MANIFEST_FILE)
 	if (await fs.pathExists(manifestPath)) {
 		logger.warn("VexBlocks is already initialized in this directory.")
-		
-		const continueAnyway = options.yes || await confirm({
-			message: "Do you want to reinitialize?",
-			default: false,
-		})
+
+		const continueAnyway =
+			options.yes ||
+			(await confirm({
+				message: "Do you want to reinitialize?",
+				default: false,
+			}))
 
 		if (!continueAnyway) {
 			logger.info("Run `vexblocks add <package>` to add packages.")
@@ -66,7 +68,10 @@ export async function initCommand(options: InitOptions): Promise<void> {
 	}
 }
 
-async function createNewProject(cwd: string, options: InitOptions): Promise<void> {
+async function createNewProject(
+	cwd: string,
+	options: InitOptions,
+): Promise<void> {
 	const projectName = await input({
 		message: "Project name:",
 		default: path.basename(cwd),
@@ -243,10 +248,12 @@ FRONTEND_URL=http://localhost:3000
 		])
 
 		// Ask if user wants to add packages now
-		const addPackages = options.yes || await confirm({
-			message: "Would you like to add VexBlocks packages now?",
-			default: true,
-		})
+		const addPackages =
+			options.yes ||
+			(await confirm({
+				message: "Would you like to add VexBlocks packages now?",
+				default: true,
+			}))
 
 		if (addPackages) {
 			logger.break()
@@ -259,7 +266,10 @@ FRONTEND_URL=http://localhost:3000
 	}
 }
 
-async function initializeExisting(cwd: string, _options: InitOptions): Promise<void> {
+async function initializeExisting(
+	cwd: string,
+	_options: InitOptions,
+): Promise<void> {
 	const spinner = ora("Initializing VexBlocks...").start()
 
 	try {
@@ -268,7 +278,9 @@ async function initializeExisting(cwd: string, _options: InitOptions): Promise<v
 
 		if (!hasTurbo) {
 			spinner.warn("No turbo.json found")
-			logger.warn("VexBlocks requires Turborepo. Please set up Turborepo first.")
+			logger.warn(
+				"VexBlocks requires Turborepo. Please set up Turborepo first.",
+			)
 			logger.info(`Run: ${pc.cyan("npx create-turbo@latest")}`)
 			return
 		}

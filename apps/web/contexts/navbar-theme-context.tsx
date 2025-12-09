@@ -69,12 +69,12 @@ export function NavbarThemeProvider({ children }: { children: ReactNode }) {
 
 	return (
 		<NavbarThemeContext.Provider
-			value={{ 
-				theme, 
-				additionalClasses, 
-				registerSection, 
+			value={{
+				theme,
+				additionalClasses,
+				registerSection,
 				unregisterSection,
-				setAdditionalClasses 
+				setAdditionalClasses,
 			}}
 		>
 			{children}

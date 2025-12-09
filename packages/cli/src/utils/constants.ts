@@ -39,24 +39,17 @@ export const PACKAGE_DEPENDENCIES: Record<string, string[]> = {
 
 // Required environment variables per package
 export const REQUIRED_ENV_VARS: Record<string, string[]> = {
-	cms: [
-		"CONVEX_DEPLOYMENT",
-		"NEXT_PUBLIC_CONVEX_URL",
-		"SITE_URL",
-	],
-	backend: [
-		"CONVEX_DEPLOYMENT",
-		"NEXT_PUBLIC_CONVEX_URL",
-		"SITE_URL",
-	],
+	cms: ["CONVEX_DEPLOYMENT", "NEXT_PUBLIC_CONVEX_URL", "SITE_URL"],
+	backend: ["CONVEX_DEPLOYMENT", "NEXT_PUBLIC_CONVEX_URL", "SITE_URL"],
 	shared: [],
-	types: [
-		"CONVEX_URL",
-	],
+	types: ["CONVEX_URL"],
 }
 
 // Optional environment variables (for features like media)
-export const OPTIONAL_ENV_VARS: Record<string, { name: string; description: string }[]> = {
+export const OPTIONAL_ENV_VARS: Record<
+	string,
+	{ name: string; description: string }[]
+> = {
 	backend: [
 		{
 			name: "CLOUDFLARE_ACCOUNT_ID",

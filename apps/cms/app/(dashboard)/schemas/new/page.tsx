@@ -140,7 +140,11 @@ function BlockReferenceSelectorNew({
 	fieldId: string
 	parentPath: string[]
 	availableBlocks: AvailableBlock[]
-	onUpdateField: (id: string, updates: Partial<Field>, parentPath: string[]) => void
+	onUpdateField: (
+		id: string,
+		updates: Partial<Field>,
+		parentPath: string[],
+	) => void
 }) {
 	const [showBlockSelector, setShowBlockSelector] = useState(false)
 

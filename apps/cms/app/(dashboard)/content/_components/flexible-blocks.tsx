@@ -148,7 +148,7 @@ export function FlexibleBlockItem({
 	const blockFieldPath = `${path}[${index}]`
 
 	return (
-		<div 
+		<div
 			className="rounded-lg border border-purple-300 bg-white p-4 shadow-sm"
 			data-field-path={blockFieldPath}
 		>
@@ -250,7 +250,7 @@ export function FlexibleBlocksField({
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [showAddMenu, setShowAddMenu] = useState(false)
 	const [showBlockSelector, setShowBlockSelector] = useState(false)
-	
+
 	const blocks = (value || []) as Array<{
 		_id: string
 		type: string
@@ -275,19 +275,29 @@ export function FlexibleBlocksField({
 		const newBlock = {
 			_id: `block_${Date.now()}`,
 			type: blockType,
-			data: blockType === "boolean" ? false : blockType === "number" ? 0 : blockType === "blockReference" ? { blockId } : "",
+			data:
+				blockType === "boolean"
+					? false
+					: blockType === "number"
+						? 0
+						: blockType === "blockReference"
+							? { blockId }
+							: "",
 		}
 		const newBlocks = [...blocks, newBlock]
 		onChange(path, newBlocks)
 		setShowAddMenu(false)
-		
+
 		// Scroll to bottom of the flexible blocks container smoothly
 		setTimeout(() => {
 			if (containerRef.current) {
 				const container = containerRef.current
 				const containerRect = container.getBoundingClientRect()
 				const absoluteBottom = window.scrollY + containerRect.bottom
-				window.scrollTo({ top: absoluteBottom - window.innerHeight + 100, behavior: "smooth" })
+				window.scrollTo({
+					top: absoluteBottom - window.innerHeight + 100,
+					behavior: "smooth",
+				})
 			}
 		}, 100)
 	}
@@ -355,7 +365,7 @@ export function FlexibleBlocksField({
 							<Plus className="h-4 w-4" />
 							Add Block
 						</button>
-						
+
 						{/* Dropdown menu for block types */}
 						{showAddMenu && (
 							<>
@@ -437,4 +447,3 @@ export function FlexibleBlocksField({
 		</div>
 	)
 }
-

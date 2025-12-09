@@ -38,7 +38,8 @@ export function PostsFilterHandler() {
 
 			// Filter posts
 			posts.forEach((post) => {
-				const postTags = (post as HTMLElement).dataset.postTags?.split(",") ?? []
+				const postTags =
+					(post as HTMLElement).dataset.postTags?.split(",") ?? []
 				const matches = selectedTags.some((tag) => postTags.includes(tag))
 				;(post as HTMLElement).style.display = matches ? "" : "none"
 			})
@@ -48,4 +49,3 @@ export function PostsFilterHandler() {
 	// This component renders nothing - it only handles side effects
 	return null
 }
-

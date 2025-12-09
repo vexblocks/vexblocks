@@ -4,7 +4,11 @@ import pc from "picocolors"
 import ora from "ora"
 import { confirm } from "@inquirer/prompts"
 import { logger } from "../utils/logger.js"
-import { readManifest, writeManifest, type PackageConfig } from "../utils/manifest.js"
+import {
+	readManifest,
+	writeManifest,
+	type PackageConfig,
+} from "../utils/manifest.js"
 import {
 	getLatestVersion,
 	getChangelog,
@@ -150,14 +154,18 @@ export async function upgradeCommand(
 
 	logger.break()
 	logger.success(`Upgraded to version ${pc.cyan(latestVersion)}`)
-	logger.info("Run your package manager's install command to update dependencies.")
+	logger.info(
+		"Run your package manager's install command to update dependencies.",
+	)
 }
 
 async function upgradePackage(
 	cwd: string,
 	pkg: PackageName,
 	version: string,
-	manifest: ReturnType<typeof readManifest> extends Promise<infer T> ? NonNullable<T> : never,
+	manifest: ReturnType<typeof readManifest> extends Promise<infer T>
+		? NonNullable<T>
+		: never,
 	options: UpgradeOptions,
 ): Promise<void> {
 	const spinner = ora(`Upgrading ${PACKAGE_NAMES[pkg]}...`).start()
@@ -173,7 +181,9 @@ async function upgradePackage(
 
 		// Check if package exists
 		if (!(await fs.pathExists(targetPath))) {
-			spinner.warn(`${PACKAGE_NAMES[pkg]} directory not found at ${config.path}`)
+			spinner.warn(
+				`${PACKAGE_NAMES[pkg]} directory not found at ${config.path}`,
+			)
 			return
 		}
 

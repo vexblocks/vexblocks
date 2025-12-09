@@ -200,9 +200,7 @@ export default function HomePage() {
 
 					<div className="grid gap-8 md:grid-cols-3">
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-teal-700 text-sm">
-								GLOBAL
-							</div>
+							<div className="mb-2 font-bold text-teal-700 text-sm">GLOBAL</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Singleton Content
 							</Heading>

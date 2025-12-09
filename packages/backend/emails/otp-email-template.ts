@@ -79,4 +79,4 @@ export const getOTPEmailTemplate = (otp: string) => `
     </tr>
   </tbody>
 </table>
-`;
+`
