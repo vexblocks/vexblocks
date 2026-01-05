@@ -27,11 +27,16 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 					return
 				}
 
+				// Check if this is the first user in the system
+				const allUsers = await ctx.db.query("users").collect()
+				const isFirstUser = allUsers.length === 0
+
 				// If the user doesn't exist, create a new one
+				// First user automatically becomes admin
 				await ctx.db.insert("users", {
 					email: authUser.email,
 					name: authUser.name,
-					role: "user",
+					role: isFirstUser ? "admin" : "user",
 					authId: authUser._id,
 				})
 			},

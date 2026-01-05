@@ -316,24 +316,8 @@ async function installBackendPackage(
 			}
 		}
 
-		// Append import instructions to existing schema
-		const schemaInstructions = `
-// === VEXBLOCKS CMS ===
-// Add the following imports and tables to your schema:
-//
-// import { cmsSchemaExports } from "./schema.cms"
-//
-// Then add to your defineSchema:
-// export default defineSchema({
-//   ...yourExistingTables,
-//   ...cmsSchemaExports,
-// })
-// === END VEXBLOCKS CMS ===
-`
-		const existingContent = await fs.readFile(existingSchemaPath, "utf-8")
-		if (!existingContent.includes("VEXBLOCKS CMS")) {
-			await fs.appendFile(existingSchemaPath, schemaInstructions)
-		}
+		// Auto-merge CMS imports into existing schema
+		await mergeSchemaFile(existingSchemaPath, spinner)
 	} else {
 		// Fresh installation - download entire backend package
 		await fs.ensureDir(targetPath)
@@ -407,4 +391,70 @@ function getOptionalEnvVars(
 	}
 
 	return vars
+}
+
+/**
+ * Intelligently merge CMS schema imports into existing schema.ts
+ */
+async function mergeSchemaFile(
+	schemaPath: string,
+	spinner: ReturnType<typeof ora>,
+): Promise<void> {
+	const content = await fs.readFile(schemaPath, "utf-8")
+
+	// Check if already merged
+	if (content.includes('from "./schema.cms"')) {
+		spinner.text = "CMS schema already integrated"
+		return
+	}
+
+	spinner.text = "Merging CMS schema into existing schema.ts..."
+
+	let newContent = content
+
+	// 1. Add import if not present
+	const importStatement = 'import { cmsSchemaExports } from "./schema.cms"'
+	const hasImport = content.includes(importStatement)
+
+	if (!hasImport) {
+		// Find the last import statement
+		const importRegex = /^import\s+.*from\s+['"].*['"];?\s*$/gm
+		const imports = [...content.matchAll(importRegex)]
+
+		if (imports.length > 0) {
+			const lastImport = imports[imports.length - 1]
+			const insertPosition = lastImport.index! + lastImport[0].length
+			newContent =
+				newContent.slice(0, insertPosition) +
+				`\n${importStatement}` +
+				newContent.slice(insertPosition)
+		} else {
+			// No imports found, add at the beginning
+			newContent = `${importStatement}\n\n${newContent}`
+		}
+	}
+
+	// 2. Add ...cmsSchemaExports to defineSchema if not present
+	const hasSpread = /defineSchema\s*\(\s*\{[^}]*\.\.\.cmsSchemaExports/s.test(
+		newContent,
+	)
+
+	if (!hasSpread) {
+		// Find defineSchema({ and add the spread
+		const defineSchemaRegex =
+			/defineSchema\s*\(\s*\{(\s*)/
+
+		if (defineSchemaRegex.test(newContent)) {
+			newContent = newContent.replace(
+				defineSchemaRegex,
+				(_match, whitespace) => {
+					return `defineSchema({${whitespace}// VexBlocks CMS tables${whitespace}...cmsSchemaExports,${whitespace}`
+				},
+			)
+		}
+	}
+
+	// Write the merged content
+	await fs.writeFile(schemaPath, newContent, "utf-8")
+	spinner.text = "Successfully merged CMS schema"
 }
