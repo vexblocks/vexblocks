@@ -2,6 +2,3 @@
 .env
 .env.production
 .DS_Store
-
-# User configuration (created from vexblocks.config.example.ts)
-vexblocks.config.ts

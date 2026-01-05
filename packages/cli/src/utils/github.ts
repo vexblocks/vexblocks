@@ -1,6 +1,11 @@
 import path from "node:path"
 import fs from "fs-extra"
-import { GITHUB_BRANCH, GITHUB_RAW_URL, GITHUB_REPO } from "./constants.js"
+import {
+	GITHUB_BRANCH,
+	GITHUB_RAW_URL,
+	GITHUB_REPO,
+	PROTECTED_FILES,
+} from "./constants.js"
 
 /**
  * Remote manifest structure from GitHub
@@ -50,11 +55,18 @@ export async function fetchFile(filePath: string): Promise<string> {
 
 /**
  * Download a file from GitHub and save it locally
+ * Protected files (like vexblocks.config.ts) will not be overwritten if they already exist
  */
 export async function downloadFile(
 	remotePath: string,
 	localPath: string,
+	options?: { skipIfExists?: boolean },
 ): Promise<void> {
+	// Check if this is a protected file that already exists
+	if (options?.skipIfExists && (await fs.pathExists(localPath))) {
+		return
+	}
+
 	const url = `${GITHUB_RAW_URL}/${remotePath}`
 
 	const response = await fetch(url)
@@ -107,8 +119,15 @@ export async function downloadAndExtractPackage(
 		const relativePath = file.path.slice(packagePath.length + 1)
 		const localPath = path.join(targetDir, relativePath)
 
+		// Check if this file is protected (should not be overwritten)
+		const isProtectedFile = PROTECTED_FILES.some((protectedPath) =>
+			file.path.endsWith(protectedPath),
+		)
+
 		onProgress?.(relativePath)
-		await downloadFile(file.path, localPath)
+		await downloadFile(file.path, localPath, {
+			skipIfExists: isProtectedFile,
+		})
 	}
 }
 

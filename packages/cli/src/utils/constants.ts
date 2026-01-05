@@ -29,6 +29,13 @@ export const PACKAGE_NAMES = {
 // Files that should be marked as managed (not to be edited)
 export const MANAGED_PACKAGES = ["cms", "shared", "types"] as const
 
+// Files that should NEVER be overwritten (user configuration)
+export const PROTECTED_FILES = [
+	"packages/backend/vexblocks.config.ts",
+	"packages/backend/.env",
+	"packages/backend/.env.local",
+] as const
+
 // Dependencies between packages
 export const PACKAGE_DEPENDENCIES: Record<string, string[]> = {
 	cms: ["backend", "shared"],
