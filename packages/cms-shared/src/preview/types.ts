@@ -41,3 +41,4 @@ export type PreviewConfig = {
 	schemaId: string
 	initialData?: Record<string, any>
 }
+

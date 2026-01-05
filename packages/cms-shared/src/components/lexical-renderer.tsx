@@ -134,8 +134,11 @@ function EditableElement({
 		return "none"
 	}
 
+	// Use span for paragraph elements to avoid <div> wrapping <p> which causes hydration errors
+	const WrapperTag = elementType === "p" ? "span" : "div"
+
 	return (
-		<div
+		<WrapperTag
 			data-cms-field={elementFieldPath}
 			data-cms-editable="true"
 			onClick={handleClick}
@@ -147,12 +150,13 @@ function EditableElement({
 				cursor: "pointer",
 				outline: getOutlineStyle(),
 				outlineOffset: "2px",
+				display: elementType === "p" ? "block" : undefined,
 				borderRadius: "4px",
 				transition: "outline 0.15s ease-in-out",
 			}}
 		>
 			{children}
-		</div>
+		</WrapperTag>
 	)
 }
 
@@ -213,6 +217,20 @@ function renderNode(
 					paragraphNode.children[0].type === "text" &&
 					!(paragraphNode.children[0] as TextNode).text)
 
+			// Check if paragraph contains block nodes (which shouldn't be wrapped in <p>)
+			const hasBlockChild = paragraphNode.children?.some(
+				(child) => child.type === "block",
+			)
+
+			// If paragraph contains block nodes, render children without <p> wrapper
+			if (hasBlockChild) {
+				return (
+					<div key={key} className="mb-6">
+						{renderChildren(paragraphNode.children, key, undefined, counters)}
+					</div>
+				)
+			}
+
 			const elementIndex = counters.paragraph++
 			const paragraphElement = (
 				<p key={key} className={isEmpty ? "mb-6" : "mb-0"}>
@@ -239,10 +257,19 @@ function renderNode(
 
 		case "heading": {
 			const headingNode = node as HeadingNode
-			const Tag = headingNode.tag || "h2"
+			// Convert all headings down one level: h1→h2, h2→h3, h3→h4, h4→h5, h5→h6, h6→h6
+			const headingMap: Record<string, "h2" | "h3" | "h4" | "h5" | "h6"> = {
+				h1: "h2",
+				h2: "h3",
+				h3: "h4",
+				h4: "h5",
+				h5: "h6",
+				h6: "h6",
+			}
+			const Tag = headingMap[headingNode.tag] || "h2"
 			const elementIndex = counters.heading++
 			const headingElement = (
-				<Tag key={key} className="mt-8 mb-4">
+				<Tag key={key} className="mb-4">
 					{renderChildren(headingNode.children, key, undefined, counters)}
 				</Tag>
 			)
@@ -415,6 +442,13 @@ function renderNode(
 
 		case "linebreak":
 			return <br key={key} />
+
+		case "block": {
+			// Block nodes are custom CMS blocks embedded in rich text
+			// Skip rendering them here - they should be extracted and rendered separately
+			// by the parent component that knows how to render specific block types
+			return null
+		}
 
 		default:
 			console.warn(`Unknown Lexical node type: ${node.type}`)

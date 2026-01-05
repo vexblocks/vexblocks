@@ -80,19 +80,14 @@ export function getLocalizedStringValue(
  * @param value - The value to check
  * @returns True if the value appears to be a localized content object
  */
-export function isLocalizedContent(
-	value: unknown,
-): value is Record<string, string> {
+export function isLocalizedContent(value: unknown): value is Record<string, string> {
 	if (!value || typeof value !== "object" || Array.isArray(value)) {
 		return false
 	}
 	const entries = Object.entries(value)
 	// Check if it looks like locale keys (2-3 character strings) with string values
-	return (
-		entries.length > 0 &&
-		entries.every(
-			([key, val]) =>
-				key.length >= 2 && key.length <= 5 && typeof val === "string",
-		)
+	return entries.length > 0 && entries.every(
+		([key, val]) => key.length >= 2 && key.length <= 5 && typeof val === "string"
 	)
 }
+

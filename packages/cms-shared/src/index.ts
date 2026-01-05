@@ -1,8 +1,8 @@
 // Components
-
 export type { CFImageProps } from "./components/cf-image"
 export { CFImage } from "./components/cf-image"
 export { LexicalRenderer } from "./components/lexical-renderer"
+// Types
 export type {
 	EditableFieldProps,
 	PreviewConfig,
@@ -11,16 +11,21 @@ export type {
 	PreviewMessageType,
 	PreviewParams,
 } from "./preview"
-// Preview SDK - All exports consolidated
+// ============================================================================
+// Preview SDK - Server Utilities
+// ============================================================================
+// ============================================================================
+// Preview SDK - Client API
+// ============================================================================
+// PreviewProvider handles postMessage communication with CMS admin
+// Use usePreview() to get draftData for live preview updates
+// Legacy API (deprecated)
 export {
-	// Legacy API (deprecated)
 	CmsContent,
 	EditableField,
 	EditableText,
-	// Server utilities
 	getPreviewParams,
 	isPreviewRequest,
-	// Client API
 	PreviewBanner,
 	PreviewProvider,
 	PreviewWrapper,
@@ -41,3 +46,9 @@ export {
 	getStringValue,
 	isLocalizedContent,
 } from "./utils"
+export type { TextFormatConfig } from "./utils/text-formatter"
+export {
+	FormattedText,
+	formatTextToHTML,
+	parseFormattedText,
+} from "./utils/text-formatter"
