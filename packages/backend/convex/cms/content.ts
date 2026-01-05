@@ -868,14 +868,17 @@ export const create = mutation({
 			updatedAt: now,
 		})
 
-		// Trigger revalidation if content is published (schedule action to call webhook)
-		if (args.status === "published") {
+		// Trigger revalidation for both published and draft content
+		// This ensures that draft content is also revalidated when saved
+		if (args.slug) {
 			await ctx.scheduler.runAfter(
 				0,
 				internal.cms.content.triggerRevalidationAction,
 				{
 					contentId,
 					slug: args.slug,
+					schemaName: schema.name,
+					urlPattern: schema.previewConfig?.urlPattern,
 				},
 			)
 		}
@@ -976,14 +979,18 @@ export const update = mutation({
 			...(isPublishing && { publishedAt: now }),
 		})
 
-		// Trigger revalidation if content is published (schedule action to call webhook)
-		if (args.status === "published" || content.status === "published") {
+		// Trigger revalidation for both published and draft content
+		// This ensures that the cache is updated whenever content is saved
+		const finalSlug = args.slug ?? content.slug
+		if (finalSlug) {
 			await ctx.scheduler.runAfter(
 				0,
 				internal.cms.content.triggerRevalidationAction,
 				{
 					contentId: args.id,
-					slug: args.slug ?? content.slug,
+					slug: finalSlug,
+					schemaName: schema.name,
+					urlPattern: schema.previewConfig?.urlPattern,
 				},
 			)
 		}
@@ -1018,7 +1025,32 @@ export const remove = mutation({
 			throw new Error("Content not found")
 		}
 
+		// Get schema for revalidation info
+		const schema = await ctx.db.get(content.schemaId)
+
+		// Store data needed for revalidation before deleting
+		const wasPublished = content.status === "published"
+		const contentSlug = content.slug
+		const schemaName = schema?.name
+		const urlPattern = schema?.previewConfig?.urlPattern
+
+		// Delete the content
 		await ctx.db.delete(args.id)
+
+		// Trigger revalidation if content was published (to remove cached page)
+		if (wasPublished && schema) {
+			await ctx.scheduler.runAfter(
+				0,
+				internal.cms.content.triggerRevalidationAction,
+				{
+					contentId: args.id,
+					slug: contentSlug,
+					schemaName,
+					urlPattern,
+					isDeleted: true,
+				},
+			)
+		}
 
 		return null
 	},
@@ -1077,12 +1109,15 @@ export const duplicate = mutation({
 
 /**
  * Internal action to call the revalidation webhook
- * This is triggered by the scheduler after content is published
+ * This is triggered by the scheduler after content is published or deleted
  */
 export const triggerRevalidationAction = internalAction({
 	args: {
 		contentId: v.id("cmsContent"),
 		slug: v.optional(v.string()),
+		schemaName: v.optional(v.string()),
+		urlPattern: v.optional(v.string()),
+		isDeleted: v.optional(v.boolean()),
 	},
 	handler: async (_ctx, args) => {
 		// Get the deployment URL (prefer FRONTEND_URL for web app, fallback to SITE_URL)
@@ -1115,16 +1150,25 @@ export const triggerRevalidationAction = internalAction({
 			// Call the HTTP webhook
 			// Ensure no double slashes and correct API path
 			const baseUrl = deploymentUrl.replace(/\/$/, "")
+			const requestPayload = {
+				contentId: args.contentId,
+				slug: args.slug,
+				schemaName: args.schemaName,
+				urlPattern: args.urlPattern,
+				isDeleted: args.isDeleted,
+				secret: revalidateSecret,
+			}
+
+			console.log(
+				`[Revalidation] Triggering for schema: ${args.schemaName}, slug: ${args.slug}, deleted: ${args.isDeleted || false}`,
+			)
+
 			const response = await fetch(`${baseUrl}/api/revalidate`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({
-					contentId: args.contentId,
-					slug: args.slug,
-					secret: revalidateSecret,
-				}),
+				body: JSON.stringify(requestPayload),
 			})
 
 			if (!response.ok) {

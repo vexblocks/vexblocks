@@ -9,6 +9,7 @@ import type {
 import type { DataModel } from "../convex/_generated/dataModel"
 import type { ActionCtx } from "../convex/_generated/server"
 import { authComponent } from "../convex/auth"
+import authConfig from "../convex/auth.config"
 import { sendEmail } from "../convex/lib/email"
 import { changeEmailTemplate } from "../emails/change-email-template"
 import { deleteAccountTemplate } from "../emails/delete-account-template"
@@ -92,7 +93,10 @@ export const createAuth = (ctx: GenericCtx): ReturnType<typeof betterAuth> => {
 			// for plugins that customize the user or session schema.
 			// See "Some caveats":
 			// https://www.better-auth.com/docs/concepts/session-management#customizing-session-response
-			convex(),
+			convex({
+				authConfig,
+				jwksRotateOnTokenGenerationError: true,
+			}),
 		],
 	})
 }

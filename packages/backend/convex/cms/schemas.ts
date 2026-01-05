@@ -373,9 +373,7 @@ export const update = mutation({
 			...(args.description !== undefined && { description: args.description }),
 			...(args.fields && { fields: args.fields }),
 			...(args.viewConfig !== undefined && { viewConfig: args.viewConfig }),
-			...(args.previewConfig !== undefined && {
-				previewConfig: args.previewConfig,
-			}),
+			...(args.previewConfig !== undefined && { previewConfig: args.previewConfig }),
 			...(args.icon !== undefined && { icon: args.icon }),
 			updatedAt: Date.now(),
 		})

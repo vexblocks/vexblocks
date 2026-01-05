@@ -121,7 +121,7 @@ const cmsSchemas = defineTable({
 	// Live preview configuration
 	previewConfig: v.optional(
 		v.object({
-			urlPattern: v.string(), // URL pattern with placeholders, e.g., "/blog/{slug}"
+			urlPattern: v.string(), // URL pattern with placeholders, e.g., "/content-library/{slug}"
 			enabled: v.optional(v.boolean()), // Whether preview is enabled for this schema
 		}),
 	),

@@ -15,6 +15,7 @@ import type * as cms_content from "../cms/content.js";
 import type * as cms_media from "../cms/media.js";
 import type * as cms_mediaActions from "../cms/mediaActions.js";
 import type * as cms_mediaTags from "../cms/mediaTags.js";
+import type * as cms_migrations from "../cms/migrations.js";
 import type * as cms_schemas from "../cms/schemas.js";
 import type * as cms_webhooks from "../cms/webhooks.js";
 import type * as constants from "../constants.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   "cms/media": typeof cms_media;
   "cms/mediaActions": typeof cms_mediaActions;
   "cms/mediaTags": typeof cms_mediaTags;
+  "cms/migrations": typeof cms_migrations;
   "cms/schemas": typeof cms_schemas;
   "cms/webhooks": typeof cms_webhooks;
   constants: typeof constants;
@@ -986,6 +988,7 @@ export declare const components: {
         "query",
         "internal",
         {
+          join?: any;
           limit?: number;
           model:
             | "user"
@@ -1039,6 +1042,7 @@ export declare const components: {
         "query",
         "internal",
         {
+          join?: any;
           model:
             | "user"
             | "session"
@@ -1076,12 +1080,6 @@ export declare const components: {
               | null;
           }>;
         },
-        any
-      >;
-      migrationRemoveUserId: FunctionReference<
-        "mutation",
-        "internal",
-        { userId: string },
         any
       >;
       updateMany: FunctionReference<
@@ -2054,14 +2052,8 @@ export declare const components: {
       >;
     };
     adapterTest: {
-      count: FunctionReference<"query", "internal", any, any>;
-      create: FunctionReference<"mutation", "internal", any, any>;
-      delete: FunctionReference<"mutation", "internal", any, any>;
-      deleteMany: FunctionReference<"mutation", "internal", any, any>;
-      findMany: FunctionReference<"query", "internal", any, any>;
-      findOne: FunctionReference<"query", "internal", any, any>;
-      update: FunctionReference<"mutation", "internal", any, any>;
-      updateMany: FunctionReference<"mutation", "internal", any, any>;
+      runCustomTests: FunctionReference<"action", "internal", any, any>;
+      runTests: FunctionReference<"action", "internal", any, any>;
     };
   };
   resend: {

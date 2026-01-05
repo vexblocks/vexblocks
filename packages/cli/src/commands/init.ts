@@ -112,7 +112,7 @@ async function createNewProject(
 		// Create root package.json
 		const packageJson = {
 			name: projectName,
-			version: "0.1.0",
+			version: "0.2.0",
 			private: true,
 			packageManager: "pnpm@9.15.0",
 			workspaces: ["apps/*", "packages/*"],
@@ -307,7 +307,9 @@ async function initializeExisting(
 			`1. ${pc.cyan("npx @vexblocks/cli add all")} - Add all CMS packages`,
 			"2. Configure your environment variables",
 			`3. ${pc.cyan(`${packageManager} install`)}`,
-			`4. ${pc.cyan(`${packageManager === "npm" ? "npm run" : packageManager} dev`)}`,
+			`4. ${pc.cyan(
+				`${packageManager === "npm" ? "npm run" : packageManager} dev`,
+			)}`,
 		])
 	} catch (error) {
 		spinner.fail("Failed to initialize")
