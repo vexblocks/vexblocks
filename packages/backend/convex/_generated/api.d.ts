@@ -21,7 +21,6 @@ import type * as cms_webhooks from "../cms/webhooks.js";
 import type * as constants from "../constants.js";
 import type * as http from "../http.js";
 import type * as lib_email from "../lib/email.js";
-import type * as lists from "../lists.js";
 import type * as settings from "../settings.js";
 import type * as users from "../users.js";
 import type * as utils from "../utils.js";
@@ -46,7 +45,6 @@ declare const fullApi: ApiFromModules<{
   constants: typeof constants;
   http: typeof http;
   "lib/email": typeof lib_email;
-  lists: typeof lists;
   settings: typeof settings;
   users: typeof users;
   utils: typeof utils;
