@@ -2,6 +2,7 @@
 
 import { ConvexError, v } from "convex/values"
 import { internalAction } from "../_generated/server"
+import { CLOUDFLARE_API } from "../constants"
 
 /**
  * Internal action to delete image from Cloudflare
@@ -13,7 +14,6 @@ export const deleteFromCloudflare = internalAction({
 	returns: v.null(),
 	handler: async (_ctx, args) => {
 		try {
-			const CLOUDFLARE_API = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}`
 			const response = await fetch(
 				`${CLOUDFLARE_API}/images/v1/${args.cloudflareId}`,
 				{

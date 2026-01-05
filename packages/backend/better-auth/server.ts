@@ -14,6 +14,7 @@ import { sendEmail } from "../convex/lib/email"
 import { changeEmailTemplate } from "../emails/change-email-template"
 import { deleteAccountTemplate } from "../emails/delete-account-template"
 import { getOTPEmailTemplate } from "../emails/otp-email-template"
+import config from "../vexblocks.config"
 
 // Union type for all Convex contexts
 type GenericCtx =
@@ -32,8 +33,8 @@ const getActionCtx = (ctx: GenericCtx): ActionCtx => {
 	return ctx
 }
 
-const createOptions = (ctx: GenericCtx) =>
-	({
+const createOptions = (ctx: GenericCtx) => {
+	return {
 		baseURL: process.env.SITE_URL as string,
 		database: authComponent.adapter(ctx),
 		account: {
@@ -47,7 +48,6 @@ const createOptions = (ctx: GenericCtx) =>
 
 				sendDeleteAccountVerification: async ({ user, url }, _request) => {
 					return await sendEmail(getActionCtx(ctx), {
-						from: "VexBlocks <noreply@julianux.com>",
 						to: user.email,
 						subject: "Confirm Account Deletion",
 						html: deleteAccountTemplate(url),
@@ -58,7 +58,6 @@ const createOptions = (ctx: GenericCtx) =>
 				enabled: true,
 				sendChangeEmailVerification: async ({ user, url }, _request) => {
 					return await sendEmail(getActionCtx(ctx), {
-						from: "VexBlocks <noreply@julianux.com>",
 						to: user.email,
 						subject: "Verify your email change",
 						html: changeEmailTemplate(url),
@@ -71,9 +70,8 @@ const createOptions = (ctx: GenericCtx) =>
 				sendVerificationOTP: async ({ email, otp }, _request) => {
 					// Ensure the promise is properly returned and awaited
 					return await sendEmail(getActionCtx(ctx), {
-						from: "VexBlocks <noreply@julianux.com>",
 						to: email,
-						subject: "Your VexBlocks login code",
+						subject: `Your ${config.appName} login code`,
 						html: getOTPEmailTemplate(otp),
 					})
 				},
@@ -81,7 +79,8 @@ const createOptions = (ctx: GenericCtx) =>
 				expiresIn: 300, // 5 minutes
 			}),
 		],
-	}) satisfies BetterAuthOptions
+	} satisfies BetterAuthOptions
+}
 
 export const createAuth = (ctx: GenericCtx): ReturnType<typeof betterAuth> => {
 	const options = createOptions(ctx)

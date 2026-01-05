@@ -4,6 +4,7 @@ import { components } from "../_generated/api"
 import "../polyfill"
 import type { RunMutationCtx } from "@convex-dev/better-auth/utils"
 import type { DataModel } from "../_generated/dataModel"
+import config from "../../vexblocks.config"
 
 export const resend: Resend = new Resend(components.resend, { testMode: false })
 
@@ -27,7 +28,7 @@ export const sendEmail = async (
 		html: string
 	},
 ) => {
-	const defaultFrom = "VexBlocks <noreply@juliaux.com>"
+	const defaultFrom = `${config.email.fromName} <${config.email.fromAddress}>`
 
 	await resend.sendEmail(ctx, {
 		from: from || defaultFrom,
