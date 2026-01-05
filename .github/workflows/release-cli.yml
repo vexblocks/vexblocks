@@ -13,10 +13,11 @@ on:
 
 jobs:
   release:
-    name: Build and Publish CLI
+    name: Build and Publish VexBlocks CLI
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -70,15 +71,13 @@ jobs:
       - name: Publish to npm
         working-directory: packages/cli
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: CLI ${{ github.ref_name }}
+          name: VexBlocks CLI ${{ github.ref_name }}
           body: |
             ## VexBlocks CLI ${{ github.ref_name }}
 
