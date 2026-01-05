@@ -7,12 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2025-01-05
+
 ### Added
-- VexBlocks CLI for easy project setup
-- `@vexblocks/cli init` - Initialize new projects
-- `@vexblocks/cli add` - Add packages to existing projects
-- `@vexblocks/cli upgrade` - Update to latest version
-- `@vexblocks/cli diff` - Show differences between versions
+- Configuration file system with `vexblocks.config.ts` for customizable app settings
+- Example configuration file `vexblocks.config.example.ts` for CLI users
+- TypeScript type definitions for VexBlocks configuration
+
+### Changed
+- Decoupled email configuration from hardcoded values to `vexblocks.config.ts`
+- App name now configurable via `vexblocks.config.ts` (used in email subjects)
+- Email sender (from name and address) now configurable via `vexblocks.config.ts`
+- Updated `.gitignore` to exclude `vexblocks.config.ts` from version control
+
+### Fixed
+- Removed Cloudflare API URL duplication in `mediaActions.ts`
+- Removed hardcoded "VexBlocks" branding from email templates
 
 ## [1.0.0] - 2024-12-08
 
