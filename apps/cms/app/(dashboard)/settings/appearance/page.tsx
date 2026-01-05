@@ -21,10 +21,10 @@ import { MediaUploader } from "../../media/_components/media-uploader"
 export default function AppearanceSettingsPage() {
 	// Use cached queries
 	const { data: settings, isPending: settingsLoading } = usePublicCachedQuery(
-		api.settings.getPublic,
+		api.cms.settings.getPublic,
 		{ key: "appearance" },
 	)
-	const updateSettings = useMutation(api.settings.update)
+	const updateSettings = useMutation(api.cms.settings.update)
 
 	const [dashboardName, setDashboardName] = useState("VexBlocks")
 	const [primaryColor, setPrimaryColor] = useState("#3b82f6") // Default blue-500

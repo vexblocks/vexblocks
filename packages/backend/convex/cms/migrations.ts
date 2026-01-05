@@ -2,6 +2,45 @@ import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
 
 /**
+ * Migration to add isActive field to existing users
+ *
+ * This migration sets isActive=true for all existing users.
+ *
+ * Run from Convex dashboard: cms/migrations:addIsActiveToUsers
+ */
+export const addIsActiveToUsers = internalMutation({
+	args: {},
+	returns: v.object({
+		updatedCount: v.number(),
+		errors: v.array(v.string()),
+	}),
+	handler: async (ctx) => {
+		const allUsers = await ctx.db.query("users").collect()
+
+		let updatedCount = 0
+		const errors: string[] = []
+
+		for (const user of allUsers) {
+			try {
+				if (user.isActive === undefined) {
+					await ctx.db.patch(user._id, { isActive: true })
+					updatedCount++
+				}
+			} catch (error) {
+				errors.push(
+					`Failed to update user ${user._id}: ${error instanceof Error ? error.message : String(error)}`,
+				)
+			}
+		}
+
+		return {
+			updatedCount,
+			errors,
+		}
+	},
+})
+
+/**
  * Migration to add blockName to existing blockReference blocks in content
  *
  * This migration iterates through all cmsContent documents and updates

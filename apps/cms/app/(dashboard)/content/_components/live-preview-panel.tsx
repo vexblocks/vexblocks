@@ -87,7 +87,7 @@ export function LivePreviewPanel({
 
 	// Get preview settings
 	const previewSettings = useQuery(
-		api.settings.get,
+		api.cms.settings.get,
 		isAuthReady ? { key: "preview" } : "skip",
 	) as {
 		enabled: boolean

@@ -14,16 +14,16 @@ const ROUTE_QUERIES: Record<string, Array<{ query: any; args: any }>> = {
 	"/media": [], // Media queries are in the component
 	"/settings": [], // Settings page is static
 	"/settings/users": [
-		{ query: api.users.list, args: {} },
-		{ query: api.users.getStats, args: {} },
+		{ query: api.cms.users.list, args: {} },
+		{ query: api.cms.users.getStats, args: {} },
 	],
 	"/settings/appearance": [
-		{ query: api.settings.getPublic, args: { key: "appearance" } },
+		{ query: api.cms.settings.getPublic, args: { key: "appearance" } },
 	],
 	"/settings/localization": [
-		{ query: api.settings.get, args: { key: "localization" } },
+		{ query: api.cms.settings.get, args: { key: "localization" } },
 	],
-	"/settings/preview": [{ query: api.settings.get, args: { key: "preview" } }],
+	"/settings/preview": [{ query: api.cms.settings.get, args: { key: "preview" } }],
 }
 
 /**

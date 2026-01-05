@@ -873,7 +873,7 @@ export default function SchemaDetailPage({
 	const availableBlocks = useQuery(api.cms.blocks.list, isReady ? {} : "skip")
 	const allSchemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
 	const localizationSettings = useQuery(
-		api.settings.get,
+		api.cms.settings.get,
 		isReady ? { key: "localization" } : "skip",
 	)
 	const updateSchema = useMutation(api.cms.schemas.update)

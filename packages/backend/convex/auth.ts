@@ -24,6 +24,13 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 					if (!existingUser.authId) {
 						await ctx.db.patch(existingUser._id, { authId: authUser._id })
 					}
+
+					// Check if user is active
+					if (!existingUser.isActive) {
+						throw new Error(
+							"Your account has been disabled. Please contact an administrator.",
+						)
+					}
 					return
 				}
 
@@ -31,14 +38,44 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 				const allUsers = await ctx.db.query("users").collect()
 				const isFirstUser = allUsers.length === 0
 
-				// If the user doesn't exist, create a new one
-				// First user automatically becomes admin
-				await ctx.db.insert("users", {
-					email: authUser.email,
-					name: authUser.name,
-					role: isFirstUser ? "admin" : "user",
-					authId: authUser._id,
-				})
+				// If not the first user, check for invitation
+				if (!isFirstUser) {
+					const invitation = await ctx.db
+						.query("cmsUserInvitations")
+						.withIndex("by_email", (q) => q.eq("email", authUser.email))
+						.filter((q) => q.eq(q.field("status"), "pending"))
+						.first()
+
+					if (!invitation) {
+						throw new Error(
+							"You need an invitation to register. Please contact an administrator.",
+						)
+					}
+
+					// Create user with invited role
+					await ctx.db.insert("users", {
+						email: authUser.email,
+						name: authUser.name,
+						role: invitation.role,
+						authId: authUser._id,
+						isActive: true,
+					})
+
+					// Mark invitation as accepted
+					await ctx.db.patch(invitation._id, {
+						status: "accepted",
+						acceptedAt: Date.now(),
+					})
+				} else {
+					// First user automatically becomes admin
+					await ctx.db.insert("users", {
+						email: authUser.email,
+						name: authUser.name,
+						role: "admin",
+						authId: authUser._id,
+						isActive: true,
+					})
+				}
 			},
 			onUpdate: async (ctx, newUser) => {
 				const user = await ctx.db

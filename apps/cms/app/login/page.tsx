@@ -58,7 +58,7 @@ function AdminLoginContent() {
 
 	// Fetch appearance settings (public query, no auth required)
 	const { data: settings, isLoading: isLoadingSettings } = useQuery(
-		convexQuery(api.settings.getPublic, { key: "appearance" }),
+		convexQuery(api.cms.settings.getPublic, { key: "appearance" }),
 	)
 
 	const dashboardName = settings?.dashboardName || "VexBlocks"

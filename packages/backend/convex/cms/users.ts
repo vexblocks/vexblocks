@@ -1,6 +1,6 @@
 import { v } from "convex/values"
-import { mutation, query } from "./_generated/server"
-import { authComponent } from "./auth"
+import { mutation, query } from "../_generated/server"
+import { authComponent } from "../auth"
 
 /**
  * List all users (admin only)
@@ -21,6 +21,7 @@ export const list = query({
 					v.literal("user"),
 				),
 				profilePictureUrl: v.optional(v.string()),
+				isActive: v.optional(v.boolean()),
 			}),
 		),
 		v.null(),
@@ -48,6 +49,7 @@ export const list = query({
 			email: user.email,
 			role: user.role,
 			profilePictureUrl: user.profilePictureUrl,
+			isActive: user.isActive,
 		}))
 	},
 })
@@ -70,6 +72,7 @@ export const get = query({
 				v.literal("user"),
 			),
 			profilePictureUrl: v.optional(v.string()),
+			isActive: v.optional(v.boolean()),
 		}),
 		v.null(),
 	),
@@ -98,6 +101,7 @@ export const get = query({
 			email: user.email,
 			role: user.role,
 			profilePictureUrl: user.profilePictureUrl,
+			isActive: user.isActive,
 		}
 	},
 })
@@ -207,6 +211,56 @@ export const remove = mutation({
 		}
 
 		await ctx.db.delete(args.id)
+		return null
+	},
+})
+
+/**
+ * Toggle user active status (admin only)
+ */
+export const toggleActive = mutation({
+	args: {
+		id: v.id("users"),
+		isActive: v.boolean(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const authUser = await authComponent.safeGetAuthUser(ctx)
+		if (!authUser) {
+			throw new Error("Not authenticated")
+		}
+
+		const currentUser = await ctx.db
+			.query("users")
+			.withIndex("authId", (q) => q.eq("authId", authUser._id))
+			.unique()
+
+		if (!currentUser || currentUser.role !== "admin") {
+			throw new Error("Unauthorized: Admin access required")
+		}
+
+		// Prevent admin from disabling themselves
+		if (args.id === currentUser._id) {
+			throw new Error("Cannot disable your own account")
+		}
+
+		// Check if user to disable is the last admin
+		const userToUpdate = await ctx.db.get(args.id)
+		if (userToUpdate?.role === "admin" && !args.isActive) {
+			const allAdmins = await ctx.db
+				.query("users")
+				.withIndex("by_role", (q) => q.eq("role", "admin"))
+				.filter((q) => q.eq(q.field("isActive"), true))
+				.collect()
+
+			if (allAdmins.length <= 1) {
+				throw new Error(
+					"Cannot disable the last active admin user. Promote another user to admin first.",
+				)
+			}
+		}
+
+		await ctx.db.patch(args.id, { isActive: args.isActive })
 		return null
 	},
 })

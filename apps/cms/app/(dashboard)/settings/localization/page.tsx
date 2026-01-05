@@ -47,10 +47,10 @@ const COMMON_LOCALES = [
 
 export default function LocalizationSettingsPage() {
 	// Use cached query
-	const { data: settings } = useCachedQuery(api.settings.get, {
+	const { data: settings } = useCachedQuery(api.cms.settings.get, {
 		key: "localization",
 	})
-	const updateSettings = useMutation(api.settings.update)
+	const updateSettings = useMutation(api.cms.settings.update)
 
 	const [locales, setLocales] = useState<Locale[]>([])
 	const [defaultLocale, setDefaultLocale] = useState<string>("")

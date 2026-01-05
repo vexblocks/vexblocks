@@ -53,7 +53,7 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 	const prefetchRoute = usePrefetchRoute()
 
 	// Use cached queries for settings
-	const { data: settings } = usePublicCachedQuery(api.settings.getPublic, {
+	const { data: settings } = usePublicCachedQuery(api.cms.settings.getPublic, {
 		key: "appearance",
 	})
 	const logoId = settings?.logoId

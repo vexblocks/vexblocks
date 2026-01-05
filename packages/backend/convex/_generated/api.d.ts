@@ -12,17 +12,18 @@ import type * as auth from "../auth.js";
 import type * as builders from "../builders.js";
 import type * as cms_blocks from "../cms/blocks.js";
 import type * as cms_content from "../cms/content.js";
+import type * as cms_invitations from "../cms/invitations.js";
 import type * as cms_media from "../cms/media.js";
 import type * as cms_mediaActions from "../cms/mediaActions.js";
 import type * as cms_mediaTags from "../cms/mediaTags.js";
 import type * as cms_migrations from "../cms/migrations.js";
 import type * as cms_schemas from "../cms/schemas.js";
+import type * as cms_settings from "../cms/settings.js";
+import type * as cms_users from "../cms/users.js";
 import type * as cms_webhooks from "../cms/webhooks.js";
 import type * as constants from "../constants.js";
 import type * as http from "../http.js";
 import type * as lib_email from "../lib/email.js";
-import type * as settings from "../settings.js";
-import type * as users from "../users.js";
 import type * as utils from "../utils.js";
 
 import type {
@@ -36,17 +37,18 @@ declare const fullApi: ApiFromModules<{
   builders: typeof builders;
   "cms/blocks": typeof cms_blocks;
   "cms/content": typeof cms_content;
+  "cms/invitations": typeof cms_invitations;
   "cms/media": typeof cms_media;
   "cms/mediaActions": typeof cms_mediaActions;
   "cms/mediaTags": typeof cms_mediaTags;
   "cms/migrations": typeof cms_migrations;
   "cms/schemas": typeof cms_schemas;
+  "cms/settings": typeof cms_settings;
+  "cms/users": typeof cms_users;
   "cms/webhooks": typeof cms_webhooks;
   constants: typeof constants;
   http: typeof http;
   "lib/email": typeof lib_email;
-  settings: typeof settings;
-  users: typeof users;
   utils: typeof utils;
 }>;
 

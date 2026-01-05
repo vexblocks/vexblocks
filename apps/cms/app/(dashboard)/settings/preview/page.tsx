@@ -16,10 +16,10 @@ type PreviewSettings = {
 
 export default function PreviewSettingsPage() {
 	// Use cached query
-	const { data: settings } = useCachedQuery(api.settings.get, {
+	const { data: settings } = useCachedQuery(api.cms.settings.get, {
 		key: "preview",
 	})
-	const updateSettings = useMutation(api.settings.update)
+	const updateSettings = useMutation(api.cms.settings.update)
 
 	const [enabled, setEnabled] = useState(true)
 	const [baseUrl, setBaseUrl] = useState("http://localhost:3000")

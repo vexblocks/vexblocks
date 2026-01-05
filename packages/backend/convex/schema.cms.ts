@@ -45,10 +45,36 @@ export const users = defineTable({
 		v.literal("user"),
 	),
 	profilePictureUrl: v.optional(v.string()),
+	isActive: v.optional(v.boolean()), // Whether the user account is active
 })
 	.index("email", ["email"])
 	.index("authId", ["authId"])
 	.index("by_role", ["role"])
+	.index("by_active", ["isActive"])
+
+/**
+ * User invitations table.
+ * Stores pending invitations sent to users.
+ */
+export const cmsUserInvitations = defineTable({
+	email: v.string(),
+	role: v.union(
+		v.literal("admin"),
+		v.literal("editor"),
+		v.literal("developer"),
+		v.literal("user"),
+	),
+	status: v.union(
+		v.literal("pending"), // Invitation sent, not yet accepted
+		v.literal("accepted"), // User registered with this invitation
+	),
+	invitedBy: v.id("users"),
+	invitedAt: v.number(),
+	acceptedAt: v.optional(v.number()),
+})
+	.index("by_email", ["email"])
+	.index("by_status", ["status"])
+	.index("by_invited_by", ["invitedBy"])
 
 // =============================================================================
 // CMS FIELD DEFINITION
@@ -284,6 +310,7 @@ export const cmsSettings = defineTable({
  */
 export const cmsSchemaExports = {
 	users,
+	cmsUserInvitations,
 	cmsSchemas,
 	cmsContent,
 	cmsMedia,
