@@ -441,8 +441,7 @@ async function mergeSchemaFile(
 
 	if (!hasSpread) {
 		// Find defineSchema({ and add the spread
-		const defineSchemaRegex =
-			/defineSchema\s*\(\s*\{(\s*)/
+		const defineSchemaRegex = /defineSchema\s*\(\s*\{(\s*)/
 
 		if (defineSchemaRegex.test(newContent)) {
 			newContent = newContent.replace(
