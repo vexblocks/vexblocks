@@ -34,6 +34,7 @@ type FieldType =
 	| "date"
 	| "select"
 	| "group"
+	| "repeater"
 
 type Field = {
 	id: string
@@ -47,20 +48,71 @@ type Field = {
 	isExisting?: boolean
 }
 
-// Simple FieldEditor for blocks (no deep nesting needed)
+// Read-only view for a field (including nested fields)
+function FieldViewItem({ field, depth = 0 }: { field: Field; depth?: number }) {
+	const indentClass = depth > 0 ? "ml-4" : ""
+	const borderColor = depth === 0 ? "border-grey-200" : "border-primary/20"
+	const bgColor = depth === 0 ? "bg-white" : "bg-primary/5"
+
+	return (
+		<div className={indentClass}>
+			<div className={`rounded-lg border ${borderColor} ${bgColor} p-4`}>
+				<div className="flex items-center gap-2">
+					<h3 className="font-semibold text-primary">{field.label}</h3>
+					<code className="rounded bg-grey-100 px-2 py-0.5 text-xs">
+						{field.name}
+					</code>
+					<span className="rounded bg-grey-200 px-2 py-0.5 text-xs">
+						{field.type}
+					</span>
+					{field.required && (
+						<span className="text-error text-xs">Required</span>
+					)}
+				</div>
+				{field.helpText && (
+					<p className="mt-1 text-grey-500 text-sm">{field.helpText}</p>
+				)}
+
+				{/* Show nested fields for group/repeater type */}
+				{(field.type === "group" || field.type === "repeater") &&
+					field.fields &&
+					field.fields.length > 0 && (
+						<div className="mt-3 space-y-2 border-grey-200 border-t pt-3">
+							<p className="font-medium text-grey-600 text-xs">
+								{field.type === "repeater" ? "Item Fields:" : "Nested Fields:"}
+							</p>
+							{field.fields.map((nestedField) => (
+								<FieldViewItem
+									key={nestedField.id}
+									field={nestedField}
+									depth={depth + 1}
+								/>
+							))}
+						</div>
+					)}
+			</div>
+		</div>
+	)
+}
+
+// FieldEditor for blocks with group support
 function SimpleFieldEditor({
 	field,
 	index,
+	depth = 0,
 	onUpdate,
 	onRemove,
 	onMove,
+	onAddNestedField,
 	totalFields,
 }: {
 	field: Field
 	index: number
-	onUpdate: (index: number, updates: Partial<Field>) => void
-	onRemove: (index: number) => void
-	onMove: (index: number, direction: "up" | "down") => void
+	depth?: number
+	onUpdate: (index: number, updates: Partial<Field>, depth: number) => void
+	onRemove: (index: number, depth: number) => void
+	onMove: (index: number, direction: "up" | "down", depth: number) => void
+	onAddNestedField?: (parentIndex: number) => void
 	totalFields: number
 }) {
 	// Track if field name has been manually edited
@@ -81,28 +133,51 @@ function SimpleFieldEditor({
 	}
 
 	const handleLabelChange = (value: string) => {
-		onUpdate(index, { label: value })
+		// Combine both updates into a single call to avoid losing changes
+		// when the closure captures stale state (especially for nested fields)
+		const updates: Partial<Field> = { label: value }
 		if (!hasEditedName && !field.isExisting) {
-			onUpdate(index, { name: generateFieldName(value) })
+			updates.name = generateFieldName(value)
 		}
+		onUpdate(index, updates, depth)
 	}
 
 	const handleNameChange = (value: string) => {
-		onUpdate(index, { name: value })
+		onUpdate(index, { name: value }, depth)
 		setHasEditedName(true)
 	}
 
+	const borderColor = depth === 0 ? "border-grey-200" : "border-primary/30"
+	const bgColor = depth === 0 ? "bg-white" : "bg-primary/5"
+
 	return (
-		<div className="rounded-lg border border-grey-200 bg-white p-4">
+		<div className={`rounded-lg border ${borderColor} ${bgColor} p-4`}>
 			<div className="mb-3 flex items-center justify-between">
-				<span className="font-medium text-grey-700 text-sm">
-					Field #{index + 1}
-				</span>
+				<div className="flex items-center gap-2">
+					<span className="font-medium text-grey-700 text-sm">
+						Field #{index + 1}
+						{depth > 0 && (
+							<span className="ml-2 text-grey-400 text-xs">
+								(Nested level {depth})
+							</span>
+						)}
+					</span>
+					{field.type === "group" && (
+						<span className="rounded-full bg-primary/10 px-2 py-1 font-medium text-primary text-xs">
+							Group
+						</span>
+					)}
+					{field.type === "repeater" && (
+						<span className="rounded-full bg-green-100 px-2 py-1 font-medium text-green-700 text-xs">
+							Repeater
+						</span>
+					)}
+				</div>
 				<div className="flex items-center gap-2">
 					<div className="flex flex-col gap-1">
 						<button
 							type="button"
-							onClick={() => onMove(index, "up")}
+							onClick={() => onMove(index, "up", depth)}
 							disabled={index === 0}
 							className="text-grey-500 transition-colors hover:text-primary disabled:opacity-30"
 							title="Move up"
@@ -111,7 +186,7 @@ function SimpleFieldEditor({
 						</button>
 						<button
 							type="button"
-							onClick={() => onMove(index, "down")}
+							onClick={() => onMove(index, "down", depth)}
 							disabled={index === totalFields - 1}
 							className="text-grey-500 transition-colors hover:text-primary disabled:opacity-30"
 							title="Move down"
@@ -121,7 +196,7 @@ function SimpleFieldEditor({
 					</div>
 					<button
 						type="button"
-						onClick={() => onRemove(index)}
+						onClick={() => onRemove(index, depth)}
 						className="text-error hover:text-error/80"
 					>
 						<Trash2 className="h-4 w-4" />
@@ -179,9 +254,26 @@ function SimpleFieldEditor({
 					<select
 						id={`field-type-${field.id}`}
 						value={field.type}
-						onChange={(e) =>
-							onUpdate(index, { type: e.target.value as FieldType })
-						}
+						onChange={(e) => {
+							const newType = e.target.value as FieldType
+							const updates: Partial<Field> = { type: newType }
+							// Initialize nested fields array if type changes to group or repeater
+							if (
+								(newType === "group" || newType === "repeater") &&
+								!field.fields
+							) {
+								updates.fields = []
+							}
+							// Reset nested fields if type changes from group/repeater
+							if (
+								(field.type === "group" || field.type === "repeater") &&
+								newType !== "group" &&
+								newType !== "repeater"
+							) {
+								updates.fields = undefined
+							}
+							onUpdate(index, updates, depth)
+						}}
 						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 					>
 						<option value="shortText">Short Text</option>
@@ -194,14 +286,23 @@ function SimpleFieldEditor({
 						<option value="youtubeUrl">YouTube URL</option>
 						<option value="media">Media</option>
 						<option value="select">Select</option>
+						{depth < 1 && <option value="group">Group</option>}
+						{depth < 1 && <option value="repeater">Repeater (Array)</option>}
 					</select>
+					{depth >= 1 && (
+						<p className="mt-1 text-grey-400 text-xs">
+							Group type not available at this nesting level
+						</p>
+					)}
 				</div>
 				<div className="flex items-end">
 					<label className="flex items-center gap-2">
 						<input
 							type="checkbox"
 							checked={field.required}
-							onChange={(e) => onUpdate(index, { required: e.target.checked })}
+							onChange={(e) =>
+								onUpdate(index, { required: e.target.checked }, depth)
+							}
 							className="h-4 w-4"
 						/>
 						<span className="text-sm">Required</span>
@@ -220,9 +321,13 @@ function SimpleFieldEditor({
 							type="text"
 							value={field.options?.join(", ") || ""}
 							onChange={(e) =>
-								onUpdate(index, {
-									options: e.target.value.split(",").map((o) => o.trim()),
-								})
+								onUpdate(
+									index,
+									{
+										options: e.target.value.split(",").map((o) => o.trim()),
+									},
+									depth,
+								)
 							}
 							placeholder="Option 1, Option 2"
 							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
@@ -240,12 +345,80 @@ function SimpleFieldEditor({
 						id={`field-help-${field.id}`}
 						type="text"
 						value={field.helpText || ""}
-						onChange={(e) => onUpdate(index, { helpText: e.target.value })}
+						onChange={(e) =>
+							onUpdate(index, { helpText: e.target.value }, depth)
+						}
 						placeholder="Hint for editors"
 						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 					/>
 				</div>
 			</div>
+
+			{/* Nested fields for group/repeater */}
+			{(field.type === "group" || field.type === "repeater") && (
+				<div className="mt-4 space-y-3">
+					<div className="flex items-center justify-between border-grey-200 border-t pt-4">
+						<h4 className="font-medium text-grey-700 text-sm">
+							{field.type === "repeater" ? "Item Fields" : "Group Fields"}
+						</h4>
+						{onAddNestedField && (
+							<button
+								type="button"
+								onClick={() => onAddNestedField(index)}
+								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/20"
+							>
+								<Plus className="h-3 w-3" />
+								Add Nested Field
+							</button>
+						)}
+					</div>
+
+					{field.fields && field.fields.length > 0 ? (
+						<div className="ml-4 space-y-3">
+							{field.fields.map((nestedField, nestedIndex) => (
+								<SimpleFieldEditor
+									key={nestedField.id}
+									field={nestedField}
+									index={nestedIndex}
+									depth={depth + 1}
+									onUpdate={(ni, updates) => {
+										// Update nested field
+										const newNestedFields = [...(field.fields || [])]
+										newNestedFields[ni] = { ...newNestedFields[ni], ...updates }
+										onUpdate(index, { fields: newNestedFields }, depth)
+									}}
+									onRemove={(ni) => {
+										// Remove nested field
+										const newNestedFields = (field.fields || []).filter(
+											(_, i) => i !== ni,
+										)
+										onUpdate(index, { fields: newNestedFields }, depth)
+									}}
+									onMove={(ni, direction) => {
+										// Move nested field
+										const newIndex = direction === "up" ? ni - 1 : ni + 1
+										if (newIndex < 0 || newIndex >= (field.fields?.length || 0))
+											return
+										const newNestedFields = [...(field.fields || [])]
+										;[newNestedFields[ni], newNestedFields[newIndex]] = [
+											newNestedFields[newIndex],
+											newNestedFields[ni],
+										]
+										onUpdate(index, { fields: newNestedFields }, depth)
+									}}
+									totalFields={field.fields?.length || 0}
+								/>
+							))}
+						</div>
+					) : (
+						<div className="rounded border-2 border-grey-300 border-dashed p-4 text-center">
+							<p className="text-grey-400 text-xs">
+								No nested fields yet. Click "Add Nested Field" to add one.
+							</p>
+						</div>
+					)}
+				</div>
+			)}
 		</div>
 	)
 }
@@ -263,9 +436,13 @@ export default function BlockDetailPage({
 	const [auth] = useAtom(authAtom)
 	const isReady = auth.isInitialized && auth.user !== null
 
+	// Check if the ID is a valid Convex ID (alphanumeric only)
+	// Invalid IDs include DRP placeholders (%drp:, %kdrp:, etc.) and URL-encoded variants
+	const isValidConvexId = /^[a-zA-Z0-9]+$/.test(id)
+
 	const block = useQuery(
 		api.cms.blocks.get,
-		isReady ? { id: id as Id<"cmsBlocks"> } : "skip",
+		isReady && isValidConvexId ? { id: id as Id<"cmsBlocks"> } : "skip",
 	)
 	const updateBlock = useMutation(api.cms.blocks.update)
 	const deleteBlock = useMutation(api.cms.blocks.remove)
@@ -277,7 +454,8 @@ export default function BlockDetailPage({
 		if (value) {
 			router.push(`/blocks/${id}?mode=edit`)
 		} else {
-			router.push(`/blocks/${id}`)
+			// Use full page navigation to avoid stale state issues with Convex queries
+			window.location.href = `/blocks/${id}`
 		}
 	}
 
@@ -298,13 +476,32 @@ export default function BlockDetailPage({
 			setDescription(block.description || "")
 			setCategory(block.category || "")
 			setPreviewImage(block.previewImage || "")
-			setFields(
-				block.fields.map((f: any, i: number) => ({
-					id: `field_${i}`,
-					...f,
-					isExisting: true,
-				})),
-			)
+
+			// Helper to recursively map fields with IDs
+			const mapFieldsWithIds = (fieldsArray: any[], prefix = ""): Field[] => {
+				return fieldsArray.map((f: any, i: number) => {
+					const fieldId = prefix ? `${prefix}_${i}` : `field_${i}`
+					const mappedField: Field = {
+						id: fieldId,
+						name: f.name,
+						label: f.label,
+						type: f.type,
+						required: f.required,
+						helpText: f.helpText,
+						options: f.options,
+						isExisting: true,
+					}
+
+					// Recursively map nested fields for group and repeater types
+					if ((f.type === "group" || f.type === "repeater") && f.fields) {
+						mappedField.fields = mapFieldsWithIds(f.fields, fieldId)
+					}
+
+					return mappedField
+				})
+			}
+
+			setFields(mapFieldsWithIds(block.fields))
 		}
 	}, [block])
 
@@ -327,17 +524,53 @@ export default function BlockDetailPage({
 		}, 100)
 	}
 
-	const handleUpdateField = (index: number, updates: Partial<Field>) => {
+	const handleAddNestedField = (parentIndex: number) => {
+		const newField: Field = {
+			id: `field_${Date.now()}`,
+			name: "",
+			label: "",
+			type: "shortText",
+			required: false,
+			isExisting: false,
+		}
+
+		setFields((prevFields) =>
+			prevFields.map((f, i) => {
+				if (i === parentIndex) {
+					return {
+						...f,
+						fields: [...(f.fields || []), newField],
+					}
+				}
+				return f
+			}),
+		)
+
+		// Scroll to bottom smoothly after adding nested field
+		setTimeout(() => {
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
+		}, 100)
+	}
+
+	const handleUpdateField = (
+		index: number,
+		updates: Partial<Field>,
+		_depth = 0,
+	) => {
 		setFields((prev) =>
 			prev.map((f, i) => (i === index ? { ...f, ...updates } : f)),
 		)
 	}
 
-	const handleRemoveField = (index: number) => {
+	const handleRemoveField = (index: number, _depth = 0) => {
 		setFields((prev) => prev.filter((_, i) => i !== index))
 	}
 
-	const handleMoveField = (index: number, direction: "up" | "down") => {
+	const handleMoveField = (
+		index: number,
+		direction: "up" | "down",
+		_depth = 0,
+	) => {
 		setFields((prevFields) => {
 			const newIndex = direction === "up" ? index - 1 : index + 1
 			if (newIndex < 0 || newIndex >= prevFields.length) return prevFields
@@ -351,15 +584,25 @@ export default function BlockDetailPage({
 		})
 	}
 
+	// Helper function to map fields recursively (including nested fields)
 	const mapFieldsForSave = (fieldsArray: Field[]): any[] => {
-		return fieldsArray.map((f) => ({
-			name: f.name,
-			label: f.label,
-			type: f.type,
-			required: f.required,
-			helpText: f.helpText,
-			options: f.options,
-		}))
+		return fieldsArray.map((f) => {
+			const mappedField: any = {
+				name: f.name,
+				label: f.label,
+				type: f.type,
+				required: f.required,
+				helpText: f.helpText,
+				options: f.options,
+			}
+
+			// Recursively include nested fields for group and repeater types
+			if ((f.type === "group" || f.type === "repeater") && f.fields) {
+				mappedField.fields = mapFieldsForSave(f.fields)
+			}
+
+			return mappedField
+		})
 	}
 
 	const handleSave = async () => {
@@ -367,28 +610,45 @@ export default function BlockDetailPage({
 		setError("")
 
 		try {
-			// Check for duplicate field names
-			const fieldNames = new Set<string>()
-			for (const field of fields) {
-				if (!field.name.trim() || !field.label.trim()) {
-					throw new Error("All fields must have a name and label")
-				}
+			// Validate fields recursively
+			const validateFields = (fieldsArray: Field[], level = 0): void => {
+				const fieldNames = new Set<string>()
+				for (const field of fieldsArray) {
+					if (!field.name.trim() || !field.label.trim()) {
+						throw new Error("All fields must have a name and label")
+					}
 
-				// Check for duplicate field name
-				if (fieldNames.has(field.name)) {
-					throw new Error(
-						`Duplicate field name "${field.name}" found. Each field must have a unique name.`,
-					)
-				}
-				fieldNames.add(field.name)
+					// Check for duplicate field name
+					if (fieldNames.has(field.name)) {
+						throw new Error(
+							`Duplicate field name "${field.name}" found. Each field must have a unique name.`,
+						)
+					}
+					fieldNames.add(field.name)
 
-				if (
-					field.type === "select" &&
-					(!field.options || field.options.length === 0)
-				) {
-					throw new Error(`Field "${field.label}" requires options`)
+					if (
+						field.type === "select" &&
+						(!field.options || field.options.length === 0)
+					) {
+						throw new Error(`Field "${field.label}" requires options`)
+					}
+
+					// Validate nested fields for group and repeater types
+					if (
+						(field.type === "group" || field.type === "repeater") &&
+						field.fields
+					) {
+						if (field.fields.length === 0) {
+							throw new Error(
+								`${field.type === "repeater" ? "Repeater" : "Group"} "${field.label}" must have at least one nested field`,
+							)
+						}
+						validateFields(field.fields, level + 1)
+					}
 				}
 			}
+
+			validateFields(fields)
 
 			await updateBlock({
 				id: id as Id<"cmsBlocks">,
@@ -423,7 +683,9 @@ export default function BlockDetailPage({
 			<div className="flex min-h-[400px] items-center justify-center">
 				<div className="text-center">
 					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-					<p className="text-grey-500">Loading block...</p>
+					<p className="text-grey-500">
+						{!isValidConvexId ? "Creating block..." : "Loading block..."}
+					</p>
 				</div>
 			</div>
 		)
@@ -479,13 +741,41 @@ export default function BlockDetailPage({
 										setDisplayName(block.displayName)
 										setDescription(block.description || "")
 										setCategory(block.category || "")
-										setFields(
-											block.fields.map((f: any, i: number) => ({
-												id: `field_${i}`,
-												...f,
-												isExisting: true,
-											})),
-										)
+										setPreviewImage(block.previewImage || "")
+
+										// Helper to recursively map fields with IDs
+										const mapFieldsWithIds = (
+											fieldsArray: any[],
+											prefix = "",
+										): Field[] => {
+											return fieldsArray.map((f: any, i: number) => {
+												const fieldId = prefix ? `${prefix}_${i}` : `field_${i}`
+												const mappedField: Field = {
+													id: fieldId,
+													name: f.name,
+													label: f.label,
+													type: f.type,
+													required: f.required,
+													helpText: f.helpText,
+													options: f.options,
+													isExisting: true,
+												}
+
+												if (
+													(f.type === "group" || f.type === "repeater") &&
+													f.fields
+												) {
+													mappedField.fields = mapFieldsWithIds(
+														f.fields,
+														fieldId,
+													)
+												}
+
+												return mappedField
+											})
+										}
+
+										setFields(mapFieldsWithIds(block.fields))
 									}
 								}}
 								className="rounded border border-grey-300 px-4 py-2 text-grey-700 hover:bg-grey-50"
@@ -545,7 +835,7 @@ export default function BlockDetailPage({
 				</div>
 			)}
 
-			<div className="rounded-lg bg-white p-6 shadow-md">
+			<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 				<div className="mb-6">
 					<h2 className="mb-4 font-semibold text-xl">Basic Information</h2>
 					{editing ? (
@@ -596,9 +886,9 @@ export default function BlockDetailPage({
 								/>
 							</div>
 							<div>
-								<label className="mb-1 block text-grey-700 text-sm">
+								<span className="mb-1 block text-grey-700 text-sm">
 									Preview Image (optional)
-								</label>
+								</span>
 								<p className="mb-2 text-grey-500 text-xs">
 									Add an image to help users visually identify this block when
 									selecting it
@@ -616,7 +906,7 @@ export default function BlockDetailPage({
 										<button
 											type="button"
 											onClick={() => setPreviewImage("")}
-											className="-top-2 -right-2 absolute rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+											className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
 										>
 											<X className="h-4 w-4" />
 										</button>
@@ -684,37 +974,16 @@ export default function BlockDetailPage({
 										key={field.id}
 										field={field}
 										index={index}
+										depth={0}
 										onUpdate={handleUpdateField}
 										onRemove={handleRemoveField}
 										onMove={handleMoveField}
+										onAddNestedField={handleAddNestedField}
 										totalFields={fields.length}
 									/>
 								))
 							: fields.map((field) => (
-									<div
-										key={field.id}
-										className="rounded-lg border border-grey-200 p-4"
-									>
-										<div className="flex items-center gap-2">
-											<h3 className="font-semibold text-primary">
-												{field.label}
-											</h3>
-											<code className="rounded bg-grey-100 px-2 py-0.5 text-xs">
-												{field.name}
-											</code>
-											<span className="rounded bg-grey-200 px-2 py-0.5 text-xs">
-												{field.type}
-											</span>
-											{field.required && (
-												<span className="text-error text-xs">Required</span>
-											)}
-										</div>
-										{field.helpText && (
-											<p className="mt-1 text-grey-500 text-sm">
-												{field.helpText}
-											</p>
-										)}
-									</div>
+									<FieldViewItem key={field.id} field={field} />
 								))}
 					</div>
 				</div>

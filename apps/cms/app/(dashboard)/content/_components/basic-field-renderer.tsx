@@ -2,7 +2,7 @@
 
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage, getStringValue } from "@repo/cms-shared"
-import { Image as ImageIcon, X } from "lucide-react"
+import { Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState } from "react"
 import type { Field } from "./types"
@@ -29,6 +29,8 @@ type BasicFieldRendererProps = {
 	fieldId: string
 	allSchemas?: any[]
 	allContent?: Record<string, any[]>
+	onRegenerateSlug?: () => void
+	isAutoSlugActive?: boolean
 }
 
 export function BasicFieldRenderer({
@@ -38,6 +40,8 @@ export function BasicFieldRenderer({
 	fieldId,
 	allSchemas,
 	allContent,
+	onRegenerateSlug,
+	isAutoSlugActive,
 }: BasicFieldRendererProps) {
 	const [showMediaSelector, setShowMediaSelector] = useState(false)
 
@@ -57,7 +61,6 @@ export function BasicFieldRenderer({
 						onChange={(e) => onChange(e.target.value)}
 						placeholder={field.helpText}
 						required={field.required}
-						readOnly={field.isSlug}
 						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
 							field.isSlug
 								? "border-blue-300 bg-blue-50 text-blue-900"
@@ -65,24 +68,43 @@ export function BasicFieldRenderer({
 						}`}
 					/>
 					{field.isSlug && field.slugSource && (
-						<p className="mt-1 text-blue-600 text-xs">
-							✨ Auto-generated from "{field.slugSource}"
-						</p>
+						<div className="mt-1 flex items-center gap-2">
+							<p className="text-blue-600 text-xs">
+								{isAutoSlugActive ? (
+									<>✨ Auto-generating from "{field.slugSource}"</>
+								) : (
+									<>✏️ Manual mode (editable)</>
+								)}
+							</p>
+							{onRegenerateSlug && !isAutoSlugActive && (
+								<button
+									type="button"
+									onClick={onRegenerateSlug}
+									className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-700 text-xs transition-colors hover:bg-blue-200"
+									title="Regenerate slug from source field"
+								>
+									<RefreshCw className="h-3 w-3" />
+									Regenerate
+								</button>
+							)}
+						</div>
 					)}
 				</div>
 			)
 
 		case "longText":
 			return (
-				<textarea
-					id={fieldId}
-					value={defaultValue}
-					onChange={(e) => onChange(e.target.value)}
-					placeholder={field.helpText}
-					required={field.required}
-					rows={4}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				/>
+				<div>
+					<textarea
+						id={fieldId}
+						value={defaultValue}
+						onChange={(e) => onChange(e.target.value)}
+						placeholder={field.helpText}
+						required={field.required}
+						rows={4}
+						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					/>
+				</div>
 			)
 
 		case "richText":
@@ -243,7 +265,7 @@ export function BasicFieldRenderer({
 							<button
 								type="button"
 								onClick={() => setShowMediaSelector(true)}
-								className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-12 transition-all hover:border-primary hover:bg-primary/5"
+								className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
 							>
 								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
 									<ImageIcon className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />

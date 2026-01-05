@@ -1,31 +1,30 @@
 "use client"
 
-import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
-import { useQuery } from "convex/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { authAtom } from "@/lib/auth-atom"
+import { useCachedQuery } from "@/lib/use-cached-query"
 
 export default function AdminDashboard() {
 	const router = useRouter()
 
-	// Wait for auth to be initialized before making queries
-	const [auth] = useAtom(authAtom)
-	const isReady = auth.isInitialized && auth.user !== null
+	// Use cached query - shows cached data instantly on navigation
+	const {
+		data: schemas,
+		isPending,
+		error,
+	} = useCachedQuery(api.cms.schemas.list, {})
 
-	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
-
-	// Redirect to login if not authenticated
+	// Redirect to login if not authenticated (error indicates auth failure)
 	useEffect(() => {
-		if (schemas === null) {
+		if (error) {
 			router.push("/login")
 		}
-	}, [schemas, router])
+	}, [error, router])
 
-	// Show loading state while checking auth
-	if (schemas === undefined) {
+	// Show loading state only on initial load (not on navigation)
+	if (isPending && !schemas) {
 		return (
 			<div className="flex min-h-[400px] items-center justify-center">
 				<div className="text-center">
@@ -37,7 +36,7 @@ export default function AdminDashboard() {
 	}
 
 	// Return null while redirecting
-	if (schemas === null) {
+	if (error || !schemas) {
 		return null
 	}
 

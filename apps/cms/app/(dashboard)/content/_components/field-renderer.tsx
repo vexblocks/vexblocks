@@ -1,13 +1,16 @@
 "use client"
 
+import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useQuery } from "convex/react"
-import { Folder, Layers, Plus, Trash2 } from "lucide-react"
+import { ChevronDown, Eye, Folder, Layers, Plus, Trash2 } from "lucide-react"
+import { useState } from "react"
+import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
+import { BlockPreviewModal } from "./block-preview-modal"
 import { FlexibleBlocksField } from "./flexible-blocks"
 import type { Field } from "./types"
-import { getNestedValue } from "./utils"
 
 type FieldRendererProps = {
 	field: Field
@@ -19,6 +22,8 @@ type FieldRendererProps = {
 	level?: number
 	allSchemas?: any[]
 	contentBySchema?: Record<string, any[]>
+	onRegenerateSlug?: (slugFieldName: string) => void
+	isAutoSlugActive?: boolean
 }
 
 export function FieldRenderer({
@@ -31,16 +36,29 @@ export function FieldRenderer({
 	level = 0,
 	allSchemas,
 	contentBySchema,
+	onRegenerateSlug,
+	isAutoSlugActive,
 }: FieldRendererProps) {
-	// Load block reference if needed (hook must be at top level)
-	const isBlockReference = field.type === "blockReference" && field.blockId
+	// State for preview modal (must be at top level for hooks rules)
+	const [showPreviewModal, setShowPreviewModal] = useState(false)
+	const [isCollapsed, setIsCollapsed] = useState(false)
+	const [previewState] = useAtom(previewAtom)
+	const isPreviewActive = previewState.isPreviewActive
+
+	// Load block data for blockReference fields (must be called unconditionally for hooks rules)
 	const block = useQuery(
 		api.cms.blocks.get,
-		isBlockReference ? { id: field.blockId as Id<"cmsBlocks"> } : "skip",
+		field.type === "blockReference" && field.blockId
+			? { id: field.blockId as Id<"cmsBlocks"> }
+			: "skip",
 	)
 
-	// Handle group fields
+	// Handle group fields (single nested object)
 	if (field.type === "group") {
+		// Check if this group should be treated as a repeater (array)
+		// by looking at if it has nested fields and is used in a context that expects an array
+		const groupValue = value || {}
+
 		return (
 			<div
 				data-field-path={field.name}
@@ -57,25 +75,101 @@ export function FieldRenderer({
 				{field.helpText && (
 					<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
 				)}
-				<div className="space-y-4">
-					{field.fields?.map((nestedField) => {
-						const nestedPath = `${path}.${nestedField.name}`
-						const nestedValue = getNestedValue(value || {}, nestedPath)
-						return (
-							<FieldRenderer
-								key={nestedField.name}
-								field={nestedField}
-								path={nestedPath}
-								value={nestedValue}
-								onChange={onChange}
-								onAddRepeaterItem={onAddRepeaterItem}
-								onRemoveRepeaterItem={onRemoveRepeaterItem}
-								level={level + 1}
-								allSchemas={allSchemas}
-								contentBySchema={contentBySchema}
-							/>
-						)
-					})}
+				<div
+					className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
+				>
+					{(() => {
+						// Group consecutive small fields together
+						const fieldGroups: any[][] = []
+						let currentGroup: any[] = []
+
+						const isSmallField = (fieldType: string) =>
+							["shortText", "select", "checkbox", "date", "number"].includes(
+								fieldType,
+							)
+						const isLargeField = (fieldType: string) =>
+							[
+								"richText",
+								"flexibleBlocks",
+								"repeater",
+								"group",
+								"blockReference",
+							].includes(fieldType)
+
+						field.fields?.forEach((nestedField: any, index: number) => {
+							if (isSmallField(nestedField.type)) {
+								currentGroup.push(nestedField)
+								const nextField = field.fields?.[index + 1]
+								if (!nextField || !isSmallField(nextField.type)) {
+									fieldGroups.push([...currentGroup])
+									currentGroup = []
+								}
+							} else {
+								if (currentGroup.length > 0) {
+									fieldGroups.push([...currentGroup])
+									currentGroup = []
+								}
+								fieldGroups.push([nestedField])
+							}
+						})
+
+						return fieldGroups.map((group, groupIndex) => {
+							const isGroupOfSmallFields = group.every((f) =>
+								isSmallField(f.type),
+							)
+							const hasOnlyOneField = group.length === 1
+							const singleField = group[0]
+							const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+
+							if (isGroupOfSmallFields && group.length > 1) {
+								return (
+									<div key={groupIndex} className="space-y-4">
+										{group.map((nestedField: any) => {
+											const nestedPath = `${path}.${nestedField.name}`
+											const nestedValue = groupValue[nestedField.name]
+											return (
+												<FieldRenderer
+													key={nestedField.name}
+													field={nestedField}
+													path={nestedPath}
+													value={nestedValue}
+													onChange={onChange}
+													onAddRepeaterItem={onAddRepeaterItem}
+													onRemoveRepeaterItem={onRemoveRepeaterItem}
+													level={level + 1}
+													allSchemas={allSchemas}
+													contentBySchema={contentBySchema}
+												/>
+											)
+										})}
+									</div>
+								)
+							}
+
+							const nestedField = singleField
+							const nestedPath = `${path}.${nestedField.name}`
+							const nestedValue = groupValue[nestedField.name]
+
+							return (
+								<div
+									key={nestedField.name}
+									className={isLarge && !isPreviewActive ? "lg:col-span-2" : ""}
+								>
+									<FieldRenderer
+										field={nestedField}
+										path={nestedPath}
+										value={nestedValue}
+										onChange={onChange}
+										onAddRepeaterItem={onAddRepeaterItem}
+										onRemoveRepeaterItem={onRemoveRepeaterItem}
+										level={level + 1}
+										allSchemas={allSchemas}
+										contentBySchema={contentBySchema}
+									/>
+								</div>
+							)
+						})
+					})()}
 				</div>
 			</div>
 		)
@@ -97,7 +191,7 @@ export function FieldRenderer({
 	}
 
 	// Handle blockReference fields
-	if (isBlockReference) {
+	if (field.type === "blockReference" && field.blockId) {
 		if (!block) {
 			return (
 				<div
@@ -126,42 +220,160 @@ export function FieldRenderer({
 		const blockValue = value || {}
 
 		return (
-			<div
-				className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4"
-				style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
-			>
-				<div className="mb-4 flex items-center gap-2">
-					<Layers className="h-5 w-5 text-blue-600" />
-					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
-					<span className="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-600 text-xs">
-						Block: {block.displayName}
-					</span>
-					{field.required && <span className="text-error text-sm">*</span>}
+			<>
+				<div
+					className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4"
+					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
+				>
+					<div className="mb-4 flex items-center justify-between">
+						<div className="flex items-center gap-2">
+							<Layers className="h-5 w-5 text-blue-600" />
+							<h3 className="font-semibold text-grey-900 text-lg">
+								{field.label}
+							</h3>
+							<span className="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-600 text-xs">
+								Block: {block.displayName}
+							</span>
+							{field.required && <span className="text-error text-sm">*</span>}
+						</div>
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => setIsCollapsed(!isCollapsed)}
+								className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-all hover:bg-blue-50"
+								title={isCollapsed ? "Expand block" : "Collapse block"}
+							>
+								<ChevronDown
+									className={`h-4 w-4 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}
+								/>
+								{isCollapsed ? "Expand" : "Collapse"}
+							</button>
+							{block.previewImage && (
+								<button
+									type="button"
+									onClick={() => setShowPreviewModal(true)}
+									className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-50"
+									title="View block preview"
+								>
+									<Eye className="h-4 w-4" />
+									Preview
+								</button>
+							)}
+						</div>
+					</div>
+					{field.helpText && (
+						<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
+					)}
+					{!isCollapsed && (
+						<div
+							className={`grid grid-cols-1 gap-4 rounded-lg border border-blue-300 bg-white p-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
+						>
+							{(() => {
+								// Group consecutive small fields together
+								const fieldGroups: any[][] = []
+								let currentGroup: any[] = []
+
+								const isSmallField = (fieldType: string) =>
+									["shortText", "select", "checkbox", "date", "number"].includes(
+										fieldType,
+									)
+								const isLargeField = (fieldType: string) =>
+									[
+										"richText",
+										"flexibleBlocks",
+										"repeater",
+										"group",
+										"blockReference",
+									].includes(fieldType)
+
+								block.fields.forEach((blockField: Field, index: number) => {
+									if (isSmallField(blockField.type)) {
+										currentGroup.push(blockField)
+										const nextField = block.fields[index + 1]
+										if (!nextField || !isSmallField(nextField.type)) {
+											fieldGroups.push([...currentGroup])
+											currentGroup = []
+										}
+									} else {
+										if (currentGroup.length > 0) {
+											fieldGroups.push([...currentGroup])
+											currentGroup = []
+										}
+										fieldGroups.push([blockField])
+									}
+								})
+
+								return fieldGroups.map((group, groupIndex) => {
+									const isGroupOfSmallFields = group.every((f) =>
+										isSmallField(f.type),
+									)
+									const hasOnlyOneField = group.length === 1
+									const singleField = group[0]
+									const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+
+									if (isGroupOfSmallFields && group.length > 1) {
+										return (
+											<div key={groupIndex} className="space-y-4">
+												{group.map((blockField: Field) => {
+													const blockFieldPath = `${path}.${blockField.name}`
+													const blockFieldValue = blockValue[blockField.name]
+													return (
+														<FieldRenderer
+															key={blockField.name}
+															field={blockField}
+															path={blockFieldPath}
+															value={blockFieldValue}
+															onChange={onChange}
+															onAddRepeaterItem={onAddRepeaterItem}
+															onRemoveRepeaterItem={onRemoveRepeaterItem}
+															level={level + 1}
+															allSchemas={allSchemas}
+															contentBySchema={contentBySchema}
+														/>
+													)
+												})}
+											</div>
+										)
+									}
+
+									const blockField = singleField
+									const blockFieldPath = `${path}.${blockField.name}`
+									const blockFieldValue = blockValue[blockField.name]
+
+									return (
+										<div
+											key={blockField.name}
+											className={
+												isLarge && !isPreviewActive ? "lg:col-span-2" : ""
+											}
+										>
+											<FieldRenderer
+												field={blockField}
+												path={blockFieldPath}
+												value={blockFieldValue}
+												onChange={onChange}
+												onAddRepeaterItem={onAddRepeaterItem}
+												onRemoveRepeaterItem={onRemoveRepeaterItem}
+												level={level + 1}
+												allSchemas={allSchemas}
+												contentBySchema={contentBySchema}
+											/>
+										</div>
+									)
+								})
+							})()}
+						</div>
+					)}
 				</div>
-				{field.helpText && (
-					<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
-				)}
-				<div className="space-y-4 rounded-lg border border-blue-300 bg-white p-4">
-					{block.fields.map((blockField: Field) => {
-						const blockFieldPath = `${path}.${blockField.name}`
-						const blockFieldValue = blockValue[blockField.name]
-						return (
-							<FieldRenderer
-								key={blockField.name}
-								field={blockField}
-								path={blockFieldPath}
-								value={blockFieldValue}
-								onChange={onChange}
-								onAddRepeaterItem={onAddRepeaterItem}
-								onRemoveRepeaterItem={onRemoveRepeaterItem}
-								level={level + 1}
-								allSchemas={allSchemas}
-								contentBySchema={contentBySchema}
-							/>
-						)
-					})}
-				</div>
-			</div>
+
+				{/* Preview Modal */}
+				<BlockPreviewModal
+					isOpen={showPreviewModal && !!block.previewImage}
+					onClose={() => setShowPreviewModal(false)}
+					blockDisplayName={block.displayName}
+					previewImageId={block.previewImage || ""}
+				/>
+			</>
 		)
 	}
 
@@ -172,7 +384,7 @@ export function FieldRenderer({
 		return (
 			<div
 				data-field-path={field.name}
-				className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4 transition-all duration-200"
+				className="rounded-lg border-2 border-green-200 bg-green-50 p-4 transition-all duration-200"
 				style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 			>
 				<div className="mb-4 flex items-center justify-between">
@@ -224,25 +436,105 @@ export function FieldRenderer({
 										<Trash2 className="h-4 w-4" />
 									</button>
 								</div>
-								<div className="space-y-4">
-									{field.fields?.map((nestedField) => {
-										const nestedPath = `${path}[${index}].${nestedField.name}`
-										const nestedValue = item?.[nestedField.name]
-										return (
-											<FieldRenderer
-												key={`${nestedField.name}-${index}`}
-												field={nestedField}
-												path={nestedPath}
-												value={nestedValue}
-												onChange={onChange}
-												onAddRepeaterItem={onAddRepeaterItem}
-												onRemoveRepeaterItem={onRemoveRepeaterItem}
-												level={level + 1}
-												allSchemas={allSchemas}
-												contentBySchema={contentBySchema}
-											/>
-										)
-									})}
+								<div
+									className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
+								>
+									{(() => {
+										// Group consecutive small fields together
+										const fieldGroups: any[][] = []
+										let currentGroup: any[] = []
+
+										const isSmallField = (fieldType: string) =>
+											["shortText", "select", "checkbox", "date", "number"].includes(
+												fieldType,
+											)
+										const isLargeField = (fieldType: string) =>
+											[
+												"richText",
+												"flexibleBlocks",
+												"repeater",
+												"group",
+												"blockReference",
+											].includes(fieldType)
+
+										field.fields?.forEach((nestedField: any, fieldIndex: number) => {
+											if (isSmallField(nestedField.type)) {
+												currentGroup.push(nestedField)
+												const nextField = field.fields?.[fieldIndex + 1]
+												if (!nextField || !isSmallField(nextField.type)) {
+													fieldGroups.push([...currentGroup])
+													currentGroup = []
+												}
+											} else {
+												if (currentGroup.length > 0) {
+													fieldGroups.push([...currentGroup])
+													currentGroup = []
+												}
+												fieldGroups.push([nestedField])
+											}
+										})
+
+										return fieldGroups.map((group, groupIndex) => {
+											const isGroupOfSmallFields = group.every((f) =>
+												isSmallField(f.type),
+											)
+											const hasOnlyOneField = group.length === 1
+											const singleField = group[0]
+											const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+
+											if (isGroupOfSmallFields && group.length > 1) {
+												return (
+													<div key={groupIndex} className="space-y-4">
+														{group.map((nestedField: any) => {
+															const nestedPath = `${path}[${index}].${nestedField.name}`
+															const nestedValue = item?.[nestedField.name]
+															return (
+																<FieldRenderer
+																	key={nestedField.name}
+																	field={nestedField}
+																	path={nestedPath}
+																	value={nestedValue}
+																	onChange={onChange}
+																	onAddRepeaterItem={onAddRepeaterItem}
+																	onRemoveRepeaterItem={onRemoveRepeaterItem}
+																	level={level + 1}
+																	allSchemas={allSchemas}
+																	contentBySchema={contentBySchema}
+																	onRegenerateSlug={onRegenerateSlug}
+																/>
+															)
+														})}
+													</div>
+												)
+											}
+
+											const nestedField = singleField
+											const nestedPath = `${path}[${index}].${nestedField.name}`
+											const nestedValue = item?.[nestedField.name]
+
+											return (
+												<div
+													key={nestedField.name}
+													className={
+														isLarge && !isPreviewActive ? "lg:col-span-2" : ""
+													}
+												>
+													<FieldRenderer
+														field={nestedField}
+														path={nestedPath}
+														value={nestedValue}
+														onChange={onChange}
+														onAddRepeaterItem={onAddRepeaterItem}
+														onRemoveRepeaterItem={onRemoveRepeaterItem}
+														level={level + 1}
+														allSchemas={allSchemas}
+														contentBySchema={contentBySchema}
+														onRegenerateSlug={onRegenerateSlug}
+													/>
+												</div>
+											)
+										})
+									})()}
 								</div>
 							</div>
 						))}
@@ -280,6 +572,12 @@ export function FieldRenderer({
 				fieldId={fieldId}
 				allSchemas={allSchemas}
 				allContent={contentBySchema}
+				onRegenerateSlug={
+					field.isSlug && onRegenerateSlug
+						? () => onRegenerateSlug(field.name)
+						: undefined
+				}
+				isAutoSlugActive={field.isSlug ? isAutoSlugActive : undefined}
 			/>
 			{field.helpText && (
 				<p className="mt-1 text-grey-400 text-xs">{field.helpText}</p>

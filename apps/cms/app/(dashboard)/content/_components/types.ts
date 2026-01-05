@@ -48,3 +48,4 @@ export type LocalizationSettings = {
 	locales: Locale[]
 	defaultLocale: string
 }
+

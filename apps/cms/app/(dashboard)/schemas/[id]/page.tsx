@@ -377,7 +377,7 @@ function FieldEditor({
 								: "border-grey-300"
 						}`}
 					/>
-					<div className="-mt-3 absolute top-full left-0">
+					<div className="absolute top-full left-0 -mt-3">
 						{isNameLocked ? (
 							<p className="text-grey-500 text-xs">
 								Field name cannot be changed to prevent data loss
@@ -1318,7 +1318,7 @@ export default function SchemaDetailPage({
 				</div>
 			)}
 
-			<div className="rounded-lg bg-white p-6 shadow-md">
+			<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 				<div className="mb-6">
 					<h2 className="mb-4 font-semibold text-xl">Basic Information</h2>
 					{editing ? (
@@ -1400,7 +1400,7 @@ export default function SchemaDetailPage({
 									id="preview-url-pattern"
 									value={previewUrlPattern}
 									onChange={(e) => setPreviewUrlPattern(e.target.value)}
-									placeholder="/blog/{slug}"
+									placeholder="/content-library/{slug}"
 									className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 								/>
 								<p className="mt-1 text-grey-500 text-xs">
@@ -1412,7 +1412,7 @@ export default function SchemaDetailPage({
 									</code>{" "}
 									as placeholders for dynamic values. Example:{" "}
 									<code className="rounded bg-grey-100 px-1">
-										/blog/{"{slug}"}
+										/content-library/{"{slug}"}
 									</code>
 								</p>
 							</div>

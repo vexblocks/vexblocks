@@ -1,15 +1,14 @@
 "use client"
 
-import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage, getStringValue } from "@repo/cms-shared"
-import { useQuery } from "convex/react"
-import { Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
+import { useMutation } from "convex/react"
+import { Copy, Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import { authAtom } from "@/lib/auth-atom"
+import { useCachedQuery } from "@/lib/use-cached-query"
 import { ContentSidebar } from "./_components/content-sidebar"
 import { ViewConfigModal } from "./_components/view-config-modal"
 
@@ -18,15 +17,18 @@ export default function ContentPage() {
 	const searchParams = useSearchParams()
 	const preselectedSchema = searchParams.get("schema")
 
-	// Wait for auth to be initialized before making queries
-	const [auth] = useAtom(authAtom)
-	const isReady = auth.isInitialized && auth.user !== null
+	// Use cached query - shows cached data instantly on navigation
+	const { data: schemas, isPending: schemasLoading } = useCachedQuery(
+		api.cms.schemas.list,
+		{},
+	)
 
-	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
 	const [selectedSchemaId, setSelectedSchemaId] = useState<string>(
 		preselectedSchema || "",
 	)
 	const [showViewConfig, setShowViewConfig] = useState(false)
+	const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+	const duplicateContent = useMutation(api.cms.content.duplicate)
 
 	// Update URL when schema changes
 	const handleSelectSchema = (schemaId: string) => {
@@ -34,9 +36,9 @@ export default function ContentPage() {
 		router.push(`/content?schema=${schemaId}`, { scroll: false })
 	}
 
-	const content = useQuery(
+	const { data: content, isPending: contentLoading } = useCachedQuery(
 		api.cms.content.listBySchema,
-		isReady && selectedSchemaId
+		selectedSchemaId
 			? { schemaId: selectedSchemaId as Id<"cmsSchemas"> }
 			: "skip",
 	)
@@ -101,11 +103,27 @@ export default function ContentPage() {
 		return selectedSchema?.fields.find((f) => f.isSlug)
 	}
 
+	// Handle duplicate content
+	const handleDuplicate = async (id: Id<"cmsContent">) => {
+		try {
+			setDuplicatingId(id)
+			const newContentId = await duplicateContent({ id })
+			// Use full page navigation to avoid stale state issues with Convex queries
+			// Client-side navigation can cause race conditions where old query state
+			// interferes with the new content ID
+			window.location.href = `/content/${newContentId}?schema=${selectedSchemaId}`
+		} catch (error) {
+			console.error("Failed to duplicate content:", error)
+			setDuplicatingId(null)
+		}
+	}
+
 	const previewFieldName = getPreviewField()
 	const additionalFields = getAdditionalFields()
 	const slugField = getSlugField()
 
-	if (!schemas) {
+	// Show loading only on initial load
+	if (schemasLoading && !schemas) {
 		return (
 			<div className="flex h-[calc(100vh-4rem)] items-center justify-center">
 				<div className="text-center">
@@ -114,6 +132,10 @@ export default function ContentPage() {
 				</div>
 			</div>
 		)
+	}
+
+	if (!schemas) {
+		return null
 	}
 
 	return (
@@ -165,7 +187,7 @@ export default function ContentPage() {
 					{selectedSchemaId && (
 						<div className="mb-6 flex flex-wrap items-center gap-4">
 							<div className="relative flex-1">
-								<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-5 w-5 text-grey-400" />
+								<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-grey-400" />
 								<input
 									type="text"
 									value={searchQuery}
@@ -214,7 +236,7 @@ export default function ContentPage() {
 					)}
 
 					{/* Loading State */}
-					{content === undefined && selectedSchemaId && (
+					{contentLoading && !content && selectedSchemaId && (
 						<div className="rounded-lg bg-white p-12 text-center shadow">
 							<div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 							<p className="mt-4 text-grey-500">Loading content...</p>
@@ -374,6 +396,19 @@ export default function ContentPage() {
 																		<Eye className="h-4 w-4" />
 																	</button>
 																)}
+															<button
+																type="button"
+																onClick={() => handleDuplicate(item._id)}
+																disabled={duplicatingId === item._id}
+																className="rounded p-2 text-grey-500 transition-colors hover:bg-grey-100 disabled:opacity-50"
+																title="Duplicate (as draft)"
+															>
+																{duplicatingId === item._id ? (
+																	<div className="h-4 w-4 animate-spin rounded-full border-2 border-grey-400 border-t-transparent" />
+																) : (
+																	<Copy className="h-4 w-4" />
+																)}
+															</button>
 															<Link
 																href={`/content/${item._id}?schema=${selectedSchemaId}`}
 																className="rounded p-2 text-primary transition-colors hover:bg-primary/10"

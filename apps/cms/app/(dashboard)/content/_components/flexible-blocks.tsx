@@ -1,13 +1,17 @@
 "use client"
 
+import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
-import { Layers, Plus, Trash2 } from "lucide-react"
+import { ChevronDown, Copy, Eye, Layers, Plus, Trash2 } from "lucide-react"
 import { useRef, useState } from "react"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
+import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
+import { BlockPreviewModal } from "./block-preview-modal"
+import { FieldRenderer } from "./field-renderer"
 import type { Field } from "./types"
 
 type FlexibleBlockItemProps = {
@@ -18,8 +22,10 @@ type FlexibleBlockItemProps = {
 	path: string
 	onUpdate: (data: any) => void
 	onRemove: () => void
+	onDuplicate: () => void
 	onMoveUp: () => void
 	onMoveDown: () => void
+	canDuplicate: boolean
 	allSchemas?: any[]
 	contentBySchema?: Record<string, any[]>
 }
@@ -27,6 +33,7 @@ type FlexibleBlockItemProps = {
 // Component to render a block reference inside FlexibleBlocks
 function BlockReferenceContent({
 	blockId,
+	blockName,
 	data,
 	onChange,
 	path,
@@ -34,12 +41,15 @@ function BlockReferenceContent({
 	contentBySchema,
 }: {
 	blockId: string
+	blockName?: string
 	data: any
 	onChange: (data: any) => void
 	path: string
 	allSchemas?: any[]
 	contentBySchema?: Record<string, any[]>
 }) {
+	const [showPreviewModal, setShowPreviewModal] = useState(false)
+	const [isCollapsed, setIsCollapsed] = useState(false)
 	const referencedBlock = useQuery(api.cms.blocks.get, {
 		id: blockId as Id<"cmsBlocks">,
 	})
@@ -58,70 +68,270 @@ function BlockReferenceContent({
 	// The data for the block fields (excluding the blockId metadata)
 	const blockFieldsData = data?.fields || {}
 
-	const handleFieldChange = (fieldName: string, value: any) => {
+	// Handle field changes using path-based updates
+	const handleFieldChange = (fieldPath: string, value: any) => {
+		// Extract field name from path (e.g., "blocks.features" -> "features")
+		const parts = fieldPath.split(".")
+		const fieldName = parts[parts.length - 1]
+
+		// Handle array paths like "features[0].title"
+		if (fieldPath.includes("[")) {
+			// Parse the path to update nested array data
+			const updatedFields = { ...blockFieldsData }
+			setNestedValue(updatedFields, fieldPath.replace(`${path}.`, ""), value)
+			onChange({
+				blockId,
+				blockName,
+				fields: updatedFields,
+			})
+		} else {
+			onChange({
+				blockId,
+				blockName,
+				fields: {
+					...blockFieldsData,
+					[fieldName]: value,
+				},
+			})
+		}
+	}
+
+	// Handle adding repeater items
+	const handleAddRepeaterItem = (repeaterPath: string) => {
+		const fieldName = repeaterPath.split(".").pop() || ""
+		const currentArray = blockFieldsData[fieldName] || []
 		onChange({
 			blockId,
+			blockName,
 			fields: {
 				...blockFieldsData,
-				[fieldName]: value,
+				[fieldName]: [...currentArray, {}],
+			},
+		})
+	}
+
+	// Handle removing repeater items
+	const handleRemoveRepeaterItem = (repeaterPath: string, index: number) => {
+		const fieldName = repeaterPath.split(".").pop() || ""
+		const currentArray = blockFieldsData[fieldName] || []
+		onChange({
+			blockId,
+			blockName,
+			fields: {
+				...blockFieldsData,
+				[fieldName]: currentArray.filter((_: any, i: number) => i !== index),
 			},
 		})
 	}
 
 	return (
-		<div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
-			<div className="flex items-center gap-2">
-				{referencedBlock.previewImage ? (
-					<CFImage
-						assetId={referencedBlock.previewImage}
-						alt={referencedBlock.displayName}
-						width={48}
-						height={32}
-						variant="public"
-						className="h-8 w-12 rounded object-cover"
-					/>
-				) : (
-					<div className="flex h-8 w-12 items-center justify-center rounded bg-blue-100">
-						<Layers className="h-4 w-4 text-blue-500" />
-					</div>
-				)}
-				<div>
-					<p className="font-medium text-blue-900 text-sm">
-						{referencedBlock.displayName}
-					</p>
-					<p className="text-blue-600 text-xs">{referencedBlock.name}</p>
-				</div>
-			</div>
-			<div className="space-y-3 rounded-lg bg-white p-3">
-				{referencedBlock.fields.map((blockField: any) => {
-					const fieldId = `${path}-${blockField.name}`.replace(/[.[\]]/g, "-")
-					return (
-						<div key={blockField.name}>
-							<label className="mb-1 block font-medium text-grey-700 text-sm">
-								{blockField.label}
-								{blockField.required && (
-									<span className="ml-1 text-error">*</span>
-								)}
-							</label>
-							{blockField.helpText && (
-								<p className="mb-2 text-grey-500 text-xs">
-									{blockField.helpText}
-								</p>
-							)}
-							<BasicFieldRenderer
-								field={blockField}
-								value={blockFieldsData[blockField.name]}
-								onChange={(value) => handleFieldChange(blockField.name, value)}
-								fieldId={fieldId}
-								allSchemas={allSchemas}
-								allContent={contentBySchema}
+		<>
+			<div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-2">
+						{referencedBlock.previewImage ? (
+							<CFImage
+								assetId={referencedBlock.previewImage}
+								alt={referencedBlock.displayName}
+								width={48}
+								height={32}
+								variant="public"
+								className="h-8 w-12 rounded object-cover"
 							/>
+						) : (
+							<div className="flex h-8 w-12 items-center justify-center rounded bg-blue-100">
+								<Layers className="h-4 w-4 text-blue-500" />
+							</div>
+						)}
+						<div>
+							<p className="font-medium text-blue-900 text-sm">
+								{referencedBlock.displayName}
+							</p>
+							<p className="text-blue-600 text-xs">{referencedBlock.name}</p>
+						</div>
+					</div>
+					<div className="flex items-center gap-2">
+						<button
+							type="button"
+							onClick={() => setIsCollapsed(!isCollapsed)}
+							className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-all hover:bg-blue-50"
+							title={isCollapsed ? "Expand block" : "Collapse block"}
+						>
+							<ChevronDown
+								className={`h-4 w-4 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}
+							/>
+							{isCollapsed ? "Expand" : "Collapse"}
+						</button>
+						{referencedBlock.previewImage && (
+							<button
+								type="button"
+								onClick={() => setShowPreviewModal(true)}
+								className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-50"
+								title="View block preview"
+							>
+								<Eye className="h-4 w-4" />
+								Preview
+							</button>
+						)}
+					</div>
+				</div>
+				{!isCollapsed && (
+					<BlockReferenceFields
+						referencedBlock={referencedBlock}
+						blockFieldsData={blockFieldsData}
+						path={path}
+						handleFieldChange={handleFieldChange}
+						handleAddRepeaterItem={handleAddRepeaterItem}
+						handleRemoveRepeaterItem={handleRemoveRepeaterItem}
+						allSchemas={allSchemas}
+						contentBySchema={contentBySchema}
+					/>
+				)}
+			</div>
+
+			{/* Preview Modal */}
+			<BlockPreviewModal
+				isOpen={showPreviewModal && !!referencedBlock.previewImage}
+				onClose={() => setShowPreviewModal(false)}
+				blockDisplayName={referencedBlock.displayName}
+				previewImageId={referencedBlock.previewImage || ""}
+			/>
+		</>
+	)
+}
+
+// Extracted component for block reference fields to use hooks
+function BlockReferenceFields({
+	referencedBlock,
+	blockFieldsData,
+	path,
+	handleFieldChange,
+	handleAddRepeaterItem,
+	handleRemoveRepeaterItem,
+	allSchemas,
+	contentBySchema,
+}: {
+	referencedBlock: any
+	blockFieldsData: any
+	path: string
+	handleFieldChange: (fieldPath: string, value: any) => void
+	handleAddRepeaterItem: (repeaterPath: string) => void
+	handleRemoveRepeaterItem: (repeaterPath: string, index: number) => void
+	allSchemas?: any[]
+	contentBySchema?: Record<string, any[]>
+}) {
+	const [previewState] = useAtom(previewAtom)
+	const isPreviewActive = previewState.isPreviewActive
+
+	// Group consecutive small fields together
+	const fieldGroups: any[][] = []
+	let currentGroup: any[] = []
+
+	const isSmallField = (fieldType: string) =>
+		["shortText", "select", "checkbox", "date", "number"].includes(fieldType)
+	const isLargeField = (fieldType: string) =>
+		[
+			"richText",
+			"flexibleBlocks",
+			"repeater",
+			"group",
+			"blockReference",
+		].includes(fieldType)
+
+	referencedBlock.fields.forEach((field: Field, index: number) => {
+		if (isSmallField(field.type)) {
+			currentGroup.push(field)
+			const nextField = referencedBlock.fields[index + 1]
+			if (!nextField || !isSmallField(nextField.type)) {
+				fieldGroups.push([...currentGroup])
+				currentGroup = []
+			}
+		} else {
+			if (currentGroup.length > 0) {
+				fieldGroups.push([...currentGroup])
+				currentGroup = []
+			}
+			fieldGroups.push([field])
+		}
+	})
+
+	return (
+		<div
+			className={`grid grid-cols-1 gap-3 rounded-lg bg-white p-3 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
+		>
+			{fieldGroups.map((group, groupIndex) => {
+				const isGroupOfSmallFields = group.every((f) => isSmallField(f.type))
+				const hasOnlyOneField = group.length === 1
+				const singleField = group[0]
+				const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+
+				if (isGroupOfSmallFields && group.length > 1) {
+					return (
+						<div key={groupIndex} className="space-y-3">
+							{group.map((blockField: Field) => {
+								const fieldPath = `${path}.${blockField.name}`
+								return (
+									<FieldRenderer
+										key={blockField.name}
+										field={blockField}
+										path={fieldPath}
+										value={blockFieldsData[blockField.name]}
+										onChange={handleFieldChange}
+										onAddRepeaterItem={handleAddRepeaterItem}
+										onRemoveRepeaterItem={handleRemoveRepeaterItem}
+										allSchemas={allSchemas}
+										contentBySchema={contentBySchema}
+									/>
+								)
+							})}
 						</div>
 					)
-				})}
-			</div>
+				}
+
+				const blockField = singleField
+				const fieldPath = `${path}.${blockField.name}`
+
+				return (
+					<div
+						key={blockField.name}
+						className={
+							isLarge && !isPreviewActive ? "lg:col-span-2" : ""
+						}
+					>
+						<FieldRenderer
+							field={blockField}
+							path={fieldPath}
+							value={blockFieldsData[blockField.name]}
+							onChange={handleFieldChange}
+							onAddRepeaterItem={handleAddRepeaterItem}
+							onRemoveRepeaterItem={handleRemoveRepeaterItem}
+							allSchemas={allSchemas}
+							contentBySchema={contentBySchema}
+						/>
+					</div>
+				)
+			})}
 		</div>
 	)
+}
+
+// Helper to set nested value in object
+function setNestedValue(obj: any, path: string, value: any): void {
+	const parts = path.split(/[.[\]]/).filter(Boolean)
+	let current = obj
+
+	for (let i = 0; i < parts.length - 1; i++) {
+		const part = parts[i]
+		const nextPart = parts[i + 1]
+		const isNextArray = /^\d+$/.test(nextPart)
+
+		if (!(part in current)) {
+			current[part] = isNextArray ? [] : {}
+		}
+		current = current[part]
+	}
+
+	current[parts[parts.length - 1]] = value
 }
 
 export function FlexibleBlockItem({
@@ -132,8 +342,10 @@ export function FlexibleBlockItem({
 	path,
 	onUpdate,
 	onRemove,
+	onDuplicate,
 	onMoveUp,
 	onMoveDown,
+	canDuplicate,
 	allSchemas,
 	contentBySchema,
 }: FlexibleBlockItemProps) {
@@ -180,6 +392,16 @@ export function FlexibleBlockItem({
 							↓
 						</button>
 					)}
+					{canDuplicate && (
+						<button
+							type="button"
+							onClick={onDuplicate}
+							className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 hover:text-purple-600"
+							title="Duplicate block"
+						>
+							<Copy className="h-4 w-4" />
+						</button>
+					)}
 					<button
 						type="button"
 						onClick={onRemove}
@@ -192,6 +414,7 @@ export function FlexibleBlockItem({
 			{isBlockReference && blockId ? (
 				<BlockReferenceContent
 					blockId={blockId}
+					blockName={block.data?.blockName}
 					data={block.data}
 					onChange={onUpdate}
 					path={`${path}.${block._id}`}
@@ -271,7 +494,11 @@ export function FlexibleBlocksField({
 		"blockReference",
 	]
 
-	const addBlock = (blockType: string, blockId?: string) => {
+	const addBlock = (
+		blockType: string,
+		blockId?: string,
+		blockName?: string,
+	) => {
 		const newBlock = {
 			_id: `block_${Date.now()}`,
 			type: blockType,
@@ -281,7 +508,7 @@ export function FlexibleBlocksField({
 					: blockType === "number"
 						? 0
 						: blockType === "blockReference"
-							? { blockId }
+							? { blockId, blockName }
 							: "",
 		}
 		const newBlocks = [...blocks, newBlock]
@@ -339,6 +566,39 @@ export function FlexibleBlocksField({
 
 	const canAddMore = !field.maxBlocks || blocks.length < field.maxBlocks
 
+	const duplicateBlock = (index: number) => {
+		// Check if we can add more blocks
+		if (!canAddMore) return
+
+		const blockToDuplicate = blocks[index]
+		// Deep clone the block data and generate a new unique ID
+		const duplicatedBlock = {
+			...blockToDuplicate,
+			_id: `block_${Date.now()}`,
+			data: JSON.parse(JSON.stringify(blockToDuplicate.data)),
+		}
+		// Insert the duplicated block right after the original
+		const newBlocks = [
+			...blocks.slice(0, index + 1),
+			duplicatedBlock,
+			...blocks.slice(index + 1),
+		]
+		onChange(path, newBlocks)
+
+		// Scroll to the duplicated block
+		setTimeout(() => {
+			if (containerRef.current) {
+				const container = containerRef.current
+				const containerRect = container.getBoundingClientRect()
+				const absoluteBottom = window.scrollY + containerRect.bottom
+				window.scrollTo({
+					top: absoluteBottom - window.innerHeight + 100,
+					behavior: "smooth",
+				})
+			}
+		}, 100)
+	}
+
 	return (
 		<div
 			ref={containerRef}
@@ -371,6 +631,8 @@ export function FlexibleBlocksField({
 							<>
 								<div
 									className="fixed inset-0 z-10"
+									tabIndex={-1}
+									role="button"
 									onClick={() => setShowAddMenu(false)}
 								/>
 								<div className="absolute top-full right-0 z-20 mt-1 min-w-48 rounded-lg border border-grey-200 bg-white py-1 shadow-lg">
@@ -424,8 +686,10 @@ export function FlexibleBlocksField({
 							path={path}
 							onUpdate={(newData) => updateBlock(block._id, newData)}
 							onRemove={() => removeBlock(block._id)}
+							onDuplicate={() => duplicateBlock(index)}
 							onMoveUp={() => moveBlock(index, "up")}
 							onMoveDown={() => moveBlock(index, "down")}
+							canDuplicate={canAddMore}
 							allSchemas={allSchemas}
 							contentBySchema={contentBySchema}
 						/>
@@ -438,7 +702,7 @@ export function FlexibleBlocksField({
 				<BlockSelectorDialog
 					title="Select Reusable Block"
 					onSelect={(block) => {
-						addBlock("blockReference", block._id)
+						addBlock("blockReference", block._id, block.name)
 						setShowBlockSelector(false)
 					}}
 					onClose={() => setShowBlockSelector(false)}

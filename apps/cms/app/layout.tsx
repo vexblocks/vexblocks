@@ -20,7 +20,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={GeistSans.variable}>
 			<body className="min-h-screen bg-background font-sans antialiased">
-				<ConvexProvider>
+				<ConvexProvider initialToken={null}>
 					<AuthProvider>
 						<Suspense fallback={null}>
 							<SessionRecovery>{children}</SessionRecovery>

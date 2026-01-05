@@ -3,13 +3,7 @@
 import { useAtom } from "@lfades/atom"
 import { authClient } from "@repo/backend/better-auth/client"
 import { usePathname } from "next/navigation"
-import {
-	type PropsWithChildren,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from "react"
+import { type PropsWithChildren, useEffect, useRef, useState } from "react"
 import { authAtom } from "@/lib/auth-atom"
 
 const SESSION_TIMEOUT_MS = 10000 // 10 seconds timeout for loading check
@@ -32,9 +26,7 @@ export function SessionRecovery({ children }: PropsWithChildren) {
 	const pathname = usePathname()
 	const [authState] = useAtom(authAtom)
 	const [isStuck, setIsStuck] = useState(false)
-	const [stuckReason, setStuckReason] = useState<"timeout" | "no-user">(
-		"timeout",
-	)
+	const [stuckReason, setStuckReason] = useState<"timeout" | "no-user">("timeout")
 	const [isClearing, setIsClearing] = useState(false)
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const noUserTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -44,8 +36,8 @@ export function SessionRecovery({ children }: PropsWithChildren) {
 		pathname?.startsWith(path),
 	)
 
-	// Clear all timeouts helper (wrapped in useCallback for stable reference)
-	const clearAllTimeouts = useCallback(() => {
+	// Clear all timeouts helper
+	const clearAllTimeouts = () => {
 		if (timeoutRef.current) {
 			clearTimeout(timeoutRef.current)
 			timeoutRef.current = null
@@ -54,7 +46,7 @@ export function SessionRecovery({ children }: PropsWithChildren) {
 			clearTimeout(noUserTimeoutRef.current)
 			noUserTimeoutRef.current = null
 		}
-	}, [])
+	}
 
 	// Cancel timeouts and reset state when user is authenticated
 	useEffect(() => {
@@ -64,7 +56,7 @@ export function SessionRecovery({ children }: PropsWithChildren) {
 				setIsStuck(false)
 			}
 		}
-	}, [authState.isInitialized, authState.user, isStuck, clearAllTimeouts])
+	}, [authState.isInitialized, authState.user, isStuck])
 
 	// Handle: auth initialized but no user (expired/invalid session)
 	useEffect(() => {

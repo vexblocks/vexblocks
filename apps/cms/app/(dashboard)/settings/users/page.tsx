@@ -2,7 +2,7 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation } from "convex/react"
 import {
 	AlertTriangle,
 	ArrowLeft,
@@ -14,6 +14,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
+import { useCachedQuery } from "@/lib/use-cached-query"
 
 type UserRole = "admin" | "editor" | "developer" | "user"
 
@@ -27,8 +28,15 @@ type User = {
 }
 
 export default function UsersPage() {
-	const users = useQuery(api.users.list)
-	const stats = useQuery(api.users.getStats)
+	// Use cached queries
+	const { data: users, isPending: usersLoading } = useCachedQuery(
+		api.users.list,
+		{},
+	)
+	const { data: stats, isPending: statsLoading } = useCachedQuery(
+		api.users.getStats,
+		{},
+	)
 	const updateUser = useMutation(api.users.update)
 	const deleteUser = useMutation(api.users.remove)
 
@@ -141,7 +149,8 @@ export default function UsersPage() {
 		)
 	}
 
-	if (users === undefined || stats === undefined) {
+	// Show loading only on initial load
+	if ((usersLoading && !users) || (statsLoading && !stats)) {
 		return (
 			<div className="flex min-h-[400px] items-center justify-center">
 				<div className="text-center">
@@ -150,6 +159,10 @@ export default function UsersPage() {
 				</div>
 			</div>
 		)
+	}
+
+	if (!users || !stats) {
+		return null
 	}
 
 	return (

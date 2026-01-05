@@ -3,17 +3,28 @@
 import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
-import { ArrowLeft, Globe, Save } from "lucide-react"
+import { ArrowLeft, Globe, Image as ImageIcon, Save, X } from "lucide-react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
 import { FieldRenderer } from "../_components/field-renderer"
 import { LocaleSelector } from "../_components/locale-selector"
 import type { Field, LocalizationSettings } from "../_components/types"
 import { getNestedValue, setNestedValue } from "../_components/utils"
+
+// Dynamic import for MediaSelector to avoid SSR issues
+const MediaSelector = dynamic(
+	() =>
+		import("../../media/_components/media-selector").then(
+			(mod) => mod.MediaSelector,
+		),
+	{ ssr: false },
+)
 
 // Validate fields recursively
 function validateFields(
@@ -56,18 +67,17 @@ function validateFields(
 }
 
 export default function NewContentPage() {
-	const router = useRouter()
 	const searchParams = useSearchParams()
 	const preselectedSchema = searchParams.get("schema")
-
-	// Wait for auth to be initialized before making queries
-	const [auth] = useAtom(authAtom)
-	const isReady = auth.isInitialized && auth.user !== null
 
 	// Build back URL with schema param for proper navigation
 	const backUrl = preselectedSchema
 		? `/content?schema=${preselectedSchema}`
 		: "/content"
+
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isReady = auth.isInitialized && auth.user !== null
 
 	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
 	const allContent = useQuery(api.cms.content.listAll, isReady ? {} : "skip") // Load all content for references
@@ -87,6 +97,10 @@ export default function NewContentPage() {
 	const [contentData, setContentData] = useState<Record<string, any>>({})
 	const [seoTitle, setSeoTitle] = useState("")
 	const [seoDescription, setSeoDescription] = useState("")
+	const [seoOgImage, setSeoOgImage] = useState("")
+	const [showMediaSelector, setShowMediaSelector] = useState(false)
+	const lastAutoSlugRef = useRef<string | null>(null)
+	const [isAutoSlugActive, setIsAutoSlugActive] = useState(true) // For new content, auto-slug is active by default
 
 	// i18n state
 	const hasLocales = (localizationSettings?.locales?.length ?? 0) > 0
@@ -116,11 +130,10 @@ export default function NewContentPage() {
 		{},
 	)
 
-	// Auto-generate slug from slug field
+	// Auto-generate slug from slug field (only when auto-slug is active)
 	useEffect(() => {
-		if (!selectedSchema?.fields) return
+		if (!selectedSchema?.fields || !isAutoSlugActive) return
 
-		// Find slug field in schema
 		const slugField = selectedSchema.fields.find(
 			(f: Field) => f.type === "shortText" && f.isSlug && f.slugSource,
 		)
@@ -133,16 +146,23 @@ export default function NewContentPage() {
 					.replace(/[^a-z0-9]+/g, "-")
 					.replace(/^-+|-+$/g, "")
 
-				// Only update the slug field if it's different from current value
-				if (contentData[slugField.name] !== autoSlug) {
+				const currentSlug = contentData[slugField.name]
+
+				// Only auto-generate if slug matches the last auto-generated value
+				// (user hasn't manually edited it)
+				if (
+					(!currentSlug || currentSlug === lastAutoSlugRef.current) &&
+					currentSlug !== autoSlug
+				) {
 					setContentData((prev) => ({
 						...prev,
 						[slugField.name]: autoSlug,
 					}))
+					lastAutoSlugRef.current = autoSlug
 				}
 			}
 		}
-	}, [contentData, selectedSchema])
+	}, [contentData, selectedSchema, isAutoSlugActive])
 
 	// Helper to check if a field at a path is translatable
 	const isFieldTranslatable = (fieldPath: string): boolean => {
@@ -188,6 +208,17 @@ export default function NewContentPage() {
 	}
 
 	const handleFieldChange = (path: string, value: any) => {
+		// Check if user is manually editing the slug field
+		if (selectedSchema?.fields) {
+			const slugField = selectedSchema.fields.find(
+				(f: Field) => f.name === path && f.isSlug,
+			)
+			if (slugField && value !== lastAutoSlugRef.current) {
+				// User manually edited the slug, deactivate auto-generation
+				setIsAutoSlugActive(false)
+			}
+		}
+
 		setContentData((prev) => {
 			if (!hasLocales || !isFieldTranslatable(path)) {
 				return setNestedValue(prev, path, value)
@@ -222,6 +253,32 @@ export default function NewContentPage() {
 		})
 	}
 
+	const handleRegenerateSlug = (slugFieldName: string) => {
+		if (!selectedSchema?.fields) return
+
+		const slugField = selectedSchema.fields.find(
+			(f: Field) => f.name === slugFieldName && f.isSlug && f.slugSource,
+		)
+
+		if (slugField?.slugSource) {
+			const sourceValue = contentData[slugField.slugSource]
+			if (sourceValue && typeof sourceValue === "string") {
+				const autoSlug = sourceValue
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, "-")
+					.replace(/^-+|-+$/g, "")
+
+				setContentData((prev) => ({
+					...prev,
+					[slugField.name]: autoSlug,
+				}))
+				lastAutoSlugRef.current = autoSlug
+				// Activate auto-generation until user manually edits the slug
+				setIsAutoSlugActive(true)
+			}
+		}
+	}
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setLoading(true)
@@ -241,20 +298,23 @@ export default function NewContentPage() {
 				throw new Error(validationError)
 			}
 
-			await createContent({
+			const newContentId = await createContent({
 				schemaId: selectedSchemaId as Id<"cmsSchemas">,
 				status,
 				data: contentData,
 				seo:
-					seoTitle || seoDescription
+					seoTitle || seoDescription || seoOgImage
 						? {
 								title: seoTitle || undefined,
 								description: seoDescription || undefined,
+								ogImage: seoOgImage || undefined,
 							}
 						: undefined,
 			})
 
-			router.push(`/content?schema=${selectedSchemaId}`)
+			// Redirect to the edit page of the newly created content
+			// Use full page navigation to avoid stale state issues with Convex queries
+			window.location.href = `/content/${newContentId}?schema=${selectedSchemaId}`
 		} catch (err) {
 			setError(getCleanErrorMessage(err, "Failed to create content"))
 			// Scroll to top to show error message
@@ -265,7 +325,7 @@ export default function NewContentPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-4xl">
+		<div className="mx-auto">
 			<div className="mb-6">
 				<Link
 					href={backUrl}
@@ -287,7 +347,11 @@ export default function NewContentPage() {
 				</div>
 			)}
 
-			<form id="content-form" onSubmit={handleSubmit} className="space-y-6">
+			<form
+				id="content-form"
+				onSubmit={handleSubmit}
+				className="space-y-6 2xl:px-16"
+			>
 				{/* Schema Selection */}
 				<div className="rounded-lg bg-white p-6 shadow">
 					<label
@@ -368,6 +432,8 @@ export default function NewContentPage() {
 												onRemoveRepeaterItem={handleRemoveRepeaterItem}
 												allSchemas={schemas || []}
 												contentBySchema={contentBySchema}
+												onRegenerateSlug={handleRegenerateSlug}
+												isAutoSlugActive={isAutoSlugActive}
 											/>
 										</div>
 									)
@@ -381,38 +447,118 @@ export default function NewContentPage() {
 								<h2 className="mb-4 font-semibold text-lg text-primary">
 									SEO Metadata
 								</h2>
-								<div className="space-y-4">
-									<div>
-										<label
-											htmlFor="seo-title"
-											className="mb-2 block font-medium text-grey-500 text-sm"
-										>
-											SEO Title
-										</label>
-										<input
-											type="text"
-											id="seo-title"
-											value={seoTitle}
-											onChange={(e) => setSeoTitle(e.target.value)}
-											placeholder="Page title for search engines"
-											className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-										/>
+								<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+									{/* Left Column - SEO Title & Description */}
+									<div className="space-y-4">
+										<div>
+											<label
+												htmlFor="seo-title"
+												className="mb-2 block font-medium text-grey-500 text-sm"
+											>
+												SEO Title
+											</label>
+											<input
+												type="text"
+												id="seo-title"
+												value={seoTitle}
+												onChange={(e) => setSeoTitle(e.target.value)}
+												placeholder="Page title for search engines"
+												className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+											/>
+										</div>
+										<div>
+											<label
+												htmlFor="seo-description"
+												className="mb-2 block font-medium text-grey-500 text-sm"
+											>
+												SEO Description
+											</label>
+											<textarea
+												id="seo-description"
+												value={seoDescription}
+												onChange={(e) => setSeoDescription(e.target.value)}
+												placeholder="Page description for search engines"
+												rows={3}
+												className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+											/>
+										</div>
 									</div>
+
+									{/* Right Column - OG Image */}
 									<div>
-										<label
-											htmlFor="seo-description"
-											className="mb-2 block font-medium text-grey-500 text-sm"
-										>
-											SEO Description
-										</label>
-										<textarea
-											id="seo-description"
-											value={seoDescription}
-											onChange={(e) => setSeoDescription(e.target.value)}
-											placeholder="Page description for search engines"
-											rows={3}
-											className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-										/>
+										<div className="mb-2 block font-medium text-grey-500 text-sm">
+											OG Image
+										</div>
+										<p className="mb-2 text-grey-400 text-xs">
+											Optional image for social media sharing
+										</p>
+										<div className="space-y-4">
+											{seoOgImage ? (
+												<div className="inline-flex w-full flex-col items-center">
+													<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+														<div className="relative overflow-hidden bg-grey-100">
+															<CFImage
+																assetId={seoOgImage}
+																alt="OG Image"
+																width={600}
+																height={315}
+																variant="public"
+																className="h-auto max-h-64 w-auto transition-transform duration-300 group-hover:scale-105"
+															/>
+															<button
+																type="button"
+																onClick={() => setSeoOgImage("")}
+																className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-error text-white shadow-lg transition-all hover:scale-110 hover:bg-error/90"
+																title="Remove image"
+															>
+																<X className="h-4 w-4" />
+															</button>
+														</div>
+														<div className="border-grey-200 border-t bg-white p-3">
+															<button
+																type="button"
+																onClick={() => setShowMediaSelector(true)}
+																className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+															>
+																Change Image
+															</button>
+														</div>
+													</div>
+												</div>
+											) : (
+												<button
+													type="button"
+													onClick={() => setShowMediaSelector(true)}
+													className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
+												>
+													<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
+														<ImageIcon className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
+													</div>
+													<div className="text-center">
+														<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+															Select from Media Library
+														</p>
+														<p className="mt-1 text-grey-500 text-xs">
+															Click to browse and choose an image
+														</p>
+													</div>
+												</button>
+											)}
+										</div>
+
+										{showMediaSelector && (
+											<MediaSelector
+												selectedCloudflareId={seoOgImage}
+												onSelect={(media: {
+													id: Id<"cmsMedia">
+													cloudflareId: string
+												}) => {
+													setSeoOgImage(media.cloudflareId)
+													setShowMediaSelector(false)
+												}}
+												onClose={() => setShowMediaSelector(false)}
+											/>
+										)}
 									</div>
 								</div>
 							</div>

@@ -291,11 +291,7 @@ type EditMediaDialogProps = {
 }
 
 function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
-	// Wait for auth to be initialized before making queries
-	const [auth] = useAtom(authAtom)
-	const isReady = auth.isInitialized && auth.user !== null
-
-	const media = useQuery(api.cms.media.get, isReady ? { id: mediaId } : "skip")
+	const media = useQuery(api.cms.media.get, { id: mediaId })
 	const [caption, setCaption] = useState("")
 	const [alt, setAlt] = useState("")
 	const [tagInput, setTagInput] = useState("")

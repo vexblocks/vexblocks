@@ -1,5 +1,6 @@
 "use client"
 
+import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import { useQuery } from "convex/react"
 import {
@@ -16,6 +17,8 @@ import {
 	Tablet,
 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { authAtom } from "@/lib/auth-atom"
+import { previewAtom } from "@/lib/preview-atom"
 
 type PreviewMessage = {
 	type: string
@@ -63,6 +66,10 @@ export function LivePreviewPanel({
 	const [isPublishing, setIsPublishing] = useState(false)
 	const [publishSuccess, setPublishSuccess] = useState(false)
 
+	// Wait for auth to be initialized before making queries
+	const [auth] = useAtom(authAtom)
+	const isAuthReady = auth.isInitialized && auth.user !== null
+
 	// Handle publish action
 	const handlePublish = useCallback(async () => {
 		if (!onPublish) return
@@ -79,7 +86,10 @@ export function LivePreviewPanel({
 	}, [onPublish])
 
 	// Get preview settings
-	const previewSettings = useQuery(api.settings.get, { key: "preview" }) as {
+	const previewSettings = useQuery(
+		api.settings.get,
+		isAuthReady ? { key: "preview" } : "skip",
+	) as {
 		enabled: boolean
 		baseUrl: string
 		productionBaseUrl: string
@@ -124,6 +134,32 @@ export function LivePreviewPanel({
 	}, [urlPattern, slug, contentData, contentId, schemaId, previewSettings])
 
 	const previewUrl = buildPreviewUrl()
+
+	// Update preview atom when preview visibility changes
+	const [, setPreviewState] = useAtom(previewAtom)
+	useEffect(() => {
+		// Only set preview as active if it's enabled, has URL, and showPreview is true
+		const shouldBeActive =
+			enabled &&
+			!!urlPattern &&
+			!!previewSettings?.enabled &&
+			!!previewUrl &&
+			showPreview
+
+		setPreviewState({ isPreviewActive: shouldBeActive })
+
+		// Cleanup: set to false when component unmounts
+		return () => {
+			setPreviewState({ isPreviewActive: false })
+		}
+	}, [
+		showPreview,
+		enabled,
+		urlPattern,
+		previewSettings?.enabled,
+		previewUrl,
+		setPreviewState,
+	])
 
 	// Send message to iframe
 	const sendToIframe = useCallback((message: PreviewMessage) => {

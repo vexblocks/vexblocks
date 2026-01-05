@@ -4,7 +4,6 @@ import { useAtom } from "@lfades/atom"
 import { authClient } from "@repo/backend/better-auth/client"
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared/src"
-import { useQuery } from "convex/react"
 import {
 	FileCode,
 	FileText,
@@ -19,6 +18,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { authAtom } from "@/lib/auth-atom"
+import { usePrefetchRoute } from "@/lib/prefetch-queries"
+import { usePublicCachedQuery } from "@/lib/use-cached-query"
 
 type NavItem = {
 	href: string
@@ -49,9 +50,14 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 	const router = useRouter()
 	const [authState] = useAtom(authAtom)
 	const { isCollapsed } = useSidebar()
-	const settings = useQuery(api.settings.getPublic, { key: "appearance" })
+	const prefetchRoute = usePrefetchRoute()
+
+	// Use cached queries for settings
+	const { data: settings } = usePublicCachedQuery(api.settings.getPublic, {
+		key: "appearance",
+	})
 	const logoId = settings?.logoId
-	const logoMedia = useQuery(
+	const { data: logoMedia } = usePublicCachedQuery(
 		api.cms.media.getPublic,
 		logoId ? { id: logoId as any } : "skip",
 	)
@@ -134,6 +140,8 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 							isCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
 						}`}
 						onClick={onClose}
+						onMouseEnter={() => prefetchRoute(item.href)}
+						onFocus={() => prefetchRoute(item.href)}
 						title={isCollapsed ? item.label : undefined}
 					>
 						<item.icon className="h-5 w-5 shrink-0" />

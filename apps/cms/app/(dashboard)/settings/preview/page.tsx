@@ -1,11 +1,12 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation } from "convex/react"
 import { ArrowLeft, ExternalLink, Eye, Globe, Info, Save } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { useCachedQuery } from "@/lib/use-cached-query"
 
 type PreviewSettings = {
 	enabled: boolean
@@ -14,7 +15,10 @@ type PreviewSettings = {
 }
 
 export default function PreviewSettingsPage() {
-	const settings = useQuery(api.settings.get, { key: "preview" })
+	// Use cached query
+	const { data: settings, isPending } = useCachedQuery(api.settings.get, {
+		key: "preview",
+	})
 	const updateSettings = useMutation(api.settings.update)
 
 	const [enabled, setEnabled] = useState(true)
@@ -223,7 +227,7 @@ export default function PreviewSettingsPage() {
 							<ul className="space-y-1 font-mono text-grey-600 text-sm">
 								<li>
 									<code className="rounded bg-grey-200 px-2 py-0.5">
-										/blog/{"{slug}"}
+										/content-library/{"{slug}"}
 									</code>{" "}
 									<span className="font-sans text-grey-500">→ Blog posts</span>
 								</li>

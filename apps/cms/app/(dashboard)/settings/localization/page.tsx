@@ -1,7 +1,7 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation } from "convex/react"
 import {
 	AlertTriangle,
 	ArrowLeft,
@@ -14,6 +14,7 @@ import {
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { useCachedQuery } from "@/lib/use-cached-query"
 
 type Locale = {
 	code: string
@@ -45,7 +46,10 @@ const COMMON_LOCALES = [
 ]
 
 export default function LocalizationSettingsPage() {
-	const settings = useQuery(api.settings.get, { key: "localization" })
+	// Use cached query
+	const { data: settings, isPending } = useCachedQuery(api.settings.get, {
+		key: "localization",
+	})
 	const updateSettings = useMutation(api.settings.update)
 
 	const [locales, setLocales] = useState<Locale[]>([])

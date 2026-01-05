@@ -3,7 +3,7 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage } from "@repo/cms-shared/src"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation } from "convex/react"
 import {
 	Check,
 	ChevronLeft,
@@ -14,11 +14,16 @@ import {
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { usePublicCachedQuery } from "@/lib/use-cached-query"
 import { MediaGallery } from "../../media/_components/media-gallery"
 import { MediaUploader } from "../../media/_components/media-uploader"
 
 export default function AppearanceSettingsPage() {
-	const settings = useQuery(api.settings.getPublic, { key: "appearance" })
+	// Use cached queries
+	const { data: settings, isPending: settingsLoading } = usePublicCachedQuery(
+		api.settings.getPublic,
+		{ key: "appearance" },
+	)
 	const updateSettings = useMutation(api.settings.update)
 
 	const [dashboardName, setDashboardName] = useState("VexBlocks")
@@ -38,7 +43,7 @@ export default function AppearanceSettingsPage() {
 	}, [settings])
 
 	// Fetch logo media details if logoId is set
-	const logoMedia = useQuery(
+	const { data: logoMedia } = usePublicCachedQuery(
 		api.cms.media.getPublic,
 		logoId ? { id: logoId } : "skip",
 	)
@@ -63,7 +68,8 @@ export default function AppearanceSettingsPage() {
 		}
 	}
 
-	if (settings === undefined) {
+	// Show loading only on initial load
+	if (settingsLoading && !settings) {
 		return (
 			<div className="flex h-96 items-center justify-center">
 				<Loader2 className="h-8 w-8 animate-spin text-primary" />

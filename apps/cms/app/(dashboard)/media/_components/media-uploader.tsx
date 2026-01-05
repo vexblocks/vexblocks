@@ -229,7 +229,7 @@ export function MediaUploader({
 				{/* Preview */}
 				{previewUrl && (
 					<div className="rounded-lg border border-grey-300 p-4">
-						{/* biome-ignore lint/performance/noImgElement: Not required */}
+						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img
 							src={previewUrl}
 							alt="Preview"

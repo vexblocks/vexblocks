@@ -27,15 +27,24 @@ const queryClient = new QueryClient({
 			queryFn: convexQueryClient.queryFn(),
 			// Reduce refetch on window focus to prevent unnecessary auth checks
 			refetchOnWindowFocus: false,
-			// Keep data fresh but don't spam the server
-			staleTime: 1000 * 10, // 10 seconds
+			// Keep data fresh for 5 minutes - this prevents loading spinners on navigation
+			staleTime: 1000 * 60 * 5, // 5 minutes
+			// Keep cached data for 10 minutes after last use
+			gcTime: 1000 * 60 * 10, // 10 minutes
 		},
 	},
 })
 convexQueryClient.connect(queryClient)
 
-export const ConvexProvider = ({ children }: PropsWithChildren) => (
-	<ConvexBetterAuthProvider client={convex} authClient={authClient}>
+export const ConvexProvider = ({
+	children,
+	initialToken,
+}: PropsWithChildren<{ initialToken: string | null }>) => (
+	<ConvexBetterAuthProvider
+		client={convex}
+		authClient={authClient}
+		initialToken={initialToken}
+	>
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	</ConvexBetterAuthProvider>
 )

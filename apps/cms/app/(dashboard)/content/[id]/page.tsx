@@ -3,20 +3,24 @@
 import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { getStringValue } from "@repo/cms-shared"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
 	ArrowLeft,
 	Check,
+	ExternalLink,
 	Eye,
 	Globe,
+	Image as ImageIcon,
 	Save,
 	Trash2,
+	X,
 } from "lucide-react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { use, useEffect, useState } from "react"
+import { use, useEffect, useRef, useState } from "react"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
@@ -25,6 +29,15 @@ import { LivePreviewPanel } from "../_components/live-preview-panel"
 import { LocaleSelector } from "../_components/locale-selector"
 import type { Field, LocalizationSettings } from "../_components/types"
 import { getNestedValue, setNestedValue } from "../_components/utils"
+
+// Dynamic import for MediaSelector to avoid SSR issues
+const MediaSelector = dynamic(
+	() =>
+		import("../../media/_components/media-selector").then(
+			(mod) => mod.MediaSelector,
+		),
+	{ ssr: false },
+)
 
 // Recursive validation function
 function validateFields(
@@ -67,8 +80,7 @@ export default function EditContentPage({
 }: {
 	params: Promise<{ id: string }>
 }) {
-	const { id: rawId } = use(params)
-	const id = decodeURIComponent(rawId)
+	const { id } = use(params)
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const schemaFromUrl = searchParams.get("schema")
@@ -77,9 +89,10 @@ export default function EditContentPage({
 	const [auth] = useAtom(authAtom)
 	const isReady = auth.isInitialized && auth.user !== null
 
+	// Only query if we have an ID (let Convex handle invalid IDs)
 	const content = useQuery(
 		api.cms.content.get,
-		isReady ? { id: id as Id<"cmsContent"> } : "skip",
+		isReady && id ? { id: id as Id<"cmsContent"> } : "skip",
 	)
 
 	// Build back URL with schema param for proper navigation
@@ -125,11 +138,38 @@ export default function EditContentPage({
 		return contentData.slug || undefined
 	}
 
+	// Build the public page URL from the urlPattern and preview settings
+	const getPublicPageUrl = (): string | null => {
+		if (!schema?.previewConfig?.urlPattern) return null
+		if (!previewSettings) return null
+		const slug = getSlugFromContent()
+		if (!slug) return null
+
+		// Determine base URL: use production URL if available and we're not on localhost, otherwise use development URL
+		const isLocalhost =
+			typeof window !== "undefined" && window.location.hostname === "localhost"
+		const baseUrl = isLocalhost
+			? previewSettings.baseUrl
+			: previewSettings.productionBaseUrl || previewSettings.baseUrl
+
+		if (!baseUrl) return null
+
+		// Replace {slug} placeholder with actual slug value
+		const path = schema.previewConfig.urlPattern.replace("{slug}", slug)
+
+		// Combine base URL with path, ensuring no double slashes
+		const cleanBaseUrl = baseUrl.replace(/\/$/, "")
+		const cleanPath = path.startsWith("/") ? path : `/${path}`
+
+		return `${cleanBaseUrl}${cleanPath}`
+	}
+
 	const { setIsCollapsed } = useSidebar()
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 	const [showPreview, setShowPreview] = useState(false)
+	const [showMediaSelector, setShowMediaSelector] = useState(false)
 
 	// Collapse sidebar when preview is active
 	useEffect(() => {
@@ -142,6 +182,16 @@ export default function EditContentPage({
 	const [contentData, setContentData] = useState<Record<string, any>>({})
 	const [seoTitle, setSeoTitle] = useState("")
 	const [seoDescription, setSeoDescription] = useState("")
+	const [seoOgImage, setSeoOgImage] = useState("")
+	const lastAutoSlugRef = useRef<string | null>(null)
+	const [isAutoSlugActive, setIsAutoSlugActive] = useState(false)
+
+	// Reset state when navigating to a different content item
+	// biome-ignore lint/correctness/useExhaustiveDependencies: id is intentionally used as a trigger to reset state
+	useEffect(() => {
+		lastAutoSlugRef.current = null
+		setIsAutoSlugActive(false)
+	}, [id])
 
 	// i18n state
 	const hasLocales = (localizationSettings?.locales?.length ?? 0) > 0
@@ -176,8 +226,43 @@ export default function EditContentPage({
 			setContentData(content.data || {})
 			setSeoTitle(content.seo?.title || "")
 			setSeoDescription(content.seo?.description || "")
+			setSeoOgImage(content.seo?.ogImage || "")
 		}
 	}, [content])
+
+	// Auto-generate slug from slug source field (only when auto-slug is active)
+	useEffect(() => {
+		if (!schema?.fields || !isAutoSlugActive) return
+
+		const slugField = schema.fields.find(
+			(f: Field) => f.type === "shortText" && f.isSlug && f.slugSource,
+		)
+
+		if (slugField?.slugSource) {
+			const sourceValue = contentData[slugField.slugSource]
+			if (sourceValue && typeof sourceValue === "string") {
+				const autoSlug = sourceValue
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, "-")
+					.replace(/^-+|-+$/g, "")
+
+				const currentSlug = contentData[slugField.name]
+
+				// Only auto-generate if slug matches the last auto-generated value
+				// (user hasn't manually edited it)
+				if (
+					currentSlug === lastAutoSlugRef.current &&
+					currentSlug !== autoSlug
+				) {
+					setContentData((prev) => ({
+						...prev,
+						[slugField.name]: autoSlug,
+					}))
+					lastAutoSlugRef.current = autoSlug
+				}
+			}
+		}
+	}, [contentData, schema, isAutoSlugActive])
 
 	// Helper to check if a field at a path is translatable
 	const isFieldTranslatable = (fieldPath: string): boolean => {
@@ -253,6 +338,17 @@ export default function EditContentPage({
 	}
 
 	const handleFieldChange = (path: string, value: any) => {
+		// Check if user is manually editing the slug field
+		if (schema?.fields) {
+			const slugField = schema.fields.find(
+				(f: Field) => f.name === path && f.isSlug,
+			)
+			if (slugField && value !== lastAutoSlugRef.current) {
+				// User manually edited the slug, deactivate auto-generation
+				setIsAutoSlugActive(false)
+			}
+		}
+
 		setContentData((prev) => {
 			if (!hasLocales || !isFieldTranslatable(path)) {
 				return setNestedValue(prev, path, value)
@@ -287,6 +383,32 @@ export default function EditContentPage({
 		})
 	}
 
+	const handleRegenerateSlug = (slugFieldName: string) => {
+		if (!schema?.fields) return
+
+		const slugField = schema.fields.find(
+			(f: Field) => f.name === slugFieldName && f.isSlug && f.slugSource,
+		)
+
+		if (slugField?.slugSource) {
+			const sourceValue = contentData[slugField.slugSource]
+			if (sourceValue && typeof sourceValue === "string") {
+				const autoSlug = sourceValue
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, "-")
+					.replace(/^-+|-+$/g, "")
+
+				setContentData((prev) => ({
+					...prev,
+					[slugField.name]: autoSlug,
+				}))
+				lastAutoSlugRef.current = autoSlug
+				// Activate auto-generation until user manually edits the slug
+				setIsAutoSlugActive(true)
+			}
+		}
+	}
+
 	const [saveSuccess, setSaveSuccess] = useState(false)
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -301,27 +423,27 @@ export default function EditContentPage({
 				throw new Error(validationError)
 			}
 
+			// Get slug for revalidation
+			const slug = getSlugFromContent()
+
 			await updateContent({
 				id: id as Id<"cmsContent">,
+				slug,
 				status,
 				data: contentData,
 				seo:
-					seoTitle || seoDescription
+					seoTitle || seoDescription || seoOgImage
 						? {
 								title: seoTitle || undefined,
 								description: seoDescription || undefined,
+								ogImage: seoOgImage || undefined,
 							}
 						: undefined,
 			})
 
-			// If in preview mode, stay on page and show success feedback
-			if (showPreview) {
-				setSaveSuccess(true)
-				setTimeout(() => setSaveSuccess(false), 2000)
-			} else {
-				// Otherwise redirect to content list
-				router.push("/content")
-			}
+			// Stay on page and show success feedback
+			setSaveSuccess(true)
+			setTimeout(() => setSaveSuccess(false), 2000)
 		} catch (err) {
 			setError(getCleanErrorMessage(err, "Failed to update content"))
 			// Scroll to top to show error message
@@ -367,7 +489,7 @@ export default function EditContentPage({
 	}
 
 	return (
-		<div className={showPreview ? "flex gap-8" : "mx-auto max-w-4xl"}>
+		<div className={showPreview ? "flex gap-8" : "mx-auto w-full px-8"}>
 			{/* Editor Panel */}
 			<div className={showPreview ? "w-[30%] min-w-0 shrink-0" : "w-full"}>
 				<div className="mb-6 flex items-center justify-between">
@@ -380,6 +502,18 @@ export default function EditContentPage({
 					</Link>
 
 					<div className="flex items-center gap-2">
+						{/* View Page Button */}
+						{getPublicPageUrl() && (
+							<a
+								href={getPublicPageUrl() ?? "#"}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+							>
+								<ExternalLink className="h-4 w-4" />
+								View Page
+							</a>
+						)}
 						{/* Preview Toggle */}
 						{isPreviewAvailable && (
 							<button
@@ -455,7 +589,11 @@ export default function EditContentPage({
 					</div>
 				)}
 
-				<form id="content-form" onSubmit={handleSubmit} className="space-y-6">
+				<form
+					id="content-form"
+					onSubmit={handleSubmit}
+					className="space-y-6 2xl:px-16"
+				>
 					{/* Locale Selector */}
 					{hasLocales && locales.length > 0 && (
 						<div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4">
@@ -473,7 +611,7 @@ export default function EditContentPage({
 					)}
 
 					{/* Content Fields */}
-					<div className="rounded-lg bg-white p-6 shadow-md">
+					<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 						<div className="mb-4 flex items-center justify-between">
 							<h2 className="font-semibold text-lg text-primary">
 								Content Fields
@@ -484,86 +622,260 @@ export default function EditContentPage({
 								</span>
 							)}
 						</div>
-						<div className="space-y-6">
-							{schema.fields.map((field: any) => {
-								const isTranslatable = field.translatable && hasLocales
-								// Always use getLocalizedValue to handle legacy localized content when locales are disabled
-								const value = field.translatable
-									? getLocalizedValue(field.name)
-									: getNestedValue(contentData, field.name)
+						<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+							{(() => {
+								// Group consecutive small fields together
+								const fieldGroups: any[][] = []
+								let currentGroup: any[] = []
 
-								return (
-									<div
-										key={field.name}
-										className="relative"
-										data-field-path={field.name}
-									>
-										{isTranslatable && (
-											<div className="absolute top-0 right-0 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
-												Translatable
+								const isSmallField = (fieldType: string) =>
+									[
+										"shortText",
+										"select",
+										"checkbox",
+										"date",
+										"number",
+									].includes(fieldType)
+								const isLargeField = (fieldType: string) =>
+									[
+										"richText",
+										"flexibleBlocks",
+										"repeater",
+										"group",
+										"blockReference",
+									].includes(fieldType)
+
+								schema.fields.forEach((field: any, index: number) => {
+									if (isSmallField(field.type)) {
+										currentGroup.push(field)
+										// Check if next field is not small or is last field
+										const nextField = schema.fields[index + 1]
+										if (!nextField || !isSmallField(nextField.type)) {
+											fieldGroups.push([...currentGroup])
+											currentGroup = []
+										}
+									} else {
+										// Medium or large field
+										if (currentGroup.length > 0) {
+											fieldGroups.push([...currentGroup])
+											currentGroup = []
+										}
+										fieldGroups.push([field])
+									}
+								})
+
+								return fieldGroups.map((group, groupIndex) => {
+									const isGroupOfSmallFields = group.every((f) =>
+										isSmallField(f.type),
+									)
+									const hasOnlyOneField = group.length === 1
+									const singleField = group[0]
+									const isLarge =
+										hasOnlyOneField && isLargeField(singleField.type)
+
+									if (isGroupOfSmallFields && group.length > 1) {
+										// Group of small fields - render in a column
+										return (
+											<div key={groupIndex} className="space-y-4">
+												{group.map((field: any) => {
+													const isTranslatable =
+														field.translatable && hasLocales
+													const value = field.translatable
+														? getLocalizedValue(field.name)
+														: getNestedValue(contentData, field.name)
+
+													return (
+														<div
+															key={field.name}
+															className="relative"
+															data-field-path={field.name}
+														>
+															{isTranslatable && (
+																<div className="absolute top-0 right-0 z-10 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
+																	Translatable
+																</div>
+															)}
+															<FieldRenderer
+																field={field}
+																path={field.name}
+																value={value}
+																onChange={handleFieldChange}
+																onAddRepeaterItem={handleAddRepeaterItem}
+																onRemoveRepeaterItem={handleRemoveRepeaterItem}
+																allSchemas={schemas || []}
+																contentBySchema={contentBySchema}
+																onRegenerateSlug={handleRegenerateSlug}
+																isAutoSlugActive={isAutoSlugActive}
+															/>
+														</div>
+													)
+												})}
 											</div>
-										)}
-										<FieldRenderer
-											field={field}
-											path={field.name}
-											value={value}
-											onChange={handleFieldChange}
-											onAddRepeaterItem={handleAddRepeaterItem}
-											onRemoveRepeaterItem={handleRemoveRepeaterItem}
-											allSchemas={schemas || []}
-											contentBySchema={contentBySchema}
-										/>
-									</div>
-								)
-							})}
+										)
+									}
+
+									// Single field or large field
+									const field = singleField
+									const isTranslatable = field.translatable && hasLocales
+									const value = field.translatable
+										? getLocalizedValue(field.name)
+										: getNestedValue(contentData, field.name)
+
+									return (
+										<div
+											key={field.name}
+											className={`relative ${isLarge ? "lg:col-span-2" : ""}`}
+											data-field-path={field.name}
+										>
+											{isTranslatable && (
+												<div className="absolute top-0 right-0 z-10 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
+													Translatable
+												</div>
+											)}
+											<FieldRenderer
+												field={field}
+												path={field.name}
+												value={value}
+												onChange={handleFieldChange}
+												onAddRepeaterItem={handleAddRepeaterItem}
+												onRemoveRepeaterItem={handleRemoveRepeaterItem}
+												allSchemas={schemas || []}
+												contentBySchema={contentBySchema}
+												onRegenerateSlug={handleRegenerateSlug}
+												isAutoSlugActive={isAutoSlugActive}
+											/>
+										</div>
+									)
+								})
+							})()}
 						</div>
 					</div>
 
 					{/* SEO */}
 					{schema.type !== "global" && (
-						<div className="rounded-lg bg-white p-6 shadow-md">
+						<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 							<h2 className="mb-4 font-semibold text-lg text-primary">
 								SEO Metadata
 							</h2>
-							<div className="space-y-4">
-								<div>
-									<label
-										htmlFor="seo-title"
-										className="mb-2 block font-medium text-grey-500 text-sm"
-									>
-										SEO Title
-									</label>
-									<input
-										type="text"
-										id="seo-title"
-										value={seoTitle}
-										onChange={(e) => setSeoTitle(e.target.value)}
-										placeholder="Page title for search engines"
-										className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									/>
+							<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+								{/* Left Column - SEO Title & Description */}
+								<div className="space-y-4">
+									<div>
+										<label
+											htmlFor="seo-title"
+											className="mb-2 block font-medium text-grey-500 text-sm"
+										>
+											SEO Title
+										</label>
+										<input
+											type="text"
+											id="seo-title"
+											value={seoTitle}
+											onChange={(e) => setSeoTitle(e.target.value)}
+											placeholder="Page title for search engines"
+											className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										/>
+									</div>
+									<div>
+										<label
+											htmlFor="seo-description"
+											className="mb-2 block font-medium text-grey-500 text-sm"
+										>
+											SEO Description
+										</label>
+										<textarea
+											id="seo-description"
+											value={seoDescription}
+											onChange={(e) => setSeoDescription(e.target.value)}
+											placeholder="Page description for search engines"
+											rows={3}
+											className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+										/>
+									</div>
 								</div>
+
+								{/* Right Column - OG Image */}
 								<div>
-									<label
-										htmlFor="seo-description"
-										className="mb-2 block font-medium text-grey-500 text-sm"
-									>
-										SEO Description
-									</label>
-									<textarea
-										id="seo-description"
-										value={seoDescription}
-										onChange={(e) => setSeoDescription(e.target.value)}
-										placeholder="Page description for search engines"
-										rows={3}
-										className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-									/>
+									<div className="mb-2 block font-medium text-grey-500 text-sm">
+										OG Image
+									</div>
+									<p className="mb-2 text-grey-400 text-xs">
+										Optional image for social media sharing
+									</p>
+									<div className="space-y-4">
+										{seoOgImage ? (
+											<div className="inline-flex w-full flex-col items-center">
+												<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+													<div className="relative overflow-hidden bg-grey-100">
+														<CFImage
+															assetId={seoOgImage}
+															alt="OG Image"
+															width={600}
+															height={315}
+															variant="public"
+															className="h-auto max-h-64 w-auto transition-transform duration-300 group-hover:scale-105"
+														/>
+														<button
+															type="button"
+															onClick={() => setSeoOgImage("")}
+															className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-error text-white shadow-lg transition-all hover:scale-110 hover:bg-error/90"
+															title="Remove image"
+														>
+															<X className="h-4 w-4" />
+														</button>
+													</div>
+													<div className="border-grey-200 border-t bg-white p-3">
+														<button
+															type="button"
+															onClick={() => setShowMediaSelector(true)}
+															className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+														>
+															Change Image
+														</button>
+													</div>
+												</div>
+											</div>
+										) : (
+											<button
+												type="button"
+												onClick={() => setShowMediaSelector(true)}
+												className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
+											>
+												<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
+													<ImageIcon className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
+												</div>
+												<div className="text-center">
+													<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+														Select from Media Library
+													</p>
+													<p className="mt-1 text-grey-500 text-xs">
+														Click to browse and choose an image
+													</p>
+												</div>
+											</button>
+										)}
+									</div>
+
+									{showMediaSelector && (
+										<MediaSelector
+											selectedCloudflareId={seoOgImage}
+											onSelect={(media: {
+												id: Id<"cmsMedia">
+												cloudflareId: string
+											}) => {
+												setSeoOgImage(media.cloudflareId)
+												setShowMediaSelector(false)
+											}}
+											onClose={() => setShowMediaSelector(false)}
+										/>
+									)}
 								</div>
 							</div>
 						</div>
 					)}
 
 					{/* Status */}
-					<div className="rounded-lg bg-white p-6 shadow-md">
+					<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 						<h2 className="mb-4 font-semibold text-lg text-primary">
 							Publication Status
 						</h2>
@@ -654,15 +966,19 @@ export default function EditContentPage({
 						onPublish={async () => {
 							// Set status to published and save
 							setStatus("published")
+							// Get slug for revalidation
+							const slug = getSlugFromContent()
 							await updateContent({
 								id: id as Id<"cmsContent">,
+								slug,
 								status: "published",
 								data: contentData,
 								seo:
-									seoTitle || seoDescription
+									seoTitle || seoDescription || seoOgImage
 										? {
 												title: seoTitle || undefined,
 												description: seoDescription || undefined,
+												ogImage: seoOgImage || undefined,
 											}
 										: undefined,
 							})

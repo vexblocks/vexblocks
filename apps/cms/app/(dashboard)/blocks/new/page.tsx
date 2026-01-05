@@ -29,6 +29,7 @@ type FieldType =
 	| "date"
 	| "select"
 	| "group"
+	| "repeater"
 
 type Field = {
 	id: string
@@ -38,7 +39,7 @@ type Field = {
 	required: boolean
 	helpText?: string
 	options?: string[]
-	fields?: Field[] // Nested fields for group type
+	fields?: Field[] // Nested fields for group/repeater type
 }
 
 const FieldEditor = ({
@@ -120,6 +121,11 @@ const FieldEditor = ({
 						{field.type === "group" && (
 							<span className="rounded-full bg-primary/10 px-2 py-1 font-medium text-primary text-xs">
 								Group
+							</span>
+						)}
+						{field.type === "repeater" && (
+							<span className="rounded-full bg-green-100 px-2 py-1 font-medium text-green-700 text-xs">
+								Repeater
 							</span>
 						)}
 					</div>
@@ -228,6 +234,7 @@ const FieldEditor = ({
 							<option value="media">Media</option>
 							<option value="select">Select</option>
 							{depth < 1 && <option value="group">Group</option>}
+							{depth < 1 && <option value="repeater">Repeater (Array)</option>}
 						</select>
 						{depth >= 1 && (
 							<p className="mt-1 text-grey-400 text-xs">
@@ -316,12 +323,12 @@ const FieldEditor = ({
 					</div>
 				</div>
 
-				{/* Nested fields for group */}
-				{field.type === "group" && (
+				{/* Nested fields for group/repeater */}
+				{(field.type === "group" || field.type === "repeater") && (
 					<div className="mt-4 space-y-3">
 						<div className="flex items-center justify-between border-grey-200 border-t pt-4">
 							<h4 className="font-medium text-grey-700 text-sm">
-								Group Fields
+								{field.type === "repeater" ? "Item Fields" : "Group Fields"}
 							</h4>
 							<button
 								type="button"
@@ -482,12 +489,19 @@ export default function NewBlockPage() {
 					prevFields.map((f) => {
 						if (f.id === id) {
 							const updated = { ...f, ...updates }
-							// Reset nested fields if type changes from group
-							if (f.type === "group" && updated.type !== "group") {
+							// Reset nested fields if type changes from group/repeater
+							if (
+								(f.type === "group" || f.type === "repeater") &&
+								updated.type !== "group" &&
+								updated.type !== "repeater"
+							) {
 								delete updated.fields
 							}
-							// Initialize nested fields array if type changes to group
-							if (updated.type === "group" && !updated.fields) {
+							// Initialize nested fields array if type changes to group/repeater
+							if (
+								(updated.type === "group" || updated.type === "repeater") &&
+								!updated.fields
+							) {
 								updated.fields = []
 							}
 							return updated
@@ -503,12 +517,19 @@ export default function NewBlockPage() {
 						fields: parentField.fields?.map((f) => {
 							if (f.id === id) {
 								const updated = { ...f, ...updates }
-								// Reset nested fields if type changes from group
-								if (f.type === "group" && updated.type !== "group") {
+								// Reset nested fields if type changes from group/repeater
+								if (
+									(f.type === "group" || f.type === "repeater") &&
+									updated.type !== "group" &&
+									updated.type !== "repeater"
+								) {
 									delete updated.fields
 								}
-								// Initialize nested fields array if type changes to group
-								if (updated.type === "group" && !updated.fields) {
+								// Initialize nested fields array if type changes to group/repeater
+								if (
+									(updated.type === "group" || updated.type === "repeater") &&
+									!updated.fields
+								) {
 									updated.fields = []
 								}
 								return updated
@@ -631,8 +652,8 @@ export default function NewBlockPage() {
 				options: f.options,
 			}
 
-			// Recursively include nested fields for group type
-			if (f.type === "group" && f.fields) {
+			// Recursively include nested fields for group and repeater types
+			if ((f.type === "group" || f.type === "repeater") && f.fields) {
 				mappedField.fields = mapFieldsForSave(f.fields)
 			}
 
@@ -686,10 +707,13 @@ export default function NewBlockPage() {
 						)
 					}
 					// Validate nested fields
-					if (field.type === "group" && field.fields) {
+					if (
+						(field.type === "group" || field.type === "repeater") &&
+						field.fields
+					) {
 						if (field.fields.length === 0) {
 							throw new Error(
-								`Group "${field.label}" must have at least one nested field`,
+								`${field.type === "repeater" ? "Repeater" : "Group"} "${field.label}" must have at least one nested field`,
 							)
 						}
 						validateFields(field.fields, level + 1)
@@ -700,7 +724,7 @@ export default function NewBlockPage() {
 			validateFields(fields)
 
 			// Create block with nested fields
-			const blockId = await createBlock({
+			await createBlock({
 				name,
 				displayName,
 				description: description || undefined,
@@ -709,8 +733,17 @@ export default function NewBlockPage() {
 				previewImage: previewImage || undefined,
 			})
 
-			// Redirect to block detail
-			router.push(`/blocks/${blockId}`)
+			// Reset form state after successful creation
+			setDisplayName("")
+			setName("")
+			setDescription("")
+			setCategory("")
+			setPreviewImage("")
+			setFields([])
+			setHasEditedName(false)
+
+			// Redirect to blocks list (safer than navigating with optimistic ID)
+			router.push("/blocks")
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to create block")
 		} finally {
@@ -835,9 +868,9 @@ export default function NewBlockPage() {
 						</div>
 
 						<div>
-							<label className="mb-2 block font-medium text-grey-500 text-sm">
+							<div className="mb-2 block font-medium text-grey-500 text-sm">
 								Preview Image (optional)
-							</label>
+							</div>
 							<p className="mb-2 text-grey-400 text-xs">
 								Add an image to help users visually identify this block when
 								selecting it

@@ -1,18 +1,13 @@
 "use client"
 
-import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
-import { useQuery } from "convex/react"
 import { FileText, Grid3x3, Layers, Plus } from "lucide-react"
 import Link from "next/link"
-import { authAtom } from "@/lib/auth-atom"
+import { useCachedQuery } from "@/lib/use-cached-query"
 
 export default function SchemasPage() {
-	// Wait for auth to be initialized before making queries
-	const [auth] = useAtom(authAtom)
-	const isReady = auth.isInitialized && auth.user !== null
-
-	const schemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
+	// Use cached query - shows cached data instantly on navigation
+	const { data: schemas, isPending } = useCachedQuery(api.cms.schemas.list, {})
 
 	const getTypeIcon = (type: string) => {
 		switch (type) {
@@ -58,8 +53,8 @@ export default function SchemasPage() {
 				</Link>
 			</div>
 
-			{/* Loading State */}
-			{schemas === undefined && (
+			{/* Loading State - only on initial load */}
+			{isPending && !schemas && (
 				<div className="rounded-lg bg-white p-12 text-center shadow">
 					<div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					<p className="mt-4 text-grey-500">Loading schemas...</p>

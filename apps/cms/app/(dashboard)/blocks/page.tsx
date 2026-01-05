@@ -1,21 +1,21 @@
 "use client"
 
-import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared"
-import { useQuery } from "convex/react"
 import { Layers, Plus } from "lucide-react"
 import Link from "next/link"
-import { authAtom } from "@/lib/auth-atom"
+import { useCachedQuery } from "@/lib/use-cached-query"
 
 export default function BlocksPage() {
-	// Wait for auth to be initialized before making queries
-	const [auth] = useAtom(authAtom)
-	const isReady = auth.isInitialized && auth.user !== null
+	// Use cached query - shows cached data instantly on navigation
+	const {
+		data: blocks,
+		isPending,
+		error,
+	} = useCachedQuery(api.cms.blocks.list, {})
 
-	const blocks = useQuery(api.cms.blocks.list, isReady ? {} : "skip")
-
-	if (blocks === undefined) {
+	// Show loading state only on initial load (not on navigation)
+	if (isPending && !blocks) {
 		return (
 			<div className="flex min-h-[400px] items-center justify-center">
 				<div className="text-center">
@@ -26,7 +26,7 @@ export default function BlocksPage() {
 		)
 	}
 
-	if (blocks === null) {
+	if (error || !blocks) {
 		return (
 			<div className="flex min-h-[400px] items-center justify-center">
 				<div className="text-center">
@@ -101,13 +101,13 @@ export default function BlocksPage() {
 											<Link href={`/blocks/${block._id}`} className="flex-1">
 												{/* Preview Image */}
 												{block.previewImage ? (
-													<div className="relative h-32 w-full overflow-hidden bg-grey-100">
+													<div className="relative h-48 w-full overflow-hidden bg-grey-100 2xl:h-64">
 														<CFImage
 															assetId={block.previewImage}
 															alt={block.displayName}
 															fill
 															variant="public"
-															className="object-cover transition-transform group-hover:scale-105"
+															className="object-contain transition-transform group-hover:scale-105"
 														/>
 													</div>
 												) : (
