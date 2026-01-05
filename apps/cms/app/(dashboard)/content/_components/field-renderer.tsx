@@ -274,9 +274,13 @@ export function FieldRenderer({
 								let currentGroup: any[] = []
 
 								const isSmallField = (fieldType: string) =>
-									["shortText", "select", "checkbox", "date", "number"].includes(
-										fieldType,
-									)
+									[
+										"shortText",
+										"select",
+										"checkbox",
+										"date",
+										"number",
+									].includes(fieldType)
 								const isLargeField = (fieldType: string) =>
 									[
 										"richText",
@@ -309,7 +313,8 @@ export function FieldRenderer({
 									)
 									const hasOnlyOneField = group.length === 1
 									const singleField = group[0]
-									const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+									const isLarge =
+										hasOnlyOneField && isLargeField(singleField.type)
 
 									if (isGroupOfSmallFields && group.length > 1) {
 										return (
@@ -445,9 +450,13 @@ export function FieldRenderer({
 										let currentGroup: any[] = []
 
 										const isSmallField = (fieldType: string) =>
-											["shortText", "select", "checkbox", "date", "number"].includes(
-												fieldType,
-											)
+											[
+												"shortText",
+												"select",
+												"checkbox",
+												"date",
+												"number",
+											].includes(fieldType)
 										const isLargeField = (fieldType: string) =>
 											[
 												"richText",
@@ -457,22 +466,24 @@ export function FieldRenderer({
 												"blockReference",
 											].includes(fieldType)
 
-										field.fields?.forEach((nestedField: any, fieldIndex: number) => {
-											if (isSmallField(nestedField.type)) {
-												currentGroup.push(nestedField)
-												const nextField = field.fields?.[fieldIndex + 1]
-												if (!nextField || !isSmallField(nextField.type)) {
-													fieldGroups.push([...currentGroup])
-													currentGroup = []
+										field.fields?.forEach(
+											(nestedField: any, fieldIndex: number) => {
+												if (isSmallField(nestedField.type)) {
+													currentGroup.push(nestedField)
+													const nextField = field.fields?.[fieldIndex + 1]
+													if (!nextField || !isSmallField(nextField.type)) {
+														fieldGroups.push([...currentGroup])
+														currentGroup = []
+													}
+												} else {
+													if (currentGroup.length > 0) {
+														fieldGroups.push([...currentGroup])
+														currentGroup = []
+													}
+													fieldGroups.push([nestedField])
 												}
-											} else {
-												if (currentGroup.length > 0) {
-													fieldGroups.push([...currentGroup])
-													currentGroup = []
-												}
-												fieldGroups.push([nestedField])
-											}
-										})
+											},
+										)
 
 										return fieldGroups.map((group, groupIndex) => {
 											const isGroupOfSmallFields = group.every((f) =>
@@ -480,7 +491,8 @@ export function FieldRenderer({
 											)
 											const hasOnlyOneField = group.length === 1
 											const singleField = group[0]
-											const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+											const isLarge =
+												hasOnlyOneField && isLargeField(singleField.type)
 
 											if (isGroupOfSmallFields && group.length > 1) {
 												return (

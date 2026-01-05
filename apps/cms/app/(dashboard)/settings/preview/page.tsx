@@ -16,7 +16,7 @@ type PreviewSettings = {
 
 export default function PreviewSettingsPage() {
 	// Use cached query
-	const { data: settings, isPending } = useCachedQuery(api.settings.get, {
+	const { data: settings } = useCachedQuery(api.settings.get, {
 		key: "preview",
 	})
 	const updateSettings = useMutation(api.settings.update)

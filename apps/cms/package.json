@@ -1,12 +1,12 @@
 {
-  "name": "vexblocks-admin",
-  "version": "0.2.0",
+	"name": "vexblocks-admin",
+	"version": "0.2.0",
 	"private": true,
 	"scripts": {
 		"dev": "next dev --port 3001",
 		"build": "next build",
 		"start": "next start --port 3001",
-		"lint": "next lint"
+		"lint": "biome check ."
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "0.10.9",

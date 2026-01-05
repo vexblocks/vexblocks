@@ -47,19 +47,3 @@ export function usePrefetchRoute() {
 
 	return prefetch
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

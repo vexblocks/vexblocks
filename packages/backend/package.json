@@ -1,26 +1,26 @@
 {
-  "name": "vexblocks-backend",
-  "version": "0.2.0",
-  "private": true,
-  "scripts": {
-    "dev": "convex dev",
-    "build": "echo \"Nothing to build for Convex backend\"",
-    "start": "echo \"Use 'pnpm dev' to run Convex dev server\"",
-    "lint": "echo \"No lint configured for backend\""
-  },
-  "dependencies": {
-    "@convex-dev/better-auth": "^0.10.9",
-    "@convex-dev/migrations": "^0.3.1",
-    "@convex-dev/resend": "^0.2.3",
-    "better-auth": "1.4.9",
-    "convex": "^1.31.2",
-    "convex-helpers": "^0.1.108",
-    "next": "16.1.1",
-    "zod": "^4.2.1"
-  },
-  "devDependencies": {
-    "@types/lodash": "^4.17.21",
-    "@types/node": "^25.0.3",
-    "typescript": "^5.9.3"
-  }
+	"name": "vexblocks-backend",
+	"version": "0.2.0",
+	"private": true,
+	"scripts": {
+		"dev": "convex dev",
+		"build": "echo \"Nothing to build for Convex backend\"",
+		"start": "echo \"Use 'pnpm dev' to run Convex dev server\"",
+		"lint": "echo \"No lint configured for backend\""
+	},
+	"dependencies": {
+		"@convex-dev/better-auth": "^0.10.9",
+		"@convex-dev/migrations": "^0.3.1",
+		"@convex-dev/resend": "^0.2.3",
+		"better-auth": "1.4.9",
+		"convex": "^1.31.2",
+		"convex-helpers": "^0.1.108",
+		"next": "16.1.1",
+		"zod": "^4.2.1"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.17.21",
+		"@types/node": "^25.0.3",
+		"typescript": "^5.9.3"
+	}
 }

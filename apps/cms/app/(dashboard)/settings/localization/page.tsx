@@ -47,7 +47,7 @@ const COMMON_LOCALES = [
 
 export default function LocalizationSettingsPage() {
 	// Use cached query
-	const { data: settings, isPending } = useCachedQuery(api.settings.get, {
+	const { data: settings } = useCachedQuery(api.settings.get, {
 		key: "localization",
 	})
 	const updateSettings = useMutation(api.settings.update)

@@ -294,9 +294,7 @@ function BlockReferenceFields({
 				return (
 					<div
 						key={blockField.name}
-						className={
-							isLarge && !isPreviewActive ? "lg:col-span-2" : ""
-						}
+						className={isLarge && !isPreviewActive ? "lg:col-span-2" : ""}
 					>
 						<FieldRenderer
 							field={blockField}

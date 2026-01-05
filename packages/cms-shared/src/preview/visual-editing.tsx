@@ -150,4 +150,3 @@ export function VisualEditing() {
 	// This component doesn't render anything visible
 	return null
 }
-

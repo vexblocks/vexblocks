@@ -78,17 +78,17 @@
 				"noInferrableTypes": "error",
 				"noUselessElse": "error"
 			},
-		"a11y": {
-			"noSvgWithoutTitle": "off",
-			"useKeyWithClickEvents": "off",
-			"useMediaCaption": "off",
-			"useSemanticElements": "off",
-			"noLabelWithoutControl": "off",
-			"noStaticElementInteractions": "off"
-		},
-		"performance": {
-			"noImgElement": "warn"
-		}
+			"a11y": {
+				"noSvgWithoutTitle": "off",
+				"useKeyWithClickEvents": "off",
+				"useMediaCaption": "off",
+				"useSemanticElements": "off",
+				"noLabelWithoutControl": "off",
+				"noStaticElementInteractions": "off"
+			},
+			"performance": {
+				"noImgElement": "warn"
+			}
 		}
 	},
 	"javascript": {

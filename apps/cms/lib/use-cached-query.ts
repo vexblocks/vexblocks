@@ -71,19 +71,3 @@ export function usePublicCachedQuery<T extends FunctionReference<"query">>(
 } {
 	return useCachedQuery(query, args, { requireAuth: false })
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

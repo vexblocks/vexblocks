@@ -45,4 +45,3 @@ export const isAdmin = () => {
 export const getCurrentAuthUser = () => {
 	return authAtom.get().user
 }
-
