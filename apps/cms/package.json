@@ -20,7 +20,7 @@
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@repo/cms-shared": "workspace:*",
 		"@tanstack/react-query": "^5.90.16",
-		"better-auth": "1.4.10",
+		"better-auth": "1.4.9",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"compressorjs": "^1.2.1",

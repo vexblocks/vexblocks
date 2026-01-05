@@ -1,10 +1,8 @@
 "use client"
 
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
 import { ConvexQueryClient } from "@convex-dev/react-query"
-import { authClient } from "@repo/backend/better-auth/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ConvexReactClient } from "convex/react"
+import { ConvexProvider, ConvexReactClient } from "convex/react"
 import type { PropsWithChildren } from "react"
 
 const convex = new ConvexReactClient(
@@ -23,8 +21,8 @@ const queryClient = new QueryClient({
 })
 convexQueryClient.connect(queryClient)
 
-export const ConvexProvider = ({ children }: PropsWithChildren) => (
-	<ConvexBetterAuthProvider client={convex} authClient={authClient}>
+export const ConvexProviderComponent = ({ children }: PropsWithChildren) => (
+	<ConvexProvider client={convex}>
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-	</ConvexBetterAuthProvider>
+	</ConvexProvider>
 )

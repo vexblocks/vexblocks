@@ -1,7 +1,7 @@
 import "@/styles/config.css"
 import { GeistSans } from "geist/font/sans"
 import localFont from "next/font/local"
-import { ConvexProvider } from "@/components/providers/convex-provider"
+import { ConvexProviderComponent } from "@/components/providers/convex-provider"
 import { NavbarThemeProvider } from "@/contexts/navbar-theme-context"
 
 const gtSuper = localFont({
@@ -23,9 +23,9 @@ export default function RootLayout({
 		>
 			<head />
 			<body className="min-h-screen bg-background font-sans antialiased">
-				<ConvexProvider>
+				<ConvexProviderComponent>
 					<NavbarThemeProvider>{children}</NavbarThemeProvider>
-				</ConvexProvider>
+				</ConvexProviderComponent>
 			</body>
 		</html>
 	)
