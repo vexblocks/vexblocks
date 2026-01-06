@@ -18,6 +18,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { authAtom } from "@/lib/auth-atom"
+import { hasAccess, type UserRole } from "@/lib/permissions"
 import { usePrefetchRoute } from "@/lib/prefetch-queries"
 import { usePublicCachedQuery } from "@/lib/use-cached-query"
 
@@ -25,15 +26,16 @@ type NavItem = {
 	href: string
 	icon: React.ComponentType<{ className?: string }>
 	label: string
+	route: "dashboard" | "schemas" | "blocks" | "content" | "media" | "settings"
 }
 
-const navItems: NavItem[] = [
-	{ href: "/", icon: LayoutDashboard, label: "Dashboard" },
-	{ href: "/schemas", icon: FileCode, label: "Schemas" },
-	{ href: "/blocks", icon: Layers, label: "Blocks" },
-	{ href: "/content", icon: FileText, label: "Content" },
-	{ href: "/media", icon: Image, label: "Media" },
-	{ href: "/settings", icon: Settings, label: "Settings" },
+const allNavItems: NavItem[] = [
+	{ href: "/", icon: LayoutDashboard, label: "Dashboard", route: "dashboard" },
+	{ href: "/schemas", icon: FileCode, label: "Schemas", route: "schemas" },
+	{ href: "/blocks", icon: Layers, label: "Blocks", route: "blocks" },
+	{ href: "/content", icon: FileText, label: "Content", route: "content" },
+	{ href: "/media", icon: Image, label: "Media", route: "media" },
+	{ href: "/settings", icon: Settings, label: "Settings", route: "settings" },
 ]
 
 type DashboardSidenavProps = {
@@ -63,6 +65,10 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 	)
 
 	const currentUser = authState.user
+	const userRole = (currentUser?.role as UserRole) || "user"
+
+	// Filter nav items based on user role
+	const navItems = allNavItems.filter((item) => hasAccess(userRole, item.route))
 
 	const handleLogout = async () => {
 		try {

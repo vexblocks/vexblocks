@@ -336,6 +336,15 @@ function AdminLoginContent() {
 						</div>
 					)}
 
+					{error === "insufficient_permissions" && (
+						<div className="mb-4 rounded-lg bg-red-50 p-4">
+							<p className="text-red-600 text-sm">
+								You don't have permission to access the CMS. Please contact an
+								administrator to request access.
+							</p>
+						</div>
+					)}
+
 					{errorMessage && (
 						<div className="mb-4 rounded-lg bg-red-50 p-4">
 							<p className="text-red-600 text-sm">{errorMessage}</p>

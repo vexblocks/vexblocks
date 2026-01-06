@@ -7,7 +7,6 @@ import {
 	AlertTriangle,
 	ArrowLeft,
 	Ban,
-	Check,
 	CheckCircle,
 	Edit,
 	Mail,
@@ -22,6 +21,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
+import { toast } from "sonner"
 import { useCachedQuery } from "@/lib/use-cached-query"
 
 type UserRole = "admin" | "editor" | "developer" | "user"
@@ -33,7 +33,7 @@ type User = {
 	email: string
 	role: UserRole
 	profilePictureUrl?: string
-	isActive: boolean
+	isActive?: boolean
 }
 
 type Invitation = {
@@ -169,7 +169,9 @@ export default function UsersPage() {
 		}
 	}
 
-	const handleResendInvitation = async (invitationId: Id<"userInvitations">) => {
+	const handleResendInvitation = async (
+		invitationId: Id<"cmsUserInvitations">,
+	) => {
 		setLoading(true)
 		setError("")
 
@@ -288,7 +290,9 @@ export default function UsersPage() {
 		return null
 	}
 
-	const pendingInvitations = invitations.filter((inv) => inv.status === "pending")
+	const pendingInvitations = invitations.filter(
+		(inv) => inv.status === "pending",
+	)
 
 	return (
 		<div className="mx-auto max-w-6xl">
@@ -370,7 +374,7 @@ export default function UsersPage() {
 			{/* Pending Invitations */}
 			{pendingInvitations.length > 0 && (
 				<div className="mb-8">
-					<h2 className="mb-4 font-bold text-xl text-grey-900">
+					<h2 className="mb-4 font-bold text-grey-900 text-xl">
 						Pending Invitations ({pendingInvitations.length})
 					</h2>
 					<div className="rounded-lg bg-white shadow-md">
@@ -415,7 +419,8 @@ export default function UsersPage() {
 												</span>
 											</td>
 											<td className="whitespace-nowrap px-6 py-4 text-grey-700 text-sm">
-												{invitation.invitedBy.name || invitation.invitedBy.email}
+												{invitation.invitedBy.name ||
+													invitation.invitedBy.email}
 											</td>
 											<td className="whitespace-nowrap px-6 py-4 text-grey-500 text-sm">
 												{new Date(invitation.invitedAt).toLocaleDateString()}
@@ -424,9 +429,10 @@ export default function UsersPage() {
 												<div className="flex items-center justify-end gap-2">
 													<button
 														type="button"
-														onClick={() =>
+														onClick={() => {
 															handleResendInvitation(invitation._id)
-														}
+															toast.success("Invitation resent")
+														}}
 														disabled={loading}
 														className="rounded p-2 text-grey-500 transition-colors hover:bg-grey-100 hover:text-primary disabled:opacity-50"
 														title="Resend invitation"
@@ -435,7 +441,10 @@ export default function UsersPage() {
 													</button>
 													<button
 														type="button"
-														onClick={() => setDeletingInvitation(invitation)}
+														onClick={() => {
+															setDeletingInvitation(invitation)
+															toast.success("Invitation deleted")
+														}}
 														disabled={loading}
 														className="rounded p-2 text-grey-500 transition-colors hover:bg-red-50 hover:text-error disabled:opacity-50"
 														title="Delete invitation"
@@ -455,7 +464,7 @@ export default function UsersPage() {
 
 			{/* Users Table */}
 			<div className="mb-4">
-				<h2 className="font-bold text-xl text-grey-900">
+				<h2 className="font-bold text-grey-900 text-xl">
 					All Users ({users.length})
 				</h2>
 			</div>
@@ -521,7 +530,7 @@ export default function UsersPage() {
 										</span>
 									</td>
 									<td className="whitespace-nowrap px-6 py-4">
-										{user.isActive ? (
+										{user.isActive !== false ? (
 											<span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 font-medium text-green-700 text-xs">
 												<CheckCircle className="h-3 w-3" />
 												Active
@@ -558,9 +567,7 @@ export default function UsersPage() {
 														? "text-grey-500 hover:bg-yellow-50 hover:text-yellow-600"
 														: "text-grey-500 hover:bg-green-50 hover:text-green-600"
 												}`}
-												title={
-													user.isActive ? "Disable user" : "Enable user"
-												}
+												title={user.isActive ? "Disable user" : "Enable user"}
 											>
 												{user.isActive ? (
 													<Ban className="h-4 w-4" />

@@ -291,7 +291,6 @@ async function installBackendPackage(
 			"convex/auth.ts",
 			"convex/auth.config.ts",
 			"convex/http.ts",
-			"convex/settings.ts",
 			"better-auth",
 			"emails",
 		]

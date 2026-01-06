@@ -245,12 +245,12 @@ function generateInvitationEmail(
 	<title>You've been invited to VexBlocks CMS</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-	<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+	<div style="background: linear-gradient(135deg, #14b3ab 0%, #108e88 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
 		<h1 style="color: white; margin: 0; font-size: 28px;">VexBlocks CMS</h1>
 	</div>
 
 	<div style="background: #fff; padding: 40px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
-		<h2 style="color: #667eea; margin-top: 0;">You've Been Invited!</h2>
+		<h2 style="color: #108e88; margin-top: 0;">You've Been Invited!</h2>
 
 		<p style="font-size: 16px; line-height: 1.8;">
 			${inviterName ? `<strong>${inviterName}</strong>` : "An administrator"} has invited you to join VexBlocks CMS as a <strong>${role}</strong>.
@@ -261,7 +261,7 @@ function generateInvitationEmail(
 		</p>
 
 		<div style="text-align: center; margin: 30px 0;">
-			<a href="${loginUrl}" style="display: inline-block; background: #667eea; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+			<a href="${loginUrl}" style="display: inline-block; background: #108e88; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
 				Sign In to VexBlocks CMS
 			</a>
 		</div>
@@ -269,7 +269,7 @@ function generateInvitationEmail(
 		<p style="font-size: 14px; color: #666; margin-top: 30px;">
 			If the button doesn't work, copy and paste this link into your browser:
 			<br>
-			<a href="${loginUrl}" style="color: #667eea; word-break: break-all;">${loginUrl}</a>
+			<a href="${loginUrl}" style="color: #108e88; word-break: break-all;">${loginUrl}</a>
 		</p>
 
 		<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
