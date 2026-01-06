@@ -22,13 +22,19 @@
 			"!**/package-lock.json",
 			"!**/yarn.lock",
 			"!**/convex/_generated",
-			"!**/types/generated.ts"
+			"!**/types/generated.ts",
+			"!**/next-env.d.ts"
 		]
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
-		"includes": ["**", "!**/convex/_generated", "!**/types/generated.ts"],
+		"includes": [
+			"**",
+			"!**/convex/_generated",
+			"!**/types/generated.ts",
+			"!**/next-env.d.ts"
+		],
 		"rules": {
 			"recommended": true,
 			"correctness": {
