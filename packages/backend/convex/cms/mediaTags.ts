@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "../_generated/server"
-import { getAuthenticatedAdminUser } from "../utils"
+import { getAuthenticatedContentUser } from "../utils"
 
 /**
  * List all media tags
@@ -19,9 +19,9 @@ export const list = query({
 		}),
 	),
 	handler: async (ctx, _args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const tags = await ctx.db.query("cmsMediaTags").order("desc").collect()
@@ -47,9 +47,9 @@ export const listPopular = query({
 		}),
 	),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const tags = await ctx.db
@@ -74,9 +74,9 @@ export const upsert = mutation({
 	},
 	returns: v.id("cmsMediaTags"),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		// Normalize tag name (lowercase, trim)
@@ -107,7 +107,7 @@ export const upsert = mutation({
 			name: normalizedName,
 			color: args.color,
 			usageCount: 0,
-			createdBy: admin._id,
+			createdBy: user._id,
 			createdAt: Date.now(),
 		})
 
@@ -126,9 +126,9 @@ export const update = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const tag = await ctx.db.get(args.id)
@@ -176,9 +176,9 @@ export const remove = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const tag = await ctx.db.get(args.id)

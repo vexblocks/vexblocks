@@ -1,7 +1,7 @@
 import { ConvexError, v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalMutation, mutation, query } from "../_generated/server"
-import { getAuthenticatedAdminUser } from "../utils"
+import { getAuthenticatedContentUser } from "../utils"
 
 /**
  * List all media with optional filters
@@ -29,9 +29,9 @@ export const list = query({
 		}),
 	),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		let mediaItems = await ctx.db.query("cmsMedia").order("desc").collect()
@@ -83,9 +83,9 @@ export const get = query({
 		v.null(),
 	),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		return await ctx.db.get(args.id)
@@ -148,9 +148,9 @@ export const getByCloudflareId = query({
 		v.null(),
 	),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		return await ctx.db
@@ -179,9 +179,9 @@ export const create = mutation({
 	},
 	returns: v.id("cmsMedia"),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		// Normalize tags
@@ -207,7 +207,7 @@ export const create = mutation({
 			caption: args.caption,
 			alt: args.alt,
 			tags: normalizedTags.length > 0 ? normalizedTags : undefined,
-			uploadedBy: admin._id,
+			uploadedBy: user._id,
 			uploadedAt: Date.now(),
 		})
 
@@ -227,9 +227,9 @@ export const update = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const media = await ctx.db.get(args.id)
@@ -302,9 +302,9 @@ export const checkReferences = query({
 		),
 	}),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const allContent = await ctx.db.query("cmsContent").collect()
@@ -365,9 +365,9 @@ export const remove = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const admin = await getAuthenticatedAdminUser(ctx)
-		if (!admin) {
-			throw new ConvexError("Unauthorized: Admin access required")
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
 		}
 
 		const media = await ctx.db.get(args.id)

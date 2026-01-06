@@ -1,13 +1,17 @@
 "use client"
 
-import { Suspense } from "react"
+import { useRouter } from "next/navigation"
+import { Suspense, useEffect } from "react"
 import { DashboardHeader } from "@/components/molecules/dashboard-header"
 import { DashboardSidenav } from "@/components/molecules/dashboard-sidenav"
 import { useSidebar } from "@/contexts/sidebar-context"
+import { useAuth } from "@/lib/auth-atom"
+import { canAccessDashboard } from "@/lib/permissions"
 
 /**
  * Dashboard Layout
  * Uses @lfades/atom for sidebar state - no provider needed
+ * Validates user role and redirects if necessary
  */
 export default function DashboardLayout({
 	children,
@@ -15,6 +19,38 @@ export default function DashboardLayout({
 	children: React.ReactNode
 }) {
 	const { isCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar()
+	const { user, isLoading, isInitialized } = useAuth()
+	const router = useRouter()
+
+	// Check if user has access to dashboard
+	useEffect(() => {
+		if (!isLoading && isInitialized) {
+			if (!user) {
+				// Not logged in, redirect to login
+				router.push("/login")
+			} else if (user.isActive === false) {
+				// Account disabled, redirect to account-disabled page
+				router.push("/account-disabled")
+			} else if (!canAccessDashboard(user.role as any)) {
+				// User role doesn't have CMS access, redirect to login with error
+				router.push("/login?error=insufficient_permissions")
+			}
+		}
+	}, [user, isLoading, isInitialized, router])
+
+	// Show loading state while checking auth
+	if (isLoading || !isInitialized) {
+		return null
+	}
+
+	// Don't render dashboard if user doesn't have access
+	if (
+		!user ||
+		user.isActive === false ||
+		!canAccessDashboard(user.role as any)
+	) {
+		return null
+	}
 
 	return (
 		<div className="flex min-h-screen bg-grey-50">

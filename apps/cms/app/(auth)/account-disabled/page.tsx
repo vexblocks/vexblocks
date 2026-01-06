@@ -28,10 +28,7 @@ export default function AccountDisabledPage() {
 				</div>
 
 				<div className="mt-6 text-center">
-					<Link
-						href="/sign-in"
-						className="text-primary text-sm hover:underline"
-					>
+					<Link href="/login" className="text-primary text-sm hover:underline">
 						Return to Sign In
 					</Link>
 				</div>

@@ -234,7 +234,7 @@ function generateInvitationEmail(
 	inviterName?: string,
 ): string {
 	const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"
-	const loginUrl = `${appUrl}/sign-in`
+	const loginUrl = `${appUrl}/login`
 
 	return `
 <!DOCTYPE html>

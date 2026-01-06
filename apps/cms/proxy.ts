@@ -45,7 +45,9 @@ export default async function proxy(request: NextRequest) {
 			// Check if user role has access to CMS dashboard
 			const userRole = (currentUser.role as UserRole) || "user"
 			if (!canAccessDashboard(userRole) && !isAccountDisabledRoute) {
-				return NextResponse.redirect(new URL(accountDisabledRoute, request.url))
+				return NextResponse.redirect(
+					new URL("/login?error=insufficient_permissions", request.url),
+				)
 			}
 		} catch (error) {
 			console.error("Error validating user permissions:", error)
@@ -54,8 +56,12 @@ export default async function proxy(request: NextRequest) {
 	}
 
 	// If logged in and trying to access sign-in route, redirect to dashboard (root)
+	// UNLESS they're being shown an error message (like insufficient_permissions)
 	if (isSignInRoute && sessionCookie) {
-		return NextResponse.redirect(new URL("/", request.url))
+		const hasErrorParam = request.nextUrl.searchParams.has("error")
+		if (!hasErrorParam) {
+			return NextResponse.redirect(new URL("/", request.url))
+		}
 	}
 
 	return NextResponse.next()

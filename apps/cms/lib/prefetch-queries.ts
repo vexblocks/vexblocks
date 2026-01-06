@@ -23,7 +23,9 @@ const ROUTE_QUERIES: Record<string, Array<{ query: any; args: any }>> = {
 	"/settings/localization": [
 		{ query: api.cms.settings.get, args: { key: "localization" } },
 	],
-	"/settings/preview": [{ query: api.cms.settings.get, args: { key: "preview" } }],
+	"/settings/preview": [
+		{ query: api.cms.settings.get, args: { key: "preview" } },
+	],
 }
 
 /**

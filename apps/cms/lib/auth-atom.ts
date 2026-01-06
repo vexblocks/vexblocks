@@ -1,4 +1,4 @@
-import { atom } from "@lfades/atom"
+import { atom, useAtom } from "@lfades/atom"
 import type { Doc } from "@repo/backend/convex/_generated/dataModel"
 
 export type AuthUser = Doc<"users"> & {
@@ -22,6 +22,15 @@ export const authAtom = atom<AuthState>({
 	isLoading: true,
 	isInitialized: false,
 })
+
+/**
+ * React hook to use auth state
+ * Returns the current auth state (doesn't allow setting)
+ */
+export const useAuth = () => {
+	const [authState] = useAtom(authAtom)
+	return authState
+}
 
 /**
  * Helper to check if user is authenticated

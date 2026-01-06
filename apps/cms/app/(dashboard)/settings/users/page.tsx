@@ -224,15 +224,6 @@ export default function UsersPage() {
 		return null
 	}
 
-	const getStatusBadgeColor = (status: "pending" | "accepted") => {
-		switch (status) {
-			case "pending":
-				return "bg-yellow-100 text-yellow-700"
-			case "accepted":
-				return "bg-green-100 text-green-700"
-		}
-	}
-
 	// Check for unauthorized access
 	if (users === null || stats === null || invitations === null) {
 		return (
@@ -531,7 +522,7 @@ export default function UsersPage() {
 									</td>
 									<td className="whitespace-nowrap px-6 py-4">
 										{user.isActive !== false ? (
-											<span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 font-medium text-green-700 text-xs">
+											<span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 font-medium text-white text-xs">
 												<CheckCircle className="h-3 w-3" />
 												Active
 											</span>

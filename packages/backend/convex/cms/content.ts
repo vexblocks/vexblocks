@@ -1,7 +1,8 @@
 import { ConvexError, v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction, mutation, query } from "../_generated/server"
-import { authComponent } from "../auth"
+
+import { getAuthenticatedContentUser } from "../utils"
 
 // ================================
 // HELPERS
@@ -102,17 +103,8 @@ export const listBySchema = query({
 	},
 	returns: v.union(v.array(v.any()), v.null()),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
-			return null
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
 			return null
 		}
 
@@ -141,17 +133,8 @@ export const listAll = query({
 	args: {},
 	returns: v.union(v.array(v.any()), v.null()),
 	handler: async (ctx) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
-			return null
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
 			return null
 		}
 
@@ -164,23 +147,14 @@ export const listAll = query({
 })
 
 /**
- * Get content by ID (admin only)
+ * Get content by ID
  */
 export const get = query({
 	args: { id: v.id("cmsContent") },
 	returns: v.union(v.any(), v.null()),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
-			return null
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
 			return null
 		}
 
@@ -804,18 +778,9 @@ export const create = mutation({
 	},
 	returns: v.id("cmsContent"),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
 			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
 		}
 
 		// Validate schema exists
@@ -862,8 +827,8 @@ export const create = mutation({
 			status: args.status,
 			data: args.data,
 			seo: args.seo,
-			createdBy: dbUser._id,
-			updatedBy: dbUser._id,
+			createdBy: user._id,
+			updatedBy: user._id,
 			publishedAt: args.status === "published" ? now : undefined,
 			updatedAt: now,
 		})
@@ -906,18 +871,9 @@ export const update = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
 			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
 		}
 
 		const content = await ctx.db.get(args.id)
@@ -974,7 +930,7 @@ export const update = mutation({
 			...(args.status && { status: args.status }),
 			...(args.data && { data: args.data }),
 			...(args.seo !== undefined && { seo: args.seo }),
-			updatedBy: dbUser._id,
+			updatedBy: user._id,
 			updatedAt: now,
 			...(isPublishing && { publishedAt: now }),
 		})
@@ -1006,18 +962,9 @@ export const remove = mutation({
 	args: { id: v.id("cmsContent") },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
 			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
 		}
 
 		const content = await ctx.db.get(args.id)
@@ -1063,18 +1010,9 @@ export const duplicate = mutation({
 	args: { id: v.id("cmsContent") },
 	returns: v.id("cmsContent"),
 	handler: async (ctx, args) => {
-		const user = await authComponent.safeGetAuthUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
 			throw new Error("Unauthorized")
-		}
-
-		const dbUser = await ctx.db
-			.query("users")
-			.withIndex("authId", (q) => q.eq("authId", user._id))
-			.unique()
-
-		if (!dbUser || dbUser.role !== "admin") {
-			throw new Error("Unauthorized - Admin access required")
 		}
 
 		const content = await ctx.db.get(args.id)
@@ -1096,8 +1034,8 @@ export const duplicate = mutation({
 			status: "draft",
 			data: content.data,
 			seo: content.seo,
-			createdBy: dbUser._id,
-			updatedBy: dbUser._id,
+			createdBy: user._id,
+			updatedBy: user._id,
 			updatedAt: now,
 		})
 	},
