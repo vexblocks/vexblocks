@@ -1,7 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { Suspense, useEffect } from "react"
+import { Suspense } from "react"
 import { DashboardHeader } from "@/components/molecules/dashboard-header"
 import { DashboardSidenav } from "@/components/molecules/dashboard-sidenav"
 import { useSidebar } from "@/contexts/sidebar-context"
@@ -20,23 +19,9 @@ export default function DashboardLayout({
 }) {
 	const { isCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar()
 	const { user, isLoading, isInitialized } = useAuth()
-	const router = useRouter()
 
-	// Check if user has access to dashboard
-	useEffect(() => {
-		if (!isLoading && isInitialized) {
-			if (!user) {
-				// Not logged in, redirect to login
-				router.push("/login")
-			} else if (user.isActive === false) {
-				// Account disabled, redirect to account-disabled page
-				router.push("/account-disabled")
-			} else if (!canAccessDashboard(user.role as any)) {
-				// User role doesn't have CMS access, redirect to login with error
-				router.push("/login?error=insufficient_permissions")
-			}
-		}
-	}, [user, isLoading, isInitialized, router])
+	// Note: Auth redirects are handled by middleware (proxy.ts)
+	// This layout only needs to validate that user has access and show loading state
 
 	// Show loading state while checking auth
 	if (isLoading || !isInitialized) {

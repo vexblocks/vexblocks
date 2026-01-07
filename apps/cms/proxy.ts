@@ -55,12 +55,25 @@ export default async function proxy(request: NextRequest) {
 		}
 	}
 
-	// If logged in and trying to access sign-in route, redirect to dashboard (root)
-	// UNLESS they're being shown an error message (like insufficient_permissions)
+	// If logged in and trying to access sign-in route, check if they have valid permissions
 	if (isSignInRoute && sessionCookie) {
-		const hasErrorParam = request.nextUrl.searchParams.has("error")
-		if (!hasErrorParam) {
-			return NextResponse.redirect(new URL("/", request.url))
+		try {
+			const currentUser = await fetchAuthQuery(api.auth.getCurrentUser, {})
+
+			if (currentUser) {
+				// Check if user has valid dashboard access
+				const userRole = (currentUser.role as UserRole) || "user"
+				const hasAccess = canAccessDashboard(userRole) && currentUser.isActive !== false
+
+				// Only redirect to dashboard if user actually has access
+				if (hasAccess) {
+					return NextResponse.redirect(new URL("/", request.url))
+				}
+				// If no access, allow them to stay on login page to see error/logout
+			}
+		} catch (error) {
+			console.error("Error checking user permissions on login route:", error)
+			// On error, allow access to login page
 		}
 	}
 
