@@ -279,21 +279,8 @@ async function installBackendPackage(
 	if (hasSchema) {
 		spinner.text = "Detected existing Convex schema, merging CMS tables..."
 
-		// Create backup of existing schema
-		const backupPath = `${existingSchemaPath}.backup-${Date.now()}`
-		await fs.copy(existingSchemaPath, backupPath)
-		logger.info(`Backed up existing schema to ${path.basename(backupPath)}`)
-
 		// Download only the CMS-specific files
-		const cmsFiles = [
-			"convex/cms",
-			"convex/auth.ts",
-			"convex/auth.config.ts",
-			"convex/http.ts",
-			"better-auth",
-			"emails",
-			"vexblocks.config.ts",
-		]
+		const cmsFiles = ["convex/cms", "convex/auth.ts", "convex/auth.config.ts", "convex/http.ts", "better-auth", "emails"]
 
 		for (const file of cmsFiles) {
 			const fullSourcePath = `${sourcePath}/${file}`

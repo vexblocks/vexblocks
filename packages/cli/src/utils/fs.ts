@@ -106,20 +106,6 @@ export async function copyDirectory(
 }
 
 /**
- * Create a backup of a file or directory
- */
-export async function createBackup(filePath: string): Promise<string> {
-	const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
-	const backupPath = `${filePath}.backup-${timestamp}`
-
-	if (await fs.pathExists(filePath)) {
-		await fs.copy(filePath, backupPath)
-	}
-
-	return backupPath
-}
-
-/**
  * Read JSON file safely
  */
 export async function readJsonSafe<T>(filePath: string): Promise<T | null> {

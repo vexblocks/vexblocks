@@ -230,7 +230,6 @@ export default function CLIAddPage() {
 					<InlineCode>schema.ts</InlineCode> file, the CLI will:
 				</p>
 				<ul>
-					<li>Create a backup of your existing schema</li>
 					<li>
 						Download only CMS-specific files (
 						<InlineCode>convex/cms</InlineCode>,{" "}
@@ -272,7 +271,7 @@ export default defineSchema({
 				</p>
 				<ul>
 					<li>
-						<InlineCode>packages/backend/vexblocks.config.ts</InlineCode> - Your
+						<InlineCode>packages/backend/convex/cms/vexblocks.config.ts</InlineCode> - Your
 						CMS configuration
 					</li>
 					<li>
@@ -305,7 +304,7 @@ export default defineSchema({
 					</li>
 					<li>
 						Configure VexBlocks settings in{" "}
-						<InlineCode>packages/backend/vexblocks.config.ts</InlineCode> (set
+						<InlineCode>packages/backend/convex/cms/vexblocks.config.ts</InlineCode> (set
 						your app name and email settings)
 					</li>
 					<li>

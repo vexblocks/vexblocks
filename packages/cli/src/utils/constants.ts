@@ -31,7 +31,7 @@ export const MANAGED_PACKAGES = ["cms", "shared", "types"] as const
 
 // Files that should NEVER be overwritten (user configuration)
 export const PROTECTED_FILES = [
-	"packages/backend/vexblocks.config.ts",
+	"packages/backend/convex/cms/vexblocks.config.ts",
 	"packages/backend/.env",
 	"packages/backend/.env.local",
 	"packages/cms-shared/src/types/generated.ts",

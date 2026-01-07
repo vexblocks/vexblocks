@@ -113,7 +113,7 @@ export default function InstallationPage() {
 					<h3>Configure VexBlocks</h3>
 					<p>
 						Update your application settings in{" "}
-						<code>packages/backend/vexblocks.config.ts</code>:
+						<code>packages/backend/convex/cms/vexblocks.config.ts</code>:
 					</p>
 					<pre className="overflow-x-auto rounded-lg border bg-zinc-950 p-4 dark:bg-zinc-900">
 						<code className="font-mono text-sm text-white">

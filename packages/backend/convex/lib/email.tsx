@@ -4,7 +4,8 @@ import { components } from "../_generated/api"
 import "../polyfill"
 import type { RunMutationCtx } from "@convex-dev/better-auth/utils"
 import type { DataModel } from "../_generated/dataModel"
-import config from "../../vexblocks.config"
+import config from "../cms/vexblocks.config"
+
 
 export const resend: Resend = new Resend(components.resend, { testMode: false })
 

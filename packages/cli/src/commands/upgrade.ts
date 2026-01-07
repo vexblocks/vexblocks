@@ -4,7 +4,6 @@ import fs from "fs-extra"
 import ora from "ora"
 import pc from "picocolors"
 import { MANAGED_PACKAGES, PACKAGE_NAMES } from "../utils/constants.js"
-import { createBackup } from "../utils/fs.js"
 import {
 	compareVersions,
 	downloadAndExtractPackage,
@@ -189,14 +188,10 @@ async function upgradePackage(
 			return
 		}
 
-		// For managed packages, create backup and replace entirely
+		// For managed packages, replace entirely
 		const isManaged = MANAGED_PACKAGES.includes(pkg as any)
 
 		if (isManaged || options.force) {
-			// Create backup
-			const backupPath = await createBackup(targetPath)
-			spinner.text = `Created backup at ${path.basename(backupPath)}`
-
 			// Remove existing
 			await fs.remove(targetPath)
 
@@ -214,11 +209,6 @@ async function upgradePackage(
 			for (const file of cmsFiles) {
 				const targetFilePath = path.join(targetPath, file)
 				const sourceFilePath = `packages/backend/${file}`
-
-				// Create backup
-				if (await fs.pathExists(targetFilePath)) {
-					await createBackup(targetFilePath)
-				}
 
 				// Download new version
 				try {

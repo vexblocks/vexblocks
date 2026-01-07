@@ -168,11 +168,10 @@ If you already have a Convex project with a `schema.ts`:
 
 1. Run `npx @vexblocks/cli add backend`
 2. The CLI will:
-   - Create a backup of your schema
    - Add `schema.cms.ts` with CMS tables
-   - Add instructions for merging
+   - Automatically merge CMS tables into your schema
 
-3. Update your `schema.ts`:
+3. Your `schema.ts` will be updated to include:
 
 ```typescript
 import { defineSchema } from "convex/server"

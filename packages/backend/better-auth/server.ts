@@ -10,11 +10,11 @@ import type { DataModel } from "../convex/_generated/dataModel"
 import type { ActionCtx } from "../convex/_generated/server"
 import { authComponent } from "../convex/auth"
 import authConfig from "../convex/auth.config"
+import config from "../convex/cms/vexblocks.config"
 import { sendEmail } from "../convex/lib/email"
 import { changeEmailTemplate } from "../emails/change-email-template"
 import { deleteAccountTemplate } from "../emails/delete-account-template"
 import { getOTPEmailTemplate } from "../emails/otp-email-template"
-import config from "../vexblocks.config"
 
 // Union type for all Convex contexts
 type GenericCtx =
