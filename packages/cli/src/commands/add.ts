@@ -292,6 +292,7 @@ async function installBackendPackage(
 			"convex/http.ts",
 			"better-auth",
 			"emails",
+			"vexblocks.config.ts",
 		]
 
 		for (const file of cmsFiles) {
@@ -411,7 +412,7 @@ async function mergeSchemaFile(
 	let newContent = content
 
 	// 1. Add import if not present
-	const importStatement = 'import { cmsSchemaExports } from "./schema.cms"'
+	const importStatement = 'import { cmsSchemaExports } from "./cms/schema.cms"'
 	const hasImport = content.includes(importStatement)
 
 	if (!hasImport) {

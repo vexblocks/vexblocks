@@ -304,6 +304,11 @@ export default defineSchema({
 						Install dependencies: <InlineCode>pnpm install</InlineCode>
 					</li>
 					<li>
+						Configure VexBlocks settings in{" "}
+						<InlineCode>packages/backend/vexblocks.config.ts</InlineCode> (set
+						your app name and email settings)
+					</li>
+					<li>
 						Configure environment variables in <InlineCode>.env</InlineCode>
 					</li>
 					<li>

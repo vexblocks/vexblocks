@@ -110,6 +110,29 @@ export default function InstallationPage() {
 				</Step>
 
 				<Step>
+					<h3>Configure VexBlocks</h3>
+					<p>
+						Update your application settings in{" "}
+						<code>packages/backend/vexblocks.config.ts</code>:
+					</p>
+					<pre className="overflow-x-auto rounded-lg border bg-zinc-950 p-4 dark:bg-zinc-900">
+						<code className="font-mono text-sm text-white">
+							{`const config: VexBlocksConfig = {
+  appName: "My App",
+  email: {
+    fromName: "My App",
+    fromAddress: "noreply@yourdomain.com",
+  },
+}`}
+						</code>
+					</pre>
+					<p>
+						These settings control your application name (used in email subjects)
+						and the sender information for transactional emails.
+					</p>
+				</Step>
+
+				<Step>
 					<h3>Set Up Convex</h3>
 					<p>Create a Convex account and initialize your backend:</p>
 					<pre className="overflow-x-auto rounded-lg border bg-zinc-950 p-4 dark:bg-zinc-900">
