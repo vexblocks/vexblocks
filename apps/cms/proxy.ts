@@ -63,7 +63,8 @@ export default async function proxy(request: NextRequest) {
 			if (currentUser) {
 				// Check if user has valid dashboard access
 				const userRole = (currentUser.role as UserRole) || "user"
-				const hasAccess = canAccessDashboard(userRole) && currentUser.isActive !== false
+				const hasAccess =
+					canAccessDashboard(userRole) && currentUser.isActive !== false
 
 				// Only redirect to dashboard if user actually has access
 				if (hasAccess) {
