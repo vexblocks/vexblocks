@@ -31,10 +31,10 @@ import { v } from "convex/values"
 // =============================================================================
 
 /**
- * Users table for CMS authentication and authorization.
- * If you already have a users table, you may need to merge fields.
+ * Required fields for VexBlocks CMS users table.
+ * Use this to extend your existing users table or create a new one.
  */
-export const users = defineTable({
+export const cmsUserFields = {
 	name: v.optional(v.string()),
 	email: v.string(),
 	authId: v.string(),
@@ -46,7 +46,34 @@ export const users = defineTable({
 	),
 	profilePictureUrl: v.optional(v.string()),
 	isActive: v.optional(v.boolean()), // Whether the user account is active
-})
+}
+
+/**
+ * Default users table for CMS authentication and authorization.
+ *
+ * ⚠️ IMPORTANT: If you already have a users table in your schema,
+ * DO NOT include this in cmsSchemaExports. Instead, extend your
+ * existing users table with cmsUserFields.
+ *
+ * @example With existing users table:
+ * ```ts
+ * import { cmsUserFields } from "./cms/schema.cms"
+ *
+ * const users = defineTable({
+ *   ...cmsUserFields,
+ *   // Your custom fields
+ *   companyId: v.id("companies"),
+ *   preferences: v.object({ ... }),
+ * })
+ *   .index("email", ["email"])
+ *   .index("authId", ["authId"])
+ *   .index("by_role", ["role"])
+ *   .index("by_active", ["isActive"])
+ *   // Your custom indexes
+ *   .index("by_company", ["companyId"])
+ * ```
+ */
+export const cmsUsersTable = defineTable(cmsUserFields)
 	.index("email", ["email"])
 	.index("authId", ["authId"])
 	.index("by_role", ["role"])
@@ -297,10 +324,36 @@ export const cmsSettings = defineTable({
  * All CMS schema tables exported as an object.
  * Use this to spread into your defineSchema call.
  *
+ * ⚠️ IMPORTANT: This includes a default users table (cmsUsersTable).
+ * If you already have a users table in your schema, you have two options:
+ *
+ * Option 1: Use cmsTablesWithoutUsers and define your own users table
+ * @example
+ * ```ts
+ * import { defineSchema, defineTable } from "convex/server"
+ * import { cmsTablesWithoutUsers, cmsUserFields } from "./cms/schema.cms"
+ *
+ * const users = defineTable({
+ *   ...cmsUserFields,
+ *   // Your custom fields
+ *   companyId: v.id("companies"),
+ * })
+ *   .index("email", ["email"])
+ *   .index("authId", ["authId"])
+ *   .index("by_role", ["role"])
+ *   .index("by_active", ["isActive"])
+ *
+ * export default defineSchema({
+ *   users,
+ *   ...cmsTablesWithoutUsers,
+ * })
+ * ```
+ *
+ * Option 2: Use the default CMS users table (if you don't have one)
  * @example
  * ```ts
  * import { defineSchema } from "convex/server"
- * import { cmsSchemaExports } from "./schema.cms"
+ * import { cmsSchemaExports } from "./cms/schema.cms"
  *
  * export default defineSchema({
  *   myTable: defineTable({ ... }),
@@ -309,7 +362,21 @@ export const cmsSettings = defineTable({
  * ```
  */
 export const cmsSchemaExports = {
-	users,
+	users: cmsUsersTable,
+	cmsUserInvitations,
+	cmsSchemas,
+	cmsContent,
+	cmsMedia,
+	cmsMediaTags,
+	cmsBlocks,
+	cmsSettings,
+}
+
+/**
+ * CMS tables WITHOUT the users table.
+ * Use this when you already have a users table and want to extend it.
+ */
+export const cmsTablesWithoutUsers = {
 	cmsUserInvitations,
 	cmsSchemas,
 	cmsContent,

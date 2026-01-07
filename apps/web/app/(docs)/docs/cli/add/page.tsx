@@ -241,19 +241,45 @@ export default function CLIAddPage() {
 					</li>
 				</ul>
 
+				<Callout type="info">
+					<p>
+						<strong>Already have a users table?</strong> The CMS includes a
+						users table. If you already have one, use{" "}
+						<InlineCode>cmsTablesWithoutUsers</InlineCode> and extend your
+						existing users table with <InlineCode>cmsUserFields</InlineCode>.
+					</p>
+				</Callout>
+
 				<CodeBlock>
-					{`// Your existing schema.ts
+					{`// Option 1: No existing users table
 import { defineSchema } from "convex/server"
-import { cmsSchemaExports } from "./schema.cms"
+import { cmsSchemaExports } from "./cms/schema.cms"
 
 export default defineSchema({
-  // VexBlocks CMS tables
+  // VexBlocks CMS tables (includes users)
   ...cmsSchemaExports,
 
   // Your existing tables
-  users: defineTable({
-    // ...
-  }),
+  products: defineTable({ ... }),
+})
+
+// Option 2: With existing users table
+import { defineSchema, defineTable } from "convex/server"
+import { cmsTablesWithoutUsers, cmsUserFields } from "./cms/schema.cms"
+
+const users = defineTable({
+  ...cmsUserFields,  // Required CMS fields
+  companyId: v.id("companies"),  // Your custom fields
+})
+  .index("email", ["email"])
+  .index("authId", ["authId"])
+  .index("by_role", ["role"])
+  .index("by_active", ["isActive"])
+
+export default defineSchema({
+  users,
+  ...cmsTablesWithoutUsers,
+  products: defineTable({ ... }),
 })`}
 				</CodeBlock>
 
