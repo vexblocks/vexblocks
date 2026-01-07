@@ -2,7 +2,7 @@
 
 import { ConvexError, v } from "convex/values"
 import { internalAction } from "../_generated/server"
-import { CLOUDFLARE_API } from "../constants"
+import { CLOUDFLARE_API } from "./constants"
 
 /**
  * Internal action to delete image from Cloudflare

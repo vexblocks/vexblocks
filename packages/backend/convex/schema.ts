@@ -1,5 +1,5 @@
 import { defineSchema } from "convex/server"
-import { cmsSchemaExports } from "./schema.cms"
+import { cmsSchemaExports } from "./cms/schema.cms"
 
 const schema = defineSchema({
 	// VexBlocks CMS tables

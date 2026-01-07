@@ -209,7 +209,7 @@ async function upgradePackage(
 			// For non-managed packages (backend), only update CMS-specific files
 			spinner.text = `Upgrading CMS files in ${PACKAGE_NAMES[pkg]}...`
 
-			const cmsFiles = ["convex/cms", "convex/schema.cms.ts"]
+			const cmsFiles = ["convex/cms"]
 
 			for (const file of cmsFiles) {
 				const targetFilePath = path.join(targetPath, file)

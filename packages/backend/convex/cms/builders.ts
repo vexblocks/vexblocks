@@ -3,7 +3,7 @@ import {
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions"
-import { mutation, query } from "./_generated/server"
+import { mutation, query } from "../_generated/server"
 import { getAuthenticatedUser } from "./utils"
 
 // Base authenticated query builder

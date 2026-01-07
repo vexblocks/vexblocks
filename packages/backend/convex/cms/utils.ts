@@ -1,6 +1,6 @@
 import { ConvexError } from "convex/values"
-import type { QueryCtx } from "./_generated/server"
-import { authComponent } from "./auth"
+import type { QueryCtx } from "../_generated/server"
+import { authComponent } from "../auth"
 
 export const getAuthenticatedUser = async (ctx: QueryCtx) => {
 	const authUser = await authComponent.safeGetAuthUser(ctx)

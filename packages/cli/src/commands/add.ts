@@ -287,7 +287,6 @@ async function installBackendPackage(
 		// Download only the CMS-specific files
 		const cmsFiles = [
 			"convex/cms",
-			"convex/schema.cms.ts",
 			"convex/auth.ts",
 			"convex/auth.config.ts",
 			"convex/http.ts",

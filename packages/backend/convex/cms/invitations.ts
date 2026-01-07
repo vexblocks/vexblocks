@@ -1,7 +1,7 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "../_generated/server"
 import { sendEmail } from "../lib/email"
-import { getAuthenticatedAdminUser } from "../utils"
+import { getAuthenticatedAdminUser } from "./utils"
 
 /**
  * List all invitations (admin only)

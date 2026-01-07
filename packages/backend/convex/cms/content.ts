@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction, mutation, query } from "../_generated/server"
 
-import { getAuthenticatedContentUser } from "../utils"
+import { getAuthenticatedContentUser } from "./utils"
 
 // ================================
 // HELPERS

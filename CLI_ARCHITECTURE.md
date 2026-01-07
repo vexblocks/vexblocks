@@ -64,7 +64,7 @@ npx @vexblocks/cli add all           # Adds everything
    - **No**: Creates full backend structure
 3. Copies:
    - `convex/cms/` folder (all CMS functions)
-   - `convex/schema.cms.ts` (CMS-only schema)
+   - `convex/cms/schema.cms.ts` (CMS-only schema)
    - `convex/auth.ts` (Better Auth setup)
    - `better-auth/` folder
    - `emails/` folder
@@ -138,8 +138,8 @@ vexblocks/
 │   │   │   │   ├── mediaTags.ts
 │   │   │   │   ├── schemas.ts
 │   │   │   │   └── webhooks.ts
+│   │   │   │   └── schema.cms.ts   # CMS-only schema (distributed)
 │   │   │   ├── schema.ts       # Full schema (not distributed)
-│   │   │   ├── schema.cms.ts   # CMS-only schema (distributed)
 │   │   │   ├── auth.ts
 │   │   │   ├── auth.config.ts
 │   │   │   └── http.ts

@@ -9,8 +9,9 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as builders from "../builders.js";
 import type * as cms_blocks from "../cms/blocks.js";
+import type * as cms_builders from "../cms/builders.js";
+import type * as cms_constants from "../cms/constants.js";
 import type * as cms_content from "../cms/content.js";
 import type * as cms_invitations from "../cms/invitations.js";
 import type * as cms_media from "../cms/media.js";
@@ -20,11 +21,10 @@ import type * as cms_migrations from "../cms/migrations.js";
 import type * as cms_schemas from "../cms/schemas.js";
 import type * as cms_settings from "../cms/settings.js";
 import type * as cms_users from "../cms/users.js";
+import type * as cms_utils from "../cms/utils.js";
 import type * as cms_webhooks from "../cms/webhooks.js";
-import type * as constants from "../constants.js";
 import type * as http from "../http.js";
 import type * as lib_email from "../lib/email.js";
-import type * as utils from "../utils.js";
 
 import type {
   ApiFromModules,
@@ -34,8 +34,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  builders: typeof builders;
   "cms/blocks": typeof cms_blocks;
+  "cms/builders": typeof cms_builders;
+  "cms/constants": typeof cms_constants;
   "cms/content": typeof cms_content;
   "cms/invitations": typeof cms_invitations;
   "cms/media": typeof cms_media;
@@ -45,11 +46,10 @@ declare const fullApi: ApiFromModules<{
   "cms/schemas": typeof cms_schemas;
   "cms/settings": typeof cms_settings;
   "cms/users": typeof cms_users;
+  "cms/utils": typeof cms_utils;
   "cms/webhooks": typeof cms_webhooks;
-  constants: typeof constants;
   http: typeof http;
   "lib/email": typeof lib_email;
-  utils: typeof utils;
 }>;
 
 /**
