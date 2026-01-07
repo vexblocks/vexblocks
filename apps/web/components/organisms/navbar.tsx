@@ -19,24 +19,24 @@ import {
 
 const docsItems = [
 	{
-		title: "Getting Started",
-		href: "/docs/getting-started",
-		description: "Quick start guide and installation",
+		title: "Introduction",
+		href: "/docs",
+		description: "Welcome to VexBlocks CMS",
 	},
 	{
-		title: "Content Management",
-		href: "/docs/content",
-		description: "Create and manage your content",
+		title: "Installation",
+		href: "/docs/installation",
+		description: "Quick start guide and setup",
 	},
 	{
-		title: "Schemas",
-		href: "/docs/schemas",
+		title: "CLI Reference",
+		href: "/docs/cli",
+		description: "Command-line interface tools",
+	},
+	{
+		title: "Creating Schemas",
+		href: "/docs/guides/creating-schemas",
 		description: "Build custom content structures",
-	},
-	{
-		title: "API Reference",
-		href: "/docs/api",
-		description: "Complete API documentation",
 	},
 ]
 

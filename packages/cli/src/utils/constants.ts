@@ -34,6 +34,7 @@ export const PROTECTED_FILES = [
 	"packages/backend/vexblocks.config.ts",
 	"packages/backend/.env",
 	"packages/backend/.env.local",
+	"packages/cms-shared/src/types/generated.ts",
 ] as const
 
 // Dependencies between packages

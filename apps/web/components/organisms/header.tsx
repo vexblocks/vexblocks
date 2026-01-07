@@ -19,6 +19,12 @@ export function Header() {
 							Home
 						</Link>
 						<Link
+							href="/docs"
+							className="font-medium text-sm transition-colors hover:text-teal-700"
+						>
+							Docs
+						</Link>
+						<Link
 							href="/blog"
 							className="font-medium text-sm transition-colors hover:text-teal-700"
 						>
