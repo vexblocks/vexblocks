@@ -409,8 +409,11 @@ async function mergeSchemaFile(
 ): Promise<void> {
 	const content = await fs.readFile(schemaPath, "utf-8")
 
-	// Check if already merged
-	if (content.includes('from "./schema.cms"')) {
+	// Check if already merged - look for any import from schema.cms
+	if (
+		content.includes('from "./cms/schema.cms"') ||
+		content.includes('from "./schema.cms"')
+	) {
 		spinner.text = "CMS schema already integrated"
 		return
 	}
@@ -442,11 +445,13 @@ async function mergeSchemaFile(
 	}
 
 	// 2. Add ...cmsSchemaExports to defineSchema if not present
-	const hasSpread = /defineSchema\s*\(\s*\{[^}]*\.\.\.cmsSchemaExports/s.test(
-		newContent,
-	)
+	// Check for any CMS-related spreads (cmsSchemaExports, cmsTablesWithoutUsers, etc.)
+	const hasCmsSpread =
+		/defineSchema\s*\(\s*\{[^}]*\.\.\.(cmsSchemaExports|cmsTablesWithoutUsers|cmsTables)/s.test(
+			newContent,
+		)
 
-	if (!hasSpread) {
+	if (!hasCmsSpread) {
 		// Find defineSchema({ and add the spread
 		const defineSchemaRegex = /defineSchema\s*\(\s*\{(\s*)/
 
