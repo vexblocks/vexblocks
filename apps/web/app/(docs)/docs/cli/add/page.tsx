@@ -288,6 +288,10 @@ export default defineSchema({
 						<InlineCode>packages/cms-shared/src/types/generated.ts</InlineCode>{" "}
 						- Your generated types
 					</li>
+					<li>
+						<InlineCode>packages/backend/emails/*.ts</InlineCode> - Your
+						customized email templates
+					</li>
 				</ul>
 
 				<Callout type="warning">

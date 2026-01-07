@@ -35,6 +35,10 @@ export const PROTECTED_FILES = [
 	"packages/backend/.env",
 	"packages/backend/.env.local",
 	"packages/cms-shared/src/types/generated.ts",
+	"packages/backend/emails/change-email-template.ts",
+	"packages/backend/emails/otp-email-template.ts",
+	"packages/backend/emails/delete-account-template.ts",
+	"packages/backend/emails/invite-email-template.ts",
 ] as const
 
 // Dependencies between packages
