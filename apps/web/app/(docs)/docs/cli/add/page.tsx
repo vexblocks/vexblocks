@@ -294,6 +294,31 @@ export default defineSchema({
 					</li>
 				</ul>
 
+				<h2>Smart package.json Merging</h2>
+				<p>
+					The CLI intelligently merges the backend{" "}
+					<InlineCode>package.json</InlineCode>:
+				</p>
+				<ul>
+					<li>
+						<strong>Preserves</strong> your package name and version
+					</li>
+					<li>
+						<strong>Adds</strong> required VexBlocks dependencies
+					</li>
+					<li>
+						<strong>Updates</strong> VexBlocks scripts (dev, build, etc.)
+					</li>
+					<li>
+						<strong>Keeps</strong> your custom fields and configurations
+					</li>
+				</ul>
+				<p>
+					This means you can have a backend named{" "}
+					<InlineCode>my-app-backend</InlineCode> and the CLI will preserve that
+					name while adding the necessary VexBlocks dependencies.
+				</p>
+
 				<Callout type="warning">
 					<p>
 						<strong>Important:</strong> Your custom schema types in{" "}

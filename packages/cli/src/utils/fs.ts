@@ -145,6 +145,66 @@ export async function mergePackageJsonDependencies(
 }
 
 /**
+ * Intelligently merge package.json files
+ * Preserves user's name, version, and other custom fields
+ * Only merges dependencies, devDependencies, and scripts
+ */
+export async function mergePackageJson(
+	targetPath: string,
+	sourcePackageJson: any,
+): Promise<void> {
+	let existingPackageJson: any = {}
+
+	// Read existing package.json if it exists
+	if (await fs.pathExists(targetPath)) {
+		existingPackageJson = await fs.readJson(targetPath)
+	}
+
+	// Merge the package.json intelligently
+	const mergedPackageJson = {
+		// Preserve user's name and version if they exist
+		name: existingPackageJson.name || sourcePackageJson.name,
+		version: existingPackageJson.version || sourcePackageJson.version,
+		private: sourcePackageJson.private,
+
+		// Merge scripts (source scripts take precedence for VexBlocks-specific scripts)
+		scripts: {
+			...existingPackageJson.scripts,
+			...sourcePackageJson.scripts,
+		},
+
+		// Merge dependencies (source versions take precedence)
+		dependencies: {
+			...existingPackageJson.dependencies,
+			...sourcePackageJson.dependencies,
+		},
+
+		// Merge devDependencies (source versions take precedence)
+		devDependencies: {
+			...existingPackageJson.devDependencies,
+			...sourcePackageJson.devDependencies,
+		},
+
+		// Preserve any other custom fields from existing package.json
+		...Object.fromEntries(
+			Object.entries(existingPackageJson).filter(
+				([key]) =>
+					![
+						"name",
+						"version",
+						"private",
+						"scripts",
+						"dependencies",
+						"devDependencies",
+					].includes(key),
+			),
+		),
+	}
+
+	await fs.writeJson(targetPath, mergedPackageJson, { spaces: 2 })
+}
+
+/**
  * Check if workspaces are configured correctly
  */
 export async function checkWorkspaces(

@@ -34,6 +34,7 @@ export const PROTECTED_FILES = [
 	"packages/backend/convex/cms/vexblocks.config.ts",
 	"packages/backend/.env",
 	"packages/backend/.env.local",
+	"packages/backend/package.json",
 	"packages/cms-shared/src/types/generated.ts",
 	"packages/backend/emails/change-email-template.ts",
 	"packages/backend/emails/otp-email-template.ts",

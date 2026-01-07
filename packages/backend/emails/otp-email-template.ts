@@ -13,7 +13,7 @@ export const getOTPEmailTemplate = (otp: string) => `
               <td>
                 <img 
                   alt="Vexblocks" 
-                  src="https://vexblocks-admin.vercel.app/_next/image?url=logotype.png&w=828&q=75" 
+                  src="https://vexblocks.com/_next/image?url=logotype.png&w=828&q=75" 
                   width="80" 
                   height="80" 
                   style="display:block;outline:none;border:none;text-decoration:none;margin:80px auto 20px"

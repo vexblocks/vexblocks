@@ -11,7 +11,7 @@ import {
 	PACKAGE_PATHS,
 	REQUIRED_ENV_VARS,
 } from "../utils/constants.js"
-import { isTurborepoProject } from "../utils/fs.js"
+import { isTurborepoProject, mergePackageJson } from "../utils/fs.js"
 import {
 	downloadAndExtractPackage,
 	fetchFile,
@@ -317,6 +317,20 @@ async function installBackendPackage(
 		await downloadAndExtractPackage(sourcePath, targetPath, (file) => {
 			spinner.text = `Installing backend... ${pc.dim(file)}`
 		})
+	}
+
+	// Merge package.json intelligently (both fresh and existing installations)
+	spinner.text = "Merging package.json..."
+	try {
+		const sourcePackageJsonContent = await fetchFile(
+			`${sourcePath}/package.json`,
+		)
+		const sourcePackageJson = JSON.parse(sourcePackageJsonContent)
+		const targetPackageJsonPath = path.join(targetPath, "package.json")
+
+		await mergePackageJson(targetPackageJsonPath, sourcePackageJson)
+	} catch {
+		spinner.warn("Could not merge package.json, skipping")
 	}
 }
 

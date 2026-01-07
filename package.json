@@ -12,7 +12,7 @@
 		"dev": "pnpm generate-types && turbo run dev",
 		"dev:web": "turbo run dev --filter=web",
 		"dev:admin": "turbo run dev --filter=admin",
-		"dev:cms": "turbo run dev --filter=vexblocks-admin",
+		"dev:cms": "turbo run dev --filter=vexblocks-cms",
 		"build": "turbo run build",
 		"build:web": "turbo run build --filter=web",
 		"build:admin": "turbo run build --filter=admin",
