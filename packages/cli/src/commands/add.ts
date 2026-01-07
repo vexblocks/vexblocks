@@ -280,7 +280,14 @@ async function installBackendPackage(
 		spinner.text = "Detected existing Convex schema, merging CMS tables..."
 
 		// Download only the CMS-specific files
-		const cmsFiles = ["convex/cms", "convex/auth.ts", "convex/auth.config.ts", "convex/http.ts", "better-auth", "emails"]
+		const cmsFiles = [
+			"convex/cms",
+			"convex/auth.ts",
+			"convex/auth.config.ts",
+			"convex/http.ts",
+			"better-auth",
+			"emails",
+		]
 
 		for (const file of cmsFiles) {
 			const fullSourcePath = `${sourcePath}/${file}`

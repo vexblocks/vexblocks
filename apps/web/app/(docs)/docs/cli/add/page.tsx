@@ -271,8 +271,10 @@ export default defineSchema({
 				</p>
 				<ul>
 					<li>
-						<InlineCode>packages/backend/convex/cms/vexblocks.config.ts</InlineCode> - Your
-						CMS configuration
+						<InlineCode>
+							packages/backend/convex/cms/vexblocks.config.ts
+						</InlineCode>{" "}
+						- Your CMS configuration
 					</li>
 					<li>
 						<InlineCode>packages/backend/.env</InlineCode> - Environment
@@ -304,8 +306,10 @@ export default defineSchema({
 					</li>
 					<li>
 						Configure VexBlocks settings in{" "}
-						<InlineCode>packages/backend/convex/cms/vexblocks.config.ts</InlineCode> (set
-						your app name and email settings)
+						<InlineCode>
+							packages/backend/convex/cms/vexblocks.config.ts
+						</InlineCode>{" "}
+						(set your app name and email settings)
 					</li>
 					<li>
 						Configure environment variables in <InlineCode>.env</InlineCode>

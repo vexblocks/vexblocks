@@ -6,7 +6,6 @@ import type { RunMutationCtx } from "@convex-dev/better-auth/utils"
 import type { DataModel } from "../_generated/dataModel"
 import config from "../cms/vexblocks.config"
 
-
 export const resend: Resend = new Resend(components.resend, { testMode: false })
 
 export const sendEmail = async (
