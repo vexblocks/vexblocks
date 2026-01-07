@@ -127,8 +127,8 @@ export default function InstallationPage() {
 						</code>
 					</pre>
 					<p>
-						These settings control your application name (used in email subjects)
-						and the sender information for transactional emails.
+						These settings control your application name (used in email
+						subjects) and the sender information for transactional emails.
 					</p>
 				</Step>
 
