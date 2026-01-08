@@ -24,6 +24,7 @@ import { use, useEffect, useRef, useState } from "react"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
+import { sanitizeData } from "@/lib/sanitize-data"
 import { FieldRenderer } from "../_components/field-renderer"
 import { LivePreviewPanel } from "../_components/live-preview-panel"
 import { LocaleSelector } from "../_components/locale-selector"
@@ -426,16 +427,21 @@ export default function EditContentPage({
 			// Get slug for revalidation
 			const slug = getSlugFromContent()
 
+			// Sanitize all data to remove unusual line terminators
+			const sanitizedData = sanitizeData(contentData)
+			const sanitizedSeoTitle = sanitizeData(seoTitle)
+			const sanitizedSeoDescription = sanitizeData(seoDescription)
+
 			await updateContent({
 				id: id as Id<"cmsContent">,
 				slug,
 				status,
-				data: contentData,
+				data: sanitizedData,
 				seo:
-					seoTitle || seoDescription || seoOgImage
+					sanitizedSeoTitle || sanitizedSeoDescription || seoOgImage
 						? {
-								title: seoTitle || undefined,
-								description: seoDescription || undefined,
+								title: sanitizedSeoTitle || undefined,
+								description: sanitizedSeoDescription || undefined,
 								ogImage: seoOgImage || undefined,
 							}
 						: undefined,
@@ -466,7 +472,7 @@ export default function EditContentPage({
 
 	if (content === undefined || schema === undefined) {
 		return (
-			<div className="flex min-h-[400px] items-center justify-center">
+			<div className="flex min-h-100 items-center justify-center">
 				<div className="text-center">
 					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					<p className="text-grey-500">Loading content...</p>
@@ -918,7 +924,7 @@ export default function EditContentPage({
 
 				{/* Floating Action Buttons */}
 				<div
-					className={`fixed bottom-6 z-10 flex gap-3 ${showPreview ? "left-[96px]" : "right-8"}`}
+					className={`fixed bottom-6 z-10 flex gap-3 ${showPreview ? "left-24" : "right-8"}`}
 				>
 					<Link
 						href="/content"

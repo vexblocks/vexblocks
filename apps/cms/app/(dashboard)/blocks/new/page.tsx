@@ -16,6 +16,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
+import { sanitizeData } from "@/lib/sanitize-data"
 
 type FieldType =
 	| "shortText"
@@ -723,13 +724,20 @@ export default function NewBlockPage() {
 
 			validateFields(fields)
 
+			// Sanitize all data to remove unusual line terminators
+			const sanitizedName = sanitizeData(name)
+			const sanitizedDisplayName = sanitizeData(displayName)
+			const sanitizedDescription = sanitizeData(description)
+			const sanitizedCategory = sanitizeData(category)
+			const sanitizedFields = sanitizeData(mapFieldsForSave(fields))
+
 			// Create block with nested fields
 			await createBlock({
-				name,
-				displayName,
-				description: description || undefined,
-				fields: mapFieldsForSave(fields),
-				category: category || undefined,
+				name: sanitizedName,
+				displayName: sanitizedDisplayName,
+				description: sanitizedDescription || undefined,
+				fields: sanitizedFields,
+				category: sanitizedCategory || undefined,
 				previewImage: previewImage || undefined,
 			})
 

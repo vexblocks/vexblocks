@@ -3,6 +3,11 @@
 import { type ReactNode, useState } from "react"
 import { usePreview } from "../preview/preview-context"
 
+// Sanitize content to remove unusual line terminators before parsing
+function _sanitizeContent(content: string): string {
+	return content.replace(/\u2028/g, "\n").replace(/\u2029/g, "\n")
+}
+
 type LexicalNode = {
 	type: string
 	version: number
@@ -166,7 +171,8 @@ export function LexicalRenderer({
 	fieldPath,
 }: LexicalRendererProps) {
 	try {
-		const parsed: LexicalContent = JSON.parse(content)
+		const sanitized = _sanitizeContent(content)
+		const parsed: LexicalContent = JSON.parse(sanitized)
 		const counters: ElementCounters = {
 			paragraph: 0,
 			heading: 0,

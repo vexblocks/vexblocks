@@ -19,6 +19,11 @@ type LexicalEditorProps = {
 	placeholder?: string
 }
 
+// Sanitize content to remove unusual line terminators before parsing
+function sanitizeContent(content: string): string {
+	return content.replace(/\u2028/g, "\n").replace(/\u2029/g, "\n")
+}
+
 export default function LexicalEditor({
 	value,
 	onChange,
@@ -29,8 +34,10 @@ export default function LexicalEditor({
 		if (!value) return undefined
 
 		try {
+			// Sanitize content before using it
+			const sanitized = sanitizeContent(value)
 			// Try to parse as JSON (Lexical format)
-			return value
+			return sanitized
 		} catch {
 			// If parsing fails, return undefined and let Lexical handle it as empty
 			return undefined

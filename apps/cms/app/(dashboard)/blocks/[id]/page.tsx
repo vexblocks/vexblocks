@@ -21,6 +21,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { use, useEffect, useState } from "react"
 import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 import { authAtom } from "@/lib/auth-atom"
+import { sanitizeData } from "@/lib/sanitize-data"
 
 type FieldType =
 	| "shortText"
@@ -650,12 +651,18 @@ export default function BlockDetailPage({
 
 			validateFields(fields)
 
+			// Sanitize all data to remove unusual line terminators
+			const sanitizedDisplayName = sanitizeData(displayName)
+			const sanitizedDescription = sanitizeData(description)
+			const sanitizedCategory = sanitizeData(category)
+			const sanitizedFields = sanitizeData(mapFieldsForSave(fields))
+
 			await updateBlock({
 				id: id as Id<"cmsBlocks">,
-				displayName: displayName || undefined,
-				description: description || undefined,
-				fields: mapFieldsForSave(fields),
-				category: category || undefined,
+				displayName: sanitizedDisplayName || undefined,
+				description: sanitizedDescription || undefined,
+				fields: sanitizedFields,
+				category: sanitizedCategory || undefined,
 				previewImage: previewImage || undefined,
 			})
 
@@ -680,7 +687,7 @@ export default function BlockDetailPage({
 
 	if (!block) {
 		return (
-			<div className="flex min-h-[400px] items-center justify-center">
+			<div className="flex min-h-100 items-center justify-center">
 				<div className="text-center">
 					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 					<p className="text-grey-500">

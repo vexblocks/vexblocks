@@ -12,6 +12,7 @@ import { useSearchParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
+import { sanitizeData } from "@/lib/sanitize-data"
 import { FieldRenderer } from "../_components/field-renderer"
 import { LocaleSelector } from "../_components/locale-selector"
 import type { Field, LocalizationSettings } from "../_components/types"
@@ -298,15 +299,20 @@ export default function NewContentPage() {
 				throw new Error(validationError)
 			}
 
+			// Sanitize all data to remove unusual line terminators
+			const sanitizedData = sanitizeData(contentData)
+			const sanitizedSeoTitle = sanitizeData(seoTitle)
+			const sanitizedSeoDescription = sanitizeData(seoDescription)
+
 			const newContentId = await createContent({
 				schemaId: selectedSchemaId as Id<"cmsSchemas">,
 				status,
-				data: contentData,
+				data: sanitizedData,
 				seo:
-					seoTitle || seoDescription || seoOgImage
+					sanitizedSeoTitle || sanitizedSeoDescription || seoOgImage
 						? {
-								title: seoTitle || undefined,
-								description: seoDescription || undefined,
+								title: sanitizedSeoTitle || undefined,
+								description: sanitizedSeoDescription || undefined,
 								ogImage: seoOgImage || undefined,
 							}
 						: undefined,
