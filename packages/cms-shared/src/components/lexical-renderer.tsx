@@ -437,6 +437,34 @@ function renderNode(
 				)
 			}
 
+			// Parse inline styles (e.g., color)
+			const inlineStyle: Record<string, string> = {}
+			if (textNode.style) {
+				const styleString = textNode.style
+				const styleMatches = styleString.match(/([^:;\s]+)\s*:\s*([^;]+)/g)
+				if (styleMatches) {
+					for (const match of styleMatches) {
+						const [property, value] = match.split(":").map((s) => s.trim())
+						if (property && value) {
+							// Convert CSS property to camelCase for React
+							const camelCaseProperty = property.replace(/-([a-z])/g, (g) =>
+								g[1].toUpperCase(),
+							)
+							inlineStyle[camelCaseProperty] = value
+						}
+					}
+				}
+			}
+
+			// Apply inline styles if present
+			if (Object.keys(inlineStyle).length > 0) {
+				return (
+					<span key={key} style={inlineStyle}>
+						{text}
+					</span>
+				)
+			}
+
 			return <span key={key}>{text}</span>
 		}
 

@@ -11,11 +11,12 @@ import {
 	$createQuoteNode,
 	type HeadingTagType,
 } from "@lexical/rich-text"
-import { $wrapNodes } from "@lexical/selection"
+import { $patchStyleText, $wrapNodes } from "@lexical/selection"
 import {
 	$createParagraphNode,
 	$getSelection,
 	$isRangeSelection,
+	$isTextNode,
 	FORMAT_TEXT_COMMAND,
 	REDO_COMMAND,
 	UNDO_COMMAND,
@@ -29,13 +30,14 @@ import {
 	Link as LinkIcon,
 	List,
 	ListOrdered,
+	Palette,
 	Quote,
 	Redo,
 	Type,
 	Underline,
 	Undo,
 } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export default function ToolbarPlugin() {
 	const [editor] = useLexicalComposerContext()
@@ -43,6 +45,11 @@ export default function ToolbarPlugin() {
 	const [isItalic, setIsItalic] = useState(false)
 	const [isUnderline, setIsUnderline] = useState(false)
 	const [_blockType, setBlockType] = useState("paragraph")
+	const [currentColor, setCurrentColor] = useState<string | undefined>(
+		undefined,
+	)
+	const [showColorPicker, setShowColorPicker] = useState(false)
+	const colorPickerRef = useRef<HTMLDivElement>(null)
 
 	const updateToolbar = useCallback(() => {
 		const selection = $getSelection()
@@ -50,6 +57,21 @@ export default function ToolbarPlugin() {
 			setIsBold(selection.hasFormat("bold"))
 			setIsItalic(selection.hasFormat("italic"))
 			setIsUnderline(selection.hasFormat("underline"))
+
+			// Get color from selected text style
+			const nodes = selection.getNodes()
+			let color: string | undefined
+			for (const node of nodes) {
+				if ($isTextNode(node)) {
+					const style = node.getStyle()
+					const colorMatch = style.match(/color:\s*([^;]+)/)
+					if (colorMatch) {
+						color = colorMatch[1].trim()
+						break
+					}
+				}
+			}
+			setCurrentColor(color)
 		}
 	}, [])
 
@@ -97,6 +119,41 @@ export default function ToolbarPlugin() {
 			editor.dispatchCommand(TOGGLE_LINK_COMMAND, url)
 		}
 	}, [editor])
+
+	const applyColor = useCallback(
+		(color: string | undefined) => {
+			editor.update(() => {
+				const selection = $getSelection()
+				if ($isRangeSelection(selection)) {
+					$patchStyleText(selection, {
+						color: color || null,
+					})
+				}
+			})
+			setCurrentColor(color)
+			setShowColorPicker(false)
+		},
+		[editor],
+	)
+
+	// Close color picker when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				colorPickerRef.current &&
+				!colorPickerRef.current.contains(event.target as Node)
+			) {
+				setShowColorPicker(false)
+			}
+		}
+
+		if (showColorPicker) {
+			document.addEventListener("mousedown", handleClickOutside)
+			return () => {
+				document.removeEventListener("mousedown", handleClickOutside)
+			}
+		}
+	}, [showColorPicker])
 
 	return (
 		<div className="flex flex-wrap items-center gap-1 border-grey-200 border-b p-2">
@@ -151,6 +208,87 @@ export default function ToolbarPlugin() {
 			>
 				<Underline className="h-4 w-4" />
 			</button>
+
+			{/* Color Picker */}
+			<div className="relative" ref={colorPickerRef}>
+				<button
+					type="button"
+					onClick={() => setShowColorPicker(!showColorPicker)}
+					className={`rounded p-2 transition-colors ${
+						currentColor ? "bg-primary/10 text-primary" : "hover:bg-grey-100"
+					}`}
+					title="Text Color"
+				>
+					<Palette className="h-4 w-4" />
+					{currentColor && (
+						<div
+							className="absolute right-1 bottom-1 h-2 w-2 rounded-full border border-white"
+							style={{ backgroundColor: currentColor }}
+						/>
+					)}
+				</button>
+
+				{showColorPicker && (
+					<div className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-grey-300 bg-white p-3 shadow-lg">
+						<div className="mb-2 font-medium text-grey-700 text-sm">
+							Text Color
+						</div>
+						<div className="grid grid-cols-6 gap-2">
+							{/* Predefined colors */}
+							{[
+								"#000000",
+								"#374151",
+								"#6B7280",
+								"#9CA3AF",
+								"#D1D5DB",
+								"#F3F4F6",
+								"#EF4444",
+								"#F97316",
+								"#F59E0B",
+								"#EAB308",
+								"#84CC16",
+								"#22C55E",
+								"#10B981",
+								"#14B8A6",
+								"#06B6D4",
+								"#0EA5E9",
+								"#3B82F6",
+								"#6366F1",
+								"#8B5CF6",
+								"#A855F7",
+								"#D946EF",
+								"#EC4899",
+								"#F43F5E",
+								"#DC2626",
+							].map((color) => (
+								<button
+									key={color}
+									type="button"
+									onClick={() => applyColor(color)}
+									className="h-6 w-6 rounded border border-grey-300 transition-transform hover:scale-110"
+									style={{ backgroundColor: color }}
+									title={color}
+								/>
+							))}
+						</div>
+						<div className="mt-3 flex items-center gap-2 border-grey-200 border-t pt-3">
+							<input
+								type="color"
+								onChange={(e) => applyColor(e.target.value)}
+								className="h-8 w-12 cursor-pointer rounded border border-grey-300"
+								title="Custom color"
+							/>
+							<button
+								type="button"
+								onClick={() => applyColor(undefined)}
+								className="flex-1 rounded border border-grey-300 px-3 py-1 text-sm transition-colors hover:bg-grey-100"
+							>
+								Reset
+							</button>
+						</div>
+					</div>
+				)}
+			</div>
 
 			<div className="mx-2 h-6 w-px bg-grey-300" />
 
