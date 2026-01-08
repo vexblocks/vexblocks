@@ -45,6 +45,8 @@ export default function ToolbarPlugin() {
 	const [isItalic, setIsItalic] = useState(false)
 	const [isUnderline, setIsUnderline] = useState(false)
 	const [_blockType, setBlockType] = useState("paragraph")
+	const [isUnorderedList, setIsUnorderedList] = useState(false)
+	const [isOrderedList, setIsOrderedList] = useState(false)
 	const [currentColor, setCurrentColor] = useState<string | undefined>(
 		undefined,
 	)
@@ -57,6 +59,26 @@ export default function ToolbarPlugin() {
 			setIsBold(selection.hasFormat("bold"))
 			setIsItalic(selection.hasFormat("italic"))
 			setIsUnderline(selection.hasFormat("underline"))
+
+			// Check if we're in a list
+			const anchorNode = selection.anchor.getNode()
+			const element =
+				anchorNode.getKey() === "root"
+					? anchorNode
+					: anchorNode.getTopLevelElementOrThrow()
+			const elementKey = element.getKey()
+			const elementDOM = editor.getElementByKey(elementKey)
+
+			if (elementDOM !== null) {
+				const parentList = elementDOM.closest("ul, ol")
+				if (parentList) {
+					setIsUnorderedList(parentList.tagName === "UL")
+					setIsOrderedList(parentList.tagName === "OL")
+				} else {
+					setIsUnorderedList(false)
+					setIsOrderedList(false)
+				}
+			}
 
 			// Get color from selected text style
 			const nodes = selection.getNodes()
@@ -73,7 +95,7 @@ export default function ToolbarPlugin() {
 			}
 			setCurrentColor(color)
 		}
-	}, [])
+	}, [editor])
 
 	useEffect(() => {
 		return editor.registerUpdateListener(({ editorState }) => {
@@ -332,9 +354,15 @@ export default function ToolbarPlugin() {
 			<button
 				type="button"
 				onClick={() => {
-					editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+					if (isUnorderedList) {
+						formatParagraph()
+					} else {
+						editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+					}
 				}}
-				className="rounded p-2 transition-colors hover:bg-grey-100"
+				className={`rounded p-2 transition-colors ${
+					isUnorderedList ? "bg-primary/10 text-primary" : "hover:bg-grey-100"
+				}`}
 				title="Bullet List"
 			>
 				<List className="h-4 w-4" />
@@ -342,9 +370,15 @@ export default function ToolbarPlugin() {
 			<button
 				type="button"
 				onClick={() => {
-					editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+					if (isOrderedList) {
+						formatParagraph()
+					} else {
+						editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+					}
 				}}
-				className="rounded p-2 transition-colors hover:bg-grey-100"
+				className={`rounded p-2 transition-colors ${
+					isOrderedList ? "bg-primary/10 text-primary" : "hover:bg-grey-100"
+				}`}
 				title="Numbered List"
 			>
 				<ListOrdered className="h-4 w-4" />

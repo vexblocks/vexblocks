@@ -7,10 +7,12 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable"
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary"
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin"
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin"
+import { ListPlugin } from "@lexical/react/LexicalListPlugin"
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import type { EditorState } from "lexical"
+import SanitizePastePlugin from "./sanitize-paste-plugin"
 import ToolbarPlugin from "./toolbar-plugin"
 
 type LexicalEditorProps = {
@@ -21,6 +23,8 @@ type LexicalEditorProps = {
 
 // Sanitize content to remove unusual line terminators before parsing
 function sanitizeContent(content: string): string {
+	// Remove Line Separator (U+2028) and Paragraph Separator (U+2029)
+	// Convert them to standard newlines - JSON.stringify will escape them properly
 	return content.replace(/\u2028/g, "\n").replace(/\u2029/g, "\n")
 }
 
@@ -70,7 +74,9 @@ export default function LexicalEditor({
 
 	const handleChange = (editorState: EditorState) => {
 		const json = JSON.stringify(editorState.toJSON())
-		onChange(json)
+		// Sanitize the JSON string to remove unusual line terminators
+		const sanitized = sanitizeContent(json)
+		onChange(sanitized)
 	}
 
 	return (
@@ -92,7 +98,9 @@ export default function LexicalEditor({
 				</div>
 			</div>
 			<HistoryPlugin />
+			<ListPlugin />
 			<LinkPlugin />
+			<SanitizePastePlugin />
 			<OnChangePlugin onChange={handleChange} />
 		</LexicalComposer>
 	)

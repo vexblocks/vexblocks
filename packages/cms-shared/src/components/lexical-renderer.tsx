@@ -239,8 +239,10 @@ function renderNode(
 
 			const elementIndex = counters.paragraph++
 			const paragraphElement = (
-				<p key={key} className={isEmpty ? "mb-6" : "mb-0"}>
-					{renderChildren(paragraphNode.children, key, undefined, counters)}
+				<p key={key} className={isEmpty ? "mb-2" : "mb-2"}>
+					{isEmpty
+						? null
+						: renderChildren(paragraphNode.children, key, undefined, counters)}
 				</p>
 			)
 
@@ -301,7 +303,7 @@ function renderNode(
 			const ListTag = listNode.listType === "number" ? "ol" : "ul"
 			const elementIndex = counters.list++
 			const listElement = (
-				<ListTag key={key} className="mb-6 ml-6">
+				<ListTag key={key} className="mb-6 marker:text-sm">
 					{renderChildren(listNode.children, key, undefined, counters)}
 				</ListTag>
 			)
@@ -325,7 +327,7 @@ function renderNode(
 		case "listitem": {
 			const listItemNode = node as ListItemNode
 			return (
-				<li key={key} className="mb-2">
+				<li key={key}>
 					{renderChildren(listItemNode.children, key, undefined, counters)}
 				</li>
 			)
@@ -406,7 +408,17 @@ function renderNode(
 
 		case "text": {
 			const textNode = node as TextNode
-			let text: ReactNode = textNode.text
+			// Split text by newlines and convert to br tags
+			const textParts = textNode.text.split("\n")
+			let text: ReactNode =
+				textParts.length > 1
+					? textParts.map((part, i) => (
+							<span key={`${key}-part-${i}`}>
+								{part}
+								{i < textParts.length - 1 && <br />}
+							</span>
+						))
+					: textNode.text
 
 			// Format flags (bitwise)
 			// 1 = bold, 2 = italic, 4 = strikethrough, 8 = underline, 16 = code
@@ -498,7 +510,26 @@ function renderChildren(
 ): ReactNode[] {
 	if (!children || !Array.isArray(children)) return []
 
-	return children.map((child, index) =>
-		renderNode(child, `${parentKey}-${index}`, fieldPath, counters),
-	)
+	const result: ReactNode[] = []
+
+	for (let i = 0; i < children.length; i++) {
+		const child = children[i]
+		const nextChild = children[i + 1]
+
+		// Check if this is a linebreak followed by another linebreak
+		if (child.type === "linebreak" && nextChild?.type === "linebreak") {
+			// Double linebreak = paragraph break, add spacing using span
+			result.push(
+				<span
+					key={`${parentKey}-${i}`}
+					style={{ display: "block", height: "1.5rem" }}
+				/>,
+			)
+			i++ // Skip the next linebreak since we handled both
+		} else {
+			result.push(renderNode(child, `${parentKey}-${i}`, fieldPath, counters))
+		}
+	}
+
+	return result
 }

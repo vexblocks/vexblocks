@@ -7,6 +7,12 @@ import dynamic from "next/dynamic"
 import { useState } from "react"
 import type { Field } from "./types"
 
+// Sanitize content to remove unusual line terminators
+function _sanitizeRichText(content: string): string {
+	if (!content || typeof content !== "string") return content
+	return content.replace(/\u2028/g, "\n").replace(/\u2029/g, "\n")
+}
+
 // Dynamic import for Lexical to avoid SSR issues
 const LexicalEditor = dynamic(
 	() => import("@/components/editor/lexical-editor"),
@@ -80,7 +86,7 @@ export function BasicFieldRenderer({
 								<button
 									type="button"
 									onClick={onRegenerateSlug}
-									className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-700 text-xs transition-colors hover:bg-blue-200"
+									className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-700 text-xs transition-colors marker:text-xs hover:bg-blue-200"
 									title="Regenerate slug from source field"
 								>
 									<RefreshCw className="h-3 w-3" />
@@ -111,7 +117,7 @@ export function BasicFieldRenderer({
 			return (
 				<LexicalEditor
 					key={fieldId}
-					value={defaultValue}
+					value={_sanitizeRichText(defaultValue)}
 					onChange={onChange}
 					placeholder={field.helpText || "Enter rich text content..."}
 				/>

@@ -18,6 +18,7 @@ import type * as cms_media from "../cms/media.js";
 import type * as cms_mediaActions from "../cms/mediaActions.js";
 import type * as cms_mediaTags from "../cms/mediaTags.js";
 import type * as cms_migrations from "../cms/migrations.js";
+import type * as cms_sanitizeContent from "../cms/sanitizeContent.js";
 import type * as cms_schemas from "../cms/schemas.js";
 import type * as cms_settings from "../cms/settings.js";
 import type * as cms_users from "../cms/users.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   "cms/mediaActions": typeof cms_mediaActions;
   "cms/mediaTags": typeof cms_mediaTags;
   "cms/migrations": typeof cms_migrations;
+  "cms/sanitizeContent": typeof cms_sanitizeContent;
   "cms/schemas": typeof cms_schemas;
   "cms/settings": typeof cms_settings;
   "cms/users": typeof cms_users;
