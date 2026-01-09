@@ -397,8 +397,8 @@ function renderNode(
 				<a
 					key={key}
 					href={linkNode.url}
-					target={linkNode.target}
-					rel={linkNode.rel || "noopener noreferrer"}
+					target="_blank"
+					rel="noopener noreferrer"
 					className="text-purple-600 hover:underline"
 				>
 					{renderChildren(linkNode.children, key, undefined, counters)}
