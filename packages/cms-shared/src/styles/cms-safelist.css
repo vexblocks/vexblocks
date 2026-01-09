@@ -1,0 +1,26 @@
+/**
+ * CMS Dynamic Classes Safelist for Tailwind CSS v4
+ *
+ * In Tailwind v4, use @source inline() with brace expansion to force generation
+ * of utility classes that might be used dynamically from the CMS (via className fields).
+ *
+ * Documentation: https://tailwindcss.com/docs/detecting-classes-in-source-files#safelisting-specific-utilities
+ */
+
+/* Margin utilities with responsive variants (base, md, lg) */
+@source inline("{,md:,lg:}m-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}mt-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}mb-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}ml-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}mr-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}mx-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}my-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+
+/* Padding utilities with responsive variants (base, md, lg) */
+@source inline("{,md:,lg:}p-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}pt-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}pb-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}pl-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}pr-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}px-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+@source inline("{,md:,lg:}py-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
