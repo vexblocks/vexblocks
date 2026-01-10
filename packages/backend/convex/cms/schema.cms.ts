@@ -316,6 +316,27 @@ export const cmsSettings = defineTable({
 	updatedAt: v.number(),
 }).index("by_key", ["key"])
 
+/**
+ * AI chat conversations and messages.
+ * Stores chat history between users and the CMS AI assistant.
+ */
+export const cmsAIChats = defineTable({
+	userId: v.id("users"), // Owner of the conversation
+	messages: v.array(
+		v.object({
+			id: v.string(), // Message ID
+			role: v.union(v.literal("user"), v.literal("assistant")),
+			content: v.string(), // Message content
+			createdAt: v.number(), // Timestamp
+		}),
+	),
+	title: v.optional(v.string()), // Optional title for the conversation
+	createdAt: v.number(),
+	updatedAt: v.number(),
+})
+	.index("by_user", ["userId"])
+	.index("by_created_at", ["createdAt"])
+
 // =============================================================================
 // EXPORTS
 // =============================================================================
@@ -370,6 +391,7 @@ export const cmsSchemaExports = {
 	cmsMediaTags,
 	cmsBlocks,
 	cmsSettings,
+	cmsAIChats,
 }
 
 /**
@@ -384,6 +406,7 @@ export const cmsTablesWithoutUsers = {
 	cmsMediaTags,
 	cmsBlocks,
 	cmsSettings,
+	cmsAIChats,
 }
 
 /**
@@ -397,4 +420,5 @@ export const cmsTables = {
 	cmsMediaTags,
 	cmsBlocks,
 	cmsSettings,
+	cmsAIChats,
 }

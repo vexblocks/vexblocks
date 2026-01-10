@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as cms_aiChat from "../cms/aiChat.js";
 import type * as cms_blocks from "../cms/blocks.js";
 import type * as cms_builders from "../cms/builders.js";
 import type * as cms_constants from "../cms/constants.js";
@@ -35,6 +36,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "cms/aiChat": typeof cms_aiChat;
   "cms/blocks": typeof cms_blocks;
   "cms/builders": typeof cms_builders;
   "cms/constants": typeof cms_constants;

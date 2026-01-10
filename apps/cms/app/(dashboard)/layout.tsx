@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
+import { AIChatTrigger } from "@/components/molecules/ai-chat-trigger"
 import { DashboardHeader } from "@/components/molecules/dashboard-header"
 import { DashboardSidenav } from "@/components/molecules/dashboard-sidenav"
 import { useSidebar } from "@/contexts/sidebar-context"
@@ -77,6 +78,9 @@ export default function DashboardLayout({
 					<Suspense fallback={null}>{children}</Suspense>
 				</div>
 			</main>
+
+			{/* AI Chat Assistant */}
+			<AIChatTrigger />
 		</div>
 	)
 }
