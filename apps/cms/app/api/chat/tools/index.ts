@@ -3,19 +3,19 @@ import {
 	getContent,
 	listContent,
 	updateContent,
-} from "./content-tools";
+} from "./content-tools"
 import {
 	createSchema,
 	getSchema,
 	listSchemas,
 	updateSchema,
-} from "./schema-tools";
+} from "./schema-tools"
 import {
 	getSchemaStats,
 	previewChanges,
 	searchContent,
 	validateContent,
-} from "./utility-tools";
+} from "./utility-tools"
 
 export const tools = {
 	// Schema tools
@@ -35,4 +35,4 @@ export const tools = {
 	validateContent,
 	searchContent,
 	previewChanges,
-};
+}

@@ -27,5 +27,5 @@ export function getSafetyRules(): string {
 ### Privacy & Security
 - Do not expose internal IDs unnecessarily
 - Do not log or display sensitive field values
-- Respect role-based access (admin, developer, editor)`;
+- Respect role-based access (admin, developer, editor)`
 }

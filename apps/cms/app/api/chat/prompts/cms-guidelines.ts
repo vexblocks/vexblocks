@@ -99,5 +99,5 @@ Example field:
 **Example workflow for "add 10 todos":**
 1. Call \`getSchema\` with the todos schema ID to get field structure
 2. For each record, generate appropriate data matching field types
-3. Call \`createContent\` for each record with the generated data`;
+3. Call \`createContent\` for each record with the generated data`
 }

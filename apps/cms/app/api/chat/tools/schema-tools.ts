@@ -1,8 +1,8 @@
-import { api } from "@repo/backend/convex/_generated/api";
-import type { Id } from "@repo/backend/convex/_generated/dataModel";
-import { tool } from "ai";
-import { z } from "zod";
-import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { tool } from "ai"
+import { z } from "zod"
+import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server"
 
 export const listSchemas = tool({
 	description:
@@ -10,19 +10,19 @@ export const listSchemas = tool({
 	inputSchema: z.object({}),
 	execute: async () => {
 		try {
-			const schemas = await fetchAuthQuery(api.cms.schemas.list, {});
+			const schemas = await fetchAuthQuery(api.cms.schemas.list, {})
 			return {
 				success: true,
 				data: schemas,
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 export const getSchema = tool({
 	description:
@@ -45,12 +45,12 @@ export const getSchema = tool({
 			if (schemaId) {
 				const schema = await fetchAuthQuery(api.cms.schemas.get, {
 					id: schemaId as Id<"cmsSchemas">,
-				});
+				})
 				if (schema) {
 					return {
 						success: true,
 						data: schema,
-					};
+					}
 				}
 			}
 
@@ -58,27 +58,27 @@ export const getSchema = tool({
 			if (schemaName) {
 				const schema = await fetchAuthQuery(api.cms.schemas.getByName, {
 					name: schemaName,
-				});
+				})
 				if (schema) {
 					return {
 						success: true,
 						data: schema,
-					};
+					}
 				}
 			}
 
 			return {
 				success: false,
 				error: "Schema not found. Please provide a valid schema ID or name.",
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 export const createSchema = tool({
 	description:
@@ -108,31 +108,31 @@ export const createSchema = tool({
 	}),
 	execute: async (params) => {
 		try {
-			const schemaId = await fetchAuthMutation(api.cms.schemas.create, params);
+			const schemaId = await fetchAuthMutation(api.cms.schemas.create, params)
 			return {
 				success: true,
 				data: { schemaId },
 				message: `Schema '${params.displayName}' created successfully with ID: ${schemaId}`,
-			};
+			}
 		} catch (error: unknown) {
 			// Handle different error types from Convex
-			let errorMessage = "Unknown error";
+			let errorMessage = "Unknown error"
 			if (error instanceof Error) {
-				errorMessage = error.message;
+				errorMessage = error.message
 			} else if (typeof error === "object" && error !== null) {
-				const errorObj = error as { message?: string; data?: string };
+				const errorObj = error as { message?: string; data?: string }
 				errorMessage =
-					errorObj.message || errorObj.data || JSON.stringify(error);
+					errorObj.message || errorObj.data || JSON.stringify(error)
 			} else if (typeof error === "string") {
-				errorMessage = error;
+				errorMessage = error
 			}
 			return {
 				success: false,
 				error: errorMessage,
-			};
+			}
 		}
 	},
-});
+})
 
 export const updateSchema = tool({
 	description:
@@ -159,23 +159,23 @@ export const updateSchema = tool({
 				error:
 					"User confirmation required. Please ask the user to confirm this schema update twice before proceeding.",
 				requiresConfirmation: true,
-			};
+			}
 		}
 
 		try {
 			await fetchAuthMutation(api.cms.schemas.update, {
 				id: schemaId as Id<"cmsSchemas">,
 				...params,
-			});
+			})
 			return {
 				success: true,
 				message: "Schema updated successfully",
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})

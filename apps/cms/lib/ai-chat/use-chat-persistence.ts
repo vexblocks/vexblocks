@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import type { UIMessage } from "@ai-sdk/react";
-import { useAtom } from "@lfades/atom";
-import { api } from "@repo/backend/convex/_generated/api";
-import type { Id } from "@repo/backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { useCallback, useEffect } from "react";
+import type { UIMessage } from "@ai-sdk/react"
+import { useAtom } from "@lfades/atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { useMutation, useQuery } from "convex/react"
+import { useCallback, useEffect } from "react"
 import {
 	type ChatSession,
 	chatSessionsAtom,
@@ -13,7 +13,7 @@ import {
 	currentChatIdAtom,
 	messagesAtom,
 	setChatError,
-} from "./context-atoms";
+} from "./context-atoms"
 
 // ================================
 // HOOK
@@ -24,21 +24,21 @@ import {
  * Syncs chat state with the database
  */
 export function useChatPersistence() {
-	const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom);
-	const [messages, setMessages] = useAtom(messagesAtom);
-	const [sessions, setSessions] = useAtom(chatSessionsAtom);
+	const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom)
+	const [messages, setMessages] = useAtom(messagesAtom)
+	const [sessions, setSessions] = useAtom(chatSessionsAtom)
 
 	// Convex queries and mutations
-	const chats = useQuery(api.cms.aiChat.listChats);
+	const chats = useQuery(api.cms.aiChat.listChats)
 	const currentChat = useQuery(
 		api.cms.aiChat.getChat,
 		currentChatId ? { chatId: currentChatId as Id<"cmsAIChats"> } : "skip",
-	);
+	)
 
-	const createChatMutation = useMutation(api.cms.aiChat.createChat);
-	const addMessageMutation = useMutation(api.cms.aiChat.addMessage);
-	const updateTitleMutation = useMutation(api.cms.aiChat.updateChatTitle);
-	const deleteChatMutation = useMutation(api.cms.aiChat.deleteChat);
+	const createChatMutation = useMutation(api.cms.aiChat.createChat)
+	const addMessageMutation = useMutation(api.cms.aiChat.addMessage)
+	const updateTitleMutation = useMutation(api.cms.aiChat.updateChatTitle)
+	const deleteChatMutation = useMutation(api.cms.aiChat.deleteChat)
 
 	// Sync sessions from Convex
 	useEffect(() => {
@@ -48,10 +48,10 @@ export function useChatPersistence() {
 				title: chat.title,
 				createdAt: chat.createdAt,
 				updatedAt: chat.updatedAt,
-			}));
-			setSessions(chatSessions);
+			}))
+			setSessions(chatSessions)
 		}
-	}, [chats, setSessions]);
+	}, [chats, setSessions])
 
 	// Sync messages when current chat changes
 	useEffect(() => {
@@ -62,10 +62,10 @@ export function useChatPersistence() {
 				content: msg.content,
 				createdAt: new Date(msg.createdAt),
 				parts: [{ type: "text" as const, text: msg.content }],
-			}));
-			setMessages(uiMessages);
+			}))
+			setMessages(uiMessages)
 		}
-	}, [currentChat, setMessages]);
+	}, [currentChat, setMessages])
 
 	/**
 	 * Create a new chat session
@@ -80,24 +80,24 @@ export function useChatPersistence() {
 							content: getMessageContent(initialMessage),
 							createdAt: Date.now(),
 						}
-					: undefined;
+					: undefined
 
 				const chatId = await createChatMutation({
 					title,
 					initialMessage: storedMessage,
-				});
+				})
 
-				setCurrentChatId(chatId);
-				return chatId;
+				setCurrentChatId(chatId)
+				return chatId
 			} catch (error) {
 				setChatError(
 					error instanceof Error ? error.message : "Failed to create chat",
-				);
-				return null;
+				)
+				return null
 			}
 		},
 		[createChatMutation, setCurrentChatId],
-	);
+	)
 
 	/**
 	 * Add a message to the current chat
@@ -106,8 +106,8 @@ export function useChatPersistence() {
 		async (message: UIMessage) => {
 			if (!currentChatId) {
 				// Create a new chat if none exists
-				const chatId = await createChat(undefined, message);
-				return chatId !== null;
+				const chatId = await createChat(undefined, message)
+				return chatId !== null
 			}
 
 			try {
@@ -119,40 +119,40 @@ export function useChatPersistence() {
 						content: getMessageContent(message),
 						createdAt: Date.now(),
 					},
-				});
-				return true;
+				})
+				return true
 			} catch (error) {
 				setChatError(
 					error instanceof Error ? error.message : "Failed to add message",
-				);
-				return false;
+				)
+				return false
 			}
 		},
 		[currentChatId, addMessageMutation, createChat],
-	);
+	)
 
 	/**
 	 * Update chat title
 	 */
 	const updateTitle = useCallback(
 		async (title: string) => {
-			if (!currentChatId) return false;
+			if (!currentChatId) return false
 
 			try {
 				await updateTitleMutation({
 					chatId: currentChatId as Id<"cmsAIChats">,
 					title,
-				});
-				return true;
+				})
+				return true
 			} catch (error) {
 				setChatError(
 					error instanceof Error ? error.message : "Failed to update title",
-				);
-				return false;
+				)
+				return false
 			}
 		},
 		[currentChatId, updateTitleMutation],
-	);
+	)
 
 	/**
 	 * Delete a chat
@@ -162,40 +162,40 @@ export function useChatPersistence() {
 			try {
 				await deleteChatMutation({
 					chatId: chatId as Id<"cmsAIChats">,
-				});
+				})
 
 				// If deleting current chat, clear context
 				if (chatId === currentChatId) {
-					clearChatContext();
+					clearChatContext()
 				}
 
-				return true;
+				return true
 			} catch (error) {
 				setChatError(
 					error instanceof Error ? error.message : "Failed to delete chat",
-				);
-				return false;
+				)
+				return false
 			}
 		},
 		[deleteChatMutation, currentChatId],
-	);
+	)
 
 	/**
 	 * Load a chat by ID
 	 */
 	const loadChat = useCallback(
 		(chatId: string) => {
-			setCurrentChatId(chatId);
+			setCurrentChatId(chatId)
 		},
 		[setCurrentChatId],
-	);
+	)
 
 	/**
 	 * Start a new chat (clears current context)
 	 */
 	const startNewChat = useCallback(() => {
-		clearChatContext();
-	}, []);
+		clearChatContext()
+	}, [])
 
 	return {
 		// State
@@ -211,7 +211,7 @@ export function useChatPersistence() {
 		deleteChat,
 		loadChat,
 		startNewChat,
-	};
+	}
 }
 
 // ================================
@@ -226,7 +226,7 @@ function getMessageContent(message: UIMessage): string {
 				(part): part is { type: "text"; text: string } => part.type === "text",
 			)
 			.map((part) => part.text)
-			.join("");
+			.join("")
 	}
-	return "";
+	return ""
 }

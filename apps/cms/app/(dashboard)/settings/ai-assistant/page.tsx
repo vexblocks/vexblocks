@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	Bot,
@@ -10,7 +10,7 @@ import {
 	Shield,
 	Wrench,
 	Zap,
-} from "lucide-react";
+} from "lucide-react"
 
 export default function AIAssistantDocsPage() {
 	return (
@@ -214,7 +214,7 @@ export default function AIAssistantDocsPage() {
 							<div className="rounded-xl bg-amber-100 p-2.5">
 								<Lightbulb className="h-6 w-6 text-amber-600" />
 							</div>
-							<h2 className="font-semibold text-xl text-grey-900">
+							<h2 className="font-semibold text-grey-900 text-xl">
 								Tips for Best Results
 							</h2>
 						</div>
@@ -230,7 +230,7 @@ export default function AIAssistantDocsPage() {
 				</section>
 			</div>
 		</div>
-	);
+	)
 }
 
 // Color variants for components
@@ -259,9 +259,9 @@ const colorVariants = {
 		icon: "bg-orange-100 text-orange-600",
 		accent: "bg-orange-500",
 	},
-} as const;
+} as const
 
-type ColorVariant = keyof typeof colorVariants;
+type ColorVariant = keyof typeof colorVariants
 
 // Component: Section Header
 function SectionHeader({
@@ -269,19 +269,19 @@ function SectionHeader({
 	title,
 	subtitle,
 }: {
-	icon: React.ReactNode;
-	title: string;
-	subtitle: string;
+	icon: React.ReactNode
+	title: string
+	subtitle: string
 }) {
 	return (
 		<div className="flex items-start gap-4">
 			<div className="rounded-xl bg-primary/10 p-3 text-primary">{icon}</div>
 			<div>
-				<h2 className="font-semibold text-xl text-grey-900">{title}</h2>
+				<h2 className="font-semibold text-grey-900 text-xl">{title}</h2>
 				<p className="mt-1 text-grey-500">{subtitle}</p>
 			</div>
 		</div>
-	);
+	)
 }
 
 // Component: Feature Card
@@ -291,12 +291,12 @@ function FeatureCard({
 	icon,
 	color,
 }: {
-	title: string;
-	description: string;
-	icon: React.ReactNode;
-	color: ColorVariant;
+	title: string
+	description: string
+	icon: React.ReactNode
+	color: ColorVariant
 }) {
-	const variant = colorVariants[color];
+	const variant = colorVariants[color]
 	return (
 		<div
 			className={`rounded-2xl border ${variant.border} ${variant.bg} p-6 transition-all hover:shadow-md`}
@@ -307,7 +307,7 @@ function FeatureCard({
 			<h3 className="mb-2 font-semibold text-grey-900 text-lg">{title}</h3>
 			<p className="text-grey-600 leading-relaxed">{description}</p>
 		</div>
-	);
+	)
 }
 
 // Component: Command Example
@@ -316,9 +316,9 @@ function CommandExample({
 	icon,
 	examples,
 }: {
-	category: string;
-	icon: React.ReactNode;
-	examples: string[];
+	category: string
+	icon: React.ReactNode
+	examples: string[]
 }) {
 	return (
 		<div className="rounded-2xl border border-grey-200 bg-white p-5 shadow-sm">
@@ -337,7 +337,7 @@ function CommandExample({
 				))}
 			</div>
 		</div>
-	);
+	)
 }
 
 // Component: Safety Item
@@ -345,8 +345,8 @@ function SafetyItem({
 	title,
 	description,
 }: {
-	title: string;
-	description: string;
+	title: string
+	description: string
 }) {
 	return (
 		<div className="flex items-start gap-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
@@ -358,7 +358,7 @@ function SafetyItem({
 				<p className="mt-0.5 text-grey-600 text-sm">{description}</p>
 			</div>
 		</div>
-	);
+	)
 }
 
 // Component: Tool Category
@@ -368,12 +368,12 @@ function ToolCategory({
 	color,
 	tools,
 }: {
-	title: string;
-	icon: React.ReactNode;
-	color: ColorVariant;
-	tools: { name: string; description: string }[];
+	title: string
+	icon: React.ReactNode
+	color: ColorVariant
+	tools: { name: string; description: string }[]
 }) {
-	const variant = colorVariants[color];
+	const variant = colorVariants[color]
 	return (
 		<div className={`rounded-2xl border ${variant.border} ${variant.bg} p-6`}>
 			<div className="mb-5 flex items-center gap-3">
@@ -394,7 +394,7 @@ function ToolCategory({
 				))}
 			</div>
 		</div>
-	);
+	)
 }
 
 // Component: Tip Item
@@ -404,5 +404,5 @@ function TipItem({ text }: { text: string }) {
 			<div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
 			<span className="text-grey-700 leading-relaxed">{text}</span>
 		</div>
-	);
+	)
 }

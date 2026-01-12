@@ -1,13 +1,13 @@
-import { api } from "@repo/backend/convex/_generated/api";
-import type { Id } from "@repo/backend/convex/_generated/dataModel";
-import { tool } from "ai";
-import { z } from "zod";
-import { fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { tool } from "ai"
+import { z } from "zod"
+import { fetchAuthQuery } from "@/lib/auth-server"
 import {
 	getCachedSchema,
 	getCachedSchemas,
 	logger,
-} from "../utils/convex-client";
+} from "../utils/convex-client"
 
 // ================================
 // VALIDATE CONTENT TOOL
@@ -24,46 +24,46 @@ export const validateContent = tool({
 	}),
 	execute: async ({ schemaId, data }) => {
 		try {
-			const schema = await getCachedSchema(schemaId);
+			const schema = await getCachedSchema(schemaId)
 
 			if (!schema) {
 				return {
 					success: false,
 					valid: false,
 					error: "Schema not found",
-				};
+				}
 			}
 
-			const errors: string[] = [];
-			const warnings: string[] = [];
+			const errors: string[] = []
+			const warnings: string[] = []
 
 			// Check required fields
 			for (const field of schema.fields) {
-				const value = data[field.name];
+				const value = data[field.name]
 
 				if (field.required && (value === undefined || value === null)) {
-					errors.push(`Missing required field: ${field.name}`);
-					continue;
+					errors.push(`Missing required field: ${field.name}`)
+					continue
 				}
 
 				if (value !== undefined && value !== null) {
 					// Type validation
-					const typeError = validateFieldType(field, value);
+					const typeError = validateFieldType(field, value)
 					if (typeError) {
-						errors.push(typeError);
+						errors.push(typeError)
 					}
 				}
 			}
 
 			// Check for unknown fields
-			const fieldNames = new Set(schema.fields.map((f) => f.name));
+			const fieldNames = new Set(schema.fields.map((f) => f.name))
 			for (const key of Object.keys(data)) {
 				if (!fieldNames.has(key)) {
-					warnings.push(`Unknown field: ${key} (not in schema)`);
+					warnings.push(`Unknown field: ${key} (not in schema)`)
 				}
 			}
 
-			logger.tool("validateContent", { schemaId, data }, { errors, warnings });
+			logger.tool("validateContent", { schemaId, data }, { errors, warnings })
 
 			return {
 				success: true,
@@ -75,22 +75,22 @@ export const validateContent = tool({
 					displayName: schema.displayName,
 					fieldCount: schema.fields.length,
 				},
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				valid: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 function validateFieldType(
 	field: { name: string; type: string },
 	value: unknown,
 ): string | null {
-	const { name, type } = field;
+	const { name, type } = field
 
 	switch (type) {
 		case "text":
@@ -98,63 +98,63 @@ function validateFieldType(
 		case "richtext":
 		case "select":
 			if (typeof value !== "string") {
-				return `Field "${name}" should be a string, got ${typeof value}`;
+				return `Field "${name}" should be a string, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "number":
 			if (typeof value !== "number") {
-				return `Field "${name}" should be a number, got ${typeof value}`;
+				return `Field "${name}" should be a number, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "boolean":
 			if (typeof value !== "boolean") {
-				return `Field "${name}" should be a boolean, got ${typeof value}`;
+				return `Field "${name}" should be a boolean, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "date":
 		case "datetime":
 			if (typeof value !== "string" && typeof value !== "number") {
-				return `Field "${name}" should be a date string or timestamp, got ${typeof value}`;
+				return `Field "${name}" should be a date string or timestamp, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "multiselect":
 			if (!Array.isArray(value)) {
-				return `Field "${name}" should be an array, got ${typeof value}`;
+				return `Field "${name}" should be an array, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "image":
 		case "file":
 			if (typeof value !== "string") {
-				return `Field "${name}" should be a storage ID string, got ${typeof value}`;
+				return `Field "${name}" should be a storage ID string, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "reference":
 			if (typeof value !== "string") {
-				return `Field "${name}" should be a content ID string, got ${typeof value}`;
+				return `Field "${name}" should be a content ID string, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "group":
 			if (typeof value !== "object" || value === null || Array.isArray(value)) {
-				return `Field "${name}" should be an object, got ${typeof value}`;
+				return `Field "${name}" should be an object, got ${typeof value}`
 			}
-			break;
+			break
 
 		case "repeater":
 		case "flexible":
 			if (!Array.isArray(value)) {
-				return `Field "${name}" should be an array, got ${typeof value}`;
+				return `Field "${name}" should be an array, got ${typeof value}`
 			}
-			break;
+			break
 	}
 
-	return null;
+	return null
 }
 
 // ================================
@@ -182,27 +182,27 @@ export const searchContent = tool({
 	}),
 	execute: async ({ query, schemaId, status, limit }) => {
 		try {
-			const searchQuery = query.toLowerCase();
-			let allContent: ContentItem[] = [];
+			const searchQuery = query.toLowerCase()
+			let allContent: ContentItem[] = []
 
 			if (schemaId) {
 				// Search within specific schema
 				const content = await fetchAuthQuery(api.cms.content.listBySchema, {
 					schemaId: schemaId as Id<"cmsSchemas">,
 					status,
-				});
-				allContent = (content ?? []) as ContentItem[];
+				})
+				allContent = (content ?? []) as ContentItem[]
 			} else {
 				// Get all schemas and search across all
-				const schemas = await getCachedSchemas();
+				const schemas = await getCachedSchemas()
 
 				for (const schema of schemas) {
 					const content = await fetchAuthQuery(api.cms.content.listBySchema, {
 						schemaId: schema._id as Id<"cmsSchemas">,
 						status,
-					});
+					})
 					if (content) {
-						allContent.push(...(content as ContentItem[]));
+						allContent.push(...(content as ContentItem[]))
 					}
 				}
 			}
@@ -210,9 +210,9 @@ export const searchContent = tool({
 			// Filter by search query
 			const results = allContent
 				.filter((item) => {
-					const dataStr = JSON.stringify(item.data).toLowerCase();
-					const slugMatch = item.slug?.toLowerCase().includes(searchQuery);
-					return dataStr.includes(searchQuery) || slugMatch;
+					const dataStr = JSON.stringify(item.data).toLowerCase()
+					const slugMatch = item.slug?.toLowerCase().includes(searchQuery)
+					return dataStr.includes(searchQuery) || slugMatch
 				})
 				.slice(0, limit)
 				.map((item) => ({
@@ -221,13 +221,13 @@ export const searchContent = tool({
 					slug: item.slug,
 					status: item.status,
 					preview: getContentPreview(item.data, searchQuery),
-				}));
+				}))
 
 			logger.tool(
 				"searchContent",
 				{ query, schemaId, status },
 				{ count: results.length },
-			);
+			)
 
 			return {
 				success: true,
@@ -237,43 +237,43 @@ export const searchContent = tool({
 					results.length > 0
 						? `Found ${results.length} matching content entries`
 						: "No matching content found",
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 type ContentItem = {
-	_id: string;
-	schemaId: string;
-	slug?: string;
-	status: "draft" | "published";
-	data: Record<string, unknown>;
-};
+	_id: string
+	schemaId: string
+	slug?: string
+	status: "draft" | "published"
+	data: Record<string, unknown>
+}
 
 function getContentPreview(
 	data: Record<string, unknown>,
 	query: string,
 ): string {
-	const dataStr = JSON.stringify(data);
-	const lowerStr = dataStr.toLowerCase();
-	const index = lowerStr.indexOf(query.toLowerCase());
+	const dataStr = JSON.stringify(data)
+	const lowerStr = dataStr.toLowerCase()
+	const index = lowerStr.indexOf(query.toLowerCase())
 
 	if (index === -1) {
-		return dataStr.slice(0, 100) + (dataStr.length > 100 ? "..." : "");
+		return dataStr.slice(0, 100) + (dataStr.length > 100 ? "..." : "")
 	}
 
-	const start = Math.max(0, index - 30);
-	const end = Math.min(dataStr.length, index + query.length + 30);
-	const preview = dataStr.slice(start, end);
+	const start = Math.max(0, index - 30)
+	const end = Math.min(dataStr.length, index + query.length + 30)
+	const preview = dataStr.slice(start, end)
 
 	return (
 		(start > 0 ? "..." : "") + preview + (end < dataStr.length ? "..." : "")
-	);
+	)
 }
 
 // ================================
@@ -288,24 +288,24 @@ export const getSchemaStats = tool({
 	}),
 	execute: async ({ schemaId }) => {
 		try {
-			const schema = await getCachedSchema(schemaId);
+			const schema = await getCachedSchema(schemaId)
 
 			if (!schema) {
 				return {
 					success: false,
 					error: "Schema not found",
-				};
+				}
 			}
 
 			// Get content counts
 			const allContent = await fetchAuthQuery(api.cms.content.listBySchema, {
 				schemaId: schemaId as Id<"cmsSchemas">,
-			});
+			})
 
 			const draftContent = await fetchAuthQuery(api.cms.content.listBySchema, {
 				schemaId: schemaId as Id<"cmsSchemas">,
 				status: "draft",
-			});
+			})
 
 			const publishedContent = await fetchAuthQuery(
 				api.cms.content.listBySchema,
@@ -313,20 +313,20 @@ export const getSchemaStats = tool({
 					schemaId: schemaId as Id<"cmsSchemas">,
 					status: "published",
 				},
-			);
+			)
 
-			const totalCount = allContent?.length ?? 0;
-			const draftCount = draftContent?.length ?? 0;
-			const publishedCount = publishedContent?.length ?? 0;
+			const totalCount = allContent?.length ?? 0
+			const draftCount = draftContent?.length ?? 0
+			const publishedCount = publishedContent?.length ?? 0
 
 			// Field summary
 			const fieldSummary = schema.fields.map((f) => ({
 				name: f.name,
 				type: f.type,
 				required: f.required ?? false,
-			}));
+			}))
 
-			logger.tool("getSchemaStats", { schemaId }, { totalCount });
+			logger.tool("getSchemaStats", { schemaId }, { totalCount })
 
 			return {
 				success: true,
@@ -347,15 +347,15 @@ export const getSchemaStats = tool({
 					fields: fieldSummary,
 					lastUpdated: new Date(schema.updatedAt).toISOString(),
 				},
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 // ================================
 // PREVIEW CHANGES TOOL
@@ -382,16 +382,16 @@ export const previewChanges = tool({
 		try {
 			const content = await fetchAuthQuery(api.cms.content.get, {
 				id: contentId as Id<"cmsContent">,
-			});
+			})
 
 			if (!content) {
 				return {
 					success: false,
 					error: "Content not found",
-				};
+				}
 			}
 
-			const changes: ChangeItem[] = [];
+			const changes: ChangeItem[] = []
 
 			// Check slug change
 			if (newSlug !== undefined && newSlug !== content.slug) {
@@ -399,7 +399,7 @@ export const previewChanges = tool({
 					field: "slug",
 					from: content.slug ?? "(none)",
 					to: newSlug,
-				});
+				})
 			}
 
 			// Check status change
@@ -408,22 +408,22 @@ export const previewChanges = tool({
 					field: "status",
 					from: content.status,
 					to: newStatus,
-				});
+				})
 			}
 
 			// Check data changes
 			if (newData) {
-				const currentData = content.data as Record<string, unknown>;
+				const currentData = content.data as Record<string, unknown>
 
 				for (const [key, newValue] of Object.entries(newData)) {
-					const currentValue = currentData[key];
+					const currentValue = currentData[key]
 
 					if (JSON.stringify(currentValue) !== JSON.stringify(newValue)) {
 						changes.push({
 							field: `data.${key}`,
 							from: formatValue(currentValue),
 							to: formatValue(newValue),
-						});
+						})
 					}
 				}
 			}
@@ -432,7 +432,7 @@ export const previewChanges = tool({
 				"previewChanges",
 				{ contentId },
 				{ changeCount: changes.length },
-			);
+			)
 
 			return {
 				success: true,
@@ -448,28 +448,28 @@ export const previewChanges = tool({
 					changes.length > 0
 						? `${changes.length} change(s) will be made`
 						: "No changes detected",
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 type ChangeItem = {
-	field: string;
-	from: string;
-	to: string;
-};
+	field: string
+	from: string
+	to: string
+}
 
 function formatValue(value: unknown): string {
-	if (value === undefined) return "(undefined)";
-	if (value === null) return "(null)";
+	if (value === undefined) return "(undefined)"
+	if (value === null) return "(null)"
 	if (typeof value === "string")
-		return value.length > 50 ? `${value.slice(0, 50)}...` : value;
+		return value.length > 50 ? `${value.slice(0, 50)}...` : value
 	if (typeof value === "object")
-		return `${JSON.stringify(value).slice(0, 50)}...`;
-	return String(value);
+		return `${JSON.stringify(value).slice(0, 50)}...`
+	return String(value)
 }

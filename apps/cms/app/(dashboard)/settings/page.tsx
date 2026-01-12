@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	Bell,
@@ -9,16 +9,16 @@ import {
 	Palette,
 	Settings,
 	Users,
-} from "lucide-react";
-import Link from "next/link";
+} from "lucide-react"
+import Link from "next/link"
 
 type SettingCard = {
-	title: string;
-	description: string;
-	icon: React.ReactNode;
-	href: string;
-	badge?: string;
-};
+	title: string
+	description: string
+	icon: React.ReactNode
+	href: string
+	badge?: string
+}
 
 export default function SettingsPage() {
 	const settingCards: SettingCard[] = [
@@ -74,7 +74,7 @@ export default function SettingsPage() {
 			href: "/settings/ai-assistant",
 			badge: "New",
 		},
-	];
+	]
 
 	return (
 		<div className="mx-auto max-w-6xl">
@@ -128,5 +128,5 @@ export default function SettingsPage() {
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

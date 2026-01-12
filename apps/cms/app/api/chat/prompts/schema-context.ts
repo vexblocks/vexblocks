@@ -11,17 +11,17 @@ Here are the current CMS types and schemas in the database:
 
 \`\`\`typescript
 ${generatedTypes}
-\`\`\``;
+\`\`\``
 
 	if (schemas && schemas.length > 0) {
 		context += `
 
 ## Current Schemas Summary
 
-${formatSchemasSummary(schemas)}`;
+${formatSchemasSummary(schemas)}`
 	}
 
-	return context;
+	return context
 }
 
 /**
@@ -30,36 +30,36 @@ ${formatSchemasSummary(schemas)}`;
 function formatSchemasSummary(schemas: unknown[]): string {
 	return (schemas as SchemaInfo[])
 		.map((schema) => {
-			const fieldCount = schema.fields?.length ?? 0;
+			const fieldCount = schema.fields?.length ?? 0
 			const fieldDetails =
 				schema.fields
 					?.map(
 						(f: FieldInfo) =>
 							`    - \`${f.name}\` (${f.type}${f.required ? ", required" : ""})`,
 					)
-					.join("\n") ?? "    - none";
+					.join("\n") ?? "    - none"
 
 			return `- **${schema.displayName}** (\`${schema.name}\`)
   - Type: ${schema.type}
   - ID: \`${schema._id}\`
   - Fields (${fieldCount}):
-${fieldDetails}`;
+${fieldDetails}`
 		})
-		.join("\n\n");
+		.join("\n\n")
 }
 
 type FieldInfo = {
-	name: string;
-	type: string;
-	label?: string;
-	required?: boolean;
-};
+	name: string
+	type: string
+	label?: string
+	required?: boolean
+}
 
 type SchemaInfo = {
-	_id: string;
-	name: string;
-	displayName: string;
-	type: "global" | "page" | "collection";
-	description?: string;
-	fields?: FieldInfo[];
-};
+	_id: string
+	name: string
+	displayName: string
+	type: "global" | "page" | "collection"
+	description?: string
+	fields?: FieldInfo[]
+}

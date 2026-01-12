@@ -1,56 +1,56 @@
-"use client";
+"use client"
 
-import { useChat } from "@ai-sdk/react";
-import { AlertCircle, Bot, Send, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { useChat } from "@ai-sdk/react"
+import { AlertCircle, Bot, Send, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { cn } from "@/lib/utils"
 
 type AIChatProps = {
-	isOpen: boolean;
-	onClose: () => void;
-};
+	isOpen: boolean
+	onClose: () => void
+}
 
 export function AIChat({ isOpen, onClose }: AIChatProps) {
-	const { messages, sendMessage, status, error } = useChat();
+	const { messages, sendMessage, status, error } = useChat()
 
-	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const inputRef = useRef<HTMLTextAreaElement>(null);
-	const [input, setInput] = useState("");
-	const [inputHeight, setInputHeight] = useState(56);
+	const messagesEndRef = useRef<HTMLDivElement>(null)
+	const inputRef = useRef<HTMLTextAreaElement>(null)
+	const [input, setInput] = useState("")
+	const [inputHeight, setInputHeight] = useState(56)
 
-	const isLoading = status === "streaming" || status === "submitted";
+	const isLoading = status === "streaming" || status === "submitted"
 
 	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!input.trim() || isLoading) return;
-		sendMessage({ text: input });
-		setInput("");
-	};
+		e.preventDefault()
+		if (!input.trim() || isLoading) return
+		sendMessage({ text: input })
+		setInput("")
+	}
 
 	// Auto-scroll to bottom when messages change
 	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	});
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+	})
 
 	// Focus input when chat opens
 	useEffect(() => {
 		if (isOpen && inputRef.current) {
-			inputRef.current.focus();
+			inputRef.current.focus()
 		}
-	}, [isOpen]);
+	}, [isOpen])
 
 	// Auto-resize textarea
 	useEffect(() => {
 		if (inputRef.current) {
-			inputRef.current.style.height = "56px";
-			const scrollHeight = inputRef.current.scrollHeight;
-			const newHeight = Math.min(Math.max(scrollHeight, 56), 200);
-			setInputHeight(newHeight);
-			inputRef.current.style.height = `${newHeight}px`;
+			inputRef.current.style.height = "56px"
+			const scrollHeight = inputRef.current.scrollHeight
+			const newHeight = Math.min(Math.max(scrollHeight, 56), 200)
+			setInputHeight(newHeight)
+			inputRef.current.style.height = `${newHeight}px`
 		}
-	});
+	})
 
-	if (!isOpen) return null;
+	if (!isOpen) return null
 
 	return (
 		<div className="fixed right-6 bottom-6 z-50 flex h-150 w-105 flex-col rounded-xl border border-grey-200 bg-white shadow-[0px_8px_32px_rgba(0,0,0,0.12)]">
@@ -119,24 +119,22 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 								<div className="wrap-break-words whitespace-pre-wrap text-sm leading-relaxed">
 									{message.parts?.map((part, i) => {
 										if (part.type === "text") {
-											return (
-												<span key={`${message.id}-${i}`}>{part.text}</span>
-											);
+											return <span key={`${message.id}-${i}`}>{part.text}</span>
 										}
 										// Handle tool invocation parts (AI SDK v6 format)
 										// Tool parts have type like "tool-createSchema", "tool-listSchemas", etc.
 										if (part.type.startsWith("tool-")) {
 											const toolPart = part as unknown as {
-												type: string;
-												toolCallId: string;
-												state: string;
-												input?: unknown;
-												output?: Record<string, unknown>;
-												errorText?: string;
-											};
+												type: string
+												toolCallId: string
+												state: string
+												input?: unknown
+												output?: Record<string, unknown>
+												errorText?: string
+											}
 											// Extract tool name from type (e.g., "tool-createSchema" -> "createSchema")
-											const toolName = part.type.replace("tool-", "");
-											const { state, output, errorText } = toolPart;
+											const toolName = part.type.replace("tool-", "")
+											const { state, output, errorText } = toolPart
 
 											// Handle different states
 											switch (state) {
@@ -144,11 +142,11 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 													if (output) {
 														const success = output.success as
 															| boolean
-															| undefined;
+															| undefined
 														const resultMessage =
 															(output.message as string) ||
 															(output.error as string) ||
-															"Done";
+															"Done"
 														return (
 															<div
 																key={`${message.id}-${i}`}
@@ -162,32 +160,32 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 																<span className="font-medium">{toolName}:</span>{" "}
 																{resultMessage}
 															</div>
-														);
+														)
 													}
-													break;
+													break
 												case "output-error":
 													return (
 														<div
 															key={`${message.id}-${i}`}
-															className="my-1 rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700"
+															className="my-1 rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-red-700 text-xs"
 														>
 															<span className="font-medium">{toolName}:</span>{" "}
 															{errorText || "An error occurred"}
 														</div>
-													);
+													)
 												case "input-available":
 													return (
 														<div
 															key={`${message.id}-${i}`}
-															className="my-1 rounded-md border border-grey-200 bg-grey-50 px-2 py-1.5 text-xs text-grey-600"
+															className="my-1 rounded-md border border-grey-200 bg-grey-50 px-2 py-1.5 text-grey-600 text-xs"
 														>
 															<span className="font-medium">{toolName}</span>{" "}
 															<span className="italic">executing...</span>
 														</div>
-													);
+													)
 											}
 										}
-										return null;
+										return null
 									})}
 								</div>
 							</div>
@@ -244,8 +242,8 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 						onChange={(e) => setInput(e.target.value)}
 						onKeyDown={(e) => {
 							if (e.key === "Enter" && !e.shiftKey) {
-								e.preventDefault();
-								handleSubmit(e);
+								e.preventDefault()
+								handleSubmit(e)
 							}
 						}}
 						placeholder="Type your message..."
@@ -267,5 +265,5 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 				</p>
 			</form>
 		</div>
-	);
+	)
 }

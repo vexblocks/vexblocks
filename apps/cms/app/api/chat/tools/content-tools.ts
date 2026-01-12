@@ -1,8 +1,8 @@
-import { api } from "@repo/backend/convex/_generated/api";
-import type { Id } from "@repo/backend/convex/_generated/dataModel";
-import { tool } from "ai";
-import { z } from "zod";
-import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { tool } from "ai"
+import { z } from "zod"
+import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server"
 
 export const listContent = tool({
 	description:
@@ -19,19 +19,19 @@ export const listContent = tool({
 			const content = await fetchAuthQuery(api.cms.content.listBySchema, {
 				schemaId: schemaId as Id<"cmsSchemas">,
 				status,
-			});
+			})
 			return {
 				success: true,
 				data: content,
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 export const getContent = tool({
 	description:
@@ -43,19 +43,19 @@ export const getContent = tool({
 		try {
 			const content = await fetchAuthQuery(api.cms.content.get, {
 				id: contentId as Id<"cmsContent">,
-			});
+			})
 			return {
 				success: true,
 				data: content,
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 export const createContent = tool({
 	description:
@@ -80,20 +80,20 @@ export const createContent = tool({
 				slug: params.slug,
 				status: params.status,
 				data: params.data,
-			});
+			})
 			return {
 				success: true,
 				data: { contentId },
 				message: `Content created successfully with ID: ${contentId}`,
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
 
 export const updateContent = tool({
 	description:
@@ -115,16 +115,16 @@ export const updateContent = tool({
 			await fetchAuthMutation(api.cms.content.update, {
 				id: contentId as Id<"cmsContent">,
 				...params,
-			});
+			})
 			return {
 				success: true,
 				message: "Content updated successfully",
-			};
+			}
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			};
+			}
 		}
 	},
-});
+})
