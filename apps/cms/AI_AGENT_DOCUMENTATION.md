@@ -4,6 +4,15 @@
 
 The AI agent is powered by **Gemini 2.5 Flash** using **Vercel AI SDK v6** with integrated tools that interact with Convex APIs. The agent helps users manage CMS schemas and content through natural language conversations.
 
+## Architecture
+
+### Key Components
+
+- **Modular Prompts** (`/app/api/chat/prompts/`) - System prompts split into reusable modules
+- **Context Manager** (`/lib/ai-chat/`) - State management using `@lfades/atom` for React
+- **Convex Client** (`/app/api/chat/utils/convex-client.ts`) - Retry logic, caching, and logging
+- **Chat Persistence** (`/lib/ai-chat/use-chat-persistence.ts`) - Syncs chat history with Convex
+
 ## Features
 
 ### 🔒 Safety Restrictions
@@ -49,19 +58,24 @@ The agent has built-in safety measures to protect your data:
      - `icon` (optional string)
      - `userConfirmed` (boolean): Must be true after double confirmation
 
+5. **getSchemaStats** ✨ NEW
+   - Get statistics about a schema
+   - Parameters: `schemaId`
+   - Returns: content count, draft/published breakdown, field summary
+
 #### Content Management
 
-5. **listContent**
+6. **listContent**
    - List all content entries for a schema
    - Parameters:
      - `schemaId` (string)
      - `status` (optional enum): "draft" | "published"
 
-6. **getContent**
+7. **getContent**
    - Get a specific content entry by ID
    - Parameters: `contentId`
 
-7. **createContent**
+8. **createContent**
    - Create a new content entry
    - Parameters:
      - `schemaId` (string)
@@ -69,13 +83,30 @@ The agent has built-in safety measures to protect your data:
      - `status` (enum): "draft" | "published"
      - `data` (object): Content data matching schema fields
 
-8. **updateContent**
+9. **updateContent**
    - Update an existing content entry
    - Parameters:
      - `contentId` (string)
      - `slug` (optional string)
      - `status` (optional enum): "draft" | "published"
      - `data` (optional object)
+
+#### Utility Tools ✨ NEW
+
+10. **validateContent**
+    - Validate content data against schema fields before creating/updating
+    - Parameters: `schemaId`, `data`
+    - Returns: validation errors and warnings
+
+11. **searchContent**
+    - Search for content across schemas
+    - Parameters: `query`, `schemaId` (optional), `status` (optional), `limit`
+    - Returns: matching content entries with preview
+
+12. **previewChanges**
+    - Preview what changes will be made before applying
+    - Parameters: `contentId`, `newData`, `newSlug`, `newStatus`
+    - Returns: diff of changes
 
 ## Context Awareness
 
@@ -130,21 +161,86 @@ Agent will:
 
 ### File Structure
 
-- **Route**: `/apps/cms/app/api/chat/route.ts` - Main API endpoint
-- **Tools Directory**: `/apps/cms/app/api/chat/tools/`
-  - `schema-tools.ts` - Schema management tools (list, get, create, update)
-  - `content-tools.ts` - Content management tools (list, get, create, update)
-  - `index.ts` - Exports all tools
-- **Frontend**: `/apps/cms/components/molecules/ai-chat.tsx`
-- **Convex APIs**: `/packages/backend/convex/cms/`
+```
+apps/cms/
+├── app/api/chat/
+│   ├── route.ts                    # Main API endpoint
+│   ├── prompts/                    # Modular system prompts
+│   │   ├── index.ts                # Exports
+│   │   ├── system.ts               # buildSystemPrompt()
+│   │   ├── cms-guidelines.ts       # CMS-specific guidelines
+│   │   ├── safety-rules.ts         # Safety restrictions
+│   │   └── schema-context.ts       # Schema context builder
+│   ├── tools/                      # AI agent tools
+│   │   ├── index.ts                # Exports all tools
+│   │   ├── schema-tools.ts         # Schema CRUD operations
+│   │   ├── content-tools.ts        # Content CRUD operations
+│   │   └── utility-tools.ts        # Validation, search, preview
+│   └── utils/
+│       └── convex-client.ts        # Retry logic, caching, logging
+├── lib/ai-chat/                    # Client-side state management
+│   ├── index.ts                    # Exports
+│   ├── context-atoms.ts            # @lfades/atom state atoms
+│   └── use-chat-persistence.ts     # Chat history sync with Convex
+└── components/molecules/
+    └── ai-chat.tsx                 # Chat UI component
+```
 
 ### Technology Stack
 
 - **AI Model**: Google Gemini 2.5 Flash
 - **AI SDK**: Vercel AI SDK v6 (`ai` package)
+- **State Management**: `@lfades/atom` for React
 - **Schema Validation**: Zod
 - **Backend**: Convex (serverless database)
 - **Authentication**: Better Auth
+
+### Key Modules
+
+#### Convex Client (`utils/convex-client.ts`)
+
+```typescript
+// Retry logic with exponential backoff
+await withRetries(() => fetchQuery(...), { maxRetries: 3 })
+
+// Cached schema fetching (1 minute TTL)
+const schemas = await getCachedSchemas()
+
+// Structured logging
+logger.debug("Message", { data })
+logger.error("Error", error)
+```
+
+#### Context Atoms (`lib/ai-chat/context-atoms.ts`)
+
+```typescript
+import { atom } from "@lfades/atom"
+
+// Available atoms
+currentChatIdAtom    // Current chat session ID
+messagesAtom         // Chat messages
+isLoadingAtom        // Loading state
+recentOperationsAtom // Recent tool operations
+cachedSchemaIdsAtom  // Accessed schema IDs
+chatSessionsAtom     // All chat sessions
+chatErrorAtom        // Error state
+```
+
+#### Chat Persistence (`lib/ai-chat/use-chat-persistence.ts`)
+
+```typescript
+const {
+  currentChatId,
+  messages,
+  sessions,
+  createChat,
+  addMessage,
+  updateTitle,
+  deleteChat,
+  loadChat,
+  startNewChat,
+} = useChatPersistence()
+```
 
 ### Tool Definition Pattern
 

@@ -1,8 +1,8 @@
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { tool } from "ai"
-import { fetchMutation, fetchQuery } from "convex/nextjs"
-import { z } from "zod"
+import { api } from "@repo/backend/convex/_generated/api";
+import type { Id } from "@repo/backend/convex/_generated/dataModel";
+import { tool } from "ai";
+import { z } from "zod";
+import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server";
 
 export const listContent = tool({
 	description:
@@ -16,22 +16,22 @@ export const listContent = tool({
 	}),
 	execute: async ({ schemaId, status }) => {
 		try {
-			const content = await fetchQuery(api.cms.content.listBySchema, {
+			const content = await fetchAuthQuery(api.cms.content.listBySchema, {
 				schemaId: schemaId as Id<"cmsSchemas">,
 				status,
-			})
+			});
 			return {
 				success: true,
 				data: content,
-			}
+			};
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			}
+			};
 		}
 	},
-})
+});
 
 export const getContent = tool({
 	description:
@@ -41,21 +41,21 @@ export const getContent = tool({
 	}),
 	execute: async ({ contentId }) => {
 		try {
-			const content = await fetchQuery(api.cms.content.get, {
+			const content = await fetchAuthQuery(api.cms.content.get, {
 				id: contentId as Id<"cmsContent">,
-			})
+			});
 			return {
 				success: true,
 				data: content,
-			}
+			};
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			}
+			};
 		}
 	},
-})
+});
 
 export const createContent = tool({
 	description:
@@ -75,25 +75,25 @@ export const createContent = tool({
 	}),
 	execute: async (params) => {
 		try {
-			const contentId = await fetchMutation(api.cms.content.create, {
+			const contentId = await fetchAuthMutation(api.cms.content.create, {
 				schemaId: params.schemaId as Id<"cmsSchemas">,
 				slug: params.slug,
 				status: params.status,
 				data: params.data,
-			})
+			});
 			return {
 				success: true,
 				data: { contentId },
 				message: `Content created successfully with ID: ${contentId}`,
-			}
+			};
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			}
+			};
 		}
 	},
-})
+});
 
 export const updateContent = tool({
 	description:
@@ -112,19 +112,19 @@ export const updateContent = tool({
 	}),
 	execute: async ({ contentId, ...params }) => {
 		try {
-			await fetchMutation(api.cms.content.update, {
+			await fetchAuthMutation(api.cms.content.update, {
 				id: contentId as Id<"cmsContent">,
 				...params,
-			})
+			});
 			return {
 				success: true,
 				message: "Content updated successfully",
-			}
+			};
 		} catch (error) {
 			return {
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
-			}
+			};
 		}
 	},
-})
+});

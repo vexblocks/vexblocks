@@ -1,23 +1,24 @@
-"use client"
+"use client";
 
 import {
 	Bell,
+	Bot,
 	Eye,
 	Globe,
 	Languages,
 	Palette,
 	Settings,
 	Users,
-} from "lucide-react"
-import Link from "next/link"
+} from "lucide-react";
+import Link from "next/link";
 
 type SettingCard = {
-	title: string
-	description: string
-	icon: React.ReactNode
-	href: string
-	badge?: string
-}
+	title: string;
+	description: string;
+	icon: React.ReactNode;
+	href: string;
+	badge?: string;
+};
 
 export default function SettingsPage() {
 	const settingCards: SettingCard[] = [
@@ -66,7 +67,14 @@ export default function SettingsPage() {
 			icon: <Palette className="h-6 w-6" />,
 			href: "/settings/appearance",
 		},
-	]
+		{
+			title: "AI Assistant",
+			description: "Learn how to use the AI-powered CMS assistant",
+			icon: <Bot className="h-6 w-6" />,
+			href: "/settings/ai-assistant",
+			badge: "New",
+		},
+	];
 
 	return (
 		<div className="mx-auto max-w-6xl">
@@ -120,5 +128,5 @@ export default function SettingsPage() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

@@ -3,13 +3,19 @@ import {
 	getContent,
 	listContent,
 	updateContent,
-} from "./content-tools"
+} from "./content-tools";
 import {
 	createSchema,
 	getSchema,
 	listSchemas,
 	updateSchema,
-} from "./schema-tools"
+} from "./schema-tools";
+import {
+	getSchemaStats,
+	previewChanges,
+	searchContent,
+	validateContent,
+} from "./utility-tools";
 
 export const tools = {
 	// Schema tools
@@ -17,10 +23,16 @@ export const tools = {
 	getSchema,
 	createSchema,
 	updateSchema,
+	getSchemaStats,
 
 	// Content tools
 	listContent,
 	getContent,
 	createContent,
 	updateContent,
-}
+
+	// Utility tools
+	validateContent,
+	searchContent,
+	previewChanges,
+};
