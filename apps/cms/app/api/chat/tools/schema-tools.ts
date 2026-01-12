@@ -26,18 +26,50 @@ export const listSchemas = tool({
 
 export const getSchema = tool({
 	description:
-		"Get details of a specific schema by its ID. Use this to see the structure and fields of a schema.",
+		"Get details of a specific schema by its ID or name. Use this to see the structure and fields of a schema before creating content. You can pass either the schema ID or the schema name (e.g., 'todos', 'blog_posts').",
 	inputSchema: z.object({
-		schemaId: z.string().describe("The ID of the schema to retrieve"),
+		schemaId: z
+			.string()
+			.optional()
+			.describe("The ID of the schema to retrieve"),
+		schemaName: z
+			.string()
+			.optional()
+			.describe(
+				"The name of the schema to retrieve (e.g., 'todos', 'blog_posts')",
+			),
 	}),
-	execute: async ({ schemaId }) => {
+	execute: async ({ schemaId, schemaName }) => {
 		try {
-			const schema = await fetchAuthQuery(api.cms.schemas.get, {
-				id: schemaId as Id<"cmsSchemas">,
-			});
+			// Try by ID first if provided
+			if (schemaId) {
+				const schema = await fetchAuthQuery(api.cms.schemas.get, {
+					id: schemaId as Id<"cmsSchemas">,
+				});
+				if (schema) {
+					return {
+						success: true,
+						data: schema,
+					};
+				}
+			}
+
+			// If no ID or not found by ID, try by name
+			if (schemaName) {
+				const schema = await fetchAuthQuery(api.cms.schemas.getByName, {
+					name: schemaName,
+				});
+				if (schema) {
+					return {
+						success: true,
+						data: schema,
+					};
+				}
+			}
+
 			return {
-				success: true,
-				data: schema,
+				success: false,
+				error: "Schema not found. Please provide a valid schema ID or name.",
 			};
 		} catch (error) {
 			return {

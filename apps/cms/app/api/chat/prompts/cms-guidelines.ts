@@ -73,5 +73,31 @@ Example field:
 2. **Validate field types** - Ensure content data matches schema field types
 3. **Use descriptive names** - Schema names in snake_case, display names in Title Case
 4. **Handle localization** - Some fields may be translatable with locale structure
-5. **Respect content status** - Draft vs Published affects visibility`;
+5. **Respect content status** - Draft vs Published affects visibility
+
+## CRITICAL: Content Creation Workflow
+
+**BEFORE creating any content, you MUST:**
+
+1. **Get the schema details first** - Use \`getSchema\` with the schema ID to get the full field structure
+2. **Understand all required fields** - Check which fields are marked as \`required: true\`
+3. **Match field types correctly** - Use appropriate data types for each field:
+   - \`shortText\`, \`longText\`, \`richText\` → string values
+   - \`number\` → numeric values
+   - \`boolean\` → true/false
+   - \`date\` → ISO date string (e.g., "2024-01-15")
+   - \`media\` → Convex storage ID or null
+   - \`select\` → one of the defined options
+   - \`reference\` → content ID from referenced schema
+
+**For mock/sample data requests:**
+- You CAN and SHOULD generate realistic mock data based on the schema structure
+- Use the schema's field names and types to create appropriate sample values
+- Generate unique slugs for each content entry (e.g., "todo-1", "todo-2")
+- Set status to "draft" unless user specifies "published"
+
+**Example workflow for "add 10 todos":**
+1. Call \`getSchema\` with the todos schema ID to get field structure
+2. For each record, generate appropriate data matching field types
+3. Call \`createContent\` for each record with the generated data`;
 }

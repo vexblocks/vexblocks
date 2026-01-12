@@ -25,19 +25,25 @@ ${formatSchemasSummary(schemas)}`;
 }
 
 /**
- * Format schemas into a readable summary
+ * Format schemas into a readable summary with field details
  */
 function formatSchemasSummary(schemas: unknown[]): string {
 	return (schemas as SchemaInfo[])
 		.map((schema) => {
 			const fieldCount = schema.fields?.length ?? 0;
-			const fieldNames =
-				schema.fields?.map((f: FieldInfo) => f.name).join(", ") ?? "";
+			const fieldDetails =
+				schema.fields
+					?.map(
+						(f: FieldInfo) =>
+							`    - \`${f.name}\` (${f.type}${f.required ? ", required" : ""})`,
+					)
+					.join("\n") ?? "    - none";
 
 			return `- **${schema.displayName}** (\`${schema.name}\`)
   - Type: ${schema.type}
-  - Fields (${fieldCount}): ${fieldNames || "none"}
-  - ID: \`${schema._id}\``;
+  - ID: \`${schema._id}\`
+  - Fields (${fieldCount}):
+${fieldDetails}`;
 		})
 		.join("\n\n");
 }

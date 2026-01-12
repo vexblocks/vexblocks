@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { stepCountIs, streamText } from "ai";
 import { isAuthenticated } from "@/lib/auth-server";
 import { buildSystemPrompt } from "./prompts";
 import { tools } from "./tools";
@@ -108,13 +108,13 @@ export async function POST(req: Request) {
 
 		// Create the AI stream with Gemini 2.5 Flash and tools
 		const result = streamText({
-			model: google("gemini-2.5-flash"),
+			model: google("gemini-2.5-flash-lite"),
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			messages: convertedMessages as any,
 			system: systemPrompt,
 			tools,
 			// Allow multiple steps so the AI can process tool results and respond
-			maxSteps: 5,
+			stopWhen: stepCountIs(5),
 		});
 
 		// Use toUIMessageStreamResponse() for proper streaming with useChat
