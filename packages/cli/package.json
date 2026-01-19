@@ -1,6 +1,6 @@
 {
 	"name": "@vexblocks/cli",
-	"version": "1.1.7",
+	"version": "1.1.8",
 	"description": "CLI for adding VexBlocks Headless CMS to your Turborepo project",
 	"keywords": [
 		"cms",
@@ -43,19 +43,19 @@
 		"prepublishOnly": "pnpm run build"
 	},
 	"dependencies": {
-		"@inquirer/prompts": "^7.2.1",
-		"commander": "^13.0.0",
-		"diff": "^7.0.0",
-		"fs-extra": "^11.2.0",
-		"ora": "^8.1.1",
+		"@inquirer/prompts": "^8.2.0",
+		"commander": "^14.0.2",
+		"diff": "^8.0.3",
+		"fs-extra": "^11.3.3",
+		"ora": "^9.0.0",
 		"picocolors": "^1.1.1",
-		"tar": "^7.4.3"
+		"tar": "^7.5.3"
 	},
 	"devDependencies": {
-		"@types/diff": "^6.0.0",
+		"@types/diff": "^8.0.0",
 		"@types/fs-extra": "^11.0.4",
-		"@types/node": "^24.10.1",
-		"tsup": "^8.3.5",
+		"@types/node": "^25.0.9",
+		"tsup": "^8.5.1",
 		"typescript": "^5.9.3"
 	},
 	"engines": {

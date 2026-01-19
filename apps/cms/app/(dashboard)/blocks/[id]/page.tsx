@@ -913,7 +913,7 @@ export default function BlockDetailPage({
 										<button
 											type="button"
 											onClick={() => setPreviewImage("")}
-											className="-top-2 -right-2 absolute rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+											className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
 										>
 											<X className="h-4 w-4" />
 										</button>

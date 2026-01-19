@@ -170,7 +170,7 @@ export default function PreviewSettingsPage() {
 								placeholder="http://localhost:3000"
 								className="w-full rounded-lg border border-grey-300 px-3 py-2 pr-10 text-sm"
 							/>
-							<Globe className="-translate-y-1/2 absolute top-1/2 right-3 h-4 w-4 text-grey-400" />
+							<Globe className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-grey-400" />
 						</div>
 						<p className="mt-1 text-grey-500 text-xs">
 							The URL where your website runs in development mode (usually
@@ -195,7 +195,7 @@ export default function PreviewSettingsPage() {
 								placeholder="https://www.yoursite.com"
 								className="w-full rounded-lg border border-grey-300 px-3 py-2 pr-10 text-sm"
 							/>
-							<ExternalLink className="-translate-y-1/2 absolute top-1/2 right-3 h-4 w-4 text-grey-400" />
+							<ExternalLink className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-grey-400" />
 						</div>
 						<p className="mt-1 text-grey-500 text-xs">
 							Your production website URL. If not set, the development URL will

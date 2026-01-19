@@ -194,7 +194,7 @@ const FieldEditor = ({
 							placeholder="post_title"
 							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 						/>
-						<div className="-mt-3 absolute top-full left-0">
+						<div className="absolute top-full left-0 -mt-3">
 							{!hasEditedName && field.label && (
 								<p className="text-blue-600 text-xs">
 									✨ Auto-generated from "Label"
@@ -828,7 +828,7 @@ export default function NewBlockPage() {
 								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 								required
 							/>
-							<div className="-mt-3 absolute top-full left-0">
+							<div className="absolute top-full left-0 -mt-3">
 								{!hasEditedName && displayName ? (
 									<p className="text-blue-600 text-xs">
 										✨ Auto-generated from "Display Name"
@@ -896,7 +896,7 @@ export default function NewBlockPage() {
 									<button
 										type="button"
 										onClick={() => setPreviewImage("")}
-										className="-top-2 -right-2 absolute rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
+										className="absolute -top-2 -right-2 rounded-full bg-error p-1 text-white shadow-md transition-colors hover:bg-error/80"
 									>
 										<X className="h-4 w-4" />
 									</button>

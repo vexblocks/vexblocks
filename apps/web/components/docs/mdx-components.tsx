@@ -107,7 +107,7 @@ export const Steps = ({ children }: { children: React.ReactNode }) => {
 export const Step = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<div className="relative mb-12 ml-4 [counter-increment:step]">
-			<div className="-left-[2.2rem] absolute flex h-8 w-8 items-center justify-center rounded-full border-4 border-background bg-muted font-medium font-mono text-sm">
+			<div className="absolute -left-[2.2rem] flex h-8 w-8 items-center justify-center rounded-full border-4 border-background bg-muted font-medium font-mono text-sm">
 				<span className="before:content-[counter(step)]" />
 			</div>
 			<div className="pl-2">{children}</div>

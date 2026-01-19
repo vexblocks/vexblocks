@@ -377,7 +377,7 @@ function FieldEditor({
 								: "border-grey-300"
 						}`}
 					/>
-					<div className="-mt-3 absolute top-full left-0">
+					<div className="absolute top-full left-0 -mt-3">
 						{isNameLocked ? (
 							<p className="text-grey-500 text-xs">
 								Field name cannot be changed to prevent data loss

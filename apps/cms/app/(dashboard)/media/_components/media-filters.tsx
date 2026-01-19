@@ -44,7 +44,7 @@ export function MediaFilters({
 			<div className="space-y-4">
 				{/* Search */}
 				<div className="relative">
-					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-5 w-5 text-grey-400" />
+					<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-grey-400" />
 					<input
 						type="text"
 						value={searchInput}
@@ -56,7 +56,7 @@ export function MediaFilters({
 						<button
 							type="button"
 							onClick={() => handleSearchChange("")}
-							className="-translate-y-1/2 absolute top-1/2 right-3 text-grey-400 hover:text-grey-600"
+							className="absolute top-1/2 right-3 -translate-y-1/2 text-grey-400 hover:text-grey-600"
 						>
 							<X className="h-5 w-5" />
 						</button>

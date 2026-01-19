@@ -382,7 +382,7 @@ const FieldEditor = ({
 									: "border-grey-300"
 							}`}
 						/>
-						<div className="-mt-3 absolute top-full left-0">
+						<div className="absolute top-full left-0 -mt-3">
 							{isDuplicate ? (
 								<p className="text-red-500 text-xs">
 									⚠️ Duplicate field name - must be unique
@@ -1374,7 +1374,7 @@ export default function NewSchemaPage() {
 								}`}
 								required
 							/>
-							<div className="-mt-3 absolute top-full left-0">
+							<div className="absolute top-full left-0 -mt-3">
 								{name && !validateFieldName(name) ? (
 									<p className="text-red-500 text-xs">
 										Only lowercase letters, numbers, and underscores allowed

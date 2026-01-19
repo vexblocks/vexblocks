@@ -84,7 +84,7 @@ export function TableOfContents() {
 
 	return (
 		<div className="hidden xl:block">
-			<div className="-mt-10 sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto pt-10">
+			<div className="sticky top-24 -mt-10 max-h-[calc(100vh-6rem)] overflow-y-auto pt-10">
 				<div className="space-y-3">
 					<p className="font-semibold text-sm">On This Page</p>
 					<nav>

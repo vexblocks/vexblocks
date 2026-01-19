@@ -1,4 +1,23 @@
 {
+	"$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+	"files": {
+		"ignoreUnknown": false,
+		"includes": [
+			"**/*",
+			"!**/node_modules",
+			"!!**/.next",
+			"!!**/.vercel",
+			"!**/public",
+			"!!**/dist",
+			"!**/.vscode",
+			"!**/pnpm-lock.yaml",
+			"!**/package-lock.json",
+			"!**/yarn.lock",
+			"!**/convex/_generated",
+			"!**/types/generated.ts",
+			"!**/next-env.d.ts"
+		]
+	},
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -9,32 +28,11 @@
 		"formatWithErrors": false,
 		"lineEnding": "lf",
 		"lineWidth": 80,
-		"attributePosition": "auto",
-		"includes": [
-			"**",
-			"!**/node_modules",
-			"!**/.next",
-			"!**/.vercel",
-			"!**/public",
-			"!**/dist",
-			"!**/.vscode",
-			"!**/pnpm-lock.yaml",
-			"!**/package-lock.json",
-			"!**/yarn.lock",
-			"!**/convex/_generated",
-			"!**/types/generated.ts",
-			"!**/next-env.d.ts"
-		]
+		"attributePosition": "auto"
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
-		"includes": [
-			"**",
-			"!**/convex/_generated",
-			"!**/types/generated.ts",
-			"!**/next-env.d.ts"
-		],
 		"rules": {
 			"recommended": true,
 			"correctness": {
@@ -89,11 +87,7 @@
 				"useKeyWithClickEvents": "off",
 				"useMediaCaption": "off",
 				"useSemanticElements": "off",
-				"noLabelWithoutControl": "off",
-				"noStaticElementInteractions": "off"
-			},
-			"performance": {
-				"noImgElement": "warn"
+				"noLabelWithoutControl": "off"
 			}
 		}
 	},
@@ -110,6 +104,7 @@
 	},
 	"css": {
 		"parser": {
+			"cssModules": false,
 			"tailwindDirectives": true
 		},
 		"linter": {

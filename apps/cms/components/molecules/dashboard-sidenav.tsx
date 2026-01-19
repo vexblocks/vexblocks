@@ -157,7 +157,7 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 							<div className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg bg-grey-900 px-3 py-2 font-medium text-sm text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
 								{item.label}
 								{/* Arrow */}
-								<div className="-left-1 -translate-y-1/2 absolute top-1/2 border-8 border-transparent border-r-grey-900" />
+								<div className="absolute top-1/2 -left-1 -translate-y-1/2 border-8 border-transparent border-r-grey-900" />
 							</div>
 						)}
 					</Link>
@@ -192,7 +192,7 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 					{isCollapsed && (
 						<div className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg bg-grey-900 px-3 py-2 font-medium text-sm text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
 							Sign Out
-							<div className="-left-1 -translate-y-1/2 absolute top-1/2 border-8 border-transparent border-r-grey-900" />
+							<div className="absolute top-1/2 -left-1 -translate-y-1/2 border-8 border-transparent border-r-grey-900" />
 						</div>
 					)}
 				</button>
