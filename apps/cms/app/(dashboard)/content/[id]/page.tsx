@@ -21,6 +21,7 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { use, useEffect, useRef, useState } from "react"
+import TextareaAutosize from "react-textarea-autosize"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
@@ -498,7 +499,7 @@ export default function EditContentPage({
 		<div className={showPreview ? "flex gap-8" : "mx-auto w-full px-8"}>
 			{/* Editor Panel */}
 			<div className={showPreview ? "w-[30%] min-w-0 shrink-0" : "w-full"}>
-				<div className="mb-6 flex items-center justify-between">
+				<div className="mb-4 flex items-center justify-between">
 					<Link
 						href={backUrl}
 						className="inline-flex items-center gap-2 text-grey-500 hover:text-primary"
@@ -547,8 +548,8 @@ export default function EditContentPage({
 				</div>
 
 				<div className="mb-6">
-					<h1 className="font-bold text-3xl text-primary">Edit Content</h1>
-					<p className="mt-2 text-grey-500">{schema.displayName}</p>
+					<h1 className="font-bold text-2xl text-primary">Edit Content</h1>
+					<p className="mt-1 text-grey-500 text-sm">{schema.displayName}</p>
 				</div>
 
 				{error && (
@@ -598,7 +599,7 @@ export default function EditContentPage({
 				<form
 					id="content-form"
 					onSubmit={handleSubmit}
-					className="space-y-6 2xl:px-16"
+					className="space-y-4 2xl:px-16"
 				>
 					{/* Locale Selector */}
 					{hasLocales && locales.length > 0 && (
@@ -617,7 +618,7 @@ export default function EditContentPage({
 					)}
 
 					{/* Content Fields */}
-					<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
+					<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
 						<div className="mb-4 flex items-center justify-between">
 							<h2 className="font-semibold text-lg text-primary">
 								Content Fields
@@ -628,7 +629,7 @@ export default function EditContentPage({
 								</span>
 							)}
 						</div>
-						<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+						<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 							{(() => {
 								// Group consecutive small fields together
 								const fieldGroups: any[][] = []
@@ -759,11 +760,11 @@ export default function EditContentPage({
 
 					{/* SEO */}
 					{schema.type !== "global" && (
-						<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
+						<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
 							<h2 className="mb-4 font-semibold text-lg text-primary">
 								SEO Metadata
 							</h2>
-							<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+							<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 								{/* Left Column - SEO Title & Description */}
 								<div className="space-y-4">
 									<div>
@@ -785,17 +786,18 @@ export default function EditContentPage({
 									<div>
 										<label
 											htmlFor="seo-description"
-											className="mb-2 block font-medium text-grey-500 text-sm"
+											className="mb-1 block font-medium text-grey-500 text-sm"
 										>
 											SEO Description
 										</label>
-										<textarea
+										<TextareaAutosize
 											id="seo-description"
 											value={seoDescription}
 											onChange={(e) => setSeoDescription(e.target.value)}
 											placeholder="Page description for search engines"
-											rows={3}
-											className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+											minRows={2}
+											maxRows={6}
+											className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 										/>
 									</div>
 								</div>
@@ -881,7 +883,7 @@ export default function EditContentPage({
 					)}
 
 					{/* Status */}
-					<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
+					<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
 						<h2 className="mb-4 font-semibold text-lg text-primary">
 							Publication Status
 						</h2>

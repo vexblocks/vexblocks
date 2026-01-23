@@ -5,6 +5,7 @@ import { CFImage, getStringValue } from "@repo/cms-shared"
 import { Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState } from "react"
+import TextareaAutosize from "react-textarea-autosize"
 import type { Field } from "./types"
 
 // Sanitize content to remove unusual line terminators
@@ -101,14 +102,15 @@ export function BasicFieldRenderer({
 		case "longText":
 			return (
 				<div>
-					<textarea
+					<TextareaAutosize
 						id={fieldId}
 						value={defaultValue}
 						onChange={(e) => onChange(e.target.value)}
 						placeholder={field.helpText}
 						required={field.required}
-						rows={4}
-						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						minRows={1}
+						maxRows={10}
+						className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 					/>
 				</div>
 			)

@@ -10,6 +10,7 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import TextareaAutosize from "react-textarea-autosize"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
 import { sanitizeData } from "@/lib/sanitize-data"
@@ -332,7 +333,7 @@ export default function NewContentPage() {
 
 	return (
 		<div className="mx-auto">
-			<div className="mb-6">
+			<div className="mb-4">
 				<Link
 					href={backUrl}
 					className="inline-flex items-center gap-2 text-grey-500 hover:text-primary"
@@ -342,13 +343,13 @@ export default function NewContentPage() {
 				</Link>
 			</div>
 
-			<div className="mb-6">
-				<h1 className="font-bold text-3xl text-primary">Create New Content</h1>
-				<p className="mt-2 text-grey-500">Add a new content entry</p>
+			<div className="mb-4">
+				<h1 className="font-bold text-2xl text-primary">Create New Content</h1>
+				<p className="mt-1 text-grey-500 text-sm">Add a new content entry</p>
 			</div>
 
 			{error && (
-				<div className="mb-6 rounded-lg bg-red-50 p-4">
+				<div className="mb-4 rounded-lg bg-red-50 p-4">
 					<p className="text-error text-sm">{error}</p>
 				</div>
 			)}
@@ -356,10 +357,10 @@ export default function NewContentPage() {
 			<form
 				id="content-form"
 				onSubmit={handleSubmit}
-				className="space-y-6 2xl:px-16"
+				className="space-y-4 2xl:px-16"
 			>
 				{/* Schema Selection */}
-				<div className="rounded-lg bg-white p-6 shadow">
+				<div className="rounded-lg bg-white p-4 shadow">
 					<label
 						htmlFor="schema-select"
 						className="mb-2 block font-medium text-grey-500 text-sm"
@@ -404,7 +405,7 @@ export default function NewContentPage() {
 							</div>
 						)}
 
-						<div className="rounded-lg bg-white p-6 shadow">
+						<div className="rounded-lg bg-white p-4 shadow">
 							<div className="mb-4 flex items-center justify-between">
 								<h2 className="font-semibold text-lg text-primary">
 									Content Fields
@@ -415,7 +416,7 @@ export default function NewContentPage() {
 									</span>
 								)}
 							</div>
-							<div className="space-y-6">
+							<div className="space-y-4">
 								{selectedSchema.fields.map((field: any) => {
 									const isTranslatable = field.translatable && hasLocales
 									const value = isTranslatable
@@ -449,11 +450,11 @@ export default function NewContentPage() {
 
 						{/* SEO (only for pages and collections, not global) */}
 						{selectedSchema.type !== "global" && (
-							<div className="rounded-lg bg-white p-6 shadow">
+							<div className="rounded-lg bg-white p-4 shadow">
 								<h2 className="mb-4 font-semibold text-lg text-primary">
 									SEO Metadata
 								</h2>
-								<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+								<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 									{/* Left Column - SEO Title & Description */}
 									<div className="space-y-4">
 										<div>
@@ -479,13 +480,14 @@ export default function NewContentPage() {
 											>
 												SEO Description
 											</label>
-											<textarea
+											<TextareaAutosize
 												id="seo-description"
 												value={seoDescription}
 												onChange={(e) => setSeoDescription(e.target.value)}
 												placeholder="Page description for search engines"
-												rows={3}
-												className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+												minRows={2}
+												maxRows={6}
+												className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 											/>
 										</div>
 									</div>
@@ -571,7 +573,7 @@ export default function NewContentPage() {
 						)}
 
 						{/* Status */}
-						<div className="rounded-lg bg-white p-6 shadow">
+						<div className="rounded-lg bg-white p-4 shadow">
 							<h2 className="mb-4 font-semibold text-lg text-primary">
 								Publication Status
 							</h2>

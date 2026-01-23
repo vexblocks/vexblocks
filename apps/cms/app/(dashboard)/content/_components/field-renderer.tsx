@@ -65,7 +65,7 @@ export function FieldRenderer({
 				className="rounded-lg border-2 border-grey-200 bg-grey-50 p-4 transition-all duration-200"
 				style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 			>
-				<div className="mb-4 flex items-center gap-2">
+				<div className="mb-3 flex items-center gap-2">
 					<Folder className="h-5 w-5 text-primary" />
 					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
 					<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
@@ -73,7 +73,7 @@ export function FieldRenderer({
 					</span>
 				</div>
 				{field.helpText && (
-					<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
+					<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
 				)}
 				<div
 					className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
@@ -198,7 +198,7 @@ export function FieldRenderer({
 					className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4"
 					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 				>
-					<div className="mb-4 flex items-center gap-2">
+					<div className="mb-3 flex items-center gap-2">
 						<Layers className="h-5 w-5 text-blue-600" />
 						<h3 className="font-semibold text-grey-900 text-lg">
 							{field.label}
@@ -225,7 +225,7 @@ export function FieldRenderer({
 					className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4"
 					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 				>
-					<div className="mb-4 flex items-center justify-between">
+					<div className="mb-2 flex items-center justify-between">
 						<div className="flex items-center gap-2">
 							<Layers className="h-5 w-5 text-blue-600" />
 							<h3 className="font-semibold text-grey-900 text-lg">
@@ -262,7 +262,7 @@ export function FieldRenderer({
 						</div>
 					</div>
 					{field.helpText && (
-						<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
+						<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
 					)}
 					{!isCollapsed && (
 						<div
@@ -389,10 +389,10 @@ export function FieldRenderer({
 		return (
 			<div
 				data-field-path={field.name}
-				className="rounded-lg border-2 border-green-200 bg-green-50 p-4 transition-all duration-200"
+				className="rounded-lg border-2 border-green-200 bg-green-50 p-2 transition-all duration-200"
 				style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 			>
-				<div className="mb-4 flex items-center justify-between">
+				<div className="mb-2 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Layers className="h-5 w-5 text-primary" />
 						<h3 className="font-semibold text-grey-900 text-lg">
@@ -413,7 +413,7 @@ export function FieldRenderer({
 					</button>
 				</div>
 				{field.helpText && (
-					<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
+					<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
 				)}
 
 				{items.length === 0 ? (
@@ -427,9 +427,9 @@ export function FieldRenderer({
 						{items.map((item, index) => (
 							<div
 								key={index}
-								className="rounded-lg border border-grey-300 bg-white p-4 shadow-sm"
+								className="rounded-lg border border-grey-300 bg-white p-1.5 shadow-sm"
 							>
-								<div className="mb-3 flex items-center justify-between">
+								<div className="mb-2 flex items-center justify-between">
 									<h4 className="font-medium text-grey-700 text-sm">
 										Item #{index + 1}
 									</h4>
