@@ -68,59 +68,48 @@ function BlockReferenceContent({
 	// The data for the block fields (excluding the blockId metadata)
 	const blockFieldsData = data?.fields || {}
 
-	// Handle field changes using path-based updates
+	// Handle field changes using path-based updates (supports nested paths like "items[0].details[0].text")
 	const handleFieldChange = (fieldPath: string, value: any) => {
-		// Extract field name from path (e.g., "blocks.features" -> "features")
-		const parts = fieldPath.split(".")
-		const fieldName = parts[parts.length - 1]
-
-		// Handle array paths like "features[0].title"
-		if (fieldPath.includes("[")) {
-			// Parse the path to update nested array data
-			const updatedFields = { ...blockFieldsData }
-			setNestedValue(updatedFields, fieldPath.replace(`${path}.`, ""), value)
-			onChange({
-				blockId,
-				blockName,
-				fields: updatedFields,
-			})
-		} else {
-			onChange({
-				blockId,
-				blockName,
-				fields: {
-					...blockFieldsData,
-					[fieldName]: value,
-				},
-			})
-		}
-	}
-
-	// Handle adding repeater items
-	const handleAddRepeaterItem = (repeaterPath: string) => {
-		const fieldName = repeaterPath.split(".").pop() || ""
-		const currentArray = blockFieldsData[fieldName] || []
+		// Remove the base path prefix to get the relative path within blockFieldsData
+		const relativePath = fieldPath.replace(`${path}.`, "")
+		const updatedFields = setNestedValue(blockFieldsData, relativePath, value)
 		onChange({
 			blockId,
 			blockName,
-			fields: {
-				...blockFieldsData,
-				[fieldName]: [...currentArray, {}],
-			},
+			fields: updatedFields,
 		})
 	}
 
-	// Handle removing repeater items
-	const handleRemoveRepeaterItem = (repeaterPath: string, index: number) => {
-		const fieldName = repeaterPath.split(".").pop() || ""
-		const currentArray = blockFieldsData[fieldName] || []
+	// Handle adding repeater items (supports nested paths like "items[0].details")
+	const handleAddRepeaterItem = (repeaterPath: string) => {
+		// Remove the base path prefix to get the relative path within blockFieldsData
+		const relativePath = repeaterPath.replace(`${path}.`, "")
+		const currentArray = getNestedValue(blockFieldsData, relativePath) || []
+		const updatedFields = setNestedValue(blockFieldsData, relativePath, [
+			...currentArray,
+			{},
+		])
 		onChange({
 			blockId,
 			blockName,
-			fields: {
-				...blockFieldsData,
-				[fieldName]: currentArray.filter((_: any, i: number) => i !== index),
-			},
+			fields: updatedFields,
+		})
+	}
+
+	// Handle removing repeater items (supports nested paths like "items[0].details")
+	const handleRemoveRepeaterItem = (repeaterPath: string, index: number) => {
+		// Remove the base path prefix to get the relative path within blockFieldsData
+		const relativePath = repeaterPath.replace(`${path}.`, "")
+		const currentArray = getNestedValue(blockFieldsData, relativePath) || []
+		const updatedFields = setNestedValue(
+			blockFieldsData,
+			relativePath,
+			currentArray.filter((_: any, i: number) => i !== index),
+		)
+		onChange({
+			blockId,
+			blockName,
+			fields: updatedFields,
 		})
 	}
 
@@ -313,10 +302,22 @@ function BlockReferenceFields({
 	)
 }
 
-// Helper to set nested value in object
-function setNestedValue(obj: any, path: string, value: any): void {
+// Helper to get nested value from object
+function getNestedValue(obj: any, path: string): any {
 	const parts = path.split(/[.[\]]/).filter(Boolean)
 	let current = obj
+	for (const part of parts) {
+		if (current === undefined || current === null) return undefined
+		current = current[part]
+	}
+	return current
+}
+
+// Helper to set nested value in object (returns new object)
+function setNestedValue(obj: any, path: string, value: any): any {
+	const parts = path.split(/[.[\]]/).filter(Boolean)
+	const newObj = JSON.parse(JSON.stringify(obj || {}))
+	let current = newObj
 
 	for (let i = 0; i < parts.length - 1; i++) {
 		const part = parts[i]
@@ -330,6 +331,7 @@ function setNestedValue(obj: any, path: string, value: any): void {
 	}
 
 	current[parts[parts.length - 1]] = value
+	return newObj
 }
 
 export function FlexibleBlockItem({

@@ -287,10 +287,10 @@ function SimpleFieldEditor({
 						<option value="youtubeUrl">YouTube URL</option>
 						<option value="media">Media</option>
 						<option value="select">Select</option>
-						{depth < 1 && <option value="group">Group</option>}
-						{depth < 1 && <option value="repeater">Repeater (Array)</option>}
+						{depth < 2 && <option value="group">Group</option>}
+						{depth < 2 && <option value="repeater">Repeater (Array)</option>}
 					</select>
-					{depth >= 1 && (
+					{depth >= 2 && (
 						<p className="mt-1 text-grey-400 text-xs">
 							Group type not available at this nesting level
 						</p>
@@ -407,6 +407,28 @@ function SimpleFieldEditor({
 										]
 										onUpdate(index, { fields: newNestedFields }, depth)
 									}}
+									onAddNestedField={
+										depth + 1 < 2
+											? (parentNestedIndex) => {
+													// Add nested field to a level 1 field
+													const newField: Field = {
+														id: `field_${Date.now()}`,
+														name: "",
+														label: "",
+														type: "shortText",
+														required: false,
+														isExisting: false,
+													}
+													const newNestedFields = [...(field.fields || [])]
+													const targetField = newNestedFields[parentNestedIndex]
+													newNestedFields[parentNestedIndex] = {
+														...targetField,
+														fields: [...(targetField.fields || []), newField],
+													}
+													onUpdate(index, { fields: newNestedFields }, depth)
+												}
+											: undefined
+									}
 									totalFields={field.fields?.length || 0}
 								/>
 							))}

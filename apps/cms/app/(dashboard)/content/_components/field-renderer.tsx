@@ -568,7 +568,7 @@ export function FieldRenderer({
 		<div
 			data-field-path={field.name}
 			className="transition-all duration-200"
-			style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
+			style={{ marginLeft: level > 0 ? `${level * 0.5}rem` : "0" }}
 		>
 			<label
 				htmlFor={fieldId}
