@@ -57,20 +57,27 @@ export function MediaCard({
 			{/* Image */}
 			<div
 				className={`relative overflow-hidden bg-grey-100 ${
-					isSmallImage ? "flex items-center justify-center p-4" : "max-h-80"
+					isSmallImage ? "flex items-center justify-center p-6" : ""
 				}`}
 			>
 				<CFImage
 					assetId={cloudflareId}
 					alt={caption}
 					width={isSmallImage ? width || 96 : 400}
-					height={isSmallImage ? height || 96 : 400}
+					height={
+						isSmallImage
+							? height || 96
+							: height && width
+								? Math.round((400 * height) / width)
+								: 300
+					}
 					variant="public"
 					className={
 						isSmallImage
 							? "object-contain transition-transform group-hover:scale-105"
-							: "h-full w-full object-cover transition-transform group-hover:scale-105"
+							: "h-auto w-full object-cover transition-transform group-hover:scale-105"
 					}
+					style={isSmallImage ? undefined : { maxHeight: "320px" }}
 				/>
 
 				{/* Selection Indicator */}
