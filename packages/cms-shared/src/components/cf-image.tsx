@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import type React from "react"
 
 /**
  * CFImage is a component that renders an image using the Next.js Image component.
@@ -30,6 +31,12 @@ export type CFImageProps = {
 	draggable?: boolean
 	className?: string
 	fill?: boolean
+	style?: React.CSSProperties
+	sizes?: string
+	/** Loading behavior: "lazy" (default) defers loading, "eager" loads immediately */
+	loading?: "lazy" | "eager"
+	/** Priority hint for LCP images - disables lazy loading */
+	priority?: boolean
 }
 
 export function CFImage({
@@ -42,6 +49,10 @@ export function CFImage({
 	draggable = false,
 	isPrivate = false,
 	fill = false,
+	style,
+	sizes,
+	loading = "lazy",
+	priority = false,
 }: CFImageProps) {
 	return (
 		<Image
@@ -58,6 +69,10 @@ export function CFImage({
 			className={className}
 			draggable={draggable}
 			unoptimized={!!isPrivate} // Use Cloudflare variants for optimization
+			style={style}
+			sizes={sizes}
+			loading={priority ? undefined : loading}
+			priority={priority}
 		/>
 	)
 }

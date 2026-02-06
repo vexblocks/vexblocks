@@ -40,11 +40,14 @@ export function MediaCard({
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 	}
 
+	// Determine if the image is small (e.g. icons, thumbnails)
+	const isSmallImage = width && height && width <= 200 && height <= 200
+
 	return (
 		<div
 			role="button"
 			tabIndex={0}
-			className={`group relative overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
+			className={`group relative mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
 				isSelected
 					? "border-primary ring-2 ring-primary/20"
 					: "border-grey-200 hover:border-primary/50 hover:shadow-md"
@@ -52,14 +55,22 @@ export function MediaCard({
 			onClick={selectionMode ? onSelect : undefined}
 		>
 			{/* Image */}
-			<div className="relative aspect-square overflow-hidden bg-grey-100">
+			<div
+				className={`relative overflow-hidden bg-grey-100 ${
+					isSmallImage ? "flex items-center justify-center p-4" : "max-h-80"
+				}`}
+			>
 				<CFImage
 					assetId={cloudflareId}
 					alt={caption}
-					width={400}
-					height={400}
+					width={isSmallImage ? width || 96 : 400}
+					height={isSmallImage ? height || 96 : 400}
 					variant="public"
-					className="h-full w-full object-cover transition-transform group-hover:scale-105"
+					className={
+						isSmallImage
+							? "object-contain transition-transform group-hover:scale-105"
+							: "h-full w-full object-cover transition-transform group-hover:scale-105"
+					}
 				/>
 
 				{/* Selection Indicator */}
