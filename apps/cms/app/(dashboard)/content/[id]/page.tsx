@@ -385,6 +385,24 @@ export default function EditContentPage({
 		})
 	}
 
+	const handleMoveRepeaterItem = (
+		path: string,
+		index: number,
+		direction: "up" | "down",
+	) => {
+		setContentData((prev) => {
+			const currentValue = getNestedValue(prev, path) || []
+			const newIndex = direction === "up" ? index - 1 : index + 1
+			if (newIndex < 0 || newIndex >= currentValue.length) return prev
+			const newValue = [...currentValue]
+			;[newValue[index], newValue[newIndex]] = [
+				newValue[newIndex],
+				newValue[index],
+			]
+			return setNestedValue(prev, path, newValue)
+		})
+	}
+
 	const handleRegenerateSlug = (slugFieldName: string) => {
 		if (!schema?.fields) return
 
@@ -709,6 +727,7 @@ export default function EditContentPage({
 																onChange={handleFieldChange}
 																onAddRepeaterItem={handleAddRepeaterItem}
 																onRemoveRepeaterItem={handleRemoveRepeaterItem}
+																onMoveRepeaterItem={handleMoveRepeaterItem}
 																allSchemas={schemas || []}
 																contentBySchema={contentBySchema}
 																onRegenerateSlug={handleRegenerateSlug}
@@ -746,6 +765,7 @@ export default function EditContentPage({
 												onChange={handleFieldChange}
 												onAddRepeaterItem={handleAddRepeaterItem}
 												onRemoveRepeaterItem={handleRemoveRepeaterItem}
+												onMoveRepeaterItem={handleMoveRepeaterItem}
 												allSchemas={schemas || []}
 												contentBySchema={contentBySchema}
 												onRegenerateSlug={handleRegenerateSlug}

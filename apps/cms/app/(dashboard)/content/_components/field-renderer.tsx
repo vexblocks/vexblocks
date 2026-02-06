@@ -4,7 +4,16 @@ import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useQuery } from "convex/react"
-import { ChevronDown, Eye, Folder, Layers, Plus, Trash2 } from "lucide-react"
+import {
+	ArrowDown,
+	ArrowUp,
+	ChevronDown,
+	Eye,
+	Folder,
+	Layers,
+	Plus,
+	Trash2,
+} from "lucide-react"
 import { useState } from "react"
 import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
@@ -19,6 +28,11 @@ type FieldRendererProps = {
 	onChange: (path: string, value: any) => void
 	onAddRepeaterItem?: (path: string) => void
 	onRemoveRepeaterItem?: (path: string, index: number) => void
+	onMoveRepeaterItem?: (
+		path: string,
+		index: number,
+		direction: "up" | "down",
+	) => void
 	level?: number
 	allSchemas?: any[]
 	contentBySchema?: Record<string, any[]>
@@ -33,6 +47,7 @@ export function FieldRenderer({
 	onChange,
 	onAddRepeaterItem,
 	onRemoveRepeaterItem,
+	onMoveRepeaterItem,
 	level = 0,
 	allSchemas,
 	contentBySchema,
@@ -136,6 +151,7 @@ export function FieldRenderer({
 													onChange={onChange}
 													onAddRepeaterItem={onAddRepeaterItem}
 													onRemoveRepeaterItem={onRemoveRepeaterItem}
+													onMoveRepeaterItem={onMoveRepeaterItem}
 													level={level + 1}
 													allSchemas={allSchemas}
 													contentBySchema={contentBySchema}
@@ -162,6 +178,7 @@ export function FieldRenderer({
 										onChange={onChange}
 										onAddRepeaterItem={onAddRepeaterItem}
 										onRemoveRepeaterItem={onRemoveRepeaterItem}
+										onMoveRepeaterItem={onMoveRepeaterItem}
 										level={level + 1}
 										allSchemas={allSchemas}
 										contentBySchema={contentBySchema}
@@ -331,6 +348,7 @@ export function FieldRenderer({
 															onChange={onChange}
 															onAddRepeaterItem={onAddRepeaterItem}
 															onRemoveRepeaterItem={onRemoveRepeaterItem}
+															onMoveRepeaterItem={onMoveRepeaterItem}
 															level={level + 1}
 															allSchemas={allSchemas}
 															contentBySchema={contentBySchema}
@@ -359,6 +377,7 @@ export function FieldRenderer({
 												onChange={onChange}
 												onAddRepeaterItem={onAddRepeaterItem}
 												onRemoveRepeaterItem={onRemoveRepeaterItem}
+												onMoveRepeaterItem={onMoveRepeaterItem}
 												level={level + 1}
 												allSchemas={allSchemas}
 												contentBySchema={contentBySchema}
@@ -433,13 +452,41 @@ export function FieldRenderer({
 									<h4 className="font-medium text-grey-700 text-sm">
 										Item #{index + 1}
 									</h4>
-									<button
-										type="button"
-										onClick={() => onRemoveRepeaterItem?.(path, index)}
-										className="text-error transition-colors hover:text-error/80"
-									>
-										<Trash2 className="h-4 w-4" />
-									</button>
+									<div className="flex items-center gap-2">
+										{items.length > 1 && (
+											<div className="flex gap-1">
+												<button
+													type="button"
+													onClick={() =>
+														onMoveRepeaterItem?.(path, index, "up")
+													}
+													disabled={index === 0}
+													className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 disabled:cursor-not-allowed disabled:opacity-30"
+													title="Move up"
+												>
+													<ArrowUp className="h-4 w-4" />
+												</button>
+												<button
+													type="button"
+													onClick={() =>
+														onMoveRepeaterItem?.(path, index, "down")
+													}
+													disabled={index === items.length - 1}
+													className="rounded p-1 text-grey-500 transition-colors hover:bg-grey-100 disabled:cursor-not-allowed disabled:opacity-30"
+													title="Move down"
+												>
+													<ArrowDown className="h-4 w-4" />
+												</button>
+											</div>
+										)}
+										<button
+											type="button"
+											onClick={() => onRemoveRepeaterItem?.(path, index)}
+											className="text-error transition-colors hover:text-error/80"
+										>
+											<Trash2 className="h-4 w-4" />
+										</button>
+									</div>
 								</div>
 								<div
 									className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
@@ -509,6 +556,7 @@ export function FieldRenderer({
 																	onChange={onChange}
 																	onAddRepeaterItem={onAddRepeaterItem}
 																	onRemoveRepeaterItem={onRemoveRepeaterItem}
+																	onMoveRepeaterItem={onMoveRepeaterItem}
 																	level={level + 1}
 																	allSchemas={allSchemas}
 																	contentBySchema={contentBySchema}
@@ -538,6 +586,7 @@ export function FieldRenderer({
 														onChange={onChange}
 														onAddRepeaterItem={onAddRepeaterItem}
 														onRemoveRepeaterItem={onRemoveRepeaterItem}
+														onMoveRepeaterItem={onMoveRepeaterItem}
 														level={level + 1}
 														allSchemas={allSchemas}
 														contentBySchema={contentBySchema}
