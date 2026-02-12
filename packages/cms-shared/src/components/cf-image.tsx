@@ -32,14 +32,11 @@ export type CFImageProps = {
 	className?: string
 	fill?: boolean
 	style?: React.CSSProperties
-<<<<<<< HEAD
-=======
 	sizes?: string
 	/** Loading behavior: "lazy" (default) defers loading, "eager" loads immediately */
 	loading?: "lazy" | "eager"
 	/** Priority hint for LCP images - disables lazy loading */
 	priority?: boolean
->>>>>>> bcc45f9b0dff9665c63dcc301e3dbe5896b37da2
 }
 
 export function CFImage({
@@ -53,12 +50,9 @@ export function CFImage({
 	isPrivate = false,
 	fill = false,
 	style,
-<<<<<<< HEAD
-=======
 	sizes,
 	loading = "lazy",
 	priority = false,
->>>>>>> bcc45f9b0dff9665c63dcc301e3dbe5896b37da2
 }: CFImageProps) {
 	return (
 		<Image
@@ -76,12 +70,9 @@ export function CFImage({
 			draggable={draggable}
 			unoptimized={!!isPrivate} // Use Cloudflare variants for optimization
 			style={style}
-<<<<<<< HEAD
-=======
 			sizes={sizes}
 			loading={priority ? undefined : loading}
 			priority={priority}
->>>>>>> bcc45f9b0dff9665c63dcc301e3dbe5896b37da2
 		/>
 	)
 }
