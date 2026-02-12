@@ -44,7 +44,7 @@ export function MediaCard({
 		<div
 			role="button"
 			tabIndex={0}
-			className={`group relative overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
+			className={`group relative mb-4 inline-block w-full break-inside-avoid overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
 				isSelected
 					? "border-primary ring-2 ring-primary/20"
 					: "border-grey-200 hover:border-primary/50 hover:shadow-md"
@@ -52,14 +52,25 @@ export function MediaCard({
 			onClick={selectionMode ? onSelect : undefined}
 		>
 			{/* Image */}
-			<div className="relative aspect-square overflow-hidden bg-grey-100">
+			<div
+				className={`relative flex items-center justify-center overflow-hidden bg-grey-100 ${
+					width && width < 200 ? "p-4" : ""
+				}`}
+			>
 				<CFImage
 					assetId={cloudflareId}
 					alt={caption}
-					width={400}
-					height={400}
+					width={width || 400}
+					height={height || 400}
 					variant="public"
-					className="h-full w-full object-cover transition-transform group-hover:scale-105"
+					className={`max-w-full transition-transform group-hover:scale-105 ${
+						width && width < 200 ? "h-auto w-auto" : "h-auto w-full"
+					}`}
+					style={
+						width && height
+							? { aspectRatio: `${width} / ${height}` }
+							: undefined
+					}
 				/>
 
 				{/* Selection Indicator */}
