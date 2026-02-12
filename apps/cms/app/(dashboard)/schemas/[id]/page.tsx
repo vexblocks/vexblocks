@@ -1294,8 +1294,8 @@ export default function SchemaDetailPage({
 						</div>
 						<p className="mb-6 text-grey-600">
 							Are you sure you want to delete this schema? This action cannot be
-							undone. All content using this schema will remain in the database
-							but won't be editable.
+							undone. All content entries associated with this schema will also
+							be permanently deleted.
 						</p>
 						<div className="flex justify-end gap-3">
 							<button

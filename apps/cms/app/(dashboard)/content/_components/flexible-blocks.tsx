@@ -113,6 +113,33 @@ function BlockReferenceContent({
 		})
 	}
 
+	// Handle moving repeater items (supports nested paths)
+	const handleMoveRepeaterItem = (
+		repeaterPath: string,
+		index: number,
+		direction: "up" | "down",
+	) => {
+		const relativePath = repeaterPath.replace(`${path}.`, "")
+		const currentArray = getNestedValue(blockFieldsData, relativePath) || []
+		const newIndex = direction === "up" ? index - 1 : index + 1
+		if (newIndex < 0 || newIndex >= currentArray.length) return
+		const newArray = [...currentArray]
+		;[newArray[index], newArray[newIndex]] = [
+			newArray[newIndex],
+			newArray[index],
+		]
+		const updatedFields = setNestedValue(
+			blockFieldsData,
+			relativePath,
+			newArray,
+		)
+		onChange({
+			blockId,
+			blockName,
+			fields: updatedFields,
+		})
+	}
+
 	return (
 		<>
 			<div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
@@ -172,6 +199,7 @@ function BlockReferenceContent({
 						handleFieldChange={handleFieldChange}
 						handleAddRepeaterItem={handleAddRepeaterItem}
 						handleRemoveRepeaterItem={handleRemoveRepeaterItem}
+						handleMoveRepeaterItem={handleMoveRepeaterItem}
 						allSchemas={allSchemas}
 						contentBySchema={contentBySchema}
 					/>
@@ -197,6 +225,7 @@ function BlockReferenceFields({
 	handleFieldChange,
 	handleAddRepeaterItem,
 	handleRemoveRepeaterItem,
+	handleMoveRepeaterItem,
 	allSchemas,
 	contentBySchema,
 }: {
@@ -206,6 +235,11 @@ function BlockReferenceFields({
 	handleFieldChange: (fieldPath: string, value: any) => void
 	handleAddRepeaterItem: (repeaterPath: string) => void
 	handleRemoveRepeaterItem: (repeaterPath: string, index: number) => void
+	handleMoveRepeaterItem: (
+		repeaterPath: string,
+		index: number,
+		direction: "up" | "down",
+	) => void
 	allSchemas?: any[]
 	contentBySchema?: Record<string, any[]>
 }) {
@@ -268,6 +302,7 @@ function BlockReferenceFields({
 										onChange={handleFieldChange}
 										onAddRepeaterItem={handleAddRepeaterItem}
 										onRemoveRepeaterItem={handleRemoveRepeaterItem}
+										onMoveRepeaterItem={handleMoveRepeaterItem}
 										allSchemas={allSchemas}
 										contentBySchema={contentBySchema}
 									/>
@@ -292,6 +327,7 @@ function BlockReferenceFields({
 							onChange={handleFieldChange}
 							onAddRepeaterItem={handleAddRepeaterItem}
 							onRemoveRepeaterItem={handleRemoveRepeaterItem}
+							onMoveRepeaterItem={handleMoveRepeaterItem}
 							allSchemas={allSchemas}
 							contentBySchema={contentBySchema}
 						/>

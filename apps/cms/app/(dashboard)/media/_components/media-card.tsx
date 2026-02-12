@@ -1,7 +1,8 @@
 "use client"
 
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage } from "@repo/cms-shared"
+import { CFImage } from "@repo/cms-shared/src"
+
 import { Check, Edit2, Trash2 } from "lucide-react"
 
 type MediaCardProps = {
@@ -40,11 +41,14 @@ export function MediaCard({
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 	}
 
+	// Determine if the image is small (e.g. icons, thumbnails)
+	const isSmallImage = width && height && width <= 200 && height <= 200
+
 	return (
 		<div
 			role="button"
 			tabIndex={0}
-			className={`group relative mb-4 inline-block w-full break-inside-avoid overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
+			className={`group relative mb-4 break-inside-avoid overflow-hidden rounded-lg border bg-white shadow-sm transition-all ${
 				isSelected
 					? "border-primary ring-2 ring-primary/20"
 					: "border-grey-200 hover:border-primary/50 hover:shadow-md"
@@ -53,24 +57,28 @@ export function MediaCard({
 		>
 			{/* Image */}
 			<div
-				className={`relative flex items-center justify-center overflow-hidden bg-grey-100 ${
-					width && width < 200 ? "p-4" : ""
+				className={`relative overflow-hidden bg-grey-100 ${
+					isSmallImage ? "flex items-center justify-center p-6" : ""
 				}`}
 			>
 				<CFImage
 					assetId={cloudflareId}
 					alt={caption}
-					width={width || 400}
-					height={height || 400}
-					variant="public"
-					className={`max-w-full transition-transform group-hover:scale-105 ${
-						width && width < 200 ? "h-auto w-auto" : "h-auto w-full"
-					}`}
-					style={
-						width && height
-							? { aspectRatio: `${width} / ${height}` }
-							: undefined
+					width={isSmallImage ? width || 96 : 400}
+					height={
+						isSmallImage
+							? height || 96
+							: height && width
+								? Math.round((400 * height) / width)
+								: 300
 					}
+					variant="public"
+					className={
+						isSmallImage
+							? "object-contain transition-transform group-hover:scale-105"
+							: "h-auto w-full object-cover transition-transform group-hover:scale-105"
+					}
+					style={isSmallImage ? undefined : { maxHeight: "320px" }}
 				/>
 
 				{/* Selection Indicator */}

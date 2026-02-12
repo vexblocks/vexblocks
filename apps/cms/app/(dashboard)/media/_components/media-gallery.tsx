@@ -166,7 +166,7 @@ export function MediaGallery({
 					</div>
 				</div>
 			) : (
-				<div className="w-full columns-2 gap-4 overflow-hidden md:columns-3 lg:columns-4 xl:columns-5">
+				<div className="columns-2 gap-4 md:columns-3 lg:columns-4">
 					{mediaItems.map((media) => (
 						<MediaCard
 							key={media._id}
