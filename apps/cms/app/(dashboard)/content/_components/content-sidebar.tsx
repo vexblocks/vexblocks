@@ -1,13 +1,13 @@
 "use client"
 
-import { FileText, Folder, Globe, Menu, X } from "lucide-react"
+import { Folder, Globe, Menu, X } from "lucide-react"
 import { useState } from "react"
 
 type Schema = {
 	_id: string
 	name: string
 	displayName: string
-	type: "global" | "page" | "collection"
+	type: "global" | "collection"
 	icon?: string
 }
 
@@ -28,12 +28,10 @@ export function ContentSidebar({
 		switch (type) {
 			case "global":
 				return <Globe className="h-4 w-4" />
-			case "page":
-				return <FileText className="h-4 w-4" />
 			case "collection":
 				return <Folder className="h-4 w-4" />
 			default:
-				return <FileText className="h-4 w-4" />
+				return <Folder className="h-4 w-4" />
 		}
 	}
 
@@ -43,12 +41,6 @@ export function ContentSidebar({
 				return (
 					<span className="rounded-full bg-purple-100 px-2 py-0.5 text-purple-700 text-xs">
 						Global
-					</span>
-				)
-			case "page":
-				return (
-					<span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
-						Page
 					</span>
 				)
 			case "collection":
@@ -64,7 +56,6 @@ export function ContentSidebar({
 
 	const groupedSchemas = {
 		global: schemas.filter((s) => s.type === "global"),
-		page: schemas.filter((s) => s.type === "page"),
 		collection: schemas.filter((s) => s.type === "collection"),
 	}
 
@@ -114,38 +105,6 @@ export function ContentSidebar({
 									</h3>
 									<div className="space-y-1">
 										{groupedSchemas.collection.map((schema) => (
-											<button
-												key={schema._id}
-												type="button"
-												onClick={() => {
-													onSelectSchema(schema._id)
-													setIsOpen(false)
-												}}
-												className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-													selectedSchemaId === schema._id
-														? "bg-primary text-white"
-														: "text-grey-700 hover:bg-grey-100"
-												}`}
-											>
-												{getTypeIcon(schema.type)}
-												<span className="flex-1 truncate">
-													{schema.displayName}
-												</span>
-											</button>
-										))}
-									</div>
-								</div>
-							)}
-
-							{/* Pages */}
-							{groupedSchemas.page.length > 0 && (
-								<div>
-									<h3 className="mb-2 flex items-center gap-2 text-grey-500 text-xs uppercase tracking-wide">
-										<FileText className="h-3 w-3" />
-										Pages
-									</h3>
-									<div className="space-y-1">
-										{groupedSchemas.page.map((schema) => (
 											<button
 												key={schema._id}
 												type="button"

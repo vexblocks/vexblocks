@@ -1214,11 +1214,7 @@ export default function SchemaDetailPage({
 						{schema.displayName}
 					</h1>
 					<p className="mt-2 text-grey-500">
-						{schema.type === "global"
-							? "Global Component"
-							: schema.type === "page"
-								? "Page Type"
-								: "Collection Type"}
+						{schema.type === "global" ? "Global Component" : "Collection Type"}
 					</p>
 				</div>
 				<div className="flex gap-2">

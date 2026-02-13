@@ -868,9 +868,7 @@ export default function NewSchemaPage() {
 	const [name, setName] = useState("")
 	const [displayName, setDisplayName] = useState("")
 	const [hasEditedName, setHasEditedName] = useState(false)
-	const [type, setType] = useState<"global" | "page" | "collection">(
-		"collection",
-	)
+	const [type, setType] = useState<"global" | "collection">("collection")
 	const [description, setDescription] = useState("")
 
 	// Fields
@@ -1405,15 +1403,13 @@ export default function NewSchemaPage() {
 								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 							>
 								<option value="collection">Collection</option>
-								<option value="page">Page</option>
 								<option value="global">Global Component</option>
 							</select>
 							<p className="mt-1 text-grey-400 text-xs">
 								{type === "global" &&
 									"Single instance content (header, footer, settings)"}
-								{type === "page" && "Unique pages with their own URLs"}
 								{type === "collection" &&
-									"Repeatable content (blog posts, products)"}
+									"Repeatable content (blog posts, pages, products)"}
 							</p>
 						</div>
 

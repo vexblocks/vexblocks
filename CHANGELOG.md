@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Convex backend with all CMS functions
 - Better Auth integration with email OTP
 - Schema tables: cmsSchemas, cmsContent, cmsMedia, cmsMediaTags, cmsBlocks, cmsSettings
-- Public queries for frontend consumption (getGlobal, getPage, getCollectionItem, listCollection)
+- Public queries for frontend consumption (getGlobal, getCollectionItem, listCollection)
 - ISR revalidation webhooks
 - Cloudflare Images upload/delete actions
 
@@ -81,8 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Content Types
 - **Global** - Singleton content (headers, footers)
-- **Page** - Single pages with unique slugs
-- **Collection** - Repeatable content (blog posts, products)
+- **Collection** - Repeatable content (blog posts, pages, products)
 
 ---
 

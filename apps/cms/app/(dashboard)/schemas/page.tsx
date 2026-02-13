@@ -1,7 +1,7 @@
 "use client"
 
 import { api } from "@repo/backend/convex/_generated/api"
-import { FileText, Grid3x3, Layers, Plus } from "lucide-react"
+import { Grid3x3, Layers, Plus } from "lucide-react"
 import Link from "next/link"
 import { useCachedQuery } from "@/lib/use-cached-query"
 
@@ -13,8 +13,6 @@ export default function SchemasPage() {
 		switch (type) {
 			case "global":
 				return <Grid3x3 className="h-5 w-5" />
-			case "page":
-				return <FileText className="h-5 w-5" />
 			case "collection":
 				return <Layers className="h-5 w-5" />
 			default:
@@ -26,8 +24,6 @@ export default function SchemasPage() {
 		switch (type) {
 			case "global":
 				return "bg-purple text-white"
-			case "page":
-				return "bg-tertiary text-white"
 			case "collection":
 				return "bg-secondary text-white"
 			default:
@@ -102,9 +98,7 @@ export default function SchemasPage() {
 										className={`rounded-full px-3 py-1 font-semibold text-xs ${
 											schema.type === "global"
 												? "bg-purple-light text-purple"
-												: schema.type === "page"
-													? "bg-tertiary-light text-tertiary"
-													: "bg-secondary-light text-primary"
+												: "bg-secondary-light text-primary"
 										}`}
 									>
 										{schema.type}
@@ -141,7 +135,7 @@ export default function SchemasPage() {
 
 			{/* Schema Types Info */}
 			{schemas && schemas.length > 0 && (
-				<div className="mt-12 grid gap-4 md:grid-cols-3">
+				<div className="mt-12 grid gap-4 md:grid-cols-2">
 					<div className="rounded-lg border-2 border-purple-light bg-purple-light/10 p-6">
 						<div className="mb-2 flex items-center gap-2">
 							<Grid3x3 className="h-5 w-5 text-purple" />
@@ -152,23 +146,14 @@ export default function SchemasPage() {
 						</p>
 					</div>
 
-					<div className="rounded-lg border-2 border-tertiary-light bg-tertiary-light/10 p-6">
-						<div className="mb-2 flex items-center gap-2">
-							<FileText className="h-5 w-5 text-tertiary" />
-							<h4 className="font-semibold text-tertiary">Pages</h4>
-						</div>
-						<p className="text-grey-500 text-sm">
-							Unique pages with their own URLs (about, contact, etc.)
-						</p>
-					</div>
-
 					<div className="rounded-lg border-2 border-secondary-light bg-secondary-light/10 p-6">
 						<div className="mb-2 flex items-center gap-2">
 							<Layers className="h-5 w-5 text-secondary" />
 							<h4 className="font-semibold text-secondary">Collections</h4>
 						</div>
 						<p className="text-grey-500 text-sm">
-							Repeatable content like blog posts, products, or team members
+							Repeatable content like blog posts, pages, products, or team
+							members
 						</p>
 					</div>
 				</div>

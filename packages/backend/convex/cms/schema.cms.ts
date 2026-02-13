@@ -193,8 +193,7 @@ export const cmsSchemas = defineTable({
 	displayName: v.string(), // Display name (e.g., "Blog Posts")
 	type: v.union(
 		v.literal("global"), // Singleton content (header, footer)
-		v.literal("page"), // Single pages with unique URLs
-		v.literal("collection"), // Repeatable content (blog posts)
+		v.literal("collection"), // Repeatable content (blog posts, pages)
 	),
 	description: v.optional(v.string()),
 	fields: v.array(fieldDefinition),

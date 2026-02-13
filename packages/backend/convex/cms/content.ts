@@ -461,64 +461,6 @@ export const getGlobal = query({
 })
 
 /**
- * Get page content by schema name and slug (public access)
- * For use in web apps to fetch page content
- * Example: await convex.query(api.cms.content.getPage, { schemaName: "landing_page", slug: "about", locale: "es" })
- * @param locale - Optional locale code to resolve translatable fields
- */
-export const getPage = query({
-	args: {
-		schemaName: v.string(),
-		slug: v.string(),
-		locale: v.optional(v.string()),
-	},
-	returns: v.union(v.any(), v.null()),
-	handler: async (ctx, args) => {
-		// Get schema by name
-		const schema = await ctx.db
-			.query("cmsSchemas")
-			.withIndex("by_name", (q) => q.eq("name", args.schemaName))
-			.unique()
-
-		if (!schema || schema.type !== "page") {
-			return null
-		}
-
-		// Get the published content by slug
-		const content = await ctx.db
-			.query("cmsContent")
-			.withIndex("by_schema_and_slug", (q) =>
-				q.eq("schemaId", schema._id).eq("slug", args.slug),
-			)
-			.filter((q) => q.eq(q.field("status"), "published"))
-			.unique()
-
-		if (!content) return null
-
-		// Get localization settings for fallback
-		const { defaultLocale } = await getLocalizationSettings(ctx)
-
-		// Process data
-		let processedData = content.data
-
-		// Resolve localized content if locale is specified
-		if (args.locale && schema.fields) {
-			processedData = resolveLocalizedContent(
-				processedData,
-				schema.fields,
-				args.locale,
-				defaultLocale ?? undefined,
-			)
-		}
-
-		return {
-			...content,
-			data: processedData,
-		}
-	},
-})
-
-/**
  * Get collection item by schema name and slug (public access)
  * For use in web apps to fetch collection items (blog posts, products, etc.)
  * Example: await convex.query(api.cms.content.getCollectionItem, { schemaName: "blog_posts", slug: "my-post", locale: "es" })
@@ -805,8 +747,8 @@ export const create = mutation({
 			}
 		}
 
-		// For pages and collections, validate slug is unique
-		if (args.slug && (schema.type === "page" || schema.type === "collection")) {
+		// For collections, validate slug is unique
+		if (args.slug && schema.type === "collection") {
 			const existing = await ctx.db
 				.query("cmsContent")
 				.withIndex("by_schema_and_slug", (q) =>

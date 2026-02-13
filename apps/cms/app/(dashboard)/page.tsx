@@ -42,7 +42,6 @@ export default function AdminDashboard() {
 
 	const schemaStats = {
 		global: schemas.filter((s) => s.type === "global").length,
-		pages: schemas.filter((s) => s.type === "page").length,
 		collections: schemas.filter((s) => s.type === "collection").length,
 	}
 
@@ -67,15 +66,6 @@ export default function AdminDashboard() {
 					</h3>
 					<p className="font-bold text-4xl text-secondary">
 						{schemaStats.global}
-					</p>
-				</div>
-
-				<div className="rounded-lg bg-white p-6 shadow">
-					<h3 className="mb-2 font-semibold text-grey-500 text-sm uppercase">
-						Pages
-					</h3>
-					<p className="font-bold text-4xl text-tertiary">
-						{schemaStats.pages}
 					</p>
 				</div>
 

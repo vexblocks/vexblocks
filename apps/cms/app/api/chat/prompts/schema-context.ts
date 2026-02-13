@@ -59,7 +59,7 @@ type SchemaInfo = {
 	_id: string
 	name: string
 	displayName: string
-	type: "global" | "page" | "collection"
+	type: "global" | "collection"
 	description?: string
 	fields?: FieldInfo[]
 }

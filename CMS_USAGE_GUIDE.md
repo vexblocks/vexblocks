@@ -12,45 +12,21 @@
 **Use cases:**
 ```typescript
 // Fetch header content
-const header = await convex.query(api.cms.content.getGlobal, { 
-  schemaName: "header" 
+const header = await convex.query(api.cms.content.getGlobal, {
+  schemaName: "header"
 })
 
 // Fetch footer content
-const footer = await convex.query(api.cms.content.getGlobal, { 
-  schemaName: "footer" 
+const footer = await convex.query(api.cms.content.getGlobal, {
+  schemaName: "footer"
 })
 ```
 
 ---
 
-### 2. **Page** (Unique Content per Slug)
-- **Purpose:** Static pages with unique content
-- **Examples:** About, Contact, Terms of Service, Privacy Policy
-- **Content Limit:** **1 instance per unique slug**
-- **Slug:** Required and must be unique
-- **SEO:** Metadata supported
-
-**Use cases:**
-```typescript
-// Fetch about page content
-const aboutPage = await convex.query(api.cms.content.getPage, { 
-  schemaName: "landing_page",
-  slug: "about" 
-})
-
-// Fetch contact page content
-const contactPage = await convex.query(api.cms.content.getPage, { 
-  schemaName: "landing_page",
-  slug: "contact" 
-})
-```
-
----
-
-### 3. **Collection** (Multiple Instances)
+### 2. **Collection** (Multiple Instances)
 - **Purpose:** Repeatable content with multiple entries
-- **Examples:** Blog Posts, Products, Case Studies, Team Members
+- **Examples:** Blog Posts, Products, Case Studies, Team Members, Landing Pages
 - **Content Limit:** **Unlimited instances**
 - **Slug:** Required and must be unique per instance
 - **SEO:** Metadata supported
@@ -58,15 +34,21 @@ const contactPage = await convex.query(api.cms.content.getPage, {
 **Use cases:**
 ```typescript
 // Fetch all blog posts (with optional limit)
-const blogPosts = await convex.query(api.cms.content.listCollection, { 
+const blogPosts = await convex.query(api.cms.content.listCollection, {
   schemaName: "blog_posts",
   limit: 10 // optional
 })
 
 // Fetch a specific blog post
-const post = await convex.query(api.cms.content.getCollectionItem, { 
+const post = await convex.query(api.cms.content.getCollectionItem, {
   schemaName: "blog_posts",
-  slug: "my-first-post" 
+  slug: "my-first-post"
+})
+
+// Fetch a specific page (pages are collections too)
+const aboutPage = await convex.query(api.cms.content.getCollectionItem, {
+  schemaName: "landing_pages",
+  slug: "about"
 })
 ```
 
@@ -82,8 +64,8 @@ Get a single global content by schema name.
 ```typescript
 import { api } from "@repo/backend/convex/_generated/api"
 
-const header = await convex.query(api.cms.content.getGlobal, { 
-  schemaName: "header" 
+const header = await convex.query(api.cms.content.getGlobal, {
+  schemaName: "header"
 })
 
 // Returns: content object or null
@@ -93,35 +75,19 @@ const header = await convex.query(api.cms.content.getGlobal, {
 
 ---
 
-#### `getPage`
-Get a page content by schema name and slug.
-
-```typescript
-const aboutPage = await convex.query(api.cms.content.getPage, { 
-  schemaName: "landing_page",
-  slug: "about" 
-})
-
-// Returns: content object or null
-```
-
-**When to use:** Fetching static pages like About, Contact, etc.
-
----
-
 #### `getCollectionItem`
 Get a single item from a collection by schema name and slug.
 
 ```typescript
-const post = await convex.query(api.cms.content.getCollectionItem, { 
+const post = await convex.query(api.cms.content.getCollectionItem, {
   schemaName: "blog_posts",
-  slug: "my-first-post" 
+  slug: "my-first-post"
 })
 
 // Returns: content object or null
 ```
 
-**When to use:** Fetching individual blog posts, products, case studies
+**When to use:** Fetching individual blog posts, products, pages, case studies
 
 ---
 
@@ -129,7 +95,7 @@ const post = await convex.query(api.cms.content.getCollectionItem, {
 List all published items in a collection.
 
 ```typescript
-const posts = await convex.query(api.cms.content.listCollection, { 
+const posts = await convex.query(api.cms.content.listCollection, {
   schemaName: "blog_posts",
   limit: 10 // optional
 })
@@ -150,7 +116,7 @@ type Content = {
   _id: Id<"cmsContent">
   _creationTime: number
   schemaId: Id<"cmsSchemas">
-  slug?: string // Only for pages and collections
+  slug?: string // Only for collections
   status: "draft" | "published"
   data: Record<string, any> // Your custom fields
   seo?: {
@@ -170,18 +136,17 @@ type Content = {
 ## 🎯 Best Practices
 
 ### Schema Naming
-- Use snake_case: `blog_posts`, `landing_page`, `site_settings`
+- Use snake_case: `blog_posts`, `landing_pages`, `site_settings`
 - Be descriptive: `header` not `h`, `footer` not `f`
-- Plural for collections: `blog_posts`, `products`, `team_members`
-- Singular for globals and pages: `header`, `footer`, `landing_page`
+- Plural for collections: `blog_posts`, `products`, `team_members`, `landing_pages`
+- Singular for globals: `header`, `footer`
 
 ### Content Organization
 
 | Type | Schema Name Example | Use Case |
 |------|---------------------|----------|
 | **Global** | `header`, `footer`, `site_settings` | Site-wide content |
-| **Page** | `landing_page`, `legal_page` | Static pages with different content per slug |
-| **Collection** | `blog_posts`, `products`, `team_members` | Multiple entries |
+| **Collection** | `blog_posts`, `products`, `landing_pages` | Multiple entries with unique slugs |
 
 ### Slug Format
 - Use kebab-case: `my-first-post`, `about-us`, `contact-form`
@@ -272,8 +237,7 @@ When content is published or updated in the CMS, Next.js pages are automatically
 3. Webhook calls Next.js API at `/api/revalidate`
 4. Next.js revalidates affected paths:
    - **Global:** Revalidates `/` and `/*` (all pages)
-   - **Page:** Revalidates `/{slug}`
-   - **Collection:** Revalidates `/blog` and `/blog/{slug}`
+   - **Collection:** Revalidates `/{schemaName}` and `/{schemaName}/{slug}`
 
 ### Configuration:
 Set these environment variables in your Next.js app:
@@ -293,11 +257,6 @@ REVALIDATE_SECRET=your-secret-here
 - ❌ Only 1 published instance per schema
 - ❌ Cannot publish if another published instance exists
 
-### Page Content
-- ✅ Multiple pages with unique slugs
-- ❌ Slug must be unique per schema
-- ❌ Slug is required
-
 ### Collection Content
 - ✅ Unlimited instances
 - ❌ Slug must be unique per schema
@@ -309,26 +268,20 @@ REVALIDATE_SECRET=your-secret-here
 
 ```typescript
 // Global (singleton)
-const header = await convex.query(api.cms.content.getGlobal, { 
-  schemaName: "header" 
-})
-
-// Page (unique per slug)
-const aboutPage = await convex.query(api.cms.content.getPage, { 
-  schemaName: "landing_page",
-  slug: "about" 
+const header = await convex.query(api.cms.content.getGlobal, {
+  schemaName: "header"
 })
 
 // Collection item (one of many)
-const post = await convex.query(api.cms.content.getCollectionItem, { 
+const post = await convex.query(api.cms.content.getCollectionItem, {
   schemaName: "blog_posts",
-  slug: "my-first-post" 
+  slug: "my-first-post"
 })
 
 // Collection list (all items)
-const posts = await convex.query(api.cms.content.listCollection, { 
+const posts = await convex.query(api.cms.content.listCollection, {
   schemaName: "blog_posts",
-  limit: 10 
+  limit: 10
 })
 ```
 
@@ -336,16 +289,15 @@ const posts = await convex.query(api.cms.content.listCollection, {
 
 ## 📝 Summary Table
 
-| Feature | Global | Page | Collection |
-|---------|--------|------|------------|
-| **Published Limit** | 1 | 1 per slug | Unlimited |
-| **Slug Required** | No | Yes | Yes |
-| **Slug Unique** | N/A | Yes (per schema) | Yes (per schema) |
-| **SEO Metadata** | No | Yes | Yes |
-| **Use Case** | Headers, Footers | About, Contact | Blog, Products |
-| **Query Method** | `getGlobal` | `getPage` | `getCollectionItem`, `listCollection` |
+| Feature | Global | Collection |
+|---------|--------|------------|
+| **Published Limit** | 1 | Unlimited |
+| **Slug Required** | No | Yes |
+| **Slug Unique** | N/A | Yes (per schema) |
+| **SEO Metadata** | No | Yes |
+| **Use Case** | Headers, Footers | Blog, Products, Pages |
+| **Query Method** | `getGlobal` | `getCollectionItem`, `listCollection` |
 
 ---
 
 **Need help?** Check the examples in `/apps/web` or review the schema definitions in `/packages/backend/convex/schema.ts`.
-

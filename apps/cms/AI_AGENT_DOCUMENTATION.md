@@ -43,7 +43,7 @@ The agent has built-in safety measures to protect your data:
    - Parameters:
      - `name` (string, snake_case): e.g., "blog_posts"
      - `displayName` (string): e.g., "Blog Posts"
-     - `type` (enum): "global" | "page" | "collection"
+     - `type` (enum): "global" | "collection"
      - `description` (optional string)
      - `fields` (array): Field definitions
      - `icon` (optional string)
@@ -79,7 +79,7 @@ The agent has built-in safety measures to protect your data:
    - Create a new content entry
    - Parameters:
      - `schemaId` (string)
-     - `slug` (optional string): Required for pages/collections
+     - `slug` (optional string): Required for collections
      - `status` (enum): "draft" | "published"
      - `data` (object): Content data matching schema fields
 

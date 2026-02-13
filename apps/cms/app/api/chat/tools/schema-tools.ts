@@ -91,9 +91,9 @@ export const createSchema = tool({
 			.string()
 			.describe("Human-readable name (e.g., 'Blog Posts', 'Products')"),
 		type: z
-			.enum(["global", "page", "collection"])
+			.enum(["global", "collection"])
 			.describe(
-				"Schema type: 'global' for singletons, 'page' for pages, 'collection' for multiple items",
+				"Schema type: 'global' for singletons, 'collection' for multiple items (blog posts, pages, products)",
 			),
 		description: z
 			.string()

@@ -107,8 +107,6 @@ http.route({
 
 			if (schema.type === "global") {
 				pathsToRevalidate.push("/")
-			} else if (schema.type === "page" && content.slug) {
-				pathsToRevalidate.push(`/${content.slug}`)
 			} else if (schema.type === "collection" && content.slug) {
 				pathsToRevalidate.push(`/${schema.name}/${content.slug}`)
 				pathsToRevalidate.push(`/${schema.name}`)

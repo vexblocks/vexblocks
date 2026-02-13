@@ -65,7 +65,7 @@ export const createContent = tool({
 		slug: z
 			.string()
 			.optional()
-			.describe("URL slug for the content (required for pages/collections)"),
+			.describe("URL slug for the content (required for collections)"),
 		status: z
 			.enum(["draft", "published"])
 			.describe("Content status: 'draft' or 'published'"),

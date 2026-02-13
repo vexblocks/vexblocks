@@ -20,7 +20,6 @@ export const listPublic = query({
 			displayName: v.string(),
 			type: v.union(
 				v.literal("global"),
-				v.literal("page"),
 				v.literal("collection"),
 			),
 			description: v.optional(v.string()),
@@ -61,7 +60,6 @@ export const list = query({
 				displayName: v.string(),
 				type: v.union(
 					v.literal("global"),
-					v.literal("page"),
 					v.literal("collection"),
 				),
 				description: v.optional(v.string()),
@@ -108,7 +106,6 @@ export const get = query({
 			displayName: v.string(),
 			type: v.union(
 				v.literal("global"),
-				v.literal("page"),
 				v.literal("collection"),
 			),
 			description: v.optional(v.string()),
@@ -169,7 +166,6 @@ export const getByName = query({
 			displayName: v.string(),
 			type: v.union(
 				v.literal("global"),
-				v.literal("page"),
 				v.literal("collection"),
 			),
 			description: v.optional(v.string()),
@@ -207,7 +203,6 @@ export const listByType = query({
 	args: {
 		type: v.union(
 			v.literal("global"),
-			v.literal("page"),
 			v.literal("collection"),
 		),
 	},
@@ -238,7 +233,6 @@ export const create = mutation({
 		displayName: v.string(),
 		type: v.union(
 			v.literal("global"),
-			v.literal("page"),
 			v.literal("collection"),
 		),
 		description: v.optional(v.string()),
