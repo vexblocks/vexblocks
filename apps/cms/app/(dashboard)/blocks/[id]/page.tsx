@@ -22,6 +22,7 @@ import { use, useEffect, useState } from "react"
 import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 import { authAtom } from "@/lib/auth-atom"
 import { sanitizeData } from "@/lib/sanitize-data"
+import { triggerTypeGeneration } from "@/lib/use-type-generation"
 
 type FieldType =
 	| "shortText"
@@ -688,6 +689,9 @@ export default function BlockDetailPage({
 				previewImage: previewImage || undefined,
 			})
 
+			// Trigger type generation in development
+			triggerTypeGeneration()
+
 			setEditing(false)
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to update block")
@@ -700,6 +704,10 @@ export default function BlockDetailPage({
 		setLoading(true)
 		try {
 			await deleteBlock({ id: id as Id<"cmsBlocks"> })
+
+			// Trigger type generation in development
+			triggerTypeGeneration()
+
 			router.push("/blocks")
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to delete block")

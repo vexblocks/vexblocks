@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 import { sanitizeData } from "@/lib/sanitize-data"
+import { triggerTypeGeneration } from "@/lib/use-type-generation"
 
 type FieldType =
 	| "shortText"
@@ -740,6 +741,9 @@ export default function NewBlockPage() {
 				category: sanitizedCategory || undefined,
 				previewImage: previewImage || undefined,
 			})
+
+			// Trigger type generation in development
+			triggerTypeGeneration()
 
 			// Reset form state after successful creation
 			setDisplayName("")

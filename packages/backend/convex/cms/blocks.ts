@@ -7,6 +7,32 @@ import { getAuthenticatedDeveloperUser } from "./utils"
 // ================================
 
 /**
+ * Get all reusable blocks (public, for type generation)
+ * This query is used by the type generator and doesn't require authentication
+ */
+export const listPublic = query({
+	args: {},
+	returns: v.array(
+		v.object({
+			_id: v.id("cmsBlocks"),
+			_creationTime: v.number(),
+			name: v.string(),
+			displayName: v.string(),
+			description: v.optional(v.string()),
+			fields: v.array(v.any()),
+			icon: v.optional(v.string()),
+			previewImage: v.optional(v.string()),
+			category: v.optional(v.string()),
+			createdBy: v.id("users"),
+			updatedAt: v.number(),
+		}),
+	),
+	handler: async (ctx) => {
+		return await ctx.db.query("cmsBlocks").collect()
+	},
+})
+
+/**
  * Get all reusable blocks
  */
 export const list = query({
