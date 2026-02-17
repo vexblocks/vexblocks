@@ -1,7 +1,27 @@
 import { ConvexError, v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalMutation, mutation, query } from "../_generated/server"
+import { r2 } from "./r2"
 import { getAuthenticatedContentUser } from "./utils"
+
+// Shared validator for media item return types
+const mediaItemValidator = v.object({
+	_id: v.id("cmsMedia"),
+	_creationTime: v.number(),
+	cloudflareId: v.string(),
+	filename: v.string(),
+	mimeType: v.string(),
+	size: v.number(),
+	width: v.optional(v.number()),
+	height: v.optional(v.number()),
+	caption: v.string(),
+	alt: v.optional(v.string()),
+	tags: v.optional(v.array(v.string())),
+	storageType: v.optional(v.string()),
+	r2Key: v.optional(v.string()),
+	uploadedBy: v.id("users"),
+	uploadedAt: v.number(),
+})
 
 /**
  * List all media with optional filters
@@ -11,23 +31,7 @@ export const list = query({
 		search: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())),
 	},
-	returns: v.array(
-		v.object({
-			_id: v.id("cmsMedia"),
-			_creationTime: v.number(),
-			cloudflareId: v.string(),
-			filename: v.string(),
-			mimeType: v.string(),
-			size: v.number(),
-			width: v.optional(v.number()),
-			height: v.optional(v.number()),
-			caption: v.string(),
-			alt: v.optional(v.string()),
-			tags: v.optional(v.array(v.string())),
-			uploadedBy: v.id("users"),
-			uploadedAt: v.number(),
-		}),
-	),
+	returns: v.array(mediaItemValidator),
 	handler: async (ctx, args) => {
 		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
@@ -64,24 +68,7 @@ export const get = query({
 	args: {
 		id: v.id("cmsMedia"),
 	},
-	returns: v.union(
-		v.object({
-			_id: v.id("cmsMedia"),
-			_creationTime: v.number(),
-			cloudflareId: v.string(),
-			filename: v.string(),
-			mimeType: v.string(),
-			size: v.number(),
-			width: v.optional(v.number()),
-			height: v.optional(v.number()),
-			caption: v.string(),
-			alt: v.optional(v.string()),
-			tags: v.optional(v.array(v.string())),
-			uploadedBy: v.id("users"),
-			uploadedAt: v.number(),
-		}),
-		v.null(),
-	),
+	returns: v.union(mediaItemValidator, v.null()),
 	handler: async (ctx, args) => {
 		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
@@ -99,24 +86,7 @@ export const getPublic = query({
 	args: {
 		id: v.id("cmsMedia"),
 	},
-	returns: v.union(
-		v.object({
-			_id: v.id("cmsMedia"),
-			_creationTime: v.number(),
-			cloudflareId: v.string(),
-			filename: v.string(),
-			mimeType: v.string(),
-			size: v.number(),
-			width: v.optional(v.number()),
-			height: v.optional(v.number()),
-			caption: v.string(),
-			alt: v.optional(v.string()),
-			tags: v.optional(v.array(v.string())),
-			uploadedBy: v.id("users"),
-			uploadedAt: v.number(),
-		}),
-		v.null(),
-	),
+	returns: v.union(mediaItemValidator, v.null()),
 	handler: async (ctx, args) => {
 		return await ctx.db.get(args.id)
 	},
@@ -129,24 +99,7 @@ export const getByCloudflareId = query({
 	args: {
 		cloudflareId: v.string(),
 	},
-	returns: v.union(
-		v.object({
-			_id: v.id("cmsMedia"),
-			_creationTime: v.number(),
-			cloudflareId: v.string(),
-			filename: v.string(),
-			mimeType: v.string(),
-			size: v.number(),
-			width: v.optional(v.number()),
-			height: v.optional(v.number()),
-			caption: v.string(),
-			alt: v.optional(v.string()),
-			tags: v.optional(v.array(v.string())),
-			uploadedBy: v.id("users"),
-			uploadedAt: v.number(),
-		}),
-		v.null(),
-	),
+	returns: v.union(mediaItemValidator, v.null()),
 	handler: async (ctx, args) => {
 		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
@@ -163,7 +116,7 @@ export const getByCloudflareId = query({
 })
 
 /**
- * Create a new media entry after uploading to Cloudflare
+ * Create a new media entry after uploading to Cloudflare Images or R2
  */
 export const create = mutation({
 	args: {
@@ -176,6 +129,8 @@ export const create = mutation({
 		caption: v.string(),
 		alt: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())),
+		storageType: v.optional(v.string()),
+		r2Key: v.optional(v.string()),
 	},
 	returns: v.id("cmsMedia"),
 	handler: async (ctx, args) => {
@@ -207,6 +162,8 @@ export const create = mutation({
 			caption: args.caption,
 			alt: args.alt,
 			tags: normalizedTags.length > 0 ? normalizedTags : undefined,
+			storageType: args.storageType,
+			r2Key: args.r2Key,
 			uploadedBy: user._id,
 			uploadedAt: Date.now(),
 		})
@@ -375,33 +332,35 @@ export const remove = mutation({
 			throw new ConvexError("Media not found")
 		}
 
-		// Check if media is referenced
-		const allContent = await ctx.db.query("cmsContent").collect()
-		const cloudflareIdToCheck = media.cloudflareId
+		// Check if media is referenced (only for cloudflare-images that have a real cloudflareId)
+		if (media.storageType !== "r2") {
+			const allContent = await ctx.db.query("cmsContent").collect()
+			const cloudflareIdToCheck = media.cloudflareId
 
-		function searchInObject(obj: any): boolean {
-			if (!obj || typeof obj !== "object") return false
+			function searchInObject(obj: any): boolean {
+				if (!obj || typeof obj !== "object") return false
 
-			for (const value of Object.values(obj)) {
-				if (value === cloudflareIdToCheck) {
-					return true
-				}
-				if (Array.isArray(value)) {
-					for (const item of value) {
-						if (searchInObject(item)) return true
+				for (const value of Object.values(obj)) {
+					if (value === cloudflareIdToCheck) {
+						return true
 					}
-				} else if (typeof value === "object") {
-					if (searchInObject(value)) return true
+					if (Array.isArray(value)) {
+						for (const item of value) {
+							if (searchInObject(item)) return true
+						}
+					} else if (typeof value === "object") {
+						if (searchInObject(value)) return true
+					}
 				}
+				return false
 			}
-			return false
-		}
 
-		for (const content of allContent) {
-			if (searchInObject(content.data)) {
-				throw new ConvexError(
-					"Cannot delete media: it is being used in content. Please remove all references first.",
-				)
+			for (const content of allContent) {
+				if (searchInObject(content.data)) {
+					throw new ConvexError(
+						"Cannot delete media: it is being used in content. Please remove all references first.",
+					)
+				}
 			}
 		}
 
@@ -413,14 +372,20 @@ export const remove = mutation({
 			})
 		}
 
-		// Delete from Cloudflare
-		await ctx.scheduler.runAfter(
-			0,
-			internal.cms.mediaActions.deleteFromCloudflare,
-			{
-				cloudflareId: media.cloudflareId,
-			},
-		)
+		// Delete from storage
+		if (media.storageType === "r2" && media.r2Key) {
+			// Delete from R2 using the component
+			await r2.deleteObject(ctx, media.r2Key)
+		} else {
+			// Delete from Cloudflare Images
+			await ctx.scheduler.runAfter(
+				0,
+				internal.cms.mediaActions.deleteFromCloudflare,
+				{
+					cloudflareId: media.cloudflareId,
+				},
+			)
+		}
 
 		// Delete from Convex
 		await ctx.db.delete(args.id)

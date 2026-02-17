@@ -1,13 +1,15 @@
 "use client"
 
-import { Plus, Tags } from "lucide-react"
+import { FileUp, Plus, Tags } from "lucide-react"
 import { useState } from "react"
+import { FileUploader } from "./_components/file-uploader"
 import { MediaGallery } from "./_components/media-gallery"
 import { MediaUploader } from "./_components/media-uploader"
 import { TagManager } from "./_components/tag-manager"
 
 export default function MediaPage() {
 	const [showUploader, setShowUploader] = useState(false)
+	const [showFileUploader, setShowFileUploader] = useState(false)
 	const [showTagManager, setShowTagManager] = useState(false)
 
 	return (
@@ -35,17 +37,27 @@ export default function MediaPage() {
 			{/* Main Content */}
 			<MediaGallery />
 
-			{/* Floating Upload Button */}
-			<button
-				type="button"
-				onClick={() => setShowUploader(true)}
-				className="fixed right-8 bottom-8 z-10 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-4 text-white shadow-lg transition-colors hover:bg-primary-800"
-			>
-				<Plus className="h-5 w-5" />
-				Upload Image
-			</button>
+			{/* Floating Action Buttons */}
+			<div className="fixed right-8 bottom-8 z-10 flex flex-col gap-3">
+				<button
+					type="button"
+					onClick={() => setShowFileUploader(true)}
+					className="inline-flex items-center gap-2 rounded-full border border-grey-300 bg-white px-6 py-4 text-primary shadow-lg transition-colors hover:bg-grey-50"
+				>
+					<FileUp className="h-5 w-5" />
+					Upload File
+				</button>
+				<button
+					type="button"
+					onClick={() => setShowUploader(true)}
+					className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-4 text-white shadow-lg transition-colors hover:bg-primary-800"
+				>
+					<Plus className="h-5 w-5" />
+					Upload Image
+				</button>
+			</div>
 
-			{/* Upload Dialog */}
+			{/* Upload Image Dialog */}
 			{showUploader && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 					<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
@@ -56,6 +68,24 @@ export default function MediaPage() {
 							onUploadComplete={() => setShowUploader(false)}
 							onCancel={() => setShowUploader(false)}
 							showInline
+						/>
+					</div>
+				</div>
+			)}
+
+			{/* Upload File Dialog */}
+			{showFileUploader && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+					<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
+						<h2 className="mb-4 font-semibold text-lg text-primary">
+							Upload File to R2
+						</h2>
+						<p className="mb-4 text-grey-400 text-sm">
+							Upload any file type (PDF, video, documents, etc.) up to 50MB.
+						</p>
+						<FileUploader
+							onUploadComplete={() => setShowFileUploader(false)}
+							onCancel={() => setShowFileUploader(false)}
 						/>
 					</div>
 				</div>

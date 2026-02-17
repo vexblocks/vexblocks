@@ -254,7 +254,7 @@ export const cmsContent = defineTable({
  * Uses Cloudflare Images for storage.
  */
 export const cmsMedia = defineTable({
-	cloudflareId: v.string(), // Cloudflare Images ID (required)
+	cloudflareId: v.string(), // Cloudflare Images ID or empty string for R2 files
 	filename: v.string(),
 	mimeType: v.string(),
 	size: v.number(), // File size in bytes
@@ -264,12 +264,16 @@ export const cmsMedia = defineTable({
 	caption: v.string(), // Descriptive name/caption (required)
 	alt: v.optional(v.string()), // Alt text for accessibility
 	tags: v.optional(v.array(v.string())), // Array of tag names (optional)
+	// Storage type: "cloudflare-images" (default) or "r2"
+	storageType: v.optional(v.string()),
+	r2Key: v.optional(v.string()), // R2 object key (only for storageType "r2")
 	// Upload info
 	uploadedBy: v.id("users"),
 	uploadedAt: v.number(),
 })
 	.index("by_uploaded_by", ["uploadedBy"])
 	.index("by_cloudflare_id", ["cloudflareId"])
+	.index("by_r2_key", ["r2Key"])
 
 /**
  * Media tags for autocomplete and organization.

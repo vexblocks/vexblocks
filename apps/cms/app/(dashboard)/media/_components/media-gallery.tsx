@@ -178,6 +178,8 @@ export function MediaGallery({
 							height={media.height}
 							size={media.size}
 							mimeType={media.mimeType}
+							storageType={media.storageType}
+							r2Key={media.r2Key}
 							onEdit={() => setEditingMedia(media._id)}
 							onDelete={() => handleDelete(media._id)}
 							onSelect={() =>
