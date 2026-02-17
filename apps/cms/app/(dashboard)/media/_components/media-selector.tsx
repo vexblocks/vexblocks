@@ -3,6 +3,7 @@
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { Upload as UploadIcon, X } from "lucide-react"
 import { useState } from "react"
+import { FileUploader } from "./file-uploader"
 import { MediaGallery } from "./media-gallery"
 import { MediaUploader } from "./media-uploader"
 
@@ -10,14 +11,18 @@ type MediaSelectorProps = {
 	onSelect: (media: { id: Id<"cmsMedia">; cloudflareId: string }) => void
 	onClose: () => void
 	selectedCloudflareId?: string
+	filterType?: "all" | "images" | "files"
 }
 
 export function MediaSelector({
 	onSelect,
 	onClose,
 	selectedCloudflareId,
+	filterType = "all",
 }: MediaSelectorProps) {
 	const [view, setView] = useState<"gallery" | "upload">("gallery")
+
+	const isFilesOnly = filterType === "files"
 
 	const handleSelect = (media: {
 		id: Id<"cmsMedia">
@@ -31,8 +36,13 @@ export function MediaSelector({
 		id: Id<"cmsMedia">
 		cloudflareId: string
 	}) => {
-		// After upload, select the newly uploaded image
 		handleSelect(media)
+	}
+
+	const handleFileUploadComplete = (media: { id: Id<"cmsMedia"> }) => {
+		// For R2 files, cloudflareId is empty — pass the media id instead
+		onSelect({ id: media.id, cloudflareId: "" })
+		onClose()
 	}
 
 	return (
@@ -41,7 +51,9 @@ export function MediaSelector({
 				{/* Header */}
 				<div className="flex items-center justify-between border-grey-200 border-b bg-white px-6 py-4">
 					<div className="flex items-center gap-4">
-						<h2 className="font-semibold text-primary text-xl">Select Media</h2>
+						<h2 className="font-semibold text-primary text-xl">
+							{isFilesOnly ? "Select File" : "Select Media"}
+						</h2>
 						<div className="flex gap-2">
 							<button
 								type="button"
@@ -52,7 +64,7 @@ export function MediaSelector({
 										: "bg-grey-100 text-grey-700 hover:bg-grey-200"
 								}`}
 							>
-								Media Library
+								{isFilesOnly ? "File Library" : "Media Library"}
 							</button>
 							<button
 								type="button"
@@ -84,6 +96,12 @@ export function MediaSelector({
 							selectionMode
 							onSelect={handleSelect}
 							selectedCloudflareId={selectedCloudflareId}
+							filterType={filterType}
+						/>
+					) : isFilesOnly ? (
+						<FileUploader
+							onUploadComplete={handleFileUploadComplete}
+							onCancel={() => setView("gallery")}
 						/>
 					) : (
 						<MediaUploader
@@ -99,8 +117,12 @@ export function MediaSelector({
 					<div className="flex items-center justify-between text-grey-500 text-sm">
 						<p>
 							{view === "gallery"
-								? "Click on an image to select it"
-								: "Upload a new image and it will be automatically selected"}
+								? isFilesOnly
+									? "Click on a file to select it"
+									: "Click on an image to select it"
+								: isFilesOnly
+									? "Upload a new file and it will be automatically selected"
+									: "Upload a new image and it will be automatically selected"}
 						</p>
 						<button
 							type="button"

@@ -56,6 +56,7 @@ type FieldType =
 	| "longText"
 	| "richText"
 	| "media"
+	| "file"
 	| "url"
 	| "youtubeUrl"
 	| "boolean"
@@ -85,6 +86,7 @@ type Field = {
 		| "longText"
 		| "richText"
 		| "media"
+		| "file"
 		| "url"
 		| "youtubeUrl"
 		| "boolean"
@@ -429,6 +431,7 @@ const FieldEditor = ({
 							<option value="url">URL</option>
 							<option value="youtubeUrl">YouTube URL</option>
 							<option value="media">Media</option>
+							<option value="file">File</option>
 							<option value="select">Select</option>
 							<option value="reference">Reference</option>
 							<option value="multiReference">Multi Reference</option>
@@ -587,6 +590,7 @@ const FieldEditor = ({
 										{ value: "longText", label: "Long Text" },
 										{ value: "richText", label: "Rich Text" },
 										{ value: "media", label: "Media" },
+										{ value: "file", label: "File" },
 										{ value: "url", label: "URL" },
 										{ value: "youtubeUrl", label: "YouTube URL" },
 										{ value: "boolean", label: "Boolean" },
@@ -601,6 +605,7 @@ const FieldEditor = ({
 											"longText",
 											"richText",
 											"media",
+											"file",
 											"url",
 											"youtubeUrl",
 											"boolean",
@@ -1120,6 +1125,8 @@ export default function NewSchemaPage() {
 				return <Video className="h-4 w-4" />
 			case "media":
 				return <Image className="h-4 w-4" />
+			case "file":
+				return <FileText className="h-4 w-4" />
 			case "select":
 			case "reference":
 				return <List className="h-4 w-4" />

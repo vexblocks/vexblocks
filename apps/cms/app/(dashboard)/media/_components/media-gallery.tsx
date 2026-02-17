@@ -15,12 +15,14 @@ type MediaGalleryProps = {
 	selectionMode?: boolean
 	onSelect?: (media: { id: Id<"cmsMedia">; cloudflareId: string }) => void
 	selectedCloudflareId?: string
+	filterType?: "all" | "images" | "files"
 }
 
 export function MediaGallery({
 	selectionMode = false,
 	onSelect,
 	selectedCloudflareId,
+	filterType = "all",
 }: MediaGalleryProps) {
 	const [searchTerm, setSearchTerm] = useState("")
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -57,8 +59,17 @@ export function MediaGallery({
 			: "skip",
 	)
 
+	// Filter by storage type
+	const filteredByType = mediaItems
+		? filterType === "images"
+			? mediaItems.filter((item) => item.storageType !== "r2")
+			: filterType === "files"
+				? mediaItems.filter((item) => item.storageType === "r2")
+				: mediaItems
+		: mediaItems
+
 	// Calculate tag counts from current filtered results
-	const tagCounts = (mediaItems || []).reduce(
+	const tagCounts = (filteredByType || []).reduce(
 		(acc, item) => {
 			for (const tag of item.tags || []) {
 				acc[tag] = (acc[tag] || 0) + 1
@@ -147,27 +158,29 @@ export function MediaGallery({
 			)}
 
 			{/* Gallery Grid */}
-			{mediaItems === undefined ? (
+			{filteredByType === undefined ? (
 				<div className="flex min-h-[300px] items-center justify-center">
 					<div className="text-center">
 						<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 						<p className="text-grey-500">Loading media...</p>
 					</div>
 				</div>
-			) : mediaItems.length === 0 ? (
+			) : filteredByType.length === 0 ? (
 				<div className="flex min-h-[300px] items-center justify-center rounded-lg border-2 border-grey-200 border-dashed">
 					<div className="text-center text-grey-500">
 						<p className="mb-2 font-medium">No media found</p>
 						<p className="text-sm">
 							{searchTerm || selectedTags.length > 0
 								? "Try adjusting your filters"
-								: "Upload your first image to get started"}
+								: filterType === "files"
+									? "Upload your first file to get started"
+									: "Upload your first image to get started"}
 						</p>
 					</div>
 				</div>
 			) : (
 				<div className="columns-2 gap-4 md:columns-3 lg:columns-4">
-					{mediaItems.map((media) => (
+					{filteredByType.map((media) => (
 						<MediaCard
 							key={media._id}
 							id={media._id}

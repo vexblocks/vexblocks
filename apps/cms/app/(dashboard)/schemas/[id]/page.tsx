@@ -63,6 +63,7 @@ type FieldType =
 	| "longText"
 	| "richText"
 	| "media"
+	| "file"
 	| "url"
 	| "youtubeUrl"
 	| "boolean"
@@ -93,6 +94,7 @@ type Field = {
 		| "longText"
 		| "richText"
 		| "media"
+		| "file"
 		| "url"
 		| "youtubeUrl"
 		| "boolean"
@@ -424,6 +426,7 @@ function FieldEditor({
 						<option value="url">URL</option>
 						<option value="youtubeUrl">YouTube URL</option>
 						<option value="media">Media</option>
+						<option value="file">File</option>
 						<option value="select">Select</option>
 						<option value="reference">Reference</option>
 						<option value="multiReference">Multi Reference</option>
@@ -546,6 +549,7 @@ function FieldEditor({
 								{ value: "longText", label: "Long Text" },
 								{ value: "richText", label: "Rich Text" },
 								{ value: "media", label: "Media" },
+								{ value: "file", label: "File" },
 								{ value: "url", label: "URL" },
 								{ value: "youtubeUrl", label: "YouTube URL" },
 								{ value: "boolean", label: "Boolean" },
@@ -560,6 +564,7 @@ function FieldEditor({
 									"longText",
 									"richText",
 									"media",
+									"file",
 									"url",
 									"youtubeUrl",
 									"boolean",

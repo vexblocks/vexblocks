@@ -1,8 +1,10 @@
 "use client"
 
+import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage, getStringValue } from "@repo/cms-shared"
-import { Image as ImageIcon, RefreshCw, X } from "lucide-react"
+import { useQuery } from "convex/react"
+import { FileUp, Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState } from "react"
 import TextareaAutosize from "react-textarea-autosize"
@@ -19,6 +21,69 @@ const LexicalEditor = dynamic(
 	() => import("@/components/editor/lexical-editor"),
 	{ ssr: false },
 )
+
+// Sub-component to display file info (needs useQuery hook)
+function FilePreview({
+	mediaId,
+	onRemove,
+	onChangeFile,
+}: {
+	mediaId: string
+	onRemove: () => void
+	onChangeFile: () => void
+}) {
+	const media = useQuery(api.cms.media.get, {
+		id: mediaId as Id<"cmsMedia">,
+	})
+
+	const formatFileSize = (bytes: number) => {
+		if (bytes < 1024) return `${bytes} B`
+		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+	}
+
+	const ext = media?.filename?.split(".").pop()?.toUpperCase()
+
+	return (
+		<div className="inline-flex w-full flex-col items-center">
+			<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+				<div className="flex items-center gap-3 p-4">
+					<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+						<FileUp className="h-5 w-5 text-primary" />
+					</div>
+					<div className="min-w-0 flex-1">
+						<p className="truncate font-medium text-grey-700 text-sm">
+							{media?.caption || "Loading..."}
+						</p>
+						{media && (
+							<p className="text-grey-400 text-xs">
+								{ext && <span className="mr-1 font-medium uppercase">{ext}</span>}
+								{formatFileSize(media.size)}
+							</p>
+						)}
+					</div>
+					<button
+						type="button"
+						onClick={onRemove}
+						className="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-error text-white shadow-lg transition-all hover:scale-110 hover:bg-error/90"
+						title="Remove file"
+					>
+						<X className="h-4 w-4" />
+					</button>
+				</div>
+				<div className="border-grey-200 border-t bg-white p-3">
+					<button
+						type="button"
+						onClick={onChangeFile}
+						className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+					>
+						Change File
+					</button>
+				</div>
+			</div>
+		</div>
+	)
+}
 
 // Dynamic import for MediaSelector to avoid SSR issues
 const MediaSelector = dynamic(
@@ -293,11 +358,59 @@ export function BasicFieldRenderer({
 					{showMediaSelector && (
 						<MediaSelector
 							selectedCloudflareId={value}
+							filterType="images"
 							onSelect={(media: {
 								id: Id<"cmsMedia">
 								cloudflareId: string
 							}) => {
 								onChange(media.cloudflareId)
+								setShowMediaSelector(false)
+							}}
+							onClose={() => setShowMediaSelector(false)}
+						/>
+					)}
+				</>
+			)
+
+		case "file":
+			return (
+				<>
+					<div className="space-y-4">
+						{value ? (
+							<FilePreview
+								mediaId={value}
+								onRemove={() => onChange("")}
+								onChangeFile={() => setShowMediaSelector(true)}
+							/>
+						) : (
+							<button
+								type="button"
+								onClick={() => setShowMediaSelector(true)}
+								className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
+							>
+								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
+									<FileUp className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
+								</div>
+								<div className="text-center">
+									<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+										Select from File Library
+									</p>
+									<p className="mt-1 text-grey-500 text-xs">
+										Click to browse and choose a file
+									</p>
+								</div>
+							</button>
+						)}
+					</div>
+
+					{showMediaSelector && (
+						<MediaSelector
+							filterType="files"
+							onSelect={(media: {
+								id: Id<"cmsMedia">
+								cloudflareId: string
+							}) => {
+								onChange(String(media.id))
 								setShowMediaSelector(false)
 							}}
 							onClose={() => setShowMediaSelector(false)}
