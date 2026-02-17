@@ -18,10 +18,7 @@ export const listPublic = query({
 			_creationTime: v.number(),
 			name: v.string(),
 			displayName: v.string(),
-			type: v.union(
-				v.literal("global"),
-				v.literal("collection"),
-			),
+			type: v.union(v.literal("global"), v.literal("collection")),
 			description: v.optional(v.string()),
 			fields: v.array(v.any()),
 			viewConfig: v.optional(
@@ -58,10 +55,7 @@ export const list = query({
 				_creationTime: v.number(),
 				name: v.string(),
 				displayName: v.string(),
-				type: v.union(
-					v.literal("global"),
-					v.literal("collection"),
-				),
+				type: v.union(v.literal("global"), v.literal("collection")),
 				description: v.optional(v.string()),
 				fields: v.array(v.any()),
 				viewConfig: v.optional(
@@ -104,10 +98,7 @@ export const get = query({
 			_creationTime: v.number(),
 			name: v.string(),
 			displayName: v.string(),
-			type: v.union(
-				v.literal("global"),
-				v.literal("collection"),
-			),
+			type: v.union(v.literal("global"), v.literal("collection")),
 			description: v.optional(v.string()),
 			fields: v.array(v.any()),
 			viewConfig: v.optional(
@@ -164,10 +155,7 @@ export const getByName = query({
 			_creationTime: v.number(),
 			name: v.string(),
 			displayName: v.string(),
-			type: v.union(
-				v.literal("global"),
-				v.literal("collection"),
-			),
+			type: v.union(v.literal("global"), v.literal("collection")),
 			description: v.optional(v.string()),
 			fields: v.array(v.any()),
 			viewConfig: v.optional(
@@ -201,10 +189,7 @@ export const getByName = query({
  */
 export const listByType = query({
 	args: {
-		type: v.union(
-			v.literal("global"),
-			v.literal("collection"),
-		),
+		type: v.union(v.literal("global"), v.literal("collection")),
 	},
 	returns: v.union(v.array(v.any()), v.null()),
 	handler: async (ctx, args) => {
@@ -231,10 +216,7 @@ export const create = mutation({
 	args: {
 		name: v.string(),
 		displayName: v.string(),
-		type: v.union(
-			v.literal("global"),
-			v.literal("collection"),
-		),
+		type: v.union(v.literal("global"), v.literal("collection")),
 		description: v.optional(v.string()),
 		fields: v.array(v.any()),
 		icon: v.optional(v.string()),

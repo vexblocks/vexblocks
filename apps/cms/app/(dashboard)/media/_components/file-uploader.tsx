@@ -1,9 +1,9 @@
 "use client"
 
+import { useUploadFile } from "@convex-dev/r2/react"
 import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { useUploadFile } from "@convex-dev/r2/react"
 import { useMutation, useQuery } from "convex/react"
 import { FileUp, Upload } from "lucide-react"
 import { useState } from "react"
@@ -17,7 +17,10 @@ type FileUploaderProps = {
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
-export function FileUploader({ onUploadComplete, onCancel }: FileUploaderProps) {
+export function FileUploader({
+	onUploadComplete,
+	onCancel,
+}: FileUploaderProps) {
 	const [isUploading, setIsUploading] = useState(false)
 	const [file, setFile] = useState<File | null>(null)
 	const [caption, setCaption] = useState("")
@@ -38,7 +41,7 @@ export function FileUploader({ onUploadComplete, onCancel }: FileUploaderProps) 
 		// Reject image files — those should use Cloudflare Images via "Upload Image"
 		if (selectedFile.type.startsWith("image/")) {
 			toast.error(
-				"Image files should be uploaded using the \"Upload Image\" button",
+				'Image files should be uploaded using the "Upload Image" button',
 			)
 			e.target.value = ""
 			return

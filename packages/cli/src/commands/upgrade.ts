@@ -7,6 +7,7 @@ import { MANAGED_PACKAGES, PACKAGE_NAMES } from "../utils/constants.js"
 import {
 	compareVersions,
 	downloadAndExtractPackage,
+	fetchFile,
 	getChangelog,
 	getLatestVersion,
 } from "../utils/github.js"
@@ -204,16 +205,37 @@ async function upgradePackage(
 			// For non-managed packages (backend), only update CMS-specific files
 			spinner.text = `Upgrading CMS files in ${PACKAGE_NAMES[pkg]}...`
 
-			const cmsFiles = ["convex/cms"]
+			// Directories to replace entirely
+			const cmsDirs = ["convex/cms", "better-auth", "emails"]
 
-			for (const file of cmsFiles) {
-				const targetFilePath = path.join(targetPath, file)
-				const sourceFilePath = `packages/backend/${file}`
+			for (const dir of cmsDirs) {
+				const targetFilePath = path.join(targetPath, dir)
+				const sourceFilePath = `packages/backend/${dir}`
 
-				// Download new version
 				try {
 					await fs.remove(targetFilePath)
 					await downloadAndExtractPackage(sourceFilePath, targetFilePath)
+				} catch {
+					// Skip if directory doesn't exist in source
+				}
+			}
+
+			// Individual files to update
+			const cmsIndividualFiles = [
+				"convex/auth.ts",
+				"convex/auth.config.ts",
+				"convex/http.ts",
+				"convex/convex.config.ts",
+			]
+
+			for (const file of cmsIndividualFiles) {
+				const targetFilePath = path.join(targetPath, file)
+				const sourceFilePath = `packages/backend/${file}`
+
+				try {
+					const content = await fetchFile(sourceFilePath)
+					await fs.ensureDir(path.dirname(targetFilePath))
+					await fs.writeFile(targetFilePath, content)
 				} catch {
 					// Skip if file doesn't exist in source
 				}

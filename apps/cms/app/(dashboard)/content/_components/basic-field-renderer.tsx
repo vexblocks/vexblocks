@@ -57,7 +57,9 @@ function FilePreview({
 						</p>
 						{media && (
 							<p className="text-grey-400 text-xs">
-								{ext && <span className="mr-1 font-medium uppercase">{ext}</span>}
+								{ext && (
+									<span className="mr-1 font-medium uppercase">{ext}</span>
+								)}
 								{formatFileSize(media.size)}
 							</p>
 						)}

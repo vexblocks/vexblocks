@@ -50,9 +50,7 @@ export function MediaGallery({
 	const removeMedia = useMutation(api.cms.media.remove)
 	const checkReferences = useQuery(
 		api.cms.media.checkReferences,
-		isReady && deletingMedia
-			? { mediaId: deletingMedia }
-			: "skip",
+		isReady && deletingMedia ? { mediaId: deletingMedia } : "skip",
 	)
 
 	// Filter by storage type

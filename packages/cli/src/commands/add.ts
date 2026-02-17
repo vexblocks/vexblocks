@@ -280,32 +280,44 @@ async function installBackendPackage(
 		spinner.text = "Detected existing Convex schema, merging CMS tables..."
 
 		// Download only the CMS-specific files
-		const cmsFiles = [
-			"convex/cms",
+		// Directories are downloaded with downloadAndExtractPackage
+		// Individual files are downloaded directly with fetchFile
+		const cmsDirs = ["convex/cms", "better-auth", "emails"]
+
+		const cmsIndividualFiles = [
 			"convex/auth.ts",
 			"convex/auth.config.ts",
 			"convex/http.ts",
-			"better-auth",
-			"emails",
+			"convex/convex.config.ts",
 		]
 
-		for (const file of cmsFiles) {
+		// Download directories
+		for (const dir of cmsDirs) {
+			const fullSourcePath = `${sourcePath}/${dir}`
+			const fullTargetPath = path.join(targetPath, dir)
+
+			spinner.text = `Downloading ${dir}...`
+
+			try {
+				await downloadAndExtractPackage(fullSourcePath, fullTargetPath)
+			} catch {
+				// Directory might not exist, skip
+			}
+		}
+
+		// Download individual files directly
+		for (const file of cmsIndividualFiles) {
 			const fullSourcePath = `${sourcePath}/${file}`
 			const fullTargetPath = path.join(targetPath, file)
 
 			spinner.text = `Downloading ${file}...`
 
 			try {
-				await downloadAndExtractPackage(fullSourcePath, fullTargetPath)
+				const content = await fetchFile(fullSourcePath)
+				await fs.ensureDir(path.dirname(fullTargetPath))
+				await fs.writeFile(fullTargetPath, content)
 			} catch {
-				// If it's a single file, download it directly
-				try {
-					const content = await fetchFile(fullSourcePath)
-					await fs.ensureDir(path.dirname(fullTargetPath))
-					await fs.writeFile(fullTargetPath, content)
-				} catch {
-					// Might not exist, skip
-				}
+				// File might not exist, skip
 			}
 		}
 
