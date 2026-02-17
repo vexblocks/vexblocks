@@ -63,7 +63,7 @@ export default function DashboardLayout({
 
 			{/* Main content - Add left margin to account for fixed sidebar */}
 			<main
-				className={`flex-1 transition-all duration-300 ${
+				className={`min-w-0 flex-1 transition-all duration-300 ${
 					isCollapsed ? "lg:ml-[72px]" : "lg:ml-64"
 				}`}
 			>
