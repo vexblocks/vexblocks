@@ -245,7 +245,7 @@ export const update = mutation({
  */
 export const checkReferences = query({
 	args: {
-		cloudflareId: v.string(),
+		mediaId: v.id("cmsMedia"),
 	},
 	returns: v.object({
 		isReferenced: v.boolean(),
@@ -264,6 +264,15 @@ export const checkReferences = query({
 			throw new ConvexError("Unauthorized")
 		}
 
+		const media = await ctx.db.get(args.mediaId)
+		if (!media) {
+			return { isReferenced: false, referenceCount: 0, references: [] }
+		}
+
+		// For R2 files, content stores String(media._id); for images, content stores cloudflareId
+		const valueToCheck =
+			media.storageType === "r2" ? args.mediaId : media.cloudflareId
+
 		const allContent = await ctx.db.query("cmsContent").collect()
 		const references: Array<{
 			contentId: any
@@ -271,12 +280,11 @@ export const checkReferences = query({
 			contentTitle: string
 		}> = []
 
-		// Recursively search for cloudflareId in content data
 		function searchInObject(obj: any): boolean {
 			if (!obj || typeof obj !== "object") return false
 
 			for (const value of Object.values(obj)) {
-				if (value === args.cloudflareId) {
+				if (value === valueToCheck) {
 					return true
 				}
 				if (Array.isArray(value)) {
@@ -332,35 +340,35 @@ export const remove = mutation({
 			throw new ConvexError("Media not found")
 		}
 
-		// Check if media is referenced (only for cloudflare-images that have a real cloudflareId)
-		if (media.storageType !== "r2") {
-			const allContent = await ctx.db.query("cmsContent").collect()
-			const cloudflareIdToCheck = media.cloudflareId
+		// Check if media is referenced in any content
+		const allContent = await ctx.db.query("cmsContent").collect()
+		// For R2 files, content stores String(media._id); for images, content stores cloudflareId
+		const valueToCheck =
+			media.storageType === "r2" ? args.id : media.cloudflareId
 
-			function searchInObject(obj: any): boolean {
-				if (!obj || typeof obj !== "object") return false
+		function searchInObject(obj: any): boolean {
+			if (!obj || typeof obj !== "object") return false
 
-				for (const value of Object.values(obj)) {
-					if (value === cloudflareIdToCheck) {
-						return true
-					}
-					if (Array.isArray(value)) {
-						for (const item of value) {
-							if (searchInObject(item)) return true
-						}
-					} else if (typeof value === "object") {
-						if (searchInObject(value)) return true
-					}
+			for (const value of Object.values(obj)) {
+				if (value === valueToCheck) {
+					return true
 				}
-				return false
+				if (Array.isArray(value)) {
+					for (const item of value) {
+						if (searchInObject(item)) return true
+					}
+				} else if (typeof value === "object") {
+					if (searchInObject(value)) return true
+				}
 			}
+			return false
+		}
 
-			for (const content of allContent) {
-				if (searchInObject(content.data)) {
-					throw new ConvexError(
-						"Cannot delete media: it is being used in content. Please remove all references first.",
-					)
-				}
+		for (const content of allContent) {
+			if (searchInObject(content.data)) {
+				throw new ConvexError(
+					"Cannot delete media: it is being used in content. Please remove all references first.",
+				)
 			}
 		}
 

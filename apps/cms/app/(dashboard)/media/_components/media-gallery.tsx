@@ -51,11 +51,7 @@ export function MediaGallery({
 	const checkReferences = useQuery(
 		api.cms.media.checkReferences,
 		isReady && deletingMedia
-			? {
-					cloudflareId:
-						mediaItems?.find((m) => m._id === deletingMedia)?.cloudflareId ||
-						"",
-				}
+			? { mediaId: deletingMedia }
 			: "skip",
 	)
 
