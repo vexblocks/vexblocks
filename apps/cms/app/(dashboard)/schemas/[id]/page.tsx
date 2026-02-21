@@ -22,6 +22,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { use, useCallback, useEffect, useState } from "react"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
+import { SelectOptionsInput } from "@/components/atoms/select-options-input"
 import { authAtom } from "@/lib/auth-atom"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
 
@@ -480,17 +481,10 @@ function FieldEditor({
 					>
 						Options (comma-separated)
 					</label>
-					<input
-						type="text"
+					<SelectOptionsInput
 						id={`field-options-${field.id}`}
-						value={field.options?.join(", ") || ""}
-						onChange={(e) =>
-							onUpdateField(path, {
-								options: e.target.value.split(",").map((o) => o.trim()),
-							})
-						}
-						placeholder="Option 1, Option 2, Option 3"
-						className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+						value={field.options ?? []}
+						onChange={(options) => onUpdateField(path, { options })}
 					/>
 				</div>
 			)}
