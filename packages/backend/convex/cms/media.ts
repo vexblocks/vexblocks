@@ -403,6 +403,98 @@ export const remove = mutation({
 })
 
 /**
+ * Replace media file: upload the new asset first (client-side), then call this
+ * mutation to delete the old file from Cloudflare/R2 and update the DB record.
+ * For Cloudflare Images, all content references are updated automatically.
+ */
+export const replace = mutation({
+	args: {
+		id: v.id("cmsMedia"),
+		filename: v.string(),
+		mimeType: v.string(),
+		size: v.number(),
+		width: v.optional(v.number()),
+		height: v.optional(v.number()),
+		// Provide for Cloudflare Images replacement
+		cloudflareId: v.optional(v.string()),
+		// Provide for R2 replacement
+		r2Key: v.optional(v.string()),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const user = await getAuthenticatedContentUser(ctx)
+		if (!user) {
+			throw new ConvexError("Unauthorized")
+		}
+
+		const media = await ctx.db.get(args.id)
+		if (!media) {
+			throw new ConvexError("Media not found")
+		}
+
+		const isR2 = media.storageType === "r2"
+
+		// For Cloudflare Images: update all content references from old cloudflareId
+		// to the new one so existing content doesn't break.
+		if (!isR2 && args.cloudflareId && media.cloudflareId && args.cloudflareId !== media.cloudflareId) {
+			const oldId = media.cloudflareId
+			const newId = args.cloudflareId
+
+			function replaceValueInObject(obj: any): any {
+				if (obj === oldId) return newId
+				if (!obj || typeof obj !== "object") return obj
+				if (Array.isArray(obj)) return obj.map(replaceValueInObject)
+				const result: Record<string, any> = {}
+				for (const [key, value] of Object.entries(obj)) {
+					result[key] = replaceValueInObject(value)
+				}
+				return result
+			}
+
+			const allContent = await ctx.db.query("cmsContent").collect()
+			for (const content of allContent) {
+				if (content.data) {
+					const updatedData = replaceValueInObject(content.data)
+					if (JSON.stringify(updatedData) !== JSON.stringify(content.data)) {
+						await ctx.db.patch(content._id, { data: updatedData })
+					}
+				}
+			}
+		}
+
+		// Delete old file from storage
+		if (isR2 && media.r2Key) {
+			await r2.deleteObject(ctx, media.r2Key)
+		} else if (!isR2 && media.cloudflareId) {
+			await ctx.scheduler.runAfter(
+				0,
+				internal.cms.mediaActions.deleteFromCloudflare,
+				{ cloudflareId: media.cloudflareId },
+			)
+		}
+
+		// Update the DB record with new file metadata
+		const updates: any = {
+			filename: args.filename,
+			mimeType: args.mimeType,
+			size: args.size,
+		}
+
+		if (isR2 && args.r2Key) {
+			updates.r2Key = args.r2Key
+		} else if (!isR2 && args.cloudflareId) {
+			updates.cloudflareId = args.cloudflareId
+		}
+
+		if (args.width !== undefined) updates.width = args.width
+		if (args.height !== undefined) updates.height = args.height
+
+		await ctx.db.patch(args.id, updates)
+		return null
+	},
+})
+
+/**
  * Internal mutation to update tag usage count
  */
 export const updateTagUsage = internalMutation({

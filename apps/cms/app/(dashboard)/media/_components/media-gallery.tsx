@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
 import { MediaCard } from "./media-card"
 import { MediaFilters } from "./media-filters"
+import { ReplaceMediaDialog } from "./replace-media-dialog"
 
 type MediaGalleryProps = {
 	selectionMode?: boolean
@@ -27,9 +28,12 @@ export function MediaGallery({
 	const [searchTerm, setSearchTerm] = useState("")
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [editingMedia, setEditingMedia] = useState<Id<"cmsMedia"> | null>(null)
-	const [deletingMedia, setDeletingMedia] = useState<Id<"cmsMedia"> | null>(
-		null,
-	)
+	const [deletingMedia, setDeletingMedia] = useState<Id<"cmsMedia"> | null>(null)
+	const [replacingMedia, setReplacingMedia] = useState<{
+		id: Id<"cmsMedia">
+		storageType?: string
+		caption: string
+	} | null>(null)
 
 	// Wait for auth to be initialized before making queries
 	const [auth] = useAtom(authAtom)
@@ -188,6 +192,13 @@ export function MediaGallery({
 							storageType={media.storageType}
 							r2Key={media.r2Key}
 							onEdit={() => setEditingMedia(media._id)}
+							onReplace={() =>
+								setReplacingMedia({
+									id: media._id,
+									storageType: media.storageType,
+									caption: media.caption,
+								})
+							}
 							onDelete={() => handleDelete(media._id)}
 							onSelect={() =>
 								handleMediaSelect({
@@ -283,6 +294,17 @@ export function MediaGallery({
 						</div>
 					</div>
 				</div>
+			)}
+
+			{/* Replace Media Dialog */}
+			{replacingMedia && (
+				<ReplaceMediaDialog
+					mediaId={replacingMedia.id}
+					storageType={replacingMedia.storageType}
+					currentCaption={replacingMedia.caption}
+					onClose={() => setReplacingMedia(null)}
+					onReplaced={() => setReplacingMedia(null)}
+				/>
 			)}
 		</div>
 	)

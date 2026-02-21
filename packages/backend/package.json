@@ -14,14 +14,14 @@
 		"@convex-dev/r2": "^0.9.1",
 		"@convex-dev/resend": "^0.2.3",
 		"better-auth": "1.4.18",
-		"convex": "^1.31.7",
-		"convex-helpers": "^0.1.112",
+		"convex": "^1.32.0",
+		"convex-helpers": "^0.1.113",
 		"next": "16.1.6",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.17.23",
-		"@types/node": "^25.2.3",
+		"@types/node": "^25.3.0",
 		"typescript": "^5.9.3"
 	}
 }

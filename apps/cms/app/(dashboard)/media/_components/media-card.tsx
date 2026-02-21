@@ -16,6 +16,7 @@ import {
 	FileSpreadsheet,
 	FileText,
 	FileVideo,
+	RefreshCw,
 	Trash2,
 } from "lucide-react"
 import { useState } from "react"
@@ -33,6 +34,7 @@ type MediaCardProps = {
 	storageType?: string
 	r2Key?: string
 	onEdit?: () => void
+	onReplace?: () => void
 	onDelete?: () => void
 	onSelect?: () => void
 	isSelected?: boolean
@@ -84,6 +86,7 @@ export function MediaCard({
 	storageType,
 	r2Key,
 	onEdit,
+	onReplace,
 	onDelete,
 	onSelect,
 	isSelected = false,
@@ -203,6 +206,14 @@ export function MediaCard({
 							title="Edit"
 						>
 							<Edit2 className="h-4 w-4" />
+						</button>
+						<button
+							type="button"
+							onClick={onReplace}
+							className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary transition-colors hover:bg-primary hover:text-white"
+							title="Replace"
+						>
+							<RefreshCw className="h-4 w-4" />
 						</button>
 						<button
 							type="button"
