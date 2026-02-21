@@ -41,7 +41,9 @@ export function ReplaceMediaDialog({
 
 		if (isR2) {
 			if (selectedFile.type.startsWith("image/")) {
-				toast.error('Image files should be uploaded using the "Upload Image" button')
+				toast.error(
+					'Image files should be uploaded using the "Upload Image" button',
+				)
 				e.target.value = ""
 				return
 			}
@@ -214,7 +216,9 @@ export function ReplaceMediaDialog({
 							>
 								<Upload className="h-5 w-5 text-grey-500" />
 								<span className="text-grey-500 text-sm">
-									{file ? file.name : `Choose ${isR2 ? "a file" : "an image"}...`}
+									{file
+										? file.name
+										: `Choose ${isR2 ? "a file" : "an image"}...`}
 								</span>
 							</label>
 							<input
@@ -258,7 +262,9 @@ export function ReplaceMediaDialog({
 									style={{ width: `${uploadProgress}%` }}
 								/>
 							</div>
-							<p className="text-grey-500 text-xs">{uploadProgress}% uploaded</p>
+							<p className="text-grey-500 text-xs">
+								{uploadProgress}% uploaded
+							</p>
 						</div>
 					)}
 				</div>

@@ -436,7 +436,12 @@ export const replace = mutation({
 
 		// For Cloudflare Images: update all content references from old cloudflareId
 		// to the new one so existing content doesn't break.
-		if (!isR2 && args.cloudflareId && media.cloudflareId && args.cloudflareId !== media.cloudflareId) {
+		if (
+			!isR2 &&
+			args.cloudflareId &&
+			media.cloudflareId &&
+			args.cloudflareId !== media.cloudflareId
+		) {
 			const oldId = media.cloudflareId
 			const newId = args.cloudflareId
 

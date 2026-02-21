@@ -28,7 +28,9 @@ export function MediaGallery({
 	const [searchTerm, setSearchTerm] = useState("")
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
 	const [editingMedia, setEditingMedia] = useState<Id<"cmsMedia"> | null>(null)
-	const [deletingMedia, setDeletingMedia] = useState<Id<"cmsMedia"> | null>(null)
+	const [deletingMedia, setDeletingMedia] = useState<Id<"cmsMedia"> | null>(
+		null,
+	)
 	const [replacingMedia, setReplacingMedia] = useState<{
 		id: Id<"cmsMedia">
 		storageType?: string

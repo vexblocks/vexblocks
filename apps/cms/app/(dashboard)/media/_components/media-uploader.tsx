@@ -59,7 +59,9 @@ function compressImage(file: File): Promise<Blob> {
 	})
 }
 
-function getDimensions(url: string): Promise<{ width?: number; height?: number }> {
+function getDimensions(
+	url: string,
+): Promise<{ width?: number; height?: number }> {
 	return new Promise((resolve) => {
 		const img = new Image()
 		img.onload = () => resolve({ width: img.width, height: img.height })
@@ -82,14 +84,17 @@ async function getFilesFromEntry(entry: FileSystemEntry): Promise<File[]> {
 		const allEntries: FileSystemEntry[] = []
 		await new Promise<void>((resolve) => {
 			const readBatch = () => {
-				reader.readEntries((batch) => {
-					if (batch.length === 0) {
-						resolve()
-					} else {
-						allEntries.push(...batch)
-						readBatch()
-					}
-				}, () => resolve())
+				reader.readEntries(
+					(batch) => {
+						if (batch.length === 0) {
+							resolve()
+						} else {
+							allEntries.push(...batch)
+							readBatch()
+						}
+					},
+					() => resolve(),
+				)
 			}
 			readBatch()
 		})
@@ -116,8 +121,9 @@ export function MediaUploader({
 	const createMedia = useMutation(api.cms.media.create)
 	const availableTags = useQuery(api.cms.mediaTags.list, isReady ? {} : "skip")
 
-	const uploadableCount =
-		queue.filter((q) => q.status === "pending" || q.status === "error").length
+	const uploadableCount = queue.filter(
+		(q) => q.status === "pending" || q.status === "error",
+	).length
 
 	const addFiles = useCallback((files: File[]) => {
 		const valid: File[] = []
@@ -372,7 +378,10 @@ export function MediaUploader({
 										<CheckCircle2 className="h-5 w-5 text-green-500" />
 									)}
 									{item.status === "error" && (
-										<XCircle className="h-5 w-5 text-error" title="Upload failed — will retry" />
+										<XCircle
+											className="h-5 w-5 text-error"
+											title="Upload failed — will retry"
+										/>
 									)}
 								</div>
 
@@ -421,8 +430,7 @@ export function MediaUploader({
 									<span className="text-grey-500 text-sm">{tag.name}</span>
 									{tag.usageCount > 0 && (
 										<span className="ml-auto text-grey-400 text-xs">
-											{tag.usageCount}{" "}
-											{tag.usageCount === 1 ? "use" : "uses"}
+											{tag.usageCount} {tag.usageCount === 1 ? "use" : "uses"}
 										</span>
 									)}
 								</label>
