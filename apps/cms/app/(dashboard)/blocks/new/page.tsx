@@ -24,6 +24,7 @@ type FieldType =
 	| "longText"
 	| "richText"
 	| "media"
+	| "file"
 	| "url"
 	| "youtubeUrl"
 	| "boolean"

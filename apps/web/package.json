@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"@base-ui-components/react": "1.0.0-rc.0",
-		"@convex-dev/better-auth": "0.10.10",
+		"@convex-dev/better-auth": "0.10.11",
 		"@convex-dev/react-query": "0.1.0",
 		"@lfades/atom": "^2.0.0",
 		"@radix-ui/react-checkbox": "^1.3.3",
