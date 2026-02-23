@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { mutation, query } from "../_generated/server"
-import { getAuthenticatedDeveloperUser } from "./utils"
+import { getAuthenticatedContentUser, getAuthenticatedDeveloperUser } from "./utils"
 
 // ================================
 // QUERIES
@@ -87,7 +87,7 @@ export const get = query({
 		v.null(),
 	),
 	handler: async (ctx, args) => {
-		const user = await getAuthenticatedDeveloperUser(ctx)
+		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
 			return null
 		}

@@ -731,7 +731,7 @@ export default function BlockDetailPage({
 	}
 
 	return (
-		<div className="mx-auto max-w-4xl">
+		<div className="mx-auto max-w-4xl pb-24">
 			<div className="mb-6">
 				<Link
 					href="/blocks"
@@ -742,97 +742,11 @@ export default function BlockDetailPage({
 				</Link>
 			</div>
 
-			<div className="mb-6 flex items-start justify-between">
-				<div>
-					<h1 className="font-bold text-3xl text-primary">
-						{block.displayName}
-					</h1>
-					{block.category && (
-						<p className="mt-2 text-grey-500">{block.category}</p>
-					)}
-				</div>
-				<div className="flex gap-2">
-					{!editing ? (
-						<>
-							<button
-								type="button"
-								onClick={() => setEditing(true)}
-								className="rounded bg-primary px-4 py-2 text-white hover:bg-primary/90"
-							>
-								Edit Block
-							</button>
-							<button
-								type="button"
-								onClick={() => setShowDeleteConfirm(true)}
-								className="rounded bg-error px-4 py-2 text-white hover:bg-error/90"
-							>
-								Delete
-							</button>
-						</>
-					) : (
-						<>
-							<button
-								type="button"
-								onClick={() => {
-									setEditing(false)
-									setError("")
-									if (block) {
-										setDisplayName(block.displayName)
-										setDescription(block.description || "")
-										setCategory(block.category || "")
-										setPreviewImage(block.previewImage || "")
-
-										// Helper to recursively map fields with IDs
-										const mapFieldsWithIds = (
-											fieldsArray: any[],
-											prefix = "",
-										): Field[] => {
-											return fieldsArray.map((f: any, i: number) => {
-												const fieldId = prefix ? `${prefix}_${i}` : `field_${i}`
-												const mappedField: Field = {
-													id: fieldId,
-													name: f.name,
-													label: f.label,
-													type: f.type,
-													required: f.required,
-													helpText: f.helpText,
-													options: f.options,
-													isExisting: true,
-												}
-
-												if (
-													(f.type === "group" || f.type === "repeater") &&
-													f.fields
-												) {
-													mappedField.fields = mapFieldsWithIds(
-														f.fields,
-														fieldId,
-													)
-												}
-
-												return mappedField
-											})
-										}
-
-										setFields(mapFieldsWithIds(block.fields))
-									}
-								}}
-								className="rounded border border-grey-300 px-4 py-2 text-grey-700 hover:bg-grey-50"
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								onClick={handleSave}
-								disabled={loading}
-								className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:opacity-50"
-							>
-								<Save className="h-4 w-4" />
-								{loading ? "Saving..." : "Save Changes"}
-							</button>
-						</>
-					)}
-				</div>
+			<div className="mb-6">
+				<h1 className="font-bold text-3xl text-primary">{block.displayName}</h1>
+				{block.category && (
+					<p className="mt-2 text-grey-500">{block.category}</p>
+				)}
 			</div>
 
 			{error && (
@@ -993,18 +907,8 @@ export default function BlockDetailPage({
 				</div>
 
 				<div>
-					<div className="mb-4 flex items-center justify-between">
+					<div className="mb-4">
 						<h2 className="font-semibold text-xl">Fields</h2>
-						{editing && (
-							<button
-								type="button"
-								onClick={handleAddField}
-								className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-white"
-							>
-								<Plus className="h-4 w-4" />
-								Add Field
-							</button>
-						)}
 					</div>
 					<div className="space-y-3">
 						{editing
@@ -1025,6 +929,106 @@ export default function BlockDetailPage({
 									<FieldViewItem key={field.id} field={field} />
 								))}
 					</div>
+				</div>
+			</div>
+
+			{/* Fixed bottom action bar */}
+			<div className="fixed inset-x-0 bottom-0 z-10 border-grey-200 border-t bg-white p-4 shadow-lg">
+				<div className="mx-auto flex max-w-4xl items-center justify-between">
+					{editing ? (
+						<>
+							<button
+								type="button"
+								onClick={handleAddField}
+								className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm text-white transition-colors hover:bg-secondary-dark"
+							>
+								<Plus className="h-4 w-4" />
+								Add Field
+							</button>
+							<div className="flex items-center gap-3">
+								<button
+									type="button"
+									onClick={() => {
+										setEditing(false)
+										setError("")
+										if (block) {
+											setDisplayName(block.displayName)
+											setDescription(block.description || "")
+											setCategory(block.category || "")
+											setPreviewImage(block.previewImage || "")
+
+											const mapFieldsWithIds = (
+												fieldsArray: any[],
+												prefix = "",
+											): Field[] => {
+												return fieldsArray.map((f: any, i: number) => {
+													const fieldId = prefix
+														? `${prefix}_${i}`
+														: `field_${i}`
+													const mappedField: Field = {
+														id: fieldId,
+														name: f.name,
+														label: f.label,
+														type: f.type,
+														required: f.required,
+														helpText: f.helpText,
+														options: f.options,
+														isExisting: true,
+													}
+
+													if (
+														(f.type === "group" || f.type === "repeater") &&
+														f.fields
+													) {
+														mappedField.fields = mapFieldsWithIds(
+															f.fields,
+															fieldId,
+														)
+													}
+
+													return mappedField
+												})
+											}
+
+											setFields(mapFieldsWithIds(block.fields))
+										}
+									}}
+									className="rounded-lg border border-grey-300 px-6 py-2 text-grey-500 transition-colors hover:bg-grey-100"
+								>
+									Cancel
+								</button>
+								<button
+									type="button"
+									onClick={handleSave}
+									disabled={loading}
+									className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
+								>
+									<Save className="h-4 w-4" />
+									{loading ? "Saving..." : "Save Changes"}
+								</button>
+							</div>
+						</>
+					) : (
+						<>
+							<div />
+							<div className="flex items-center gap-3">
+								<button
+									type="button"
+									onClick={() => setShowDeleteConfirm(true)}
+									className="rounded-lg border border-error px-4 py-2 text-error transition-colors hover:bg-error/5"
+								>
+									Delete
+								</button>
+								<button
+									type="button"
+									onClick={() => setEditing(true)}
+									className="rounded-lg bg-primary px-6 py-2 text-white transition-colors hover:bg-primary-800"
+								>
+									Edit Block
+								</button>
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 

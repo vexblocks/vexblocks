@@ -42,25 +42,7 @@ export default function SettingsPage() {
 			href: "/settings/preview",
 			badge: "New",
 		},
-		{
-			title: "General",
-			description: "Configure general settings and preferences",
-			icon: <Settings className="h-6 w-6" />,
-			href: "/settings/general",
-		},
-		{
-			title: "Site Configuration",
-			description: "Set up your site name, URL, and metadata",
-			icon: <Globe className="h-6 w-6" />,
-			href: "/settings/site",
-		},
 
-		{
-			title: "Notifications",
-			description: "Configure email and push notifications",
-			icon: <Bell className="h-6 w-6" />,
-			href: "/settings/notifications",
-		},
 		{
 			title: "Appearance",
 			description: "Customize the look and feel of your CMS",
