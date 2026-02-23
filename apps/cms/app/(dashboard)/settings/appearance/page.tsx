@@ -260,8 +260,10 @@ export default function AppearanceSettingsPage() {
 						<MediaUploader
 							onUploadComplete={(media) => {
 								setShowUploader(false)
-								setLogoId(media.id)
-								toast.success("Logo uploaded and selected")
+								if (media) {
+									setLogoId(media.id)
+									toast.success("Logo uploaded and selected")
+								}
 							}}
 							onCancel={() => setShowUploader(false)}
 							showInline

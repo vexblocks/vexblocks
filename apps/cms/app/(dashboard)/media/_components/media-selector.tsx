@@ -32,11 +32,16 @@ export function MediaSelector({
 		onClose()
 	}
 
-	const handleUploadComplete = (media: {
+	const handleUploadComplete = (media?: {
 		id: Id<"cmsMedia">
 		cloudflareId: string
 	}) => {
-		handleSelect(media)
+		if (media) {
+			handleSelect(media)
+		} else {
+			// Multiple images uploaded — go to gallery so the user can pick one
+			setView("gallery")
+		}
 	}
 
 	const handleFileUploadComplete = (media: { id: Id<"cmsMedia"> }) => {

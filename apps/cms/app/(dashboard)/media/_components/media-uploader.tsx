@@ -2,6 +2,7 @@
 
 import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import Compressor from "compressorjs"
 import { useMutation, useQuery } from "convex/react"
 import { CheckCircle2, Loader2, Upload, X, XCircle } from "lucide-react"
@@ -30,7 +31,10 @@ type QueuedImage = {
 }
 
 type MediaUploaderProps = {
-	onUploadComplete?: () => void
+	onUploadComplete?: (media: {
+		id: Id<"cmsMedia">
+		cloudflareId: string
+	}) => void
 	onCancel?: () => void
 	showInline?: boolean
 	prefilledCaption?: string
@@ -208,6 +212,9 @@ export function MediaUploader({
 		setIsUploading(true)
 		let successCount = 0
 		let failCount = 0
+		let lastUploadedMedia:
+			| { id: Id<"cmsMedia">; cloudflareId: string }
+			| undefined
 
 		for (const item of toUpload) {
 			setQueue((prev) =>
@@ -245,7 +252,7 @@ export function MediaUploader({
 				const cloudflareId = upload.result.id
 				const dimensions = await getDimensions(item.previewUrl)
 
-				await createMedia({
+				const mediaId = await createMedia({
 					cloudflareId,
 					filename: item.file.name,
 					mimeType: item.file.type,
@@ -255,6 +262,8 @@ export function MediaUploader({
 					caption: item.caption.trim() || item.file.name,
 					tags: tags.length > 0 ? tags : undefined,
 				})
+
+				lastUploadedMedia = { id: mediaId, cloudflareId }
 
 				setQueue((prev) =>
 					prev.map((q) =>
@@ -287,8 +296,8 @@ export function MediaUploader({
 		}
 
 		// Auto-close only when everything succeeded
-		if (failCount === 0) {
-			onUploadComplete?.()
+		if (failCount === 0 && lastUploadedMedia) {
+			onUploadComplete?.(lastUploadedMedia)
 		}
 	}
 
@@ -378,10 +387,7 @@ export function MediaUploader({
 										<CheckCircle2 className="h-5 w-5 text-green-500" />
 									)}
 									{item.status === "error" && (
-										<XCircle
-											className="h-5 w-5 text-error"
-											title="Upload failed — will retry"
-										/>
+										<XCircle className="h-5 w-5 text-error" />
 									)}
 								</div>
 
