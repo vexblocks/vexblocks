@@ -6,7 +6,8 @@ import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { ChevronDown, Copy, Eye, Layers, Plus, Trash2 } from "lucide-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
 import {
 	getCollapsedBlockIds,
@@ -524,8 +525,22 @@ export function FlexibleBlocksField({
 	contentBySchema,
 }: FlexibleBlocksFieldProps) {
 	const containerRef = useRef<HTMLDivElement>(null)
+	const headerRef = useRef<HTMLDivElement>(null)
 	const [showAddMenu, setShowAddMenu] = useState(false)
+	const [showBottomAddMenu, setShowBottomAddMenu] = useState(false)
 	const [showBlockSelector, setShowBlockSelector] = useState(false)
+	const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+
+	useEffect(() => {
+		const el = headerRef.current
+		if (!el) return
+		const observer = new IntersectionObserver(
+			([entry]) => setIsHeaderVisible(entry.isIntersecting),
+			{ threshold: 0 },
+		)
+		observer.observe(el)
+		return () => observer.disconnect()
+	}, [])
 
 	const blocks = (value || []) as Array<{
 		_id: string
@@ -584,6 +599,7 @@ export function FlexibleBlocksField({
 	}
 
 	const handleAddBlockType = (blockType: string) => {
+		setShowBottomAddMenu(false)
 		if (blockType === "blockReference") {
 			// Show block selector dialog for block references
 			setShowBlockSelector(true)
@@ -660,7 +676,7 @@ export function FlexibleBlocksField({
 			className="rounded-lg border-2 border-purple-200 bg-purple-50 p-4 transition-all duration-200"
 			style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 		>
-			<div className="mb-4 flex items-center justify-between">
+			<div ref={headerRef} className="mb-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Layers className="h-5 w-5 text-purple-600" />
 					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
@@ -761,6 +777,51 @@ export function FlexibleBlocksField({
 					}}
 					onClose={() => setShowBlockSelector(false)}
 				/>
+			)}
+
+			{/* Fixed floating "Add Block" button — visible when the header scrolls out of view */}
+			{canAddMore && !isHeaderVisible && blocks.length > 0 && !showBlockSelector && createPortal(
+				<div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+					<div className="relative">
+						<button
+							type="button"
+							onClick={() => setShowBottomAddMenu(!showBottomAddMenu)}
+							className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-2 text-purple-600 text-sm shadow-lg transition-colors hover:bg-purple-50"
+						>
+							<Plus className="h-4 w-4" />
+							Add Block
+						</button>
+						{showBottomAddMenu && (
+							<>
+								<div
+									className="fixed inset-0 z-10"
+									tabIndex={-1}
+									role="button"
+									onClick={() => setShowBottomAddMenu(false)}
+								/>
+								<div className="absolute bottom-full left-1/2 z-20 mb-1 min-w-48 -translate-x-1/2 rounded-lg border border-grey-200 bg-white py-1 shadow-lg">
+									{allowedTypes.map((type) => (
+										<button
+											key={type}
+											type="button"
+											onClick={() => handleAddBlockType(type)}
+											className="flex w-full items-center gap-2 px-4 py-2 text-left text-grey-700 text-sm transition-colors hover:bg-grey-50"
+										>
+											{type === "blockReference" && (
+												<Layers className="h-4 w-4 text-purple-500" />
+											)}
+											<span>{typeLabels[type] || type}</span>
+											{type === "blockReference" && (
+												<span className="ml-auto text-grey-400 text-xs">→</span>
+											)}
+										</button>
+									))}
+								</div>
+							</>
+						)}
+					</div>
+				</div>,
+				document.body,
 			)}
 		</div>
 	)

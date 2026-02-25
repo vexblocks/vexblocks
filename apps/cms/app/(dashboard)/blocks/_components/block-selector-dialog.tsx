@@ -102,14 +102,14 @@ export function BlockSelectorDialog({
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto bg-grey-50 p-6">
 					{blocks === undefined ? (
-						<div className="flex min-h-[200px] items-center justify-center">
+						<div className="flex min-h-50 items-center justify-center">
 							<div className="text-center">
 								<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 								<p className="text-grey-500">Loading blocks...</p>
 							</div>
 						</div>
 					) : Object.keys(filteredGroups).length === 0 ? (
-						<div className="flex min-h-[200px] items-center justify-center">
+						<div className="flex min-h-50 items-center justify-center">
 							<div className="text-center">
 								<Layers className="mx-auto mb-4 h-12 w-12 text-grey-400" />
 								<p className="text-grey-500">
