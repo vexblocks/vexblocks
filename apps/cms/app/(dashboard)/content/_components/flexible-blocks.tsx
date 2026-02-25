@@ -8,6 +8,10 @@ import { useQuery } from "convex/react"
 import { ChevronDown, Copy, Eye, Layers, Plus, Trash2 } from "lucide-react"
 import { useRef, useState } from "react"
 import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-selector-dialog"
+import {
+	getCollapsedBlockIds,
+	setBlockCollapsed,
+} from "@/lib/block-collapse-cookie"
 import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { BlockPreviewModal } from "./block-preview-modal"
@@ -49,7 +53,6 @@ function BlockReferenceContent({
 	contentBySchema?: Record<string, any[]>
 }) {
 	const [showPreviewModal, setShowPreviewModal] = useState(false)
-	const [isCollapsed, setIsCollapsed] = useState(false)
 	const referencedBlock = useQuery(api.cms.blocks.get, {
 		id: blockId as Id<"cmsBlocks">,
 	})
@@ -166,44 +169,29 @@ function BlockReferenceContent({
 							<p className="text-blue-600 text-xs">{referencedBlock.name}</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-2">
+					{referencedBlock.previewImage && (
 						<button
 							type="button"
-							onClick={() => setIsCollapsed(!isCollapsed)}
-							className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-all hover:bg-blue-50"
-							title={isCollapsed ? "Expand block" : "Collapse block"}
+							onClick={() => setShowPreviewModal(true)}
+							className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-50"
+							title="View block preview"
 						>
-							<ChevronDown
-								className={`h-4 w-4 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}
-							/>
-							{isCollapsed ? "Expand" : "Collapse"}
+							<Eye className="h-4 w-4" />
+							Preview
 						</button>
-						{referencedBlock.previewImage && (
-							<button
-								type="button"
-								onClick={() => setShowPreviewModal(true)}
-								className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-50"
-								title="View block preview"
-							>
-								<Eye className="h-4 w-4" />
-								Preview
-							</button>
-						)}
-					</div>
+					)}
 				</div>
-				{!isCollapsed && (
-					<BlockReferenceFields
-						referencedBlock={referencedBlock}
-						blockFieldsData={blockFieldsData}
-						path={path}
-						handleFieldChange={handleFieldChange}
-						handleAddRepeaterItem={handleAddRepeaterItem}
-						handleRemoveRepeaterItem={handleRemoveRepeaterItem}
-						handleMoveRepeaterItem={handleMoveRepeaterItem}
-						allSchemas={allSchemas}
-						contentBySchema={contentBySchema}
-					/>
-				)}
+				<BlockReferenceFields
+					referencedBlock={referencedBlock}
+					blockFieldsData={blockFieldsData}
+					path={path}
+					handleFieldChange={handleFieldChange}
+					handleAddRepeaterItem={handleAddRepeaterItem}
+					handleRemoveRepeaterItem={handleRemoveRepeaterItem}
+					handleMoveRepeaterItem={handleMoveRepeaterItem}
+					allSchemas={allSchemas}
+					contentBySchema={contentBySchema}
+				/>
 			</div>
 
 			{/* Preview Modal */}
@@ -395,19 +383,45 @@ export function FlexibleBlockItem({
 	// Create the field path for this block (e.g., "blocks[0]")
 	const blockFieldPath = `${path}[${index}]`
 
+	const [isCollapsed, setIsCollapsed] = useState(
+		() => getCollapsedBlockIds().has(block._id),
+	)
+
+	const handleToggleCollapse = () => {
+		const next = !isCollapsed
+		setIsCollapsed(next)
+		setBlockCollapsed(block._id, next)
+	}
+
 	return (
 		<div
 			className="rounded-lg border border-purple-300 bg-white p-4 shadow-sm"
 			data-field-path={blockFieldPath}
 		>
-			<div className="mb-3 flex items-center justify-between">
-				<div className="flex items-center gap-2">
+			<div className={`flex items-center justify-between ${isCollapsed ? "" : "mb-3"}`}>
+				<div className="flex min-w-0 flex-1 items-center gap-2">
 					<span className="rounded bg-purple-100 px-2 py-0.5 font-mono text-purple-600 text-xs">
 						{isBlockReference ? "blockReference" : block.type}
 					</span>
 					<span className="text-grey-500 text-xs">Block #{index + 1}</span>
+					{isBlockReference && block.data?.blockName && (
+						<span className="truncate text-blue-600 text-xs">
+							· {block.data.blockName}
+						</span>
+					)}
 				</div>
 				<div className="flex items-center gap-1">
+					<button
+						type="button"
+						onClick={handleToggleCollapse}
+						className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-2.5 py-1 text-purple-700 text-xs transition-all hover:bg-purple-50"
+						title={isCollapsed ? "Expand block" : "Collapse block"}
+					>
+						<ChevronDown
+							className={`h-3.5 w-3.5 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}
+						/>
+						{isCollapsed ? "Expand" : "Collapse"}
+					</button>
 					{index > 0 && (
 						<button
 							type="button"
@@ -447,25 +461,27 @@ export function FlexibleBlockItem({
 					</button>
 				</div>
 			</div>
-			{isBlockReference && blockId ? (
-				<BlockReferenceContent
-					blockId={blockId}
-					blockName={block.data?.blockName}
-					data={block.data}
-					onChange={onUpdate}
-					path={`${path}.${block._id}`}
-					allSchemas={allSchemas}
-					contentBySchema={contentBySchema}
-				/>
-			) : (
-				<BasicFieldRenderer
-					field={{ ...field, type: block.type as any, required: false }}
-					value={block.data}
-					onChange={onUpdate}
-					fieldId={fieldId}
-					allSchemas={allSchemas}
-					allContent={contentBySchema}
-				/>
+			{!isCollapsed && (
+				isBlockReference && blockId ? (
+					<BlockReferenceContent
+						blockId={blockId}
+						blockName={block.data?.blockName}
+						data={block.data}
+						onChange={onUpdate}
+						path={`${path}.${block._id}`}
+						allSchemas={allSchemas}
+						contentBySchema={contentBySchema}
+					/>
+				) : (
+					<BasicFieldRenderer
+						field={{ ...field, type: block.type as any, required: false }}
+						value={block.data}
+						onChange={onUpdate}
+						fieldId={fieldId}
+						allSchemas={allSchemas}
+						allContent={contentBySchema}
+					/>
+				)
 			)}
 		</div>
 	)

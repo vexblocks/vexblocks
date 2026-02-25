@@ -15,6 +15,10 @@ import {
 	Trash2,
 } from "lucide-react"
 import { useState } from "react"
+import {
+	getCollapsedBlockIds,
+	setBlockCollapsed,
+} from "@/lib/block-collapse-cookie"
 import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { BlockPreviewModal } from "./block-preview-modal"
@@ -56,7 +60,9 @@ export function FieldRenderer({
 }: FieldRendererProps) {
 	// State for preview modal (must be at top level for hooks rules)
 	const [showPreviewModal, setShowPreviewModal] = useState(false)
-	const [isCollapsed, setIsCollapsed] = useState(false)
+	const [isCollapsed, setIsCollapsed] = useState(
+		() => getCollapsedBlockIds().has(path),
+	)
 	const [previewState] = useAtom(previewAtom)
 	const isPreviewActive = previewState.isPreviewActive
 
@@ -67,6 +73,12 @@ export function FieldRenderer({
 			? { id: field.blockId as Id<"cmsBlocks"> }
 			: "skip",
 	)
+
+	const handleToggleCollapse = () => {
+		const next = !isCollapsed
+		setIsCollapsed(next)
+		setBlockCollapsed(path, next)
+	}
 
 	// Handle group fields (single nested object)
 	if (field.type === "group") {
@@ -242,7 +254,7 @@ export function FieldRenderer({
 					className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4"
 					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 				>
-					<div className="mb-2 flex items-center justify-between">
+					<div className={`flex items-center justify-between ${isCollapsed ? "" : "mb-2"}`}>
 						<div className="flex items-center gap-2">
 							<Layers className="h-5 w-5 text-blue-600" />
 							<h3 className="font-semibold text-grey-900 text-lg">
@@ -256,7 +268,7 @@ export function FieldRenderer({
 						<div className="flex items-center gap-2">
 							<button
 								type="button"
-								onClick={() => setIsCollapsed(!isCollapsed)}
+								onClick={handleToggleCollapse}
 								className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-all hover:bg-blue-50"
 								title={isCollapsed ? "Expand block" : "Collapse block"}
 							>
@@ -278,7 +290,7 @@ export function FieldRenderer({
 							)}
 						</div>
 					</div>
-					{field.helpText && (
+					{field.helpText && !isCollapsed && (
 						<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
 					)}
 					{!isCollapsed && (

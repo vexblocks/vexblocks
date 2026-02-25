@@ -306,15 +306,15 @@ export function BasicFieldRenderer({
 					<div className="space-y-4">
 						{value ? (
 							<div className="inline-flex w-full flex-col items-center">
-								<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+								<div className="group relative max-w-40 overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
 									<div className="relative overflow-hidden bg-grey-100">
 										<CFImage
 											assetId={value}
 											alt={field.label}
-											width={600}
-											height={600}
+											width={160}
+											height={160}
 											variant="public"
-											className="h-auto max-h-96 w-auto transition-transform duration-300 group-hover:scale-105"
+											className="h-auto max-h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
 										/>
 										<button
 											type="button"
