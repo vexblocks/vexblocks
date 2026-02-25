@@ -60,8 +60,8 @@ export function FieldRenderer({
 }: FieldRendererProps) {
 	// State for preview modal (must be at top level for hooks rules)
 	const [showPreviewModal, setShowPreviewModal] = useState(false)
-	const [isCollapsed, setIsCollapsed] = useState(
-		() => getCollapsedBlockIds().has(path),
+	const [isCollapsed, setIsCollapsed] = useState(() =>
+		getCollapsedBlockIds().has(path),
 	)
 	const [previewState] = useAtom(previewAtom)
 	const isPreviewActive = previewState.isPreviewActive
@@ -254,7 +254,9 @@ export function FieldRenderer({
 					className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4"
 					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 				>
-					<div className={`flex items-center justify-between ${isCollapsed ? "" : "mb-2"}`}>
+					<div
+						className={`flex items-center justify-between ${isCollapsed ? "" : "mb-2"}`}
+					>
 						<div className="flex items-center gap-2">
 							<Layers className="h-5 w-5 text-blue-600" />
 							<h3 className="font-semibold text-grey-900 text-lg">

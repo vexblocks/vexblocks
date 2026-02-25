@@ -72,7 +72,7 @@ export function BlockSelectorDialog({
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-			<div className="flex h-[80vh] w-full max-w-4xl flex-col rounded-lg bg-white shadow-xl">
+			<div className="flex h-[95vh] w-full max-w-[95vw] flex-col rounded-lg bg-white shadow-xl">
 				{/* Header */}
 				<div className="flex items-center justify-between border-grey-200 border-b px-6 py-4">
 					<h2 className="font-semibold text-primary text-xl">{title}</h2>
@@ -127,7 +127,7 @@ export function BlockSelectorDialog({
 										<h3 className="mb-3 font-semibold text-grey-700">
 											{category}
 										</h3>
-										<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+										<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 											{categoryBlocks?.map((block) => (
 												<button
 													key={block._id}

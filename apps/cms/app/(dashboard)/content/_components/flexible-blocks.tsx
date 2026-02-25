@@ -384,8 +384,8 @@ export function FlexibleBlockItem({
 	// Create the field path for this block (e.g., "blocks[0]")
 	const blockFieldPath = `${path}[${index}]`
 
-	const [isCollapsed, setIsCollapsed] = useState(
-		() => getCollapsedBlockIds().has(block._id),
+	const [isCollapsed, setIsCollapsed] = useState(() =>
+		getCollapsedBlockIds().has(block._id),
 	)
 
 	const handleToggleCollapse = () => {
@@ -399,7 +399,9 @@ export function FlexibleBlockItem({
 			className="rounded-lg border border-purple-300 bg-white p-4 shadow-sm"
 			data-field-path={blockFieldPath}
 		>
-			<div className={`flex items-center justify-between ${isCollapsed ? "" : "mb-3"}`}>
+			<div
+				className={`flex items-center justify-between ${isCollapsed ? "" : "mb-3"}`}
+			>
 				<div className="flex min-w-0 flex-1 items-center gap-2">
 					<span className="rounded bg-purple-100 px-2 py-0.5 font-mono text-purple-600 text-xs">
 						{isBlockReference ? "blockReference" : block.type}
@@ -462,8 +464,8 @@ export function FlexibleBlockItem({
 					</button>
 				</div>
 			</div>
-			{!isCollapsed && (
-				isBlockReference && blockId ? (
+			{!isCollapsed &&
+				(isBlockReference && blockId ? (
 					<BlockReferenceContent
 						blockId={blockId}
 						blockName={block.data?.blockName}
@@ -482,8 +484,7 @@ export function FlexibleBlockItem({
 						allSchemas={allSchemas}
 						allContent={contentBySchema}
 					/>
-				)
-			)}
+				))}
 		</div>
 	)
 }
@@ -780,49 +781,55 @@ export function FlexibleBlocksField({
 			)}
 
 			{/* Fixed floating "Add Block" button — visible when the header scrolls out of view */}
-			{canAddMore && !isHeaderVisible && blocks.length > 0 && !showBlockSelector && createPortal(
-				<div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-					<div className="relative">
-						<button
-							type="button"
-							onClick={() => setShowBottomAddMenu(!showBottomAddMenu)}
-							className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-2 text-purple-600 text-sm shadow-lg transition-colors hover:bg-purple-50"
-						>
-							<Plus className="h-4 w-4" />
-							Add Block
-						</button>
-						{showBottomAddMenu && (
-							<>
-								<div
-									className="fixed inset-0 z-10"
-									tabIndex={-1}
-									role="button"
-									onClick={() => setShowBottomAddMenu(false)}
-								/>
-								<div className="absolute bottom-full left-1/2 z-20 mb-1 min-w-48 -translate-x-1/2 rounded-lg border border-grey-200 bg-white py-1 shadow-lg">
-									{allowedTypes.map((type) => (
-										<button
-											key={type}
-											type="button"
-											onClick={() => handleAddBlockType(type)}
-											className="flex w-full items-center gap-2 px-4 py-2 text-left text-grey-700 text-sm transition-colors hover:bg-grey-50"
-										>
-											{type === "blockReference" && (
-												<Layers className="h-4 w-4 text-purple-500" />
-											)}
-											<span>{typeLabels[type] || type}</span>
-											{type === "blockReference" && (
-												<span className="ml-auto text-grey-400 text-xs">→</span>
-											)}
-										</button>
-									))}
-								</div>
-							</>
-						)}
-					</div>
-				</div>,
-				document.body,
-			)}
+			{canAddMore &&
+				!isHeaderVisible &&
+				blocks.length > 0 &&
+				!showBlockSelector &&
+				createPortal(
+					<div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+						<div className="relative">
+							<button
+								type="button"
+								onClick={() => setShowBottomAddMenu(!showBottomAddMenu)}
+								className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-2 text-purple-600 text-sm shadow-lg transition-colors hover:bg-purple-50"
+							>
+								<Plus className="h-4 w-4" />
+								Add Block
+							</button>
+							{showBottomAddMenu && (
+								<>
+									<div
+										className="fixed inset-0 z-10"
+										tabIndex={-1}
+										role="button"
+										onClick={() => setShowBottomAddMenu(false)}
+									/>
+									<div className="absolute bottom-full left-1/2 z-20 mb-1 min-w-48 -translate-x-1/2 rounded-lg border border-grey-200 bg-white py-1 shadow-lg">
+										{allowedTypes.map((type) => (
+											<button
+												key={type}
+												type="button"
+												onClick={() => handleAddBlockType(type)}
+												className="flex w-full items-center gap-2 px-4 py-2 text-left text-grey-700 text-sm transition-colors hover:bg-grey-50"
+											>
+												{type === "blockReference" && (
+													<Layers className="h-4 w-4 text-purple-500" />
+												)}
+												<span>{typeLabels[type] || type}</span>
+												{type === "blockReference" && (
+													<span className="ml-auto text-grey-400 text-xs">
+														→
+													</span>
+												)}
+											</button>
+										))}
+									</div>
+								</>
+							)}
+						</div>
+					</div>,
+					document.body,
+				)}
 		</div>
 	)
 }
