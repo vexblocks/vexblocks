@@ -94,7 +94,7 @@ export const createAuth = (ctx: GenericCtx): ReturnType<typeof betterAuth> => {
 			// https://www.better-auth.com/docs/concepts/session-management#customizing-session-response
 			convex({
 				authConfig,
-				jwksRotateOnTokenGenerationError: true,
+				jwks: process.env.JWKS,
 			}),
 		],
 	})

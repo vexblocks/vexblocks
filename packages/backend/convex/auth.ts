@@ -107,6 +107,9 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 // Export triggers for Convex wiring
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi()
 
+// Export auth user query for AuthBoundary client component
+export const { getAuthUser } = authComponent.clientApi()
+
 export const getCurrentUser = query({
 	args: {},
 	handler: async (ctx) => {

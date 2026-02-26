@@ -6,6 +6,7 @@ import { Toaster } from "sonner"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ConvexProvider } from "@/components/providers/convex-provider"
 import { SessionRecovery } from "@/components/providers/session-recovery"
+import { getToken } from "@/lib/auth-server"
 
 export const metadata: Metadata = {
 	title: "CMS Admin - VexBlocks",
@@ -20,15 +21,28 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={GeistSans.variable}>
 			<body className="min-h-screen bg-background font-sans antialiased">
-				<ConvexProvider initialToken={null}>
-					<AuthProvider>
-						<Suspense fallback={null}>
-							<SessionRecovery>{children}</SessionRecovery>
-						</Suspense>
-					</AuthProvider>
-					<Toaster position="top-right" richColors />
-				</ConvexProvider>
+				<Suspense>
+					<ConvexProviderWithToken>{children}</ConvexProviderWithToken>
+				</Suspense>
+				<Toaster position="top-right" richColors />
 			</body>
 		</html>
+	)
+}
+
+async function ConvexProviderWithToken({
+	children,
+}: {
+	children: React.ReactNode
+}) {
+	const initialToken = (await getToken()) ?? null
+	return (
+		<ConvexProvider initialToken={initialToken}>
+			<AuthProvider>
+				<Suspense fallback={null}>
+					<SessionRecovery>{children}</SessionRecovery>
+				</Suspense>
+			</AuthProvider>
+		</ConvexProvider>
 	)
 }

@@ -287,6 +287,7 @@ async function installBackendPackage(
 		const cmsIndividualFiles = [
 			"convex/auth.ts",
 			"convex/auth.config.ts",
+			"convex/authJwks.ts",
 			"convex/http.ts",
 			"convex/convex.config.ts",
 		]
