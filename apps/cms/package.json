@@ -9,9 +9,9 @@
 		"lint": "biome check ."
 	},
 	"dependencies": {
-		"@ai-sdk/google": "^3.0.31",
-		"@ai-sdk/react": "^3.0.103",
-		"@convex-dev/better-auth": "0.10.11",
+		"@ai-sdk/google": "^3.0.34",
+		"@ai-sdk/react": "^3.0.107",
+		"@convex-dev/better-auth": "0.10.13",
 		"@convex-dev/r2": "^0.9.1",
 		"@convex-dev/react-query": "0.1.0",
 		"@lexical/link": "^0.41.0",
@@ -23,8 +23,8 @@
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@repo/cms-shared": "workspace:*",
 		"@tanstack/react-query": "^5.90.21",
-		"ai": "^6.0.101",
-		"better-auth": "1.4.19",
+		"ai": "^6.0.105",
+		"better-auth": "1.4.9",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"compressorjs": "^1.2.1",
@@ -47,7 +47,7 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4.2.1",
-		"@types/node": "^25.3.1",
+		"@types/node": "^25.3.3",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
 		"postcss": "^8.5.6",

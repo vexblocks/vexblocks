@@ -9,11 +9,11 @@
 		"lint": "echo \"No lint configured for backend\""
 	},
 	"dependencies": {
-		"@convex-dev/better-auth": "^0.10.11",
+		"@convex-dev/better-auth": "^0.10.13",
 		"@convex-dev/migrations": "^0.3.1",
 		"@convex-dev/r2": "^0.9.1",
 		"@convex-dev/resend": "^0.2.3",
-		"better-auth": "1.4.19",
+		"better-auth": "1.4.9",
 		"convex": "^1.32.0",
 		"convex-helpers": "^0.1.114",
 		"next": "16.1.6",
@@ -21,7 +21,7 @@
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.17.24",
-		"@types/node": "^25.3.1",
+		"@types/node": "^25.3.3",
 		"typescript": "^5.9.3"
 	}
 }
