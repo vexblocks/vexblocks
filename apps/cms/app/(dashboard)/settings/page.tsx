@@ -1,15 +1,6 @@
 "use client"
 
-import {
-	Bell,
-	Bot,
-	Eye,
-	Globe,
-	Languages,
-	Palette,
-	Settings,
-	Users,
-} from "lucide-react"
+import { Bot, Eye, Languages, Palette, Settings, Users } from "lucide-react"
 import Link from "next/link"
 
 type SettingCard = {
