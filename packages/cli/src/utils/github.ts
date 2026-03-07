@@ -8,9 +8,21 @@ import {
 } from "./constants.js"
 
 const BINARY_EXTENSIONS = new Set([
-	".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
-	".woff", ".woff2", ".ttf", ".otf", ".eot",
-	".pdf", ".zip", ".tar", ".gz",
+	".png",
+	".jpg",
+	".jpeg",
+	".gif",
+	".webp",
+	".ico",
+	".woff",
+	".woff2",
+	".ttf",
+	".otf",
+	".eot",
+	".pdf",
+	".zip",
+	".tar",
+	".gz",
 ])
 
 /**
