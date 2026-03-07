@@ -243,10 +243,15 @@ async function installPackage(
 			// Standard package installation
 			await fs.ensureDir(targetPath)
 
-			// Download package files
-			await downloadAndExtractPackage(sourcePath, targetPath, (file) => {
-				spinner.text = `Installing ${PACKAGE_NAMES[pkg]}... ${pc.dim(file)}`
-			})
+			// Download package files, removing any local files no longer in remote
+			await downloadAndExtractPackage(
+				sourcePath,
+				targetPath,
+				(file) => {
+					spinner.text = `Installing ${PACKAGE_NAMES[pkg]}... ${pc.dim(file)}`
+				},
+				{ sync: true },
+			)
 		}
 
 		// Update manifest
@@ -327,9 +332,14 @@ async function installBackendPackage(
 	} else {
 		// Fresh installation - download entire backend package
 		await fs.ensureDir(targetPath)
-		await downloadAndExtractPackage(sourcePath, targetPath, (file) => {
-			spinner.text = `Installing backend... ${pc.dim(file)}`
-		})
+		await downloadAndExtractPackage(
+			sourcePath,
+			targetPath,
+			(file) => {
+				spinner.text = `Installing backend... ${pc.dim(file)}`
+			},
+			{ sync: true },
+		)
 	}
 
 	// Merge package.json intelligently (both fresh and existing installations)

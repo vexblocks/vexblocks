@@ -7,6 +7,12 @@ import {
 	PROTECTED_FILES,
 } from "./constants.js"
 
+const BINARY_EXTENSIONS = new Set([
+	".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
+	".woff", ".woff2", ".ttf", ".otf", ".eot",
+	".pdf", ".zip", ".tar", ".gz",
+])
+
 /**
  * Remote manifest structure from GitHub
  */
@@ -78,18 +84,64 @@ export async function downloadFile(
 	// Ensure directory exists
 	await fs.ensureDir(path.dirname(localPath))
 
-	// Write file
-	const content = await response.text()
-	await fs.writeFile(localPath, content, "utf-8")
+	// Write file — use binary mode for non-text files to avoid UTF-8 corruption
+	const ext = path.extname(localPath).toLowerCase()
+	if (BINARY_EXTENSIONS.has(ext)) {
+		const buffer = await response.arrayBuffer()
+		await fs.writeFile(localPath, Buffer.from(buffer))
+	} else {
+		const content = await response.text()
+		await fs.writeFile(localPath, content, "utf-8")
+	}
 }
 
 /**
- * Download the repository archive and extract specific paths
+ * Recursively collect all file paths inside a directory
+ */
+async function collectLocalFiles(dir: string): Promise<string[]> {
+	const entries = await fs.readdir(dir, { withFileTypes: true })
+	const files: string[] = []
+
+	for (const entry of entries) {
+		const full = path.join(dir, entry.name)
+		if (entry.isDirectory()) {
+			files.push(...(await collectLocalFiles(full)))
+		} else {
+			files.push(full)
+		}
+	}
+
+	return files
+}
+
+/**
+ * Remove directories that became empty after a sync
+ */
+async function removeEmptyDirs(dir: string): Promise<void> {
+	const entries = await fs.readdir(dir, { withFileTypes: true })
+
+	for (const entry of entries) {
+		if (entry.isDirectory()) {
+			const full = path.join(dir, entry.name)
+			await removeEmptyDirs(full)
+
+			const remaining = await fs.readdir(full)
+			if (remaining.length === 0) {
+				await fs.remove(full)
+			}
+		}
+	}
+}
+
+/**
+ * Download the repository archive and extract specific paths.
+ * When `sync` is true, local files not present in the remote are deleted.
  */
 export async function downloadAndExtractPackage(
 	packagePath: string,
 	targetDir: string,
 	onProgress?: (file: string) => void,
+	options?: { sync?: boolean },
 ): Promise<void> {
 	// Get file list from GitHub tree API
 	const treeUrl = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`
@@ -114,6 +166,10 @@ export async function downloadAndExtractPackage(
 		(item) => item.type === "blob" && item.path.startsWith(`${packagePath}/`),
 	)
 
+	const remoteRelativePaths = new Set(
+		files.map((f) => f.path.slice(packagePath.length + 1)),
+	)
+
 	// Download each file
 	for (const file of files) {
 		const relativePath = file.path.slice(packagePath.length + 1)
@@ -128,6 +184,20 @@ export async function downloadAndExtractPackage(
 		await downloadFile(file.path, localPath, {
 			skipIfExists: isProtectedFile,
 		})
+	}
+
+	// Remove local files that no longer exist in the remote
+	if (options?.sync && (await fs.pathExists(targetDir))) {
+		const localFiles = await collectLocalFiles(targetDir)
+
+		for (const localFile of localFiles) {
+			const relPath = path.relative(targetDir, localFile)
+			if (!remoteRelativePaths.has(relPath)) {
+				await fs.remove(localFile)
+			}
+		}
+
+		await removeEmptyDirs(targetDir)
 	}
 }
 
