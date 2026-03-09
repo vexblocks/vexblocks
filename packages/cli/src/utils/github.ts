@@ -199,12 +199,19 @@ export async function downloadAndExtractPackage(
 	}
 
 	// Remove local files that no longer exist in the remote
+	// Hidden files/dirs (starting with ".") are never deleted — they contain user config
 	if (options?.sync && (await fs.pathExists(targetDir))) {
 		const localFiles = await collectLocalFiles(targetDir)
 
 		for (const localFile of localFiles) {
 			const relPath = path.relative(targetDir, localFile)
-			if (!remoteRelativePaths.has(relPath)) {
+
+			// Skip any path segment that starts with "." (.env.local, .next, etc.)
+			const isHidden = relPath
+				.split(path.sep)
+				.some((segment) => segment.startsWith("."))
+
+			if (!isHidden && !remoteRelativePaths.has(relPath)) {
 				await fs.remove(localFile)
 			}
 		}

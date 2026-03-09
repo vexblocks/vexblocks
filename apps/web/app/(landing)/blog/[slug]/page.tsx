@@ -86,17 +86,19 @@ export async function generateStaticParams() {
 		name: "blog_posts",
 	})
 
-	if (!blogSchemaId) return []
+	if (!blogSchemaId) return [{ slug: "_placeholder" }]
 
 	const posts = await cachedQuery(api.cms.content.listPublished, {
 		schemaId: blogSchemaId,
 	})
 
-	return (posts as { slug?: string; data: { slug?: string } }[]).map(
+	const slugs = (posts as { slug?: string; data: { slug?: string } }[]).map(
 		(post) => ({
 			slug: post.slug || post.data.slug,
 		}),
 	)
+
+	return slugs.length > 0 ? slugs : [{ slug: "_placeholder" }]
 }
 
 /**
