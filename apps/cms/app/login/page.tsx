@@ -408,7 +408,7 @@ function AdminLoginContent() {
 							/>
 						) : (
 							<Image
-								src="/vexblocks-logotype.png"
+								src="/logo.png"
 								alt="Logo"
 								width={64}
 								height={64}

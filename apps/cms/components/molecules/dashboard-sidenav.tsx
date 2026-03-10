@@ -117,7 +117,7 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 					/>
 				) : (
 					<NextImage
-						src="/vexblocks-logotype.png"
+						src="/logo.png"
 						alt="Logo"
 						width={32}
 						height={32}
