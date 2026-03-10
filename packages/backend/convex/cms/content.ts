@@ -712,8 +712,8 @@ export const create = mutation({
 		data: v.any(),
 		seo: v.optional(
 			v.object({
-				title: v.optional(v.string()),
-				description: v.optional(v.string()),
+				title: v.optional(v.any()),
+				description: v.optional(v.any()),
 				ogImage: v.optional(v.string()),
 			}),
 		),
@@ -805,8 +805,8 @@ export const update = mutation({
 		data: v.optional(v.any()),
 		seo: v.optional(
 			v.object({
-				title: v.optional(v.string()),
-				description: v.optional(v.string()),
+				title: v.optional(v.any()),
+				description: v.optional(v.any()),
 				ogImage: v.optional(v.string()),
 			}),
 		),

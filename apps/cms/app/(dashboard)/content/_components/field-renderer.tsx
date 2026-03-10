@@ -23,6 +23,7 @@ import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { BlockPreviewModal } from "./block-preview-modal"
 import { FlexibleBlocksField } from "./flexible-blocks"
+import { useLocale } from "./locale-context"
 import type { Field } from "./types"
 
 type FieldRendererProps = {
@@ -63,6 +64,20 @@ export function FieldRenderer({
 	const [isCollapsed, setIsCollapsed] = useState(() =>
 		getCollapsedBlockIds().has(path),
 	)
+	const { currentLocale, defaultLocale, hasLocales } = useLocale()
+
+	const getLocalizedFieldValue = (raw: any, translatable?: boolean) => {
+		if (
+			hasLocales &&
+			translatable &&
+			raw &&
+			typeof raw === "object" &&
+			!Array.isArray(raw)
+		) {
+			return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+		}
+		return raw
+	}
 	const [previewState] = useAtom(previewAtom)
 	const isPreviewActive = previewState.isPreviewActive
 
@@ -153,7 +168,10 @@ export function FieldRenderer({
 									<div key={groupIndex} className="space-y-4">
 										{group.map((nestedField: any) => {
 											const nestedPath = `${path}.${nestedField.name}`
-											const nestedValue = groupValue[nestedField.name]
+											const nestedValue = getLocalizedFieldValue(
+												groupValue[nestedField.name],
+												nestedField.translatable,
+											)
 											return (
 												<FieldRenderer
 													key={nestedField.name}
@@ -176,7 +194,10 @@ export function FieldRenderer({
 
 							const nestedField = singleField
 							const nestedPath = `${path}.${nestedField.name}`
-							const nestedValue = groupValue[nestedField.name]
+							const nestedValue = getLocalizedFieldValue(
+								groupValue[nestedField.name],
+								nestedField.translatable,
+							)
 
 							return (
 								<div
@@ -352,14 +373,34 @@ export function FieldRenderer({
 											<div key={groupIndex} className="space-y-4">
 												{group.map((blockField: Field) => {
 													const blockFieldPath = `${path}.${blockField.name}`
-													const blockFieldValue = blockValue[blockField.name]
+													const blockFieldValue = getLocalizedFieldValue(
+														blockValue[blockField.name],
+														blockField.translatable,
+													)
 													return (
 														<FieldRenderer
 															key={blockField.name}
 															field={blockField}
 															path={blockFieldPath}
 															value={blockFieldValue}
-															onChange={onChange}
+															onChange={(fieldPath, newVal) => {
+																if (
+																	hasLocales &&
+																	currentLocale &&
+																	blockField.translatable
+																) {
+																	const raw = blockValue[blockField.name]
+																	const merged =
+																		raw &&
+																		typeof raw === "object" &&
+																		!Array.isArray(raw)
+																			? { ...raw, [currentLocale]: newVal }
+																			: { [currentLocale]: newVal }
+																	onChange(fieldPath, merged)
+																} else {
+																	onChange(fieldPath, newVal)
+																}
+															}}
 															onAddRepeaterItem={onAddRepeaterItem}
 															onRemoveRepeaterItem={onRemoveRepeaterItem}
 															onMoveRepeaterItem={onMoveRepeaterItem}
@@ -375,7 +416,10 @@ export function FieldRenderer({
 
 									const blockField = singleField
 									const blockFieldPath = `${path}.${blockField.name}`
-									const blockFieldValue = blockValue[blockField.name]
+									const blockFieldValue = getLocalizedFieldValue(
+										blockValue[blockField.name],
+										blockField.translatable,
+									)
 
 									return (
 										<div
@@ -388,7 +432,24 @@ export function FieldRenderer({
 												field={blockField}
 												path={blockFieldPath}
 												value={blockFieldValue}
-												onChange={onChange}
+												onChange={(fieldPath, newVal) => {
+													if (
+														hasLocales &&
+														currentLocale &&
+														blockField.translatable
+													) {
+														const raw = blockValue[blockField.name]
+														const merged =
+															raw &&
+															typeof raw === "object" &&
+															!Array.isArray(raw)
+																? { ...raw, [currentLocale]: newVal }
+																: { [currentLocale]: newVal }
+														onChange(fieldPath, merged)
+													} else {
+														onChange(fieldPath, newVal)
+													}
+												}}
 												onAddRepeaterItem={onAddRepeaterItem}
 												onRemoveRepeaterItem={onRemoveRepeaterItem}
 												onMoveRepeaterItem={onMoveRepeaterItem}

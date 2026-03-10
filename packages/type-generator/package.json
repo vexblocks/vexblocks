@@ -11,7 +11,7 @@
 		"convex": "^1.32.0"
 	},
 	"devDependencies": {
-		"@types/node": "^25.3.5",
+		"@types/node": "^25.4.0",
 		"vexblocks-backend": "workspace:*",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"

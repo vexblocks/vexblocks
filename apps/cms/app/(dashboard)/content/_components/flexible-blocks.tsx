@@ -17,6 +17,7 @@ import { previewAtom } from "@/lib/preview-atom"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { BlockPreviewModal } from "./block-preview-modal"
 import { FieldRenderer } from "./field-renderer"
+import { useLocale } from "./locale-context"
 import type { Field } from "./types"
 
 type FlexibleBlockItemProps = {
@@ -54,6 +55,7 @@ function BlockReferenceContent({
 	contentBySchema?: Record<string, any[]>
 }) {
 	const [showPreviewModal, setShowPreviewModal] = useState(false)
+	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 	const referencedBlock = useQuery(api.cms.blocks.get, {
 		id: blockId as Id<"cmsBlocks">,
 	})
@@ -76,7 +78,22 @@ function BlockReferenceContent({
 	const handleFieldChange = (fieldPath: string, value: any) => {
 		// Remove the base path prefix to get the relative path within blockFieldsData
 		const relativePath = fieldPath.replace(`${path}.`, "")
-		const updatedFields = setNestedValue(blockFieldsData, relativePath, value)
+		let finalValue = value
+		if (hasLocales && currentLocale) {
+			const currentRaw = getNestedValue(blockFieldsData, relativePath)
+			finalValue =
+				currentRaw &&
+				typeof currentRaw === "object" &&
+				!Array.isArray(currentRaw)
+					? { ...currentRaw, [currentLocale]: value }
+					: { [currentLocale]: value }
+		}
+
+		const updatedFields = setNestedValue(
+			blockFieldsData,
+			relativePath,
+			finalValue,
+		)
 		onChange({
 			blockId,
 			blockName,
@@ -234,6 +251,15 @@ function BlockReferenceFields({
 }) {
 	const [previewState] = useAtom(previewAtom)
 	const isPreviewActive = previewState.isPreviewActive
+	const { currentLocale, defaultLocale, hasLocales } = useLocale()
+
+	const getDisplayValue = (blockField: Field) => {
+		const raw = blockFieldsData[blockField.name]
+		if (hasLocales && raw && typeof raw === "object" && !Array.isArray(raw)) {
+			return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+		}
+		return raw
+	}
 
 	// Group consecutive small fields together
 	const fieldGroups: any[][] = []
@@ -287,7 +313,7 @@ function BlockReferenceFields({
 										key={blockField.name}
 										field={blockField}
 										path={fieldPath}
-										value={blockFieldsData[blockField.name]}
+										value={getDisplayValue(blockField)}
 										onChange={handleFieldChange}
 										onAddRepeaterItem={handleAddRepeaterItem}
 										onRemoveRepeaterItem={handleRemoveRepeaterItem}
@@ -312,7 +338,7 @@ function BlockReferenceFields({
 						<FieldRenderer
 							field={blockField}
 							path={fieldPath}
-							value={blockFieldsData[blockField.name]}
+							value={getDisplayValue(blockField)}
 							onChange={handleFieldChange}
 							onAddRepeaterItem={handleAddRepeaterItem}
 							onRemoveRepeaterItem={handleRemoveRepeaterItem}
