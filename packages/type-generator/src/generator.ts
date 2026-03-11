@@ -77,9 +77,33 @@ function toPascalCase(str: string): string {
 }
 
 /**
+ * Primitive block type names (field types that can appear in allowedBlocks)
+ * mapped to their corresponding FlexibleBlock discriminated union member.
+ */
+const PRIMITIVE_BLOCK_TYPES: Record<string, string> = {
+	shortText: '{ type: "shortText"; value: string }',
+	longText: '{ type: "longText"; value: string }',
+	richText: '{ type: "richText"; value: string }',
+	url: '{ type: "url"; value: string }',
+	youtubeUrl: '{ type: "youtubeUrl"; value: string }',
+	number: '{ type: "number"; value: number }',
+	boolean: '{ type: "boolean"; value: boolean }',
+	date: '{ type: "date"; value: string }',
+	media: '{ type: "media"; value: string }',
+	select: '{ type: "select"; value: string }',
+	group: '{ type: "group"; value: any }',
+	blockReference: '{ type: "blockReference"; value: any }',
+}
+
+/**
  * Map CMS field type to TypeScript type
  */
-function mapFieldType(field: any, indent = "", allSchemas: any[] = []): string {
+function mapFieldType(
+	field: any,
+	indent = "",
+	allSchemas: any[] = [],
+	allBlocks: any[] = [],
+): string {
 	switch (field.type) {
 		case "shortText":
 		case "longText":
@@ -107,21 +131,16 @@ function mapFieldType(field: any, indent = "", allSchemas: any[] = []): string {
 			return "string"
 
 		case "reference": {
-			// Support both ID string and embedded object
-			if (field.referenceSchema) {
-				const referencedTypeName = toPascalCase(field.referenceSchema)
-				return `string | ${referencedTypeName}Content`
-			}
-			return "string" // Fallback to ID only
+			// Returns the Convex document ID string at runtime.
+			// Public queries do not auto-resolve references; resolution must be
+			// done manually in the application layer (e.g. by fetching the
+			// referenced content and extracting its slug/data).
+			return "string"
 		}
 
 		case "multiReference": {
-			// Support both array of IDs and array of embedded objects
-			if (field.referenceSchema) {
-				const referencedTypeName = toPascalCase(field.referenceSchema)
-				return `Array<string | ${referencedTypeName}Content>`
-			}
-			return "string[]" // Fallback to IDs only
+			// Same as "reference" — always an array of ID strings at runtime.
+			return "string[]"
 		}
 
 		case "group": {
@@ -129,7 +148,12 @@ function mapFieldType(field: any, indent = "", allSchemas: any[] = []): string {
 				return "Record<string, any>"
 			}
 			const nestedIndent = `${indent}  `
-			const fields = generateFieldTypes(field.fields, nestedIndent, allSchemas)
+			const fields = generateFieldTypes(
+				field.fields,
+				nestedIndent,
+				allSchemas,
+				allBlocks,
+			)
 			return `{\n${fields}\n${indent}}`
 		}
 
@@ -138,18 +162,51 @@ function mapFieldType(field: any, indent = "", allSchemas: any[] = []): string {
 				return "Array<Record<string, any>>"
 			}
 			const nestedIndent = `${indent}  `
-			const fields = generateFieldTypes(field.fields, nestedIndent, allSchemas)
+			const fields = generateFieldTypes(
+				field.fields,
+				nestedIndent,
+				allSchemas,
+				allBlocks,
+			)
 			return `Array<{\n${fields}\n${indent}}>`
 		}
 
 		case "flexibleBlocks": {
-			// Always allow all block types since content can have any block
-			// regardless of allowedBlocks restrictions (which are UI-only)
+			// When allowedBlocks is specified, narrow the type to only named reusable
+			// blocks that exist in the system, or to specific FlexibleBlock members
+			// for primitive types. Falls back to FlexibleBlock for unknowns.
+			if (field.allowedBlocks?.length) {
+				const seen = new Set<string>()
+				const blockTypeNames = (field.allowedBlocks as string[])
+					.map((name) => {
+						if (allBlocks.some((b: any) => b.name === name)) {
+							return `${toPascalCase(name)}Block`
+						}
+						if (PRIMITIVE_BLOCK_TYPES[name]) {
+							return PRIMITIVE_BLOCK_TYPES[name]
+						}
+						return "FlexibleBlock"
+					})
+					.filter((t) => {
+						if (seen.has(t)) return false
+						seen.add(t)
+						return true
+					})
+				return `Array<${blockTypeNames.join(" | ")}>`
+			}
 			return "Array<FlexibleBlock>"
 		}
 
-		case "blockReference":
-			return "any" // Could be more specific if block types are known
+		case "blockReference": {
+			// Use the specific block type when the block name is known.
+			if (
+				field.blockName &&
+				allBlocks.some((b: any) => b.name === field.blockName)
+			) {
+				return `${toPascalCase(field.blockName)}Block`
+			}
+			return "FlexibleBlock"
+		}
 
 		default:
 			return "any"
@@ -163,11 +220,12 @@ function generateFieldTypes(
 	fields: any[],
 	indent = "",
 	allSchemas: any[] = [],
+	allBlocks: any[] = [],
 ): string {
 	return fields
 		.map((field) => {
 			const optional = field.required ? "" : "?"
-			const fieldType = mapFieldType(field, indent, allSchemas)
+			const fieldType = mapFieldType(field, indent, allSchemas, allBlocks)
 			const comment = field.helpText
 				? `\n${indent}/** ${field.helpText} */`
 				: ""
@@ -179,7 +237,7 @@ function generateFieldTypes(
 /**
  * Generate TypeScript type for a block
  */
-function generateBlockType(block: any): string {
+function generateBlockType(block: any, allBlocks: any[] = []): string {
 	const typeName = toPascalCase(block.name)
 	const description = block.description ? `\n * ${block.description}` : ""
 
@@ -189,7 +247,7 @@ function generateBlockType(block: any): string {
  * @block ${block.name}
  */
 export type ${typeName}Block = {
-${generateFieldTypes(block.fields, "  ", [])}
+${generateFieldTypes(block.fields, "  ", [], allBlocks)}
 }
 	`.trim()
 }
@@ -264,7 +322,7 @@ export type ${typeName}Content = {
 	slug?: string
 	status: "draft" | "published"
 	data: {
-${generateFieldTypes(schema.fields, "    ", schemas)}
+${generateFieldTypes(schema.fields, "    ", schemas, blocks || [])}
 	}
 }
 			`.trim()
@@ -287,7 +345,9 @@ ${generateFieldTypes(schema.fields, "    ", schemas)}
 		// Generate types for blocks
 		const blockTypes =
 			blocks && blocks.length > 0
-				? blocks.map((block: any) => generateBlockType(block)).join("\n\n")
+				? blocks
+						.map((block: any) => generateBlockType(block, blocks))
+						.join("\n\n")
 				: ""
 
 		// Generate block union types
