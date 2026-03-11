@@ -235,6 +235,7 @@ const FieldEditor = ({
 							<option value="url">URL</option>
 							<option value="youtubeUrl">YouTube URL</option>
 							<option value="media">Media</option>
+							<option value="file">File</option>
 							<option value="select">Select</option>
 							{depth < 2 && <option value="group">Group</option>}
 							{depth < 2 && <option value="repeater">Repeater (Array)</option>}

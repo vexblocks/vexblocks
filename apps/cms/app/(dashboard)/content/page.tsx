@@ -3,7 +3,7 @@
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { CFImage, getStringValue } from "@repo/cms-shared"
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { Copy, Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -29,6 +29,10 @@ export default function ContentPage() {
 	const [showViewConfig, setShowViewConfig] = useState(false)
 	const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
 	const duplicateContent = useMutation(api.cms.content.duplicate)
+	const previewSettings = useQuery(api.cms.settings.get, { key: "preview" }) as
+		| { enabled: boolean; baseUrl: string; productionBaseUrl: string }
+		| null
+		| undefined
 
 	// Update URL when schema changes
 	const handleSelectSchema = (schemaId: string) => {
@@ -116,6 +120,32 @@ export default function ContentPage() {
 			console.error("Failed to duplicate content:", error)
 			setDuplicatingId(null)
 		}
+	}
+
+	const getPublicPageUrl = (item: any): string | null => {
+		if (!selectedSchema?.previewConfig?.urlPattern) return null
+		if (!previewSettings) return null
+		const slugField = getSlugField()
+		const slug = slugField
+			? getStringValue(item.data[slugField.name])
+			: item.data.slug
+		if (!slug) return null
+
+		const isLocalhost =
+			typeof window !== "undefined" && window.location.hostname === "localhost"
+		const baseUrl = isLocalhost
+			? previewSettings.baseUrl
+			: previewSettings.productionBaseUrl || previewSettings.baseUrl
+		if (!baseUrl) return null
+
+		const path = selectedSchema.previewConfig.urlPattern.replace("{slug}", slug)
+		const cleanBaseUrl = baseUrl.replace(/\/$/, "")
+		const cleanPath = path.startsWith("/") ? path : `/${path}`
+
+		// If the path resolves to /home, open the root instead
+		if (cleanPath === "/home") return cleanBaseUrl || "/"
+
+		return `${cleanBaseUrl}${cleanPath}`
 	}
 
 	const previewFieldName = getPreviewField()
@@ -385,17 +415,20 @@ export default function ContentPage() {
 													</td>
 													<td className="px-6 py-4 text-right">
 														<div className="flex items-center justify-end gap-2">
-															{item.status === "published" &&
-																slugField &&
-																getStringValue(item.data[slugField.name]) && (
-																	<button
-																		type="button"
+															{(() => {
+																const url = getPublicPageUrl(item)
+																return url ? (
+																	<a
+																		href={url}
+																		target="_blank"
+																		rel="noopener noreferrer"
 																		className="rounded p-2 text-grey-500 transition-colors hover:bg-grey-100"
-																		title="Preview"
+																		title="View Page"
 																	>
 																		<Eye className="h-4 w-4" />
-																	</button>
-																)}
+																	</a>
+																) : null
+															})()}
 															<button
 																type="button"
 																onClick={() => handleDuplicate(item._id)}

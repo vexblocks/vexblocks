@@ -41,7 +41,7 @@ export default function SettingsPage() {
 			href: "/settings/appearance",
 		},
 		{
-			title: "AI Assistant",
+			title: "AI Assistant (Beta)",
 			description: "Learn how to use the AI-powered CMS assistant",
 			icon: <Bot className="h-6 w-6" />,
 			href: "/settings/ai-assistant",
