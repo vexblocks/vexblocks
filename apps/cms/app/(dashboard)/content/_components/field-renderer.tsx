@@ -67,14 +67,16 @@ export function FieldRenderer({
 	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 
 	const getLocalizedFieldValue = (raw: any, translatable?: boolean) => {
-		if (
-			hasLocales &&
-			translatable &&
-			raw &&
-			typeof raw === "object" &&
-			!Array.isArray(raw)
-		) {
-			return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+		if (hasLocales && raw && typeof raw === "object" && !Array.isArray(raw)) {
+			if (translatable) {
+				return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+			}
+			// Defensive: if value is a locale map (has current/default locale key),
+			// extract it even for non-translatable fields to avoid showing [object Object]
+			const localeValue = raw[currentLocale] ?? raw[defaultLocale]
+			if (localeValue !== undefined) {
+				return localeValue
+			}
 		}
 		return raw
 	}
@@ -387,7 +389,8 @@ export function FieldRenderer({
 																if (
 																	hasLocales &&
 																	currentLocale &&
-																	blockField.translatable
+																	blockField.translatable &&
+																	fieldPath === blockFieldPath
 																) {
 																	const raw = blockValue[blockField.name]
 																	const merged =
@@ -436,7 +439,8 @@ export function FieldRenderer({
 													if (
 														hasLocales &&
 														currentLocale &&
-														blockField.translatable
+														blockField.translatable &&
+														fieldPath === blockFieldPath
 													) {
 														const raw = blockValue[blockField.name]
 														const merged =
@@ -621,7 +625,10 @@ export function FieldRenderer({
 													<div key={groupIndex} className="space-y-4">
 														{group.map((nestedField: any) => {
 															const nestedPath = `${path}[${index}].${nestedField.name}`
-															const nestedValue = item?.[nestedField.name]
+															const nestedValue = getLocalizedFieldValue(
+																item?.[nestedField.name],
+																nestedField.translatable,
+															)
 															return (
 																<FieldRenderer
 																	key={nestedField.name}
@@ -645,7 +652,10 @@ export function FieldRenderer({
 
 											const nestedField = singleField
 											const nestedPath = `${path}[${index}].${nestedField.name}`
-											const nestedValue = item?.[nestedField.name]
+											const nestedValue = getLocalizedFieldValue(
+												item?.[nestedField.name],
+												nestedField.translatable,
+											)
 
 											return (
 												<div

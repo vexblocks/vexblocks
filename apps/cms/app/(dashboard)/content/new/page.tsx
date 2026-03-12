@@ -188,12 +188,11 @@ export default function NewContentPage() {
 			if (!cleanPart) continue
 
 			const field = currentFields.find((f: Field) => f.name === cleanPart)
-			if (field) {
-				isTranslatable = field.translatable ?? false
-				// Navigate into nested fields
-				if (field.fields) {
-					currentFields = field.fields
-				}
+			if (!field) return false
+			isTranslatable = field.translatable ?? false
+			// Navigate into nested fields
+			if (field.fields) {
+				currentFields = field.fields
 			}
 		}
 
