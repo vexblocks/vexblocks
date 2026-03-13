@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as authJwks from "../authJwks.js";
 import type * as cms_aiChat from "../cms/aiChat.js";
+import type * as cms_apiKeys from "../cms/apiKeys.js";
 import type * as cms_blocks from "../cms/blocks.js";
 import type * as cms_builders from "../cms/builders.js";
 import type * as cms_constants from "../cms/constants.js";
@@ -21,6 +22,7 @@ import type * as cms_mediaActions from "../cms/mediaActions.js";
 import type * as cms_mediaTags from "../cms/mediaTags.js";
 import type * as cms_migrations from "../cms/migrations.js";
 import type * as cms_r2 from "../cms/r2.js";
+import type * as cms_rest from "../cms/rest.js";
 import type * as cms_sanitizeContent from "../cms/sanitizeContent.js";
 import type * as cms_schemas from "../cms/schemas.js";
 import type * as cms_settings from "../cms/settings.js";
@@ -40,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authJwks: typeof authJwks;
   "cms/aiChat": typeof cms_aiChat;
+  "cms/apiKeys": typeof cms_apiKeys;
   "cms/blocks": typeof cms_blocks;
   "cms/builders": typeof cms_builders;
   "cms/constants": typeof cms_constants;
@@ -50,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "cms/mediaTags": typeof cms_mediaTags;
   "cms/migrations": typeof cms_migrations;
   "cms/r2": typeof cms_r2;
+  "cms/rest": typeof cms_rest;
   "cms/sanitizeContent": typeof cms_sanitizeContent;
   "cms/schemas": typeof cms_schemas;
   "cms/settings": typeof cms_settings;

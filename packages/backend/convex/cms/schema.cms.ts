@@ -213,6 +213,8 @@ export const cmsSchemas = defineTable({
 			enabled: v.optional(v.boolean()), // Whether preview is enabled for this schema
 		}),
 	),
+	// Simple mode: disables SEO metadata on content entries
+	isSimple: v.optional(v.boolean()),
 	// Metadata
 	icon: v.optional(v.string()), // Icon for UI
 	createdBy: v.id("users"),
@@ -312,6 +314,23 @@ export const cmsBlocks = defineTable({
 	.index("by_created_by", ["createdBy"])
 
 /**
+ * API Keys for external REST API access.
+ * Keys are hashed before storage — the raw key is only shown once at creation.
+ */
+export const cmsApiKeys = defineTable({
+	name: v.string(), // User-given label (e.g., "Production", "Python client")
+	keyHash: v.string(), // SHA-256 hex hash of the raw API key
+	keyPrefix: v.string(), // First 16 chars of the raw key for display (e.g., "cb_live_xxxx...")
+	createdBy: v.id("users"),
+	createdAt: v.number(),
+	lastUsedAt: v.optional(v.number()),
+	revokedAt: v.optional(v.number()), // Set when revoked; null/undefined = active
+})
+	.index("by_key_hash", ["keyHash"])
+	.index("by_created_by", ["createdBy"])
+	.index("by_revoked_at", ["revokedAt"])
+
+/**
  * Global settings (appearance, site config, localization, etc.).
  */
 export const cmsSettings = defineTable({
@@ -397,6 +416,7 @@ export const cmsSchemaExports = {
 	cmsBlocks,
 	cmsSettings,
 	cmsAIChats,
+	cmsApiKeys,
 }
 
 /**
@@ -412,6 +432,7 @@ export const cmsTablesWithoutUsers = {
 	cmsBlocks,
 	cmsSettings,
 	cmsAIChats,
+	cmsApiKeys,
 }
 
 /**
@@ -426,4 +447,5 @@ export const cmsTables = {
 	cmsBlocks,
 	cmsSettings,
 	cmsAIChats,
+	cmsApiKeys,
 }

@@ -1,6 +1,14 @@
 "use client"
 
-import { Bot, Eye, Languages, Palette, Settings, Users } from "lucide-react"
+import {
+	Bot,
+	Eye,
+	KeyRound,
+	Languages,
+	Palette,
+	Settings,
+	Users,
+} from "lucide-react"
 import Link from "next/link"
 
 type SettingCard = {
@@ -46,6 +54,13 @@ export default function SettingsPage() {
 			icon: <Bot className="h-6 w-6" />,
 			href: "/settings/ai-assistant",
 			badge: "New",
+		},
+		{
+			title: "API Keys",
+			description: "Manage REST API keys for external integrations",
+			icon: <KeyRound className="h-6 w-6" />,
+			href: "/settings/api-keys",
+			badge: "Admin Only",
 		},
 	]
 

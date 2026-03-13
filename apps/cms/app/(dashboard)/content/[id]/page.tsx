@@ -817,7 +817,7 @@ export default function EditContentPage({
 						</div>
 
 						{/* SEO */}
-						{schema.type !== "global" && (
+						{schema.type !== "global" && !schema.isSimple && (
 							<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
 								<h2 className="mb-4 font-semibold text-lg text-primary">
 									SEO Metadata
