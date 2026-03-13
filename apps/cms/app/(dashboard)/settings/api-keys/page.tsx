@@ -383,7 +383,6 @@ export default function ApiKeysPage() {
 								onKeyDown={(e) => e.key === "Enter" && handleCreate()}
 								placeholder="e.g. Production, Python client"
 								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-								autoFocus
 							/>
 							<p className="mt-1 text-grey-400 text-xs">
 								A descriptive label to identify where this key is used
