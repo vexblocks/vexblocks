@@ -255,7 +255,15 @@ function BlockReferenceFields({
 
 	const getDisplayValue = (blockField: Field) => {
 		const raw = blockFieldsData[blockField.name]
-		if (hasLocales && raw && typeof raw === "object" && !Array.isArray(raw)) {
+		if (
+			hasLocales &&
+			raw &&
+			typeof raw === "object" &&
+			!Array.isArray(raw) &&
+			blockField.type !== "group" &&
+			blockField.type !== "repeater" &&
+			blockField.type !== "flexibleBlocks"
+		) {
 			return raw[currentLocale] ?? raw[defaultLocale] ?? ""
 		}
 		return raw

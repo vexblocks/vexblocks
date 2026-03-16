@@ -741,7 +741,7 @@ export default function EditContentPage({
 													{group.map((field: any) => {
 														const isTranslatable =
 															field.translatable && hasLocales
-														const value = field.translatable
+														const value = isTranslatable
 															? getLocalizedValue(field.name)
 															: getNestedValue(contentData, field.name)
 
@@ -781,7 +781,7 @@ export default function EditContentPage({
 										// Single field or large field
 										const field = singleField
 										const isTranslatable = field.translatable && hasLocales
-										const value = field.translatable
+										const value = isTranslatable
 											? getLocalizedValue(field.name)
 											: getNestedValue(contentData, field.name)
 
