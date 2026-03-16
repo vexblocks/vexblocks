@@ -31,18 +31,11 @@ export function BlogPostsGrid({ posts, tags }: BlogPostsGridProps) {
 		<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3" data-posts-grid>
 			{posts.map((post) => {
 				// Get all tag IDs for this post
-				const tagIds =
-					post.data.tags
-						?.map((t) => (typeof t === "string" ? t : t._id))
-						.join(",") ?? ""
+				const tagIds = post.data.tags?.join(",") ?? ""
 
 				// Get the first tag name for display
 				const firstTag = post.data.tags?.[0]
-				const tagName = firstTag
-					? typeof firstTag === "string"
-						? (tagMap.get(firstTag) ?? null)
-						: ((firstTag as BlogTagsContent).data?.name ?? null)
-					: null
+				const tagName = firstTag ? (tagMap.get(firstTag) ?? null) : null
 
 				return (
 					<div key={post._id} className="h-full" data-post-tags={tagIds}>

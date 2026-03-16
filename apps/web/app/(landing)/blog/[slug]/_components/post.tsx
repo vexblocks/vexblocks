@@ -44,8 +44,6 @@ export function Post({ post, slug, schemaId }: PostProps) {
 
 	// Extract tag IDs for related posts
 	const tagIds = post.data.tags
-		? post.data.tags.map((tag) => (typeof tag === "string" ? tag : tag._id))
-		: undefined
 
 	const title = getStringValue(post.data.title)
 
