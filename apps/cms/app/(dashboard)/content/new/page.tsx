@@ -485,8 +485,8 @@ export default function NewContentPage() {
 								</div>
 							</div>
 
-							{/* SEO (only for pages and collections, not global) */}
-							{selectedSchema.type !== "global" && (
+							{/* SEO (only for pages and collections, not global or simple) */}
+							{selectedSchema.type !== "global" && !selectedSchema.isSimple && (
 								<div className="rounded-lg bg-white p-4 shadow">
 									<h2 className="mb-4 font-semibold text-lg text-primary">
 										SEO Metadata

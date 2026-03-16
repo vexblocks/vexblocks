@@ -34,6 +34,7 @@ export const listPublic = query({
 				}),
 			),
 			icon: v.optional(v.string()),
+			isSimple: v.optional(v.boolean()),
 			createdBy: v.id("users"),
 			updatedAt: v.number(),
 		}),
@@ -71,6 +72,7 @@ export const list = query({
 					}),
 				),
 				icon: v.optional(v.string()),
+				isSimple: v.optional(v.boolean()),
 				createdBy: v.id("users"),
 				updatedAt: v.number(),
 			}),
@@ -114,6 +116,7 @@ export const get = query({
 				}),
 			),
 			icon: v.optional(v.string()),
+			isSimple: v.optional(v.boolean()),
 			createdBy: v.id("users"),
 			updatedAt: v.number(),
 		}),
@@ -171,6 +174,7 @@ export const getByName = query({
 				}),
 			),
 			icon: v.optional(v.string()),
+			isSimple: v.optional(v.boolean()),
 			createdBy: v.id("users"),
 			updatedAt: v.number(),
 		}),
@@ -220,6 +224,7 @@ export const create = mutation({
 		description: v.optional(v.string()),
 		fields: v.array(v.any()),
 		icon: v.optional(v.string()),
+		isSimple: v.optional(v.boolean()),
 		previewConfig: v.optional(
 			v.object({
 				urlPattern: v.string(),
@@ -256,6 +261,7 @@ export const create = mutation({
 			description: args.description,
 			fields: args.fields,
 			icon: args.icon,
+			isSimple: args.isSimple,
 			previewConfig: args.previewConfig,
 			createdBy: user._id,
 			updatedAt: Date.now(),
@@ -285,6 +291,7 @@ export const update = mutation({
 			}),
 		),
 		icon: v.optional(v.string()),
+		isSimple: v.optional(v.boolean()),
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
@@ -307,6 +314,7 @@ export const update = mutation({
 				previewConfig: args.previewConfig,
 			}),
 			...(args.icon !== undefined && { icon: args.icon }),
+			...(args.isSimple !== undefined && { isSimple: args.isSimple }),
 			updatedAt: Date.now(),
 		})
 
