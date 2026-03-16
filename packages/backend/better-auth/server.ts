@@ -56,7 +56,7 @@ const createOptions = (ctx: GenericCtx) => {
 			},
 			changeEmail: {
 				enabled: true,
-				sendChangeEmailVerification: async ({ user, url }, _request) => {
+				sendChangeEmailConfirmation: async ({ user, url }, _request) => {
 					return await sendEmail(getActionCtx(ctx), {
 						to: user.email,
 						subject: "Verify your email change",
@@ -82,7 +82,7 @@ const createOptions = (ctx: GenericCtx) => {
 	} satisfies BetterAuthOptions
 }
 
-export const createAuth = (ctx: GenericCtx): ReturnType<typeof betterAuth> => {
+export const createAuth = (ctx: GenericCtx) => {
 	const options = createOptions(ctx)
 	return betterAuth({
 		...options,

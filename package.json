@@ -2,7 +2,7 @@
 	"name": "vexblocks-monorepo",
 	"version": "0.2.0",
 	"private": true,
-	"packageManager": "pnpm@10.32.0",
+	"packageManager": "pnpm@10.32.1",
 	"workspaces": [
 		"apps/*",
 		"packages/*"
@@ -28,7 +28,7 @@
 		"release:cli": "pnpm build:cli && pnpm --filter @vexblocks/cli publish"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.6",
-		"turbo": "^2.8.15"
+		"@biomejs/biome": "2.4.7",
+		"turbo": "^2.8.17"
 	}
 }

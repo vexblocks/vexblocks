@@ -777,18 +777,16 @@ export const create = mutation({
 
 		// Trigger revalidation for both published and draft content
 		// This ensures that draft content is also revalidated when saved
-		if (args.slug) {
-			await ctx.scheduler.runAfter(
-				0,
-				internal.cms.content.triggerRevalidationAction,
-				{
-					contentId,
-					slug: args.slug,
-					schemaName: schema.name,
-					urlPattern: schema.previewConfig?.urlPattern,
-				},
-			)
-		}
+		await ctx.scheduler.runAfter(
+			0,
+			internal.cms.content.triggerRevalidationAction,
+			{
+				contentId,
+				slug: args.slug,
+				schemaName: schema.name,
+				urlPattern: schema.previewConfig?.urlPattern,
+			},
+		)
 
 		return contentId
 	},
@@ -880,18 +878,16 @@ export const update = mutation({
 		// Trigger revalidation for both published and draft content
 		// This ensures that the cache is updated whenever content is saved
 		const finalSlug = args.slug ?? content.slug
-		if (finalSlug) {
-			await ctx.scheduler.runAfter(
-				0,
-				internal.cms.content.triggerRevalidationAction,
-				{
-					contentId: args.id,
-					slug: finalSlug,
-					schemaName: schema.name,
-					urlPattern: schema.previewConfig?.urlPattern,
-				},
-			)
-		}
+		await ctx.scheduler.runAfter(
+			0,
+			internal.cms.content.triggerRevalidationAction,
+			{
+				contentId: args.id,
+				slug: finalSlug,
+				schemaName: schema.name,
+				urlPattern: schema.previewConfig?.urlPattern,
+			},
+		)
 
 		return null
 	},
