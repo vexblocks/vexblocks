@@ -903,6 +903,8 @@ export default function SchemaDetailPage({
 	// Preview configuration
 	const [previewEnabled, setPreviewEnabled] = useState(false)
 	const [previewUrlPattern, setPreviewUrlPattern] = useState("")
+	// Simple schema mode
+	const [isSimple, setIsSimple] = useState(false)
 
 	// Initialize edit state when schema loads
 	useEffect(() => {
@@ -913,6 +915,7 @@ export default function SchemaDetailPage({
 			// Initialize preview config
 			setPreviewEnabled(schema.previewConfig?.enabled ?? false)
 			setPreviewUrlPattern(schema.previewConfig?.urlPattern ?? "")
+			setIsSimple(schema.isSimple ?? false)
 		}
 	}, [schema])
 
@@ -1143,6 +1146,7 @@ export default function SchemaDetailPage({
 				previewConfig: previewUrlPattern
 					? { urlPattern: previewUrlPattern, enabled: previewEnabled }
 					: undefined,
+				isSimple,
 			})
 
 			// Trigger type generation in development
@@ -1253,6 +1257,7 @@ export default function SchemaDetailPage({
 										)
 										setPreviewEnabled(schema.previewConfig?.enabled ?? false)
 										setPreviewUrlPattern(schema.previewConfig?.urlPattern ?? "")
+										setIsSimple(schema.isSimple ?? false)
 									}
 								}}
 								className="rounded border border-grey-300 px-4 py-2 text-grey-700 hover:bg-grey-50"
@@ -1363,6 +1368,30 @@ export default function SchemaDetailPage({
 						</div>
 					)}
 				</div>
+
+				{/* Simple Schema */}
+				{editing && (
+					<div className="mb-6 border-grey-200 border-t pt-6">
+						<h2 className="mb-4 font-semibold text-xl">Simple Schema</h2>
+						<div className="flex items-center gap-4">
+							<label className="relative inline-flex cursor-pointer items-center">
+								<input
+									type="checkbox"
+									checked={isSimple}
+									onChange={(e) => setIsSimple(e.target.checked)}
+									className="peer sr-only"
+								/>
+								<div className="peer h-6 w-11 rounded-full bg-grey-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20" />
+							</label>
+							<span className="font-medium text-grey-700">
+								Enable Simple Mode
+							</span>
+						</div>
+						<p className="mt-2 text-grey-500 text-sm">
+							Disables SEO metadata fields on content entries for this schema.
+						</p>
+					</div>
+				)}
 
 				{/* Preview Configuration */}
 				{editing && (
@@ -1606,6 +1635,7 @@ export default function SchemaDetailPage({
 											setPreviewUrlPattern(
 												schema.previewConfig?.urlPattern ?? "",
 											)
+											setIsSimple(schema.isSimple ?? false)
 										}
 									}}
 									className="rounded-lg border border-grey-300 px-6 py-3 text-grey-700 hover:bg-grey-50"

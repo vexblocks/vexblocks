@@ -36,6 +36,8 @@ type FieldType =
 	| "number"
 	| "date"
 	| "select"
+	| "reference"
+	| "multiReference"
 	| "group"
 	| "repeater"
 
@@ -47,6 +49,7 @@ type Field = {
 	required: boolean
 	helpText?: string
 	options?: string[]
+	referenceSchema?: string
 	fields?: Field[]
 	isExisting?: boolean
 }
@@ -75,6 +78,15 @@ function FieldViewItem({ field, depth = 0 }: { field: Field; depth?: number }) {
 				{field.helpText && (
 					<p className="mt-1 text-grey-500 text-sm">{field.helpText}</p>
 				)}
+				{(field.type === "reference" || field.type === "multiReference") &&
+					field.referenceSchema && (
+						<p className="mt-1 text-grey-500 text-sm">
+							Schema:{" "}
+							<code className="rounded bg-grey-100 px-1.5 py-0.5 text-xs">
+								{field.referenceSchema}
+							</code>
+						</p>
+					)}
 
 				{/* Show nested fields for group/repeater type */}
 				{(field.type === "group" || field.type === "repeater") &&
@@ -108,6 +120,7 @@ function SimpleFieldEditor({
 	onMove,
 	onAddNestedField,
 	totalFields,
+	allSchemas = [],
 }: {
 	field: Field
 	index: number
@@ -117,6 +130,7 @@ function SimpleFieldEditor({
 	onMove: (index: number, direction: "up" | "down", depth: number) => void
 	onAddNestedField?: (parentIndex: number) => void
 	totalFields: number
+	allSchemas?: Array<{ _id: string; name: string; displayName: string }>
 }) {
 	// Track if field name has been manually edited
 	const [hasEditedName, setHasEditedName] = useState(false)
@@ -290,6 +304,8 @@ function SimpleFieldEditor({
 						<option value="media">Media</option>
 						<option value="file">File</option>
 						<option value="select">Select</option>
+						<option value="reference">Reference</option>
+						<option value="multiReference">Multi Reference</option>
 						{depth < 2 && <option value="group">Group</option>}
 						{depth < 2 && <option value="repeater">Repeater (Array)</option>}
 					</select>
@@ -336,6 +352,46 @@ function SimpleFieldEditor({
 							placeholder="Option 1, Option 2"
 							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 						/>
+					</div>
+				)}
+				{(field.type === "reference" || field.type === "multiReference") && (
+					<div className="md:col-span-2">
+						<label
+							htmlFor={`field-referenceSchema-${field.id}`}
+							className="mb-1 block text-grey-600 text-xs"
+						>
+							Reference Schema <span className="text-error">*</span>
+						</label>
+						<select
+							id={`field-referenceSchema-${field.id}`}
+							value={field.referenceSchema || ""}
+							onChange={(e) =>
+								onUpdate(index, { referenceSchema: e.target.value }, depth)
+							}
+							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+						>
+							<option value="">-- Select a schema --</option>
+							{allSchemas
+								.filter((s) => s.name !== "")
+								.map((s) => (
+									<option key={s._id} value={s.name}>
+										{s.displayName} ({s.name})
+									</option>
+								))}
+						</select>
+						{allSchemas.length === 0 && (
+							<p className="mt-1 text-grey-400 text-xs">
+								No schemas available.{" "}
+								<Link href="/schemas/new" className="text-primary underline">
+									Create one first
+								</Link>
+							</p>
+						)}
+						<p className="mt-1 text-grey-400 text-xs">
+							{field.type === "reference"
+								? "Select a schema to reference (e.g., 'authors' for author selection)"
+								: "Select a schema to reference (e.g., 'tags' for selecting multiple tags)"}
+						</p>
 					</div>
 				)}
 				<div className="md:col-span-2">
@@ -433,6 +489,7 @@ function SimpleFieldEditor({
 											: undefined
 									}
 									totalFields={field.fields?.length || 0}
+									allSchemas={allSchemas}
 								/>
 							))}
 						</div>
@@ -472,6 +529,7 @@ export default function BlockDetailPage({
 	)
 	const updateBlock = useMutation(api.cms.blocks.update)
 	const deleteBlock = useMutation(api.cms.blocks.remove)
+	const allSchemas = useQuery(api.cms.schemas.list, isReady ? {} : "skip")
 
 	// Use URL param to determine edit mode
 	const editing = searchParams.get("mode") === "edit"
@@ -515,6 +573,7 @@ export default function BlockDetailPage({
 						required: f.required,
 						helpText: f.helpText,
 						options: f.options,
+						referenceSchema: f.referenceSchema,
 						isExisting: true,
 					}
 
@@ -620,6 +679,7 @@ export default function BlockDetailPage({
 				required: f.required,
 				helpText: f.helpText,
 				options: f.options,
+				referenceSchema: f.referenceSchema,
 			}
 
 			// Recursively include nested fields for group and repeater types
@@ -657,6 +717,14 @@ export default function BlockDetailPage({
 						(!field.options || field.options.length === 0)
 					) {
 						throw new Error(`Field "${field.label}" requires options`)
+					}
+					if (
+						(field.type === "reference" || field.type === "multiReference") &&
+						!field.referenceSchema?.trim()
+					) {
+						throw new Error(
+							`Field "${field.label}" requires a reference schema`,
+						)
 					}
 
 					// Validate nested fields for group and repeater types
@@ -923,6 +991,7 @@ export default function BlockDetailPage({
 										onMove={handleMoveField}
 										onAddNestedField={handleAddNestedField}
 										totalFields={fields.length}
+										allSchemas={allSchemas || []}
 									/>
 								))
 							: fields.map((field) => (
@@ -973,6 +1042,7 @@ export default function BlockDetailPage({
 														required: f.required,
 														helpText: f.helpText,
 														options: f.options,
+														referenceSchema: f.referenceSchema,
 														isExisting: true,
 													}
 

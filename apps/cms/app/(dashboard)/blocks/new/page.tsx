@@ -2,7 +2,7 @@
 
 import { api } from "@repo/backend/convex/_generated/api"
 import { CFImage } from "@repo/cms-shared"
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import {
 	ArrowDown,
 	ArrowLeft,
@@ -31,6 +31,8 @@ type FieldType =
 	| "number"
 	| "date"
 	| "select"
+	| "reference"
+	| "multiReference"
 	| "group"
 	| "repeater"
 
@@ -42,6 +44,7 @@ type Field = {
 	required: boolean
 	helpText?: string
 	options?: string[]
+	referenceSchema?: string
 	fields?: Field[] // Nested fields for group/repeater type
 }
 
@@ -55,6 +58,7 @@ const FieldEditor = ({
 	onAddNestedField,
 	onMoveField,
 	totalFields,
+	allSchemas = [],
 }: {
 	field: Field
 	index: number
@@ -73,6 +77,7 @@ const FieldEditor = ({
 		parentPath: string[],
 	) => void
 	totalFields: number
+	allSchemas?: Array<{ _id: string; name: string; displayName: string }>
 }) => {
 	const currentPath = [...parentPath, field.id]
 	const indentClass = depth > 0 ? `ml-${depth * 4}` : ""
@@ -237,6 +242,8 @@ const FieldEditor = ({
 							<option value="media">Media</option>
 							<option value="file">File</option>
 							<option value="select">Select</option>
+							<option value="reference">Reference</option>
+							<option value="multiReference">Multi Reference</option>
 							{depth < 2 && <option value="group">Group</option>}
 							{depth < 2 && <option value="repeater">Repeater (Array)</option>}
 						</select>
@@ -301,6 +308,51 @@ const FieldEditor = ({
 						</div>
 					)}
 
+					{(field.type === "reference" || field.type === "multiReference") && (
+						<div className="md:col-span-2">
+							<label
+								htmlFor={`field-referenceSchema-${field.id}`}
+								className="mb-1 block font-medium text-grey-500 text-xs"
+							>
+								Reference Schema <span className="text-error">*</span>
+							</label>
+							<select
+								id={`field-referenceSchema-${field.id}`}
+								value={field.referenceSchema || ""}
+								onChange={(e) =>
+									onUpdateField(
+										field.id,
+										{ referenceSchema: e.target.value },
+										parentPath,
+									)
+								}
+								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+							>
+								<option value="">-- Select a schema --</option>
+								{allSchemas
+									.filter((s) => s.name !== "")
+									.map((s) => (
+										<option key={s._id} value={s.name}>
+											{s.displayName} ({s.name})
+										</option>
+									))}
+							</select>
+							{allSchemas.length === 0 && (
+								<p className="mt-1 text-grey-400 text-xs">
+									No schemas available.{" "}
+									<Link href="/schemas/new" className="text-primary underline">
+										Create one first
+									</Link>
+								</p>
+							)}
+							<p className="mt-1 text-grey-400 text-xs">
+								{field.type === "reference"
+									? "Select a schema to reference (e.g., 'authors' for author selection)"
+									: "Select a schema to reference (e.g., 'tags' for selecting multiple tags)"}
+							</p>
+						</div>
+					)}
+
 					<div className="md:col-span-2">
 						<label
 							htmlFor={`field-help-${field.id}`}
@@ -359,6 +411,7 @@ const FieldEditor = ({
 										onAddNestedField={onAddNestedField}
 										onMoveField={onMoveField}
 										totalFields={field.fields?.length || 0}
+										allSchemas={allSchemas}
 									/>
 								))}
 							</div>
@@ -379,6 +432,7 @@ const FieldEditor = ({
 export default function NewBlockPage() {
 	const router = useRouter()
 	const createBlock = useMutation(api.cms.blocks.create)
+	const allSchemas = useQuery(api.cms.schemas.list, {})
 
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
@@ -654,6 +708,7 @@ export default function NewBlockPage() {
 				required: f.required,
 				helpText: f.helpText,
 				options: f.options,
+				referenceSchema: f.referenceSchema,
 			}
 
 			// Recursively include nested fields for group and repeater types
@@ -708,6 +763,14 @@ export default function NewBlockPage() {
 					) {
 						throw new Error(
 							`Field "${field.label}" requires at least one option`,
+						)
+					}
+					if (
+						(field.type === "reference" || field.type === "multiReference") &&
+						!field.referenceSchema?.trim()
+					) {
+						throw new Error(
+							`Field "${field.label}" requires a reference schema`,
 						)
 					}
 					// Validate nested fields
@@ -949,6 +1012,7 @@ export default function NewBlockPage() {
 									onAddNestedField={handleAddNestedField}
 									onMoveField={handleMoveField}
 									totalFields={fields.length}
+									allSchemas={allSchemas || []}
 								/>
 							))}
 						</div>

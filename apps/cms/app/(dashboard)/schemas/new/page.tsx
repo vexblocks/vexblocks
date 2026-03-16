@@ -864,6 +864,7 @@ export default function NewSchemaPage() {
 	const [hasEditedName, setHasEditedName] = useState(false)
 	const [type, setType] = useState<"global" | "collection">("collection")
 	const [description, setDescription] = useState("")
+	const [isSimple, setIsSimple] = useState(false)
 
 	// Fields
 	const [fields, setFields] = useState<Field[]>([])
@@ -1273,6 +1274,7 @@ export default function NewSchemaPage() {
 				type,
 				description: description || undefined,
 				fields: mapFieldsForSave(fields),
+				isSimple: type === "collection" ? isSimple : undefined,
 			})
 
 			// Trigger type generation in development
@@ -1426,6 +1428,28 @@ export default function NewSchemaPage() {
 							/>
 						</div>
 					</div>
+					{type === "collection" && (
+						<div className="border-grey-200 border-t pt-4">
+							<h3 className="mb-3 font-medium text-grey-700">Simple Schema</h3>
+							<div className="flex items-center gap-4">
+								<label className="relative inline-flex cursor-pointer items-center">
+									<input
+										type="checkbox"
+										checked={isSimple}
+										onChange={(e) => setIsSimple(e.target.checked)}
+										className="peer sr-only"
+									/>
+									<div className="peer h-6 w-11 rounded-full bg-grey-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20" />
+								</label>
+								<span className="font-medium text-grey-700">
+									Enable Simple Mode
+								</span>
+							</div>
+							<p className="mt-2 text-grey-500 text-sm">
+								Disables SEO metadata fields on content entries for this schema.
+							</p>
+						</div>
+					)}
 				</div>
 
 				{/* Fields */}
