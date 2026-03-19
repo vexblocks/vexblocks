@@ -489,6 +489,21 @@ function renderNode(
 		case "linebreak":
 			return <br key={key} />
 
+		case "horizontalrule":
+			return <hr key={key} className="my-6 border-gray-200" />
+
+		case "label": {
+			const labelNode = node as ElementNode
+			return (
+				<p
+					key={key}
+					className="mb-3 w-fit rounded border border-gray-500 px-2 py-0.5 font-semibold text-xs uppercase tracking-widest"
+				>
+					{renderChildren(labelNode.children, key, undefined, counters)}
+				</p>
+			)
+		}
+
 		case "block": {
 			// Block nodes are custom CMS blocks embedded in rich text
 			// Skip rendering them here - they should be extracted and rendered separately

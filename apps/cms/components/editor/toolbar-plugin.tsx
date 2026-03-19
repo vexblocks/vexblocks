@@ -6,6 +6,7 @@ import {
 	INSERT_UNORDERED_LIST_COMMAND,
 } from "@lexical/list"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
+import { INSERT_HORIZONTAL_RULE_COMMAND } from "@lexical/extension"
 import {
 	$createHeadingNode,
 	$createQuoteNode,
@@ -21,18 +22,22 @@ import {
 	REDO_COMMAND,
 	UNDO_COMMAND,
 } from "lexical"
+import { $createLabelNode } from "./label-node"
 import {
 	Bold,
 	Heading1,
 	Heading2,
 	Heading3,
+	Heading4,
 	Italic,
 	Link as LinkIcon,
 	List,
 	ListOrdered,
+	Minus,
 	Palette,
 	Quote,
 	Redo,
+	Tag,
 	Type,
 	Underline,
 	Undo,
@@ -123,6 +128,16 @@ export default function ToolbarPlugin() {
 			}
 		})
 		setBlockType("paragraph")
+	}
+
+	const formatLabel = () => {
+		editor.update(() => {
+			const selection = $getSelection()
+			if ($isRangeSelection(selection)) {
+				$wrapNodes(selection, () => $createLabelNode())
+			}
+		})
+		setBlockType("label")
 	}
 
 	const formatQuote = () => {
@@ -347,6 +362,22 @@ export default function ToolbarPlugin() {
 			>
 				<Heading3 className="h-4 w-4" />
 			</button>
+			<button
+				type="button"
+				onClick={() => formatHeading("h4")}
+				className="rounded p-2 transition-colors hover:bg-grey-100"
+				title="Heading 4"
+			>
+				<Heading4 className="h-4 w-4" />
+			</button>
+			<button
+				type="button"
+				onClick={formatLabel}
+				className="rounded p-2 transition-colors hover:bg-grey-100"
+				title="Label"
+			>
+				<Tag className="h-4 w-4" />
+			</button>
 
 			<div className="mx-2 h-6 w-px bg-grey-300" />
 
@@ -394,6 +425,16 @@ export default function ToolbarPlugin() {
 				title="Quote"
 			>
 				<Quote className="h-4 w-4" />
+			</button>
+			<button
+				type="button"
+				onClick={() =>
+					editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)
+				}
+				className="rounded p-2 transition-colors hover:bg-grey-100"
+				title="Divider"
+			>
+				<Minus className="h-4 w-4" />
 			</button>
 
 			<div className="mx-2 h-6 w-px bg-grey-300" />
