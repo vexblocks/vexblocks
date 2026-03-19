@@ -28,7 +28,7 @@
 		"release:cli": "pnpm build:cli && pnpm --filter @vexblocks/cli publish"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.7",
-		"turbo": "^2.8.17"
+		"@biomejs/biome": "2.4.8",
+		"turbo": "^2.8.19"
 	}
 }

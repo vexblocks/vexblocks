@@ -16,7 +16,7 @@
 		"better-auth": "1.5.5",
 		"convex": "^1.33.1",
 		"convex-helpers": "^0.1.114",
-		"next": "16.1.6",
+		"next": "16.2.0",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {

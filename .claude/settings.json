@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat -A /Users/juliandavid/projects/vexblocks/apps/cms/app/\\\\\\(dashboard\\\\\\)/blocks/new/page.tsx)"
+    ]
+  }
+}

@@ -86,6 +86,10 @@ const FieldEditor = ({
 
 	// Track if field name has been manually edited
 	const [hasEditedName, setHasEditedName] = useState(false)
+	// Local state for options text to allow free typing with commas
+	const [optionsText, setOptionsText] = useState(
+		field.options?.join(", ") || "",
+	)
 
 	const generateFieldName = (label: string) => {
 		return label
@@ -289,8 +293,9 @@ const FieldEditor = ({
 							<input
 								id={`field-options-${field.id}`}
 								type="text"
-								value={field.options?.join(", ") || ""}
-								onChange={(e) =>
+								value={optionsText}
+								onChange={(e) => {
+									setOptionsText(e.target.value)
 									onUpdateField(
 										field.id,
 										{
@@ -301,7 +306,7 @@ const FieldEditor = ({
 										},
 										parentPath,
 									)
-								}
+								}}
 								placeholder="Option 1, Option 2, Option 3"
 								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 							/>
