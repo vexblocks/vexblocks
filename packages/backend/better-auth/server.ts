@@ -51,6 +51,7 @@ const createOptions = (ctx: GenericCtx) => {
 						to: user.email,
 						subject: "Confirm Account Deletion",
 						html: deleteAccountTemplate(url),
+						from: config.email.fromAddress, // Use the fromAddress from your config
 					})
 				},
 			},
@@ -61,6 +62,7 @@ const createOptions = (ctx: GenericCtx) => {
 						to: user.email,
 						subject: "Verify your email change",
 						html: changeEmailTemplate(url),
+						from: config.email.fromAddress, // Use the fromAddress from your config
 					})
 				},
 			},
@@ -73,6 +75,7 @@ const createOptions = (ctx: GenericCtx) => {
 						to: email,
 						subject: `Your ${config.appName} login code`,
 						html: getOTPEmailTemplate(otp),
+						from: config.email.fromAddress, // Use the fromAddress from your config
 					})
 				},
 				otpLength: 6,
