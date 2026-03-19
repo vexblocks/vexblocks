@@ -8,6 +8,69 @@ function _sanitizeContent(content: string): string {
 	return content.replace(/\u2028/g, "\n").replace(/\u2029/g, "\n")
 }
 
+/**
+ * Per-node class overrides for LexicalRenderer.
+ * Pass this to `nodeClassNames` to customize element styles without
+ * modifying the component. Each key replaces the default class for that node.
+ *
+ * Heading keys refer to the original CMS heading level (h1–h6), not the
+ * rendered tag (which is shifted down one level: h1→<h2>, h2→<h3>, etc.).
+ */
+export type NodeClassNames = {
+	/** <p> elements */
+	paragraph?: string
+	/** CMS h1 — rendered as <h2> */
+	h1?: string
+	/** CMS h2 — rendered as <h3> */
+	h2?: string
+	/** CMS h3 — rendered as <h4> */
+	h3?: string
+	/** CMS h4 — rendered as <h5> */
+	h4?: string
+	/** CMS h5 — rendered as <h6> */
+	h5?: string
+	/** CMS h6 — rendered as <h6> */
+	h6?: string
+	/** <blockquote> elements */
+	blockquote?: string
+	/** <ul> unordered list */
+	ul?: string
+	/** <ol> ordered list */
+	ol?: string
+	/** <li> list items */
+	li?: string
+	/** <pre> code block wrapper */
+	pre?: string
+	/** <code> inline code */
+	inlineCode?: string
+	/** <a> link elements */
+	link?: string
+	/** label node */
+	label?: string
+	/** <hr> horizontal rule */
+	hr?: string
+}
+
+const DEFAULT_NODE_CLASSES = {
+	paragraph: "mb-2",
+	h1: "mb-4",
+	h2: "mb-4",
+	h3: "mb-4",
+	h4: "mb-4",
+	h5: "mb-4",
+	h6: "mb-4",
+	blockquote: "mb-6 border-gray-300 border-l-4 pl-4 text-gray-700 italic",
+	ul: "mb-6 marker:text-sm",
+	ol: "mb-6 marker:text-sm",
+	li: "",
+	pre: "mb-6 overflow-x-auto rounded-lg bg-gray-900 p-4 text-gray-100",
+	inlineCode: "rounded bg-gray-100 px-1 py-0.5 font-mono text-sm",
+	link: "text-purple-600 hover:underline",
+	label:
+		"mb-3 w-fit rounded border border-gray-500 px-2 py-0.5 font-semibold text-xs uppercase tracking-widest",
+	hr: "my-6 border-gray-200",
+} satisfies Required<NodeClassNames>
+
 type LexicalNode = {
 	type: string
 	version: number
@@ -77,6 +140,8 @@ type LexicalRendererProps = {
 	className?: string
 	/** Field path for preview mode - enables paragraph-level selection */
 	fieldPath?: string
+	/** Override classes for specific node types. Each key replaces the default class. */
+	nodeClassNames?: NodeClassNames
 }
 
 // Track element indices for preview mode
@@ -169,6 +234,7 @@ export function LexicalRenderer({
 	content,
 	className,
 	fieldPath,
+	nodeClassNames,
 }: LexicalRendererProps) {
 	try {
 		const sanitized = _sanitizeContent(content)
@@ -182,13 +248,17 @@ export function LexicalRenderer({
 		}
 		return (
 			<div className={className}>
-				{renderNode(parsed.root, "root", fieldPath, counters)}
+				{renderNode(parsed.root, "root", fieldPath, counters, nodeClassNames)}
 			</div>
 		)
 	} catch (error) {
 		console.error("Error parsing Lexical content:", error)
 		return <div className={className}>Failed to load content</div>
 	}
+}
+
+function cls(override: string | undefined, defaultClass: string): string {
+	return override !== undefined ? override : defaultClass
 }
 
 function renderNode(
@@ -202,6 +272,7 @@ function renderNode(
 		quote: 0,
 		code: 0,
 	},
+	nodeClassNames?: NodeClassNames,
 ): ReactNode {
 	if (!node) return null
 
@@ -212,6 +283,7 @@ function renderNode(
 				key,
 				fieldPath,
 				counters,
+				nodeClassNames,
 			)
 
 		case "paragraph": {
@@ -232,17 +304,35 @@ function renderNode(
 			if (hasBlockChild) {
 				return (
 					<div key={key} className="mb-6">
-						{renderChildren(paragraphNode.children, key, undefined, counters)}
+						{renderChildren(
+							paragraphNode.children,
+							key,
+							undefined,
+							counters,
+							nodeClassNames,
+						)}
 					</div>
 				)
 			}
 
 			const elementIndex = counters.paragraph++
 			const paragraphElement = (
-				<p key={key} className={isEmpty ? "mb-2" : "mb-2"}>
+				<p
+					key={key}
+					className={cls(
+						nodeClassNames?.paragraph,
+						DEFAULT_NODE_CLASSES.paragraph,
+					)}
+				>
 					{isEmpty
 						? null
-						: renderChildren(paragraphNode.children, key, undefined, counters)}
+						: renderChildren(
+								paragraphNode.children,
+								key,
+								undefined,
+								counters,
+								nodeClassNames,
+							)}
 				</p>
 			)
 
@@ -275,10 +365,20 @@ function renderNode(
 				h6: "h6",
 			}
 			const Tag = headingMap[headingNode.tag] || "h2"
+			const headingClassName = cls(
+				nodeClassNames?.[headingNode.tag],
+				DEFAULT_NODE_CLASSES[headingNode.tag],
+			)
 			const elementIndex = counters.heading++
 			const headingElement = (
-				<Tag key={key} className="mb-4">
-					{renderChildren(headingNode.children, key, undefined, counters)}
+				<Tag key={key} className={headingClassName}>
+					{renderChildren(
+						headingNode.children,
+						key,
+						undefined,
+						counters,
+						nodeClassNames,
+					)}
 				</Tag>
 			)
 
@@ -301,10 +401,22 @@ function renderNode(
 		case "list": {
 			const listNode = node as ListNode
 			const ListTag = listNode.listType === "number" ? "ol" : "ul"
+			const listClassName = cls(
+				listNode.listType === "number"
+					? nodeClassNames?.ol
+					: nodeClassNames?.ul,
+				DEFAULT_NODE_CLASSES[listNode.listType === "number" ? "ol" : "ul"],
+			)
 			const elementIndex = counters.list++
 			const listElement = (
-				<ListTag key={key} className="mb-6 marker:text-sm">
-					{renderChildren(listNode.children, key, undefined, counters)}
+				<ListTag key={key} className={listClassName}>
+					{renderChildren(
+						listNode.children,
+						key,
+						undefined,
+						counters,
+						nodeClassNames,
+					)}
 				</ListTag>
 			)
 
@@ -327,8 +439,19 @@ function renderNode(
 		case "listitem": {
 			const listItemNode = node as ListItemNode
 			return (
-				<li key={key}>
-					{renderChildren(listItemNode.children, key, undefined, counters)}
+				<li
+					key={key}
+					className={
+						cls(nodeClassNames?.li, DEFAULT_NODE_CLASSES.li) || undefined
+					}
+				>
+					{renderChildren(
+						listItemNode.children,
+						key,
+						undefined,
+						counters,
+						nodeClassNames,
+					)}
 				</li>
 			)
 		}
@@ -339,9 +462,18 @@ function renderNode(
 			const quoteElement = (
 				<blockquote
 					key={key}
-					className="mb-6 border-gray-300 border-l-4 pl-4 text-gray-700 italic"
+					className={cls(
+						nodeClassNames?.blockquote,
+						DEFAULT_NODE_CLASSES.blockquote,
+					)}
 				>
-					{renderChildren(quoteNode.children, key, undefined, counters)}
+					{renderChildren(
+						quoteNode.children,
+						key,
+						undefined,
+						counters,
+						nodeClassNames,
+					)}
 				</blockquote>
 			)
 
@@ -367,10 +499,16 @@ function renderNode(
 			const codeElement = (
 				<pre
 					key={key}
-					className="mb-6 overflow-x-auto rounded-lg bg-gray-900 p-4 text-gray-100"
+					className={cls(nodeClassNames?.pre, DEFAULT_NODE_CLASSES.pre)}
 				>
 					<code>
-						{renderChildren(codeNode.children, key, undefined, counters)}
+						{renderChildren(
+							codeNode.children,
+							key,
+							undefined,
+							counters,
+							nodeClassNames,
+						)}
 					</code>
 				</pre>
 			)
@@ -399,9 +537,15 @@ function renderNode(
 					href={linkNode.url}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="text-purple-600 hover:underline"
+					className={cls(nodeClassNames?.link, DEFAULT_NODE_CLASSES.link)}
 				>
-					{renderChildren(linkNode.children, key, undefined, counters)}
+					{renderChildren(
+						linkNode.children,
+						key,
+						undefined,
+						counters,
+						nodeClassNames,
+					)}
 				</a>
 			)
 		}
@@ -448,7 +592,10 @@ function renderNode(
 				text = (
 					<code
 						key={`${key}-code`}
-						className="rounded bg-gray-100 px-1 py-0.5 font-mono text-sm"
+						className={cls(
+							nodeClassNames?.inlineCode,
+							DEFAULT_NODE_CLASSES.inlineCode,
+						)}
 					>
 						{text}
 					</code>
@@ -490,16 +637,27 @@ function renderNode(
 			return <br key={key} />
 
 		case "horizontalrule":
-			return <hr key={key} className="my-6 border-gray-200" />
+			return (
+				<hr
+					key={key}
+					className={cls(nodeClassNames?.hr, DEFAULT_NODE_CLASSES.hr)}
+				/>
+			)
 
 		case "label": {
 			const labelNode = node as ElementNode
 			return (
 				<p
 					key={key}
-					className="mb-3 w-fit rounded border border-gray-500 px-2 py-0.5 font-semibold text-xs uppercase tracking-widest"
+					className={cls(nodeClassNames?.label, DEFAULT_NODE_CLASSES.label)}
 				>
-					{renderChildren(labelNode.children, key, undefined, counters)}
+					{renderChildren(
+						labelNode.children,
+						key,
+						undefined,
+						counters,
+						nodeClassNames,
+					)}
 				</p>
 			)
 		}
@@ -522,6 +680,7 @@ function renderChildren(
 	parentKey: string,
 	fieldPath?: string,
 	counters?: ElementCounters,
+	nodeClassNames?: NodeClassNames,
 ): ReactNode[] {
 	if (!children || !Array.isArray(children)) return []
 
@@ -542,7 +701,15 @@ function renderChildren(
 			)
 			i++ // Skip the next linebreak since we handled both
 		} else {
-			result.push(renderNode(child, `${parentKey}-${i}`, fieldPath, counters))
+			result.push(
+				renderNode(
+					child,
+					`${parentKey}-${i}`,
+					fieldPath,
+					counters,
+					nodeClassNames,
+				),
+			)
 		}
 	}
 

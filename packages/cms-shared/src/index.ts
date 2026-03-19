@@ -1,6 +1,7 @@
 // Components
 export type { CFImageProps } from "./components/cf-image"
 export { CFImage } from "./components/cf-image"
+export type { NodeClassNames } from "./components/lexical-renderer"
 export { LexicalRenderer } from "./components/lexical-renderer"
 // Types
 export type {
