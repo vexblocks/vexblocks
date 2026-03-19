@@ -1,12 +1,12 @@
 "use client"
 
+import { INSERT_HORIZONTAL_RULE_COMMAND } from "@lexical/extension"
 import { TOGGLE_LINK_COMMAND } from "@lexical/link"
 import {
 	INSERT_ORDERED_LIST_COMMAND,
 	INSERT_UNORDERED_LIST_COMMAND,
 } from "@lexical/list"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { INSERT_HORIZONTAL_RULE_COMMAND } from "@lexical/extension"
 import {
 	$createHeadingNode,
 	$createQuoteNode,
@@ -22,7 +22,6 @@ import {
 	REDO_COMMAND,
 	UNDO_COMMAND,
 } from "lexical"
-import { $createLabelNode } from "./label-node"
 import {
 	Bold,
 	Heading1,
@@ -43,6 +42,7 @@ import {
 	Undo,
 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { $createLabelNode } from "./label-node"
 
 export default function ToolbarPlugin() {
 	const [editor] = useLexicalComposerContext()

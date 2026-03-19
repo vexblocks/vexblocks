@@ -55,7 +55,7 @@ function BlockReferenceContent({
 	contentBySchema?: Record<string, any[]>
 }) {
 	const [showPreviewModal, setShowPreviewModal] = useState(false)
-	const { currentLocale, defaultLocale, hasLocales } = useLocale()
+	const { currentLocale, hasLocales } = useLocale()
 	const referencedBlock = useQuery(api.cms.blocks.get, {
 		id: blockId as Id<"cmsBlocks">,
 	})

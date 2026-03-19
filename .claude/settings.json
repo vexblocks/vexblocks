@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat -A /Users/juliandavid/projects/vexblocks/apps/cms/app/\\\\\\(dashboard\\\\\\)/blocks/new/page.tsx)"
+      "Bash(cat -A /Users/juliandavid/projects/vexblocks/apps/cms/app/\\\\\\(dashboard\\\\\\)/blocks/new/page.tsx)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm --filter vexblocks-cms exec biome check --write --unsafe components/editor/toolbar-plugin.tsx components/editor/horizontal-rule-plugin.tsx)",
+      "Bash(pnpm --filter vexblocks-cms exec biome check .)",
+      "Bash(pnpm exec:*)",
+      "Bash(echo \"EXIT: $?\")"
     ]
   }
 }

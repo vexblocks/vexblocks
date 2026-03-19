@@ -6,16 +6,16 @@ import { LexicalComposer } from "@lexical/react/LexicalComposer"
 import { ContentEditable } from "@lexical/react/LexicalContentEditable"
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary"
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin"
-import {
-	HorizontalRuleNode,
-	HorizontalRulePlugin,
-} from "./horizontal-rule-plugin"
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin"
 import { ListPlugin } from "@lexical/react/LexicalListPlugin"
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import type { EditorState } from "lexical"
+import {
+	HorizontalRuleNode,
+	HorizontalRulePlugin,
+} from "./horizontal-rule-plugin"
 import { LabelNode } from "./label-node"
 import SanitizePastePlugin from "./sanitize-paste-plugin"
 import ToolbarPlugin from "./toolbar-plugin"
@@ -71,14 +71,22 @@ export default function LexicalEditor({
 				listitem: "mb-1",
 			},
 			label:
-			"w-fit border border-grey-500 text-xs uppercase tracking-widest font-semibold px-2 py-0.5 rounded mb-3",
-		quote: "border-l-4 border-grey-300 pl-4 italic my-4",
+				"w-fit border border-grey-500 text-xs uppercase tracking-widest font-semibold px-2 py-0.5 rounded mb-3",
+			quote: "border-l-4 border-grey-300 pl-4 italic my-4",
 			link: "text-primary underline hover:text-primary-800",
 		},
 		onError: (error: Error) => {
 			console.error("Lexical Error:", error)
 		},
-		nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, HorizontalRuleNode, LabelNode],
+		nodes: [
+			HeadingNode,
+			QuoteNode,
+			ListNode,
+			ListItemNode,
+			LinkNode,
+			HorizontalRuleNode,
+			LabelNode,
+		],
 	}
 
 	const handleChange = (editorState: EditorState) => {

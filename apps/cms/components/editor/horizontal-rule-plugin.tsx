@@ -40,7 +40,7 @@ function HorizontalRuleComponent({ nodeKey }: { nodeKey: NodeKey }) {
 			onClick={handleClick}
 			aria-label="Divider"
 		>
-			<hr className="my-4 border-t border-grey-300" />
+			<hr className="my-4 border-grey-300 border-t" />
 		</button>
 	)
 }
@@ -128,7 +128,7 @@ export function HorizontalRulePlugin() {
 					if (prev) {
 						prev.selectEnd()
 					} else {
-								const p = $createParagraphNode()
+						const p = $createParagraphNode()
 						$getRoot().append(p)
 						p.select()
 					}
