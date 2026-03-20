@@ -52,11 +52,14 @@ function buildQueueItem(file: File): QueuedImage {
 }
 
 function compressImage(file: File): Promise<Blob> {
+	const preserveFormat = new Set(["image/png", "image/webp", "image/avif"])
+	const outputMime = preserveFormat.has(file.type) ? file.type : "image/jpeg"
+
 	return new Promise((resolve, reject) => {
 		new Compressor(file, {
 			quality: 0.8,
 			maxWidth: 1600,
-			mimeType: "image/jpeg",
+			mimeType: outputMime,
 			success: resolve,
 			error: reject,
 		})

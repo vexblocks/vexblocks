@@ -24,3 +24,18 @@
 @source inline("{,md:,lg:}pr-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
 @source inline("{,md:,lg:}px-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
 @source inline("{,md:,lg:}py-{0,1,2,3,4,5,6,7,8,10,12,16,20,24}");
+
+/* Height utilities with responsive variants */
+@source inline("{,md:,lg:}h-{32,40,48,56,64,72,80,96}");
+@source inline("{,md:,lg:}h-{auto,full,screen}");
+
+/* Negative margin utilities for full-width images */
+@source inline("{,md:,lg:}-mx-{4,6,8}");
+@source inline("{,md:,lg:}mx-{0,auto}");
+
+/* Border radius overrides */
+@source inline("{,md:,lg:}rounded-{none,md,lg,xl,2xl}");
+@source inline("{,md:,lg:}rounded-{[10px]}");
+
+/* Object fit */
+@source inline("object-{cover,contain}");
