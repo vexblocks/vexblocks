@@ -9,14 +9,14 @@
 		"lint": "echo \"No lint configured for backend\""
 	},
 	"dependencies": {
-		"@convex-dev/better-auth": "^0.11.2",
+		"@convex-dev/better-auth": "^0.11.3",
 		"@convex-dev/migrations": "^0.3.1",
 		"@convex-dev/r2": "^0.9.1",
 		"@convex-dev/resend": "^0.2.3",
 		"better-auth": "1.5.5",
-		"convex": "^1.33.1",
+		"convex": "^1.34.0",
 		"convex-helpers": "^0.1.114",
-		"next": "16.2.0",
+		"next": "16.2.1",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {

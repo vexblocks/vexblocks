@@ -784,6 +784,7 @@ export const create = mutation({
 				contentId,
 				slug: args.slug,
 				schemaName: schema.name,
+				schemaType: schema.type,
 				urlPattern: schema.previewConfig?.urlPattern,
 			},
 		)
@@ -885,6 +886,7 @@ export const update = mutation({
 				contentId: args.id,
 				slug: finalSlug,
 				schemaName: schema.name,
+				schemaType: schema.type,
 				urlPattern: schema.previewConfig?.urlPattern,
 			},
 		)
@@ -917,6 +919,7 @@ export const remove = mutation({
 		const wasPublished = content.status === "published"
 		const contentSlug = content.slug
 		const schemaName = schema?.name
+		const schemaType = schema?.type
 		const urlPattern = schema?.previewConfig?.urlPattern
 
 		// Delete the content
@@ -931,6 +934,7 @@ export const remove = mutation({
 					contentId: args.id,
 					slug: contentSlug,
 					schemaName,
+					schemaType,
 					urlPattern,
 					isDeleted: true,
 				},
@@ -992,6 +996,7 @@ export const triggerRevalidationAction = internalAction({
 		contentId: v.id("cmsContent"),
 		slug: v.optional(v.string()),
 		schemaName: v.optional(v.string()),
+		schemaType: v.optional(v.string()),
 		urlPattern: v.optional(v.string()),
 		isDeleted: v.optional(v.boolean()),
 	},
@@ -1030,6 +1035,7 @@ export const triggerRevalidationAction = internalAction({
 				contentId: args.contentId,
 				slug: args.slug,
 				schemaName: args.schemaName,
+				schemaType: args.schemaType,
 				urlPattern: args.urlPattern,
 				isDeleted: args.isDeleted,
 				secret: revalidateSecret,
