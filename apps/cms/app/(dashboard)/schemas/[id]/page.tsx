@@ -12,6 +12,7 @@ import {
 	ArrowUp,
 	Folder,
 	Layers,
+	MapPin,
 	Plus,
 	Save,
 	Trash2,
@@ -77,6 +78,7 @@ type FieldType =
 	| "repeater"
 	| "flexibleBlocks"
 	| "blockReference"
+	| "map"
 
 type Field = {
 	id: string
@@ -104,6 +106,7 @@ type Field = {
 		| "select"
 		| "group"
 		| "blockReference"
+		| "map"
 	>
 	maxBlocks?: number
 	// For blockReference
@@ -262,6 +265,8 @@ function FieldEditor({
 				return <Layers className="h-4 w-4 text-primary" />
 			case "youtubeUrl":
 				return <Video className="h-4 w-4" />
+			case "map":
+				return <MapPin className="h-4 w-4" />
 			default:
 				return <Type className="h-4 w-4" />
 		}
@@ -426,6 +431,7 @@ function FieldEditor({
 						<option value="date">Date</option>
 						<option value="url">URL</option>
 						<option value="youtubeUrl">YouTube URL</option>
+						<option value="map">Map</option>
 						<option value="media">Media</option>
 						<option value="file">File</option>
 						<option value="select">Select</option>
@@ -1194,6 +1200,8 @@ export default function SchemaDetailPage({
 				return <Layers className="h-4 w-4 text-primary" />
 			case "youtubeUrl":
 				return <Video className="h-4 w-4" />
+			case "map":
+				return <MapPin className="h-4 w-4" />
 			default:
 				return <Type className="h-4 w-4" />
 		}

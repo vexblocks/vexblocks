@@ -16,6 +16,7 @@ import {
 	Layers,
 	Link as LinkIcon,
 	List,
+	MapPin,
 	Plus,
 	ToggleLeft,
 	Trash2,
@@ -70,6 +71,7 @@ type FieldType =
 	| "repeater"
 	| "flexibleBlocks"
 	| "blockReference"
+	| "map"
 
 type Field = {
 	id: string
@@ -96,6 +98,7 @@ type Field = {
 		| "select"
 		| "group"
 		| "blockReference"
+		| "map"
 	>
 	maxBlocks?: number
 	// For blockReference
@@ -431,6 +434,7 @@ const FieldEditor = ({
 							<option value="date">Date</option>
 							<option value="url">URL</option>
 							<option value="youtubeUrl">YouTube URL</option>
+							<option value="map">Map</option>
 							<option value="media">Media</option>
 							<option value="file">File</option>
 							<option value="select">Select</option>
@@ -1113,6 +1117,8 @@ export default function NewSchemaPage() {
 				return <LinkIcon className="h-4 w-4" />
 			case "youtubeUrl":
 				return <Video className="h-4 w-4" />
+			case "map":
+				return <MapPin className="h-4 w-4" />
 			case "media":
 				return <Image className="h-4 w-4" />
 			case "file":

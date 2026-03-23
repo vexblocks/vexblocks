@@ -7,6 +7,12 @@ import { useQuery } from "convex/react"
 import { FileUp, Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState } from "react"
+
+const MapFieldEditor = dynamic(
+	() => import("./map-field").then((mod) => mod.MapFieldEditor),
+	{ ssr: false },
+)
+
 import TextareaAutosize from "react-textarea-autosize"
 import type { Field } from "./types"
 
@@ -463,6 +469,9 @@ export function BasicFieldRenderer({
 				</select>
 			)
 		}
+
+		case "map":
+			return <MapFieldEditor value={value ?? null} onChange={onChange} />
 
 		case "multiReference": {
 			const referencedSchema = allSchemas?.find(

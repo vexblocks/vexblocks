@@ -132,6 +132,7 @@ export const fieldDefinition: any = v.object({
 		v.literal("repeater"), // Array of repeated fields (e.g., menu items)
 		v.literal("flexibleBlocks"), // Dynamic blocks - user can add any type of field
 		v.literal("blockReference"), // Reference to a reusable block
+		v.literal("map"), // Geographic point with coordinates
 	),
 	required: v.boolean(),
 	defaultValue: v.optional(v.any()),

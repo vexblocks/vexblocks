@@ -24,6 +24,7 @@
 		"@radix-ui/react-dialog": "^1.1.15",
 		"@repo/cms-shared": "workspace:*",
 		"@tanstack/react-query": "^5.94.5",
+		"@vis.gl/react-google-maps": "^1.7.1",
 		"ai": "^6.0.134",
 		"better-auth": "1.5.5",
 		"class-variance-authority": "^0.7.1",
@@ -48,6 +49,7 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4.2.2",
+		"@types/google.maps": "^3.58.1",
 		"@types/node": "^25.5.0",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",

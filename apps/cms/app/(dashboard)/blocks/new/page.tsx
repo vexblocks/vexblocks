@@ -35,6 +35,7 @@ type FieldType =
 	| "multiReference"
 	| "group"
 	| "repeater"
+	| "map"
 
 type Field = {
 	id: string
@@ -243,6 +244,7 @@ const FieldEditor = ({
 							<option value="date">Date</option>
 							<option value="url">URL</option>
 							<option value="youtubeUrl">YouTube URL</option>
+							<option value="map">Map</option>
 							<option value="media">Media</option>
 							<option value="file">File</option>
 							<option value="select">Select</option>

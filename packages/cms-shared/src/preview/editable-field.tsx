@@ -1,6 +1,6 @@
 "use client"
 
-import { type JSX, useState } from "react"
+import { useState } from "react"
 import { usePreview } from "./preview-context"
 import type { EditableFieldProps } from "./types"
 
@@ -104,7 +104,7 @@ export function EditableField({
  * ```
  */
 type EditableTextProps = EditableFieldProps & {
-	as?: keyof JSX.IntrinsicElements
+	as?: React.ElementType
 }
 
 export function EditableText({

@@ -16,6 +16,7 @@ export type FieldType =
 	| "repeater"
 	| "flexibleBlocks"
 	| "blockReference"
+	| "map"
 
 export type Field = {
 	name: string
