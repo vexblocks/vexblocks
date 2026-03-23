@@ -118,6 +118,7 @@ type Field = {
 	nameManuallyEdited?: boolean
 	// Localization
 	translatable?: boolean
+	defaultValue?: string
 }
 
 // Block type for selection
@@ -492,6 +493,64 @@ function FieldEditor({
 						value={field.options ?? []}
 						onChange={(options) => onUpdateField(path, { options })}
 					/>
+				</div>
+			)}
+
+			{(field.type === "shortText" ||
+				field.type === "longText" ||
+				field.type === "select") && (
+				<div className="mt-4">
+					<label
+						htmlFor={`field-default-${field.id}`}
+						className="mb-1 block font-medium text-grey-700 text-sm"
+					>
+						Default Value
+					</label>
+					{field.type === "select" && (field.options ?? []).length > 0 ? (
+						<select
+							id={`field-default-${field.id}`}
+							value={field.defaultValue ?? ""}
+							onChange={(e) =>
+								onUpdateField(path, {
+									defaultValue: e.target.value || undefined,
+								})
+							}
+							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+						>
+							<option value="">— No default —</option>
+							{(field.options ?? []).map((opt) => (
+								<option key={opt} value={opt}>
+									{opt}
+								</option>
+							))}
+						</select>
+					) : field.type === "longText" ? (
+						<textarea
+							id={`field-default-${field.id}`}
+							value={field.defaultValue ?? ""}
+							onChange={(e) =>
+								onUpdateField(path, {
+									defaultValue: e.target.value || undefined,
+								})
+							}
+							rows={3}
+							placeholder="Optional default text..."
+							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+						/>
+					) : (
+						<input
+							id={`field-default-${field.id}`}
+							type="text"
+							value={field.defaultValue ?? ""}
+							onChange={(e) =>
+								onUpdateField(path, {
+									defaultValue: e.target.value || undefined,
+								})
+							}
+							placeholder="Optional default value..."
+							className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+						/>
+					)}
 				</div>
 			)}
 
@@ -1036,6 +1095,7 @@ export default function SchemaDetailPage({
 				helpText: f.helpText,
 				options: f.options,
 				referenceSchema: f.referenceSchema,
+				defaultValue: f.defaultValue,
 			}
 
 			// For flexibleBlocks type

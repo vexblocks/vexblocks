@@ -53,6 +53,7 @@ type Field = {
 	referenceSchema?: string
 	fields?: Field[]
 	isExisting?: boolean
+	defaultValue?: string
 }
 
 // Read-only view for a field (including nested fields)
@@ -356,6 +357,69 @@ function SimpleFieldEditor({
 						/>
 					</div>
 				)}
+				{(field.type === "shortText" ||
+					field.type === "longText" ||
+					field.type === "select") && (
+					<div className="md:col-span-2">
+						<label
+							htmlFor={`field-default-${field.id}`}
+							className="mb-1 block text-grey-600 text-xs"
+						>
+							Default Value
+						</label>
+						{field.type === "select" && (field.options ?? []).length > 0 ? (
+							<select
+								id={`field-default-${field.id}`}
+								value={field.defaultValue ?? ""}
+								onChange={(e) =>
+									onUpdate(
+										index,
+										{ defaultValue: e.target.value || undefined },
+										depth,
+									)
+								}
+								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+							>
+								<option value="">— No default —</option>
+								{(field.options ?? []).map((opt) => (
+									<option key={opt} value={opt}>
+										{opt}
+									</option>
+								))}
+							</select>
+						) : field.type === "longText" ? (
+							<textarea
+								id={`field-default-${field.id}`}
+								value={field.defaultValue ?? ""}
+								onChange={(e) =>
+									onUpdate(
+										index,
+										{ defaultValue: e.target.value || undefined },
+										depth,
+									)
+								}
+								rows={3}
+								placeholder="Optional default text..."
+								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+							/>
+						) : (
+							<input
+								id={`field-default-${field.id}`}
+								type="text"
+								value={field.defaultValue ?? ""}
+								onChange={(e) =>
+									onUpdate(
+										index,
+										{ defaultValue: e.target.value || undefined },
+										depth,
+									)
+								}
+								placeholder="Optional default value..."
+								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+							/>
+						)}
+					</div>
+				)}
 				{(field.type === "reference" || field.type === "multiReference") && (
 					<div className="md:col-span-2">
 						<label
@@ -576,6 +640,7 @@ export default function BlockDetailPage({
 						helpText: f.helpText,
 						options: f.options,
 						referenceSchema: f.referenceSchema,
+						defaultValue: f.defaultValue,
 						isExisting: true,
 					}
 
@@ -682,6 +747,7 @@ export default function BlockDetailPage({
 				helpText: f.helpText,
 				options: f.options,
 				referenceSchema: f.referenceSchema,
+				defaultValue: f.defaultValue,
 			}
 
 			// Recursively include nested fields for group and repeater types

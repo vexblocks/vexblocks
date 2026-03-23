@@ -6,15 +6,14 @@ import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { FileUp, Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import TextareaAutosize from "react-textarea-autosize"
+import type { Field } from "./types"
 
 const MapFieldEditor = dynamic(
 	() => import("./map-field").then((mod) => mod.MapFieldEditor),
 	{ ssr: false },
 )
-
-import TextareaAutosize from "react-textarea-autosize"
-import type { Field } from "./types"
 
 // Sanitize content to remove unusual line terminators
 function _sanitizeRichText(content: string): string {
@@ -125,9 +124,20 @@ export function BasicFieldRenderer({
 }: BasicFieldRendererProps) {
 	const [showMediaSelector, setShowMediaSelector] = useState(false)
 
+	// Pre-fill with schema defaultValue when the field has no value yet
+	useEffect(() => {
+		if (
+			(value === undefined || value === null || value === "") &&
+			field.defaultValue
+		) {
+			onChange(field.defaultValue)
+		}
+	}, [value, field.defaultValue, onChange])
+
 	// Provide consistent default based on type to prevent uncontrolled component warnings
 	const defaultValue =
 		value ??
+		field.defaultValue ??
 		(field.type === "number" ? 0 : field.type === "boolean" ? false : "")
 
 	switch (field.type) {
@@ -139,7 +149,7 @@ export function BasicFieldRenderer({
 						id={fieldId}
 						value={defaultValue}
 						onChange={(e) => onChange(e.target.value)}
-						placeholder={field.helpText}
+						placeholder={field.defaultValue ?? field.helpText}
 						required={field.required}
 						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
 							field.isSlug
@@ -179,7 +189,7 @@ export function BasicFieldRenderer({
 						id={fieldId}
 						value={defaultValue}
 						onChange={(e) => onChange(e.target.value)}
-						placeholder={field.helpText}
+						placeholder={field.defaultValue ?? field.helpText}
 						required={field.required}
 						minRows={1}
 						maxRows={10}

@@ -47,6 +47,7 @@ type Field = {
 	options?: string[]
 	referenceSchema?: string
 	fields?: Field[] // Nested fields for group/repeater type
+	defaultValue?: string
 }
 
 const FieldEditor = ({
@@ -312,6 +313,70 @@ const FieldEditor = ({
 								placeholder="Option 1, Option 2, Option 3"
 								className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 							/>
+						</div>
+					)}
+
+					{(field.type === "shortText" ||
+						field.type === "longText" ||
+						field.type === "select") && (
+						<div className="md:col-span-2">
+							<label
+								htmlFor={`field-default-${field.id}`}
+								className="mb-1 block font-medium text-grey-500 text-xs"
+							>
+								Default Value
+							</label>
+							{field.type === "select" && (field.options ?? []).length > 0 ? (
+								<select
+									id={`field-default-${field.id}`}
+									value={field.defaultValue ?? ""}
+									onChange={(e) =>
+										onUpdateField(
+											field.id,
+											{ defaultValue: e.target.value || undefined },
+											parentPath,
+										)
+									}
+									className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+								>
+									<option value="">— No default —</option>
+									{(field.options ?? []).map((opt) => (
+										<option key={opt} value={opt}>
+											{opt}
+										</option>
+									))}
+								</select>
+							) : field.type === "longText" ? (
+								<textarea
+									id={`field-default-${field.id}`}
+									value={field.defaultValue ?? ""}
+									onChange={(e) =>
+										onUpdateField(
+											field.id,
+											{ defaultValue: e.target.value || undefined },
+											parentPath,
+										)
+									}
+									rows={3}
+									placeholder="Optional default text..."
+									className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+								/>
+							) : (
+								<input
+									id={`field-default-${field.id}`}
+									type="text"
+									value={field.defaultValue ?? ""}
+									onChange={(e) =>
+										onUpdateField(
+											field.id,
+											{ defaultValue: e.target.value || undefined },
+											parentPath,
+										)
+									}
+									placeholder="Optional default value..."
+									className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
+								/>
+							)}
 						</div>
 					)}
 
@@ -716,6 +781,7 @@ export default function NewBlockPage() {
 				helpText: f.helpText,
 				options: f.options,
 				referenceSchema: f.referenceSchema,
+				defaultValue: f.defaultValue,
 			}
 
 			// Recursively include nested fields for group and repeater types

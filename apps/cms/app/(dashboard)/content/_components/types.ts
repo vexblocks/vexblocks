@@ -37,6 +37,7 @@ export type Field = {
 	slugSource?: string
 	// Localization
 	translatable?: boolean
+	defaultValue?: string
 }
 
 export type Locale = {
