@@ -7,14 +7,47 @@ import {
 	type MapMouseEvent,
 	useMapsLibrary,
 } from "@vis.gl/react-google-maps"
-import { MapPin, X } from "lucide-react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { AlertTriangle, MapPin, X } from "lucide-react"
+import type { ErrorInfo, ReactNode } from "react"
+import { Component, useCallback, useEffect, useRef, useState } from "react"
 
 export type MapValue = {
 	lat: number
 	lng: number
 	address: string
 	placeId?: string
+}
+
+// Error boundary to catch API errors without crashing the parent
+class MapErrorBoundary extends Component<
+	{ children: ReactNode },
+	{ error: string | null }
+> {
+	constructor(props: { children: ReactNode }) {
+		super(props)
+		this.state = { error: null }
+	}
+
+	static getDerivedStateFromError(error: Error) {
+		return { error: error.message }
+	}
+
+	componentDidCatch(_error: Error, _info: ErrorInfo) {}
+
+	render() {
+		if (this.state.error) {
+			return (
+				<div className="flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-700">
+					<AlertTriangle className="h-4 w-4 shrink-0" />
+					<span>
+						Map unavailable. Check that the Google Maps API key is valid and has
+						Maps JavaScript API + Places API enabled.
+					</span>
+				</div>
+			)
+		}
+		return this.props.children
+	}
 }
 
 type PlacesSearchProps = {
@@ -30,9 +63,11 @@ function PlacesSearch({ onPlaceSelect }: PlacesSearchProps) {
 
 		const PlaceAutocompleteElement = (
 			placesLib as google.maps.PlacesLibrary & {
-				PlaceAutocompleteElement: typeof google.maps.places.PlaceAutocompleteElement
+				PlaceAutocompleteElement?: typeof google.maps.places.PlaceAutocompleteElement
 			}
 		).PlaceAutocompleteElement
+
+		if (!PlaceAutocompleteElement) return
 
 		const element = new PlaceAutocompleteElement({})
 		element.style.width = "100%"
@@ -69,7 +104,7 @@ type MapFieldEditorProps = {
 	onChange: (value: MapValue | null) => void
 }
 
-const DEFAULT_CENTER = { lat: 52.52, lng: 13.405 } // Berlin
+const DEFAULT_CENTER = { lat: 52.52, lng: 13.405 }
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""
 
 function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
@@ -150,9 +185,23 @@ function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
 }
 
 export function MapFieldEditor({ value, onChange }: MapFieldEditorProps) {
+	if (!API_KEY) {
+		return (
+			<div className="flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-700">
+				<AlertTriangle className="h-4 w-4 shrink-0" />
+				<span>
+					Set <code className="font-mono">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code>{" "}
+					to enable map fields.
+				</span>
+			</div>
+		)
+	}
+
 	return (
-		<APIProvider apiKey={API_KEY} libraries={["places"]}>
-			<MapEditorInner value={value} onChange={onChange} />
-		</APIProvider>
+		<MapErrorBoundary>
+			<APIProvider apiKey={API_KEY} libraries={["places"]}>
+				<MapEditorInner value={value} onChange={onChange} />
+			</APIProvider>
+		</MapErrorBoundary>
 	)
 }
