@@ -251,10 +251,10 @@ const FieldEditor = ({
 							<option value="select">Select</option>
 							<option value="reference">Reference</option>
 							<option value="multiReference">Multi Reference</option>
-							{depth < 2 && <option value="group">Group</option>}
-							{depth < 2 && <option value="repeater">Repeater (Array)</option>}
+							{depth < 4 && <option value="group">Group</option>}
+							{depth < 4 && <option value="repeater">Repeater (Array)</option>}
 						</select>
-						{depth >= 2 && (
+						{depth >= 4 && (
 							<p className="mt-1 text-grey-400 text-xs">
 								Group type not available at this nesting level
 							</p>
@@ -462,7 +462,7 @@ const FieldEditor = ({
 								type="button"
 								onClick={() => onAddNestedField(field.id, parentPath)}
 								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/20"
-								disabled={depth >= 2}
+								disabled={depth >= 4}
 							>
 								<Plus className="h-3 w-3" />
 								Add Nested Field

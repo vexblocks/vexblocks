@@ -309,10 +309,10 @@ function SimpleFieldEditor({
 						<option value="select">Select</option>
 						<option value="reference">Reference</option>
 						<option value="multiReference">Multi Reference</option>
-						{depth < 2 && <option value="group">Group</option>}
-						{depth < 2 && <option value="repeater">Repeater (Array)</option>}
+						{depth < 4 && <option value="group">Group</option>}
+						{depth < 4 && <option value="repeater">Repeater (Array)</option>}
 					</select>
-					{depth >= 2 && (
+					{depth >= 4 && (
 						<p className="mt-1 text-grey-400 text-xs">
 							Group type not available at this nesting level
 						</p>
@@ -533,7 +533,7 @@ function SimpleFieldEditor({
 										onUpdate(index, { fields: newNestedFields }, depth)
 									}}
 									onAddNestedField={
-										depth + 1 < 2
+										depth + 1 < 4
 											? (parentNestedIndex) => {
 													// Add nested field to a level 1 field
 													const newField: Field = {
