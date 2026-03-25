@@ -74,12 +74,31 @@ function BlockReferenceContent({
 	// The data for the block fields (excluding the blockId metadata)
 	const blockFieldsData = data?.fields || {}
 
+	// Traverse the block's field schema to find the type of a field at a dotted path
+	const getFieldTypeAtPath = (
+		fields: Field[],
+		parts: string[],
+	): string | null => {
+		const cleanPart = parts[0]?.replace(/\[\d+\]/g, "")
+		if (!cleanPart) return null
+		const field = fields.find((f) => f.name === cleanPart)
+		if (!field) return null
+		if (parts.length === 1) return field.type
+		if (field.fields) return getFieldTypeAtPath(field.fields, parts.slice(1))
+		return null
+	}
+
 	// Handle field changes using path-based updates (supports nested paths like "items[0].details[0].text")
 	const handleFieldChange = (fieldPath: string, value: any) => {
 		// Remove the base path prefix to get the relative path within blockFieldsData
 		const relativePath = fieldPath.replace(`${path}.`, "")
+		const pathParts = relativePath.split(".").filter(Boolean)
+		const fieldType = getFieldTypeAtPath(
+			referencedBlock.fields ?? [],
+			pathParts,
+		)
 		let finalValue = value
-		if (hasLocales && currentLocale) {
+		if (hasLocales && currentLocale && fieldType !== "map") {
 			const currentRaw = getNestedValue(blockFieldsData, relativePath)
 			finalValue =
 				currentRaw &&
@@ -262,9 +281,25 @@ function BlockReferenceFields({
 			!Array.isArray(raw) &&
 			blockField.type !== "group" &&
 			blockField.type !== "repeater" &&
-			blockField.type !== "flexibleBlocks"
+			blockField.type !== "flexibleBlocks" &&
+			blockField.type !== "map"
 		) {
 			return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+		}
+		if (
+			blockField.type === "map" &&
+			hasLocales &&
+			raw &&
+			typeof raw === "object"
+		) {
+			// Handle old data that may have been saved locale-wrapped
+			const keys = Object.keys(raw)
+			if (
+				keys.length > 0 &&
+				keys.every((k) => k.length >= 2 && k.length <= 5)
+			) {
+				return raw[currentLocale] ?? raw[defaultLocale] ?? null
+			}
 		}
 		return raw
 	}
@@ -282,6 +317,7 @@ function BlockReferenceFields({
 			"repeater",
 			"group",
 			"blockReference",
+			"map",
 		].includes(fieldType)
 
 	referencedBlock.fields.forEach((field: Field, index: number) => {

@@ -307,6 +307,8 @@ export default function EditContentPage({
 
 			const field = currentFields.find((f: Field) => f.name === cleanPart)
 			if (!field) return false
+			// Map fields are never translatable — coordinates don't change per language
+			if (field.type === "map") return false
 			isTranslatable = field.translatable ?? false
 			// Navigate into nested fields
 			if (field.fields) {
@@ -781,9 +783,10 @@ export default function EditContentPage({
 										// Single field or large field
 										const field = singleField
 										const isTranslatable = field.translatable && hasLocales
-										const value = isTranslatable
-											? getLocalizedValue(field.name)
-											: getNestedValue(contentData, field.name)
+										const value =
+											isTranslatable || field.type === "map"
+												? getLocalizedValue(field.name)
+												: getNestedValue(contentData, field.name)
 
 										return (
 											<div

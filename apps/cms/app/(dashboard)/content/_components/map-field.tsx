@@ -17,6 +17,13 @@ export type MapValue = {
 	lng: number
 	address: string
 	placeId?: string
+	name?: string
+	viewport?: {
+		north: number
+		south: number
+		east: number
+		west: number
+	}
 }
 
 class MapErrorBoundary extends Component<
@@ -56,6 +63,8 @@ type PlacesSearchProps = {
 		lng: number,
 		address: string,
 		placeId?: string,
+		name?: string,
+		viewport?: MapValue["viewport"],
 	) => void
 }
 
@@ -67,17 +76,27 @@ function PlacesSearch({ onLocationSelect }: PlacesSearchProps) {
 		if (!placesLib || !inputRef.current) return
 
 		const autocomplete = new placesLib.Autocomplete(inputRef.current, {
-			fields: ["geometry", "formatted_address", "place_id"],
+			fields: ["geometry", "formatted_address", "place_id", "name"],
 		})
 
 		const listener = autocomplete.addListener("place_changed", () => {
 			const place = autocomplete.getPlace()
 			if (!place.geometry?.location) return
+			const vp = place.geometry.viewport
 			onLocationSelect(
 				place.geometry.location.lat(),
 				place.geometry.location.lng(),
 				place.formatted_address ?? "",
 				place.place_id,
+				place.name,
+				vp
+					? {
+							north: vp.getNorthEast().lat(),
+							south: vp.getSouthWest().lat(),
+							east: vp.getNorthEast().lng(),
+							west: vp.getSouthWest().lng(),
+						}
+					: undefined,
 			)
 		})
 
@@ -103,7 +122,7 @@ type MapFieldEditorProps = {
 
 const MAP_ID = "cms-map-field"
 const DEFAULT_CENTER = { lat: 52.52, lng: 13.405 }
-const DEFAULT_ZOOM = 12
+const DEFAULT_ZOOM = 16
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""
 
 function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
@@ -126,10 +145,26 @@ function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
 	}
 
 	const handleLocationSelect = useCallback(
-		(lat: number, lng: number, address: string, placeId?: string) => {
-			mapRef.current?.panTo({ lat, lng })
-			mapRef.current?.setZoom(14)
-			onChange({ lat, lng, address, placeId })
+		(
+			lat: number,
+			lng: number,
+			address: string,
+			placeId?: string,
+			name?: string,
+			viewport?: MapValue["viewport"],
+		) => {
+			if (viewport) {
+				mapRef.current?.fitBounds({
+					north: viewport.north,
+					south: viewport.south,
+					east: viewport.east,
+					west: viewport.west,
+				})
+			} else {
+				mapRef.current?.panTo({ lat, lng })
+				mapRef.current?.setZoom(14)
+			}
+			onChange({ lat, lng, address, placeId, name, viewport })
 		},
 		[onChange],
 	)
