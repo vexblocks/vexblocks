@@ -138,6 +138,7 @@ export function FieldRenderer({
 								"repeater",
 								"group",
 								"blockReference",
+								"map",
 							].includes(fieldType)
 
 						field.fields?.forEach((nestedField: any, index: number) => {
@@ -342,6 +343,7 @@ export function FieldRenderer({
 										"repeater",
 										"group",
 										"blockReference",
+										"map",
 									].includes(fieldType)
 
 								block.fields.forEach((blockField: Field, index: number) => {
@@ -590,6 +592,7 @@ export function FieldRenderer({
 												"repeater",
 												"group",
 												"blockReference",
+												"map",
 											].includes(fieldType)
 
 										field.fields?.forEach(

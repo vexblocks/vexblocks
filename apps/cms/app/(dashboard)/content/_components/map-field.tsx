@@ -5,11 +5,12 @@ import {
 	APIProvider,
 	Map as GoogleMap,
 	type MapMouseEvent,
+	useMap,
 	useMapsLibrary,
 } from "@vis.gl/react-google-maps"
 import { AlertTriangle, MapPin, X } from "lucide-react"
 import type { ErrorInfo, ReactNode } from "react"
-import { Component, useCallback, useEffect, useRef, useState } from "react"
+import { Component, useCallback, useEffect, useRef } from "react"
 
 export type MapValue = {
 	lat: number
@@ -18,7 +19,6 @@ export type MapValue = {
 	placeId?: string
 }
 
-// Error boundary to catch API errors without crashing the parent
 class MapErrorBoundary extends Component<
 	{ children: ReactNode },
 	{ error: string | null }
@@ -51,50 +51,47 @@ class MapErrorBoundary extends Component<
 }
 
 type PlacesSearchProps = {
-	onPlaceSelect: (place: google.maps.places.Place) => void
+	onLocationSelect: (
+		lat: number,
+		lng: number,
+		address: string,
+		placeId?: string,
+	) => void
 }
 
-function PlacesSearch({ onPlaceSelect }: PlacesSearchProps) {
+function PlacesSearch({ onLocationSelect }: PlacesSearchProps) {
 	const placesLib = useMapsLibrary("places")
-	const containerRef = useRef<HTMLDivElement>(null)
+	const inputRef = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
-		if (!placesLib || !containerRef.current) return
+		if (!placesLib || !inputRef.current) return
 
-		const PlaceAutocompleteElement = (
-			placesLib as google.maps.PlacesLibrary & {
-				PlaceAutocompleteElement?: typeof google.maps.places.PlaceAutocompleteElement
-			}
-		).PlaceAutocompleteElement
+		const autocomplete = new placesLib.Autocomplete(inputRef.current, {
+			fields: ["geometry", "formatted_address", "place_id"],
+		})
 
-		if (!PlaceAutocompleteElement) return
-
-		const element = new PlaceAutocompleteElement({})
-		element.style.width = "100%"
-		containerRef.current.appendChild(element)
-
-		const handler = async (e: Event) => {
-			const placeSelectEvent =
-				e as google.maps.places.PlaceAutocompletePlaceSelectEvent
-			const place = placeSelectEvent.place
-			await place.fetchFields({
-				fields: ["location", "formattedAddress", "id"],
-			})
-			onPlaceSelect(place)
-		}
-
-		element.addEventListener("gmp-placeselect", handler)
+		const listener = autocomplete.addListener("place_changed", () => {
+			const place = autocomplete.getPlace()
+			if (!place.geometry?.location) return
+			onLocationSelect(
+				place.geometry.location.lat(),
+				place.geometry.location.lng(),
+				place.formatted_address ?? "",
+				place.place_id,
+			)
+		})
 
 		return () => {
-			element.removeEventListener("gmp-placeselect", handler)
-			element.remove()
+			google.maps.event.removeListener(listener)
 		}
-	}, [placesLib, onPlaceSelect])
+	}, [placesLib, onLocationSelect])
 
 	return (
-		<div
-			ref={containerRef}
-			className="w-full [&>gmp-place-autocomplete]:w-full"
+		<input
+			ref={inputRef}
+			type="text"
+			placeholder="Search for an address..."
+			className="w-full rounded-lg border border-grey-300 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
 		/>
 	)
 }
@@ -104,12 +101,18 @@ type MapFieldEditorProps = {
 	onChange: (value: MapValue | null) => void
 }
 
+const MAP_ID = "cms-map-field"
 const DEFAULT_CENTER = { lat: 52.52, lng: 13.405 }
+const DEFAULT_ZOOM = 12
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""
 
 function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
-	const [zoom, setZoom] = useState(value ? 14 : 10)
-	const center = value ? { lat: value.lat, lng: value.lng } : DEFAULT_CENTER
+	const map = useMap(MAP_ID)
+	const mapRef = useRef<google.maps.Map | null>(null)
+
+	useEffect(() => {
+		mapRef.current = map
+	}, [map])
 
 	const handleMapClick = (e: MapMouseEvent) => {
 		if (!e.detail.latLng) return
@@ -122,29 +125,27 @@ function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
 		})
 	}
 
-	const handlePlaceSelect = useCallback(
-		(place: google.maps.places.Place) => {
-			if (!place.location) return
-			setZoom(14)
-			onChange({
-				lat: place.location.lat(),
-				lng: place.location.lng(),
-				address: place.formattedAddress ?? "",
-				placeId: place.id,
-			})
+	const handleLocationSelect = useCallback(
+		(lat: number, lng: number, address: string, placeId?: string) => {
+			mapRef.current?.panTo({ lat, lng })
+			mapRef.current?.setZoom(14)
+			onChange({ lat, lng, address, placeId })
 		},
 		[onChange],
 	)
 
 	return (
 		<div className="space-y-3">
-			<PlacesSearch onPlaceSelect={handlePlaceSelect} />
+			<PlacesSearch onLocationSelect={handleLocationSelect} />
 
 			<div className="overflow-hidden rounded-lg border border-grey-300">
 				<GoogleMap
-					style={{ width: "100%", height: "320px" }}
-					center={center}
-					zoom={zoom}
+					id={MAP_ID}
+					style={{ width: "100%", height: "560px" }}
+					defaultCenter={
+						value ? { lat: value.lat, lng: value.lng } : DEFAULT_CENTER
+					}
+					defaultZoom={value ? 16 : DEFAULT_ZOOM}
 					gestureHandling="cooperative"
 					mapId="cms-map-field"
 					onClick={handleMapClick}
