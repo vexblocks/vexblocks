@@ -198,12 +198,13 @@ function mapFieldType(
 		}
 
 		case "blockReference": {
-			// Use the specific block type when the block name is known.
-			if (
-				field.blockName &&
-				allBlocks.some((b: any) => b.name === field.blockName)
-			) {
-				return `${toPascalCase(field.blockName)}Block`
+			// blockId is the Convex document ID stored in the schema field.
+			// Resolve it to the block's name to build the specific type.
+			if (field.blockId) {
+				const block = allBlocks.find((b: any) => b._id === field.blockId)
+				if (block) {
+					return `${toPascalCase(block.name)}Block`
+				}
 			}
 			return "FlexibleBlock"
 		}
