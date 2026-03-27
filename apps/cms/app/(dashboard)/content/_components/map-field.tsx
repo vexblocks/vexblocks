@@ -66,11 +66,18 @@ type PlacesSearchProps = {
 		name?: string,
 		viewport?: MapValue["viewport"],
 	) => void
+	address?: string
 }
 
-function PlacesSearch({ onLocationSelect }: PlacesSearchProps) {
+function PlacesSearch({ onLocationSelect, address }: PlacesSearchProps) {
 	const placesLib = useMapsLibrary("places")
 	const inputRef = useRef<HTMLInputElement>(null)
+
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.value = address ?? ""
+		}
+	}, [address])
 
 	useEffect(() => {
 		if (!placesLib || !inputRef.current) return
@@ -171,7 +178,10 @@ function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
 
 	return (
 		<div className="space-y-3">
-			<PlacesSearch onLocationSelect={handleLocationSelect} />
+			<PlacesSearch
+				onLocationSelect={handleLocationSelect}
+				address={value?.address}
+			/>
 
 			<div className="overflow-hidden rounded-lg border border-grey-300">
 				<GoogleMap
