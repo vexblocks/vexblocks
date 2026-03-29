@@ -247,20 +247,47 @@ export function BasicFieldRenderer({
 				/>
 			)
 
-		case "url":
+		case "url": {
+			// Normalize value: existing plain strings are migrated transparently
+			const urlValue =
+				value === null || value === undefined
+					? { url: "", newWindow: false }
+					: typeof value === "string"
+						? { url: value, newWindow: false }
+						: value
+
 			return (
-				<input
-					type="text"
-					id={fieldId}
-					value={defaultValue}
-					onChange={(e) => onChange(e.target.value)}
-					placeholder={field.helpText || "https://example.com or /about"}
-					required={field.required}
-					pattern="^(https?:\/\/.+|\/.*|#.*)$"
-					title="Enter a full URL (https://...) or a relative path (/about, #section)"
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				/>
+				<div className="space-y-2">
+					<input
+						type="text"
+						id={fieldId}
+						value={urlValue.url}
+						onChange={(e) => onChange({ ...urlValue, url: e.target.value })}
+						placeholder={field.helpText || "https://example.com or /about"}
+						required={field.required}
+						pattern="^(https?:\/\/.+|\/.*|#.*)$"
+						title="Enter a full URL (https://...) or a relative path (/about, #section)"
+						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					/>
+					<p className="text-grey-400 text-xs">
+						Absolute URLs must start with{" "}
+						<span className="font-mono">https://</span>. Relative paths (e.g.{" "}
+						<span className="font-mono">/about</span>) do not need it.
+					</p>
+					<label className="flex cursor-pointer items-center gap-2">
+						<input
+							type="checkbox"
+							checked={urlValue.newWindow ?? false}
+							onChange={(e) =>
+								onChange({ ...urlValue, newWindow: e.target.checked })
+							}
+							className="h-4 w-4 rounded border-grey-300"
+						/>
+						<span className="text-grey-600 text-sm">Open in a new window</span>
+					</label>
+				</div>
 			)
+		}
 
 		case "youtubeUrl":
 			return (
