@@ -29,6 +29,13 @@ export const PACKAGE_NAMES = {
 // Files that should be marked as managed (not to be edited)
 export const MANAGED_PACKAGES = ["cms", "shared", "types"] as const
 
+// Files that should NEVER be deleted during sync (user-customizable assets)
+export const SYNC_EXCLUDED_FILES = [
+	"app/apple-icon.png",
+	"app/favicon.ico",
+	"app/icon.png",
+] as const
+
 // Files that should NEVER be overwritten (user configuration)
 export const PROTECTED_FILES = [
 	"packages/backend/convex/cms/vexblocks.config.ts",

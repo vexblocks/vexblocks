@@ -5,6 +5,7 @@ import {
 	GITHUB_RAW_URL,
 	GITHUB_REPO,
 	PROTECTED_FILES,
+	SYNC_EXCLUDED_FILES,
 } from "./constants.js"
 
 const BINARY_EXTENSIONS = new Set([
@@ -211,7 +212,12 @@ export async function downloadAndExtractPackage(
 				.split(path.sep)
 				.some((segment) => segment.startsWith("."))
 
-			if (!isHidden && !remoteRelativePaths.has(relPath)) {
+			const isSyncExcluded = SYNC_EXCLUDED_FILES.some(
+				(excluded) =>
+					relPath === excluded || relPath.endsWith(`${path.sep}${excluded}`),
+			)
+
+			if (!isHidden && !isSyncExcluded && !remoteRelativePaths.has(relPath)) {
 				await fs.remove(localFile)
 			}
 		}
