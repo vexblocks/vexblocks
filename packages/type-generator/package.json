@@ -8,7 +8,7 @@
 		"generate:with-env": "bash scripts/generate-with-env.sh"
 	},
 	"dependencies": {
-		"convex": "^1.34.0"
+		"convex": "^1.34.1"
 	},
 	"devDependencies": {
 		"@types/node": "^25.5.0",

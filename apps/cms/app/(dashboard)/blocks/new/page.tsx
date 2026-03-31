@@ -30,6 +30,8 @@ type FieldType =
 	| "boolean"
 	| "number"
 	| "date"
+	| "datetime"
+	| "time"
 	| "select"
 	| "reference"
 	| "multiReference"
@@ -243,6 +245,8 @@ const FieldEditor = ({
 							<option value="number">Number</option>
 							<option value="boolean">Boolean</option>
 							<option value="date">Date</option>
+							<option value="datetime">Date & Time</option>
+							<option value="time">Time</option>
 							<option value="url">URL</option>
 							<option value="youtubeUrl">YouTube URL</option>
 							<option value="map">Map</option>

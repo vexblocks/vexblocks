@@ -9,6 +9,7 @@ import {
 	ArrowLeft,
 	ArrowUp,
 	Calendar,
+	Clock,
 	FileText,
 	Folder,
 	Hash,
@@ -64,6 +65,8 @@ type FieldType =
 	| "boolean"
 	| "number"
 	| "date"
+	| "datetime"
+	| "time"
 	| "select"
 	| "reference"
 	| "multiReference"
@@ -433,6 +436,8 @@ const FieldEditor = ({
 							<option value="number">Number</option>
 							<option value="boolean">Boolean</option>
 							<option value="date">Date</option>
+							<option value="datetime">Date & Time</option>
+							<option value="time">Time</option>
 							<option value="url">URL</option>
 							<option value="youtubeUrl">YouTube URL</option>
 							<option value="map">Map</option>
@@ -1178,6 +1183,9 @@ export default function NewSchemaPage() {
 				return <ToggleLeft className="h-4 w-4" />
 			case "date":
 				return <Calendar className="h-4 w-4" />
+			case "datetime":
+			case "time":
+				return <Clock className="h-4 w-4" />
 			case "url":
 				return <LinkIcon className="h-4 w-4" />
 			case "youtubeUrl":

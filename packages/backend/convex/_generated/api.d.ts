@@ -1887,7 +1887,6 @@ export declare const components: {
       >;
     };
     adapterTest: {
-      runCustomTests: FunctionReference<"action", "internal", any, any>;
       runTests: FunctionReference<"action", "internal", any, any>;
     };
     testProfiles: {
@@ -21484,6 +21483,7 @@ export declare const components: {
           name: string;
           next?: Array<{ fnHandle: string; name: string }>;
           oneBatchOnly?: boolean;
+          reset?: boolean;
         },
         {
           batchSize?: number;

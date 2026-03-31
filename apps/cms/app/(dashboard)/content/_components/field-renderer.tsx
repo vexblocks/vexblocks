@@ -128,9 +128,15 @@ export function FieldRenderer({
 						let currentGroup: any[] = []
 
 						const isSmallField = (fieldType: string) =>
-							["shortText", "select", "checkbox", "date", "number"].includes(
-								fieldType,
-							)
+							[
+								"shortText",
+								"select",
+								"checkbox",
+								"date",
+								"datetime",
+								"time",
+								"number",
+							].includes(fieldType)
 						const isLargeField = (fieldType: string) =>
 							[
 								"richText",
@@ -138,7 +144,6 @@ export function FieldRenderer({
 								"repeater",
 								"group",
 								"blockReference",
-								"map",
 							].includes(fieldType)
 
 						field.fields?.forEach((nestedField: any, index: number) => {
@@ -343,7 +348,6 @@ export function FieldRenderer({
 										"repeater",
 										"group",
 										"blockReference",
-										"map",
 									].includes(fieldType)
 
 								block.fields.forEach((blockField: Field, index: number) => {
@@ -592,7 +596,6 @@ export function FieldRenderer({
 												"repeater",
 												"group",
 												"blockReference",
-												"map",
 											].includes(fieldType)
 
 										field.fields?.forEach(

@@ -1,6 +1,6 @@
 "use client"
 
-import { Facebook, Link2, Linkedin, Twitter } from "lucide-react"
+import { Link2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -69,7 +69,7 @@ export function ShareSection({ title, slug }: ShareSectionProps) {
 					className="flex size-10 items-center justify-center rounded-full bg-white transition-colors hover:bg-gray-50"
 					title="Share on LinkedIn"
 				>
-					<Linkedin className="size-6 text-black" />
+					{/* <Linkedin className="size-6 text-black" /> */}
 				</button>
 				<button
 					type="button"
@@ -77,7 +77,7 @@ export function ShareSection({ title, slug }: ShareSectionProps) {
 					className="flex size-10 items-center justify-center rounded-full bg-white transition-colors hover:bg-gray-50"
 					title="Share on X (Twitter)"
 				>
-					<Twitter className="size-6 text-black" />
+					{/* <Twitter className="size-6 text-black" /> */}
 				</button>
 				<button
 					type="button"
@@ -85,7 +85,7 @@ export function ShareSection({ title, slug }: ShareSectionProps) {
 					className="flex size-10 items-center justify-center rounded-full bg-white transition-colors hover:bg-gray-50"
 					title="Share on Facebook"
 				>
-					<Facebook className="size-6 text-black" />
+					{/* <Facebook className="size-6 text-black" /> */}
 				</button>
 			</div>
 		</div>

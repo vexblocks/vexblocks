@@ -84,11 +84,13 @@ const PRIMITIVE_BLOCK_TYPES: Record<string, string> = {
 	shortText: '{ type: "shortText"; value: string }',
 	longText: '{ type: "longText"; value: string }',
 	richText: '{ type: "richText"; value: string }',
-	url: '{ type: "url"; value: { url: string; newWindow?: boolean } }',
+	url: '{ type: "url"; value: string }',
 	youtubeUrl: '{ type: "youtubeUrl"; value: string }',
 	number: '{ type: "number"; value: number }',
 	boolean: '{ type: "boolean"; value: boolean }',
-	date: '{ type: "date"; value: string }',
+	date: '{ type: "date"; value: ISODate }',
+	datetime: '{ type: "datetime"; value: ISODateTime }',
+	time: '{ type: "time"; value: TimeString }',
 	media: '{ type: "media"; value: string }',
 	select: '{ type: "select"; value: string }',
 	group: '{ type: "group"; value: any }',
@@ -108,11 +110,9 @@ function mapFieldType(
 		case "shortText":
 		case "longText":
 		case "richText":
+		case "url":
 		case "youtubeUrl":
 			return "string"
-
-		case "url":
-			return "{ url: string; newWindow?: boolean }"
 
 		case "number":
 			return "number"
@@ -121,7 +121,13 @@ function mapFieldType(
 			return "boolean"
 
 		case "date":
-			return "string" // ISO date string
+			return "ISODate"
+
+		case "datetime":
+			return "ISODateTime"
+
+		case "time":
+			return "TimeString"
 
 		case "media":
 			return "string" // Cloudflare ID
@@ -200,12 +206,13 @@ function mapFieldType(
 		}
 
 		case "blockReference": {
-			// Use the specific block type when the block name is known.
-			if (
-				field.blockName &&
-				allBlocks.some((b: any) => b.name === field.blockName)
-			) {
-				return `${toPascalCase(field.blockName)}Block`
+			// blockId is the Convex document ID stored in the schema field.
+			// Resolve it to the block's name to build the specific type.
+			if (field.blockId) {
+				const block = allBlocks.find((b: any) => b._id === field.blockId)
+				if (block) {
+					return `${toPascalCase(block.name)}Block`
+				}
 			}
 			return "FlexibleBlock"
 		}
@@ -384,17 +391,37 @@ ${generateFieldTypes(schema.fields, "    ", schemas, blocks || [])}
  */
 
 /**
+ * ISO 8601 date string (YYYY-MM-DD)
+ * @example "2024-03-31"
+ */
+export type ISODate = string & { readonly __brand: "ISODate" }
+
+/**
+ * ISO 8601 datetime string (YYYY-MM-DDTHH:mm)
+ * @example "2024-03-31T14:30"
+ */
+export type ISODateTime = string & { readonly __brand: "ISODateTime" }
+
+/**
+ * Time string (HH:mm or HH:mm:ss)
+ * @example "14:30"
+ */
+export type TimeString = string & { readonly __brand: "TimeString" }
+
+/**
  * Base flexible block type (used when no allowedBlocks are specified)
  */
 export type FlexibleBlock =
   | { type: "shortText"; value: string }
   | { type: "longText"; value: string }
   | { type: "richText"; value: string }
-  | { type: "url"; value: { url: string; newWindow?: boolean } }
+  | { type: "url"; value: string }
   | { type: "youtubeUrl"; value: string }
   | { type: "number"; value: number }
   | { type: "boolean"; value: boolean }
-  | { type: "date"; value: string }
+  | { type: "date"; value: ISODate }
+  | { type: "datetime"; value: ISODateTime }
+  | { type: "time"; value: TimeString }
   | { type: "media"; value: string }
   | { type: "select"; value: string }
   | { type: "group"; value: any }

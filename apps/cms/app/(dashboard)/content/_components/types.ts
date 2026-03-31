@@ -9,6 +9,8 @@ export type FieldType =
 	| "boolean"
 	| "number"
 	| "date"
+	| "datetime"
+	| "time"
 	| "select"
 	| "reference"
 	| "multiReference"

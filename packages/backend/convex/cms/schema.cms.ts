@@ -125,6 +125,8 @@ export const fieldDefinition: any = v.object({
 		v.literal("boolean"),
 		v.literal("number"),
 		v.literal("date"),
+		v.literal("datetime"),
+		v.literal("time"),
 		v.literal("select"),
 		v.literal("reference"),
 		v.literal("multiReference"), // Multiple references to another schema (e.g., tags, categories)
@@ -156,6 +158,8 @@ export const fieldDefinition: any = v.object({
 				v.literal("boolean"),
 				v.literal("number"),
 				v.literal("date"),
+				v.literal("datetime"),
+				v.literal("time"),
 				v.literal("select"),
 				v.literal("group"),
 				v.literal("blockReference"),
