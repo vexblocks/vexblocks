@@ -97,15 +97,55 @@ function BlockReferenceContent({
 			referencedBlock.fields ?? [],
 			pathParts,
 		)
+
 		let finalValue = value
-		if (hasLocales && currentLocale && fieldType !== "map") {
+
+		// For fields nested inside groups, check if we need to wrap in locale
+		// by checking if the parent field is a group and has locale-wrapped values
+		if (
+			hasLocales &&
+			currentLocale &&
+			fieldType !== "map" &&
+			fieldType !== "group"
+		) {
 			const currentRaw = getNestedValue(blockFieldsData, relativePath)
-			finalValue =
+
+			// Check if current value is already locale-wrapped
+			const isLocaleWrapped =
 				currentRaw &&
 				typeof currentRaw === "object" &&
-				!Array.isArray(currentRaw)
-					? { ...currentRaw, [currentLocale]: value }
-					: { [currentLocale]: value }
+				!Array.isArray(currentRaw) &&
+				Object.keys(currentRaw).some((k) => k.length >= 2 && k.length <= 5)
+
+			if (isLocaleWrapped) {
+				finalValue = { ...currentRaw, [currentLocale]: value }
+			} else {
+				// Check if this is a nested field in a group that uses locale wrapping
+				// by checking the parent group
+				const parentPath = pathParts.slice(0, -1).join(".")
+				if (parentPath) {
+					const parentValue = getNestedValue(blockFieldsData, parentPath)
+					if (parentValue && typeof parentValue === "object") {
+						// Check if siblings are locale-wrapped
+						const siblingValues = Object.values(parentValue)
+						const hasLocaleWrappedSiblings = siblingValues.some(
+							(v) =>
+								v &&
+								typeof v === "object" &&
+								!Array.isArray(v) &&
+								Object.keys(v).some((k) => k.length >= 2 && k.length <= 5),
+						)
+						if (hasLocaleWrappedSiblings) {
+							finalValue =
+								currentRaw &&
+								typeof currentRaw === "object" &&
+								!Array.isArray(currentRaw)
+									? { ...currentRaw, [currentLocale]: value }
+									: { [currentLocale]: value }
+						}
+					}
+				}
+			}
 		}
 
 		const updatedFields = setNestedValue(
@@ -113,6 +153,7 @@ function BlockReferenceContent({
 			relativePath,
 			finalValue,
 		)
+
 		onChange({
 			blockId,
 			blockName,
@@ -273,7 +314,66 @@ function BlockReferenceFields({
 	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 
 	const getDisplayValue = (blockField: Field) => {
-		const raw = blockFieldsData[blockField.name]
+		let raw = blockFieldsData[blockField.name]
+
+		// Normalize legacy data: if group type has string data, convert to object
+		if (blockField.type === "group" && typeof raw === "string") {
+			return {}
+		}
+
+		// For group fields, unwrap locale-wrapped nested values
+		if (
+			blockField.type === "group" &&
+			raw &&
+			typeof raw === "object" &&
+			!Array.isArray(raw)
+		) {
+			// Check if this is corrupted data with locale keys at the wrong level
+			// e.g., {en: "Reserve", link: {}, text: {}} instead of {text: {en: "Reserve"}, link: {en: ""}}
+			const topLevelKeys = Object.keys(raw)
+			const localeKeys = topLevelKeys.filter(
+				(k) => k.length >= 2 && k.length <= 5 && typeof raw[k] === "string",
+			)
+
+			if (localeKeys.length > 0) {
+				// Remove locale keys and keep only valid field keys
+				const cleaned: any = {}
+				for (const [key, value] of Object.entries(raw)) {
+					// Skip locale keys (2-5 char keys with string values)
+					if (key.length >= 2 && key.length <= 5 && typeof value === "string") {
+						continue
+					}
+					cleaned[key] = value
+				}
+				raw = cleaned
+			}
+
+			// Check if the group's nested fields are locale-wrapped
+			// by checking if all values are objects with locale keys
+			const unwrappedGroup: any = {}
+			for (const [key, value] of Object.entries(raw)) {
+				if (value && typeof value === "object" && !Array.isArray(value)) {
+					// Check if this looks like a locale map (has locale keys like 'en', 'es', etc.)
+					const keys = Object.keys(value)
+					if (
+						keys.length > 0 &&
+						keys.every((k) => k.length >= 2 && k.length <= 5)
+					) {
+						// Unwrap the locale value
+						const unwrappedValue =
+							(value as any)[currentLocale] ??
+							(value as any)[defaultLocale] ??
+							""
+
+						unwrappedGroup[key] = unwrappedValue
+						continue
+					}
+				}
+				unwrappedGroup[key] = value
+			}
+			return unwrappedGroup
+		}
+
 		if (
 			hasLocales &&
 			raw &&
@@ -373,6 +473,7 @@ function BlockReferenceFields({
 
 				const blockField = singleField
 				const fieldPath = `${path}.${blockField.name}`
+				const displayValue = getDisplayValue(blockField)
 
 				return (
 					<div
@@ -382,7 +483,7 @@ function BlockReferenceFields({
 						<FieldRenderer
 							field={blockField}
 							path={fieldPath}
-							value={getDisplayValue(blockField)}
+							value={displayValue}
 							onChange={handleFieldChange}
 							onAddRepeaterItem={handleAddRepeaterItem}
 							onRemoveRepeaterItem={handleRemoveRepeaterItem}
@@ -459,16 +560,28 @@ export function FlexibleBlockItem({
 	const isBlockReference = block.type === "blockReference"
 	const blockId = isBlockReference ? block.data?.blockId : null
 
+	// Check if this is a group type (needs FieldRenderer for nested fields)
+	const isGroupType = block.type === "group"
+
+	// Normalize legacy data: if group type has string data, convert to object
+	const normalizedData =
+		isGroupType && typeof block.data === "string" ? {} : block.data
+
 	// Determine if this block type should store content per-locale
 	const isLocaleAware =
 		hasLocales && !isBlockReference && LOCALE_AWARE_BLOCK_TYPES.has(block.type)
 
 	// Extract the locale-specific value for display
 	const displayValue = isLocaleAware
-		? block.data && typeof block.data === "object" && !Array.isArray(block.data)
-			? (block.data[currentLocale] ?? block.data[defaultLocale] ?? "")
-			: (block.data ?? "")
-		: block.data
+		? normalizedData &&
+			typeof normalizedData === "object" &&
+			!Array.isArray(normalizedData)
+			? (normalizedData[currentLocale] ?? normalizedData[defaultLocale] ?? "")
+			: (normalizedData ?? "")
+		: normalizedData
+
+	// Create the field path for this block (e.g., "blocks[0]")
+	const blockFieldPath = `${path}[${index}]`
 
 	// Wrap onUpdate to merge into locale map when locale-aware
 	const handleUpdate = isLocaleAware
@@ -483,15 +596,24 @@ export function FlexibleBlockItem({
 			}
 		: onUpdate
 
+	// For group fields, we need to handle nested field changes
+	const handleGroupFieldChange = (fieldPath: string, value: any) => {
+		// Remove the base path prefix to get the relative path within block data
+		const relativePath = fieldPath.replace(`${blockFieldPath}.`, "")
+		const updatedData = setNestedValue(
+			normalizedData || {},
+			relativePath,
+			value,
+		)
+		onUpdate(updatedData)
+	}
+
 	// Include locale in fieldId so LexicalEditor remounts on locale change
 	const fieldId =
 		`field-${path}-${block._id}${isLocaleAware ? `-${currentLocale}` : ""}`.replace(
 			/[.[\]]/g,
 			"-",
 		)
-
-	// Create the field path for this block (e.g., "blocks[0]")
-	const blockFieldPath = `${path}[${index}]`
 
 	const [isCollapsed, setIsCollapsed] = useState(() =>
 		getCollapsedBlockIds().has(block._id),
@@ -580,7 +702,19 @@ export function FlexibleBlockItem({
 						blockName={block.data?.blockName}
 						data={block.data}
 						onChange={onUpdate}
-						path={`${path}.${block._id}`}
+						path={`${blockFieldPath}.fields`}
+						allSchemas={allSchemas}
+						contentBySchema={contentBySchema}
+					/>
+				) : isGroupType && field.fields ? (
+					<FieldRenderer
+						field={{ ...field, type: block.type as any, required: false }}
+						path={blockFieldPath}
+						value={normalizedData || {}}
+						onChange={handleGroupFieldChange}
+						onAddRepeaterItem={() => {}}
+						onRemoveRepeaterItem={() => {}}
+						onMoveRepeaterItem={() => {}}
 						allSchemas={allSchemas}
 						contentBySchema={contentBySchema}
 					/>
@@ -688,7 +822,9 @@ export function FlexibleBlocksField({
 						? 0
 						: blockType === "blockReference"
 							? { blockId, blockName }
-							: "",
+							: blockType === "group"
+								? {}
+								: "",
 		}
 		const newBlocks = [...blocks, newBlock]
 		onChange(path, newBlocks)

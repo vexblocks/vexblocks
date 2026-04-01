@@ -68,18 +68,78 @@ export function FieldRenderer({
 
 	const getLocalizedFieldValue = (raw: any, translatable?: boolean) => {
 		if (hasLocales && raw && typeof raw === "object" && !Array.isArray(raw)) {
-			if (translatable) {
-				return raw[currentLocale] ?? raw[defaultLocale] ?? ""
-			}
-			// Defensive: if value is a locale map (has current/default locale key),
-			// extract it even for non-translatable fields to avoid showing [object Object]
-			const localeValue = raw[currentLocale] ?? raw[defaultLocale]
-			if (localeValue !== undefined) {
-				return localeValue
+			// Check if this object actually has locale keys (2-5 character keys like 'en', 'es', 'en-US')
+			const keys = Object.keys(raw)
+			const hasLocaleKeys =
+				keys.length > 0 && keys.some((k) => k.length >= 2 && k.length <= 5)
+
+			if (hasLocaleKeys) {
+				if (translatable) {
+					return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+				}
+				// Defensive: if value is a locale map (has current/default locale key),
+				// extract it even for non-translatable fields to avoid showing [object Object]
+				const localeValue = raw[currentLocale] ?? raw[defaultLocale]
+				if (localeValue !== undefined) {
+					return localeValue
+				}
 			}
 		}
 		return raw
 	}
+
+	// Helper to unwrap locale-wrapped nested values in group fields
+	const unwrapGroupLocaleValues = (groupValue: any) => {
+		if (
+			!groupValue ||
+			typeof groupValue !== "object" ||
+			Array.isArray(groupValue)
+		) {
+			console.log("  Returning early - not an object")
+			return groupValue
+		}
+
+		// Check if this is corrupted data with locale keys at the wrong level
+		// e.g., {en: "Reserve", link: {}, text: {}} instead of {text: {en: "Reserve"}, link: {en: ""}}
+		const keys = Object.keys(groupValue)
+
+		const localeKeys = keys.filter(
+			(k) =>
+				k.length >= 2 && k.length <= 5 && typeof groupValue[k] === "string",
+		)
+
+		if (localeKeys.length > 0) {
+			// Remove locale keys and keep only valid field keys
+			const cleaned: any = {}
+			for (const [key, value] of Object.entries(groupValue)) {
+				// Skip locale keys (2-5 char keys with string values)
+				if (key.length >= 2 && key.length <= 5 && typeof value === "string") {
+					continue
+				}
+				cleaned[key] = value
+			}
+			groupValue = cleaned
+		}
+
+		const unwrapped: any = {}
+		for (const [key, value] of Object.entries(groupValue)) {
+			if (value && typeof value === "object" && !Array.isArray(value)) {
+				const valueKeys = Object.keys(value)
+				// Check if this looks like a locale map
+				if (
+					valueKeys.length > 0 &&
+					valueKeys.every((k) => k.length >= 2 && k.length <= 5)
+				) {
+					unwrapped[key] =
+						(value as any)[currentLocale] ?? (value as any)[defaultLocale] ?? ""
+					continue
+				}
+			}
+			unwrapped[key] = value
+		}
+		return unwrapped
+	}
+
 	const [previewState] = useAtom(previewAtom)
 	const isPreviewActive = previewState.isPreviewActive
 
@@ -631,10 +691,19 @@ export function FieldRenderer({
 													<div key={groupIndex} className="space-y-4">
 														{group.map((nestedField: any) => {
 															const nestedPath = `${path}[${index}].${nestedField.name}`
+
+															let rawValue = item?.[nestedField.name]
+
+															// For group fields, unwrap BEFORE getLocalizedFieldValue
+															if (nestedField.type === "group") {
+																rawValue = unwrapGroupLocaleValues(rawValue)
+															}
+
 															const nestedValue = getLocalizedFieldValue(
-																item?.[nestedField.name],
+																rawValue,
 																nestedField.translatable,
 															)
+
 															return (
 																<FieldRenderer
 																	key={nestedField.name}
@@ -658,8 +727,16 @@ export function FieldRenderer({
 
 											const nestedField = singleField
 											const nestedPath = `${path}[${index}].${nestedField.name}`
+
+											let rawValue = item?.[nestedField.name]
+
+											// For group fields, unwrap BEFORE getLocalizedFieldValue
+											if (nestedField.type === "group") {
+												rawValue = unwrapGroupLocaleValues(rawValue)
+											}
+
 											const nestedValue = getLocalizedFieldValue(
-												item?.[nestedField.name],
+												rawValue,
 												nestedField.translatable,
 											)
 
