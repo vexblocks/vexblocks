@@ -149,7 +149,16 @@ export default function NewContentPage() {
 		)
 
 		if (slugField?.slugSource) {
-			const sourceValue = contentData[slugField.slugSource]
+			const sourceRaw = contentData[slugField.slugSource]
+			const sourceValue =
+				typeof sourceRaw === "string"
+					? sourceRaw
+					: sourceRaw && typeof sourceRaw === "object"
+						? (sourceRaw[defaultLocale] ??
+							sourceRaw[currentLocale] ??
+							Object.values(sourceRaw)[0])
+						: null
+
 			if (sourceValue && typeof sourceValue === "string") {
 				const autoSlug = sourceValue
 					.toLowerCase()
@@ -172,7 +181,13 @@ export default function NewContentPage() {
 				}
 			}
 		}
-	}, [contentData, selectedSchema, isAutoSlugActive])
+	}, [
+		contentData,
+		selectedSchema,
+		isAutoSlugActive,
+		defaultLocale,
+		currentLocale,
+	])
 
 	// Helper to check if a field at a path is translatable
 	const isFieldTranslatable = (fieldPath: string): boolean => {
@@ -288,7 +303,16 @@ export default function NewContentPage() {
 		)
 
 		if (slugField?.slugSource) {
-			const sourceValue = contentData[slugField.slugSource]
+			const sourceRaw = contentData[slugField.slugSource]
+			const sourceValue =
+				typeof sourceRaw === "string"
+					? sourceRaw
+					: sourceRaw && typeof sourceRaw === "object"
+						? (sourceRaw[defaultLocale] ??
+							sourceRaw[currentLocale] ??
+							Object.values(sourceRaw)[0])
+						: null
+
 			if (sourceValue && typeof sourceValue === "string") {
 				const autoSlug = sourceValue
 					.toLowerCase()

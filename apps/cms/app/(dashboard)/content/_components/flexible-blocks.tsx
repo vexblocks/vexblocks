@@ -429,6 +429,15 @@ function setNestedValue(obj: any, path: string, value: any): any {
 	return newObj
 }
 
+// Block types whose content should be stored per-locale
+const LOCALE_AWARE_BLOCK_TYPES = new Set([
+	"richText",
+	"longText",
+	"shortText",
+	"url",
+	"youtubeUrl",
+])
+
 export function FlexibleBlockItem({
 	block,
 	index,
@@ -444,12 +453,42 @@ export function FlexibleBlockItem({
 	allSchemas,
 	contentBySchema,
 }: FlexibleBlockItemProps) {
-	// Generate stable fieldId using block._id which never changes
-	const fieldId = `field-${path}-${block._id}`.replace(/[.[\]]/g, "-")
+	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 
 	// Check if this is a blockReference type
 	const isBlockReference = block.type === "blockReference"
 	const blockId = isBlockReference ? block.data?.blockId : null
+
+	// Determine if this block type should store content per-locale
+	const isLocaleAware =
+		hasLocales && !isBlockReference && LOCALE_AWARE_BLOCK_TYPES.has(block.type)
+
+	// Extract the locale-specific value for display
+	const displayValue = isLocaleAware
+		? block.data && typeof block.data === "object" && !Array.isArray(block.data)
+			? (block.data[currentLocale] ?? block.data[defaultLocale] ?? "")
+			: (block.data ?? "")
+		: block.data
+
+	// Wrap onUpdate to merge into locale map when locale-aware
+	const handleUpdate = isLocaleAware
+		? (newValue: any) => {
+				const existing =
+					block.data &&
+					typeof block.data === "object" &&
+					!Array.isArray(block.data)
+						? block.data
+						: {}
+				onUpdate({ ...existing, [currentLocale]: newValue })
+			}
+		: onUpdate
+
+	// Include locale in fieldId so LexicalEditor remounts on locale change
+	const fieldId =
+		`field-${path}-${block._id}${isLocaleAware ? `-${currentLocale}` : ""}`.replace(
+			/[.[\]]/g,
+			"-",
+		)
 
 	// Create the field path for this block (e.g., "blocks[0]")
 	const blockFieldPath = `${path}[${index}]`
@@ -548,8 +587,8 @@ export function FlexibleBlockItem({
 				) : (
 					<BasicFieldRenderer
 						field={{ ...field, type: block.type as any, required: false }}
-						value={block.data}
-						onChange={onUpdate}
+						value={displayValue}
+						onChange={handleUpdate}
 						fieldId={fieldId}
 						allSchemas={allSchemas}
 						allContent={contentBySchema}
