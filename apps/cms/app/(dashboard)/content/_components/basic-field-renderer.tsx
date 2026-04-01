@@ -279,6 +279,9 @@ export function BasicFieldRenderer({
 							url: typeof defaultValue === "string" ? defaultValue : "",
 							newWindow: false,
 						}
+			const urlPattern = "^(https?://.+|/.*|#.*|mailto:.+|tel:.+)$"
+			const isInvalid =
+				urlValue.url.length > 0 && !new RegExp(urlPattern).test(urlValue.url)
 			return (
 				<div className="space-y-2">
 					<input
@@ -286,10 +289,28 @@ export function BasicFieldRenderer({
 						id={fieldId}
 						value={urlValue.url}
 						onChange={(e) => onChange({ ...urlValue, url: e.target.value })}
-						placeholder={field.helpText || "https://example.com or /about"}
+						placeholder={field.helpText || "https://example.com"}
 						required={field.required}
-						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						pattern={urlPattern}
+						className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:outline-none focus:ring-2 ${
+							isInvalid
+								? "border-red-400 focus:border-red-400 focus:ring-red-400/20"
+								: "border-grey-300 focus:border-primary focus:ring-primary/20"
+						}`}
 					/>
+					<p className="text-grey-400 text-xs leading-relaxed">
+						Accepted formats:{" "}
+						<span className="font-mono">https://example.com</span> ·{" "}
+						<span className="font-mono">/about</span> ·{" "}
+						<span className="font-mono">#section</span> ·{" "}
+						<span className="font-mono">mailto:hello@example.com</span> ·{" "}
+						<span className="font-mono">tel:+1234567890</span>
+					</p>
+					{isInvalid && (
+						<p className="text-red-500 text-xs">
+							Invalid URL format. Please use one of the accepted formats above.
+						</p>
+					)}
 					<label className="flex cursor-pointer items-center gap-2 text-grey-500 text-sm">
 						<input
 							type="checkbox"
