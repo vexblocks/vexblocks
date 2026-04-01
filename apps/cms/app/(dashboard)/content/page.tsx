@@ -49,12 +49,13 @@ export default function ContentPage() {
 
 	const selectedSchema = schemas?.find((s) => s._id === selectedSchemaId)
 
-	// Auto-select first schema if none selected
+	// Auto-select first collection schema (or first schema as fallback) if none selected
 	useEffect(() => {
 		if (schemas && schemas.length > 0 && !selectedSchemaId) {
-			const firstSchemaId = schemas[0]._id
-			setSelectedSchemaId(firstSchemaId)
-			router.replace(`/content?schema=${firstSchemaId}`, { scroll: false })
+			const firstSchema =
+				schemas.find((s) => s.type === "collection") || schemas[0]
+			setSelectedSchemaId(firstSchema._id)
+			router.replace(`/content?schema=${firstSchema._id}`, { scroll: false })
 		}
 	}, [schemas, selectedSchemaId, router])
 
