@@ -5,6 +5,7 @@ import { usePreview } from "../preview/preview-context"
 
 // Sanitize content to remove unusual line terminators before parsing
 function _sanitizeContent(content: string): string {
+	if (!content || typeof content !== "string") return ""
 	return content.replace(/\u2028/g, "\n").replace(/\u2029/g, "\n")
 }
 
