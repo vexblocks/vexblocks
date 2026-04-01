@@ -55,7 +55,7 @@ function BlockReferenceContent({
 	contentBySchema?: Record<string, any[]>
 }) {
 	const [showPreviewModal, setShowPreviewModal] = useState(false)
-	const { currentLocale, hasLocales } = useLocale()
+	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 	const referencedBlock = useQuery(api.cms.blocks.get, {
 		id: blockId as Id<"cmsBlocks">,
 	})
@@ -122,8 +122,8 @@ function BlockReferenceContent({
 					(k) =>
 						k.length >= 2 && k.length <= 5 && typeof currentRaw[k] === "string",
 				)
-				if (localeKeys.length > 0) {
-					// Remove locale keys, keep only valid field keys
+				if (localeKeys.length > 0 && keys.length > localeKeys.length) {
+					// Has both locale keys AND other keys - this is corrupted, clean it
 					const cleaned: any = {}
 					for (const [key, val] of Object.entries(currentRaw)) {
 						if (
@@ -141,10 +141,16 @@ function BlockReferenceContent({
 				currentRaw &&
 				typeof currentRaw === "object" &&
 				!Array.isArray(currentRaw) &&
-				Object.keys(currentRaw).some((k) => k.length >= 2 && k.length <= 5)
+				Object.keys(currentRaw).length > 0 &&
+				Object.keys(currentRaw).every((k) => k.length >= 2 && k.length <= 5)
 
 			if (isLocaleWrapped) {
+				// Already a locale map — merge current locale in
 				finalValue = { ...currentRaw, [currentLocale]: value }
+			} else if (typeof currentRaw === "string" && currentRaw !== "") {
+				// Plain string (old data pre-i18n) — migrate: preserve old value as
+				// the default locale so switching languages doesn't lose it
+				finalValue = { [defaultLocale]: currentRaw, [currentLocale]: value }
 			} else {
 				// Check if this is a nested field in a group that uses locale wrapping
 				// by checking the parent group
@@ -159,7 +165,8 @@ function BlockReferenceContent({
 								v &&
 								typeof v === "object" &&
 								!Array.isArray(v) &&
-								Object.keys(v).some((k) => k.length >= 2 && k.length <= 5),
+								Object.keys(v).length > 0 &&
+								Object.keys(v).every((k) => k.length >= 2 && k.length <= 5),
 						)
 						if (hasLocaleWrappedSiblings) {
 							finalValue =
@@ -168,8 +175,17 @@ function BlockReferenceContent({
 								!Array.isArray(currentRaw)
 									? { ...currentRaw, [currentLocale]: value }
 									: { [currentLocale]: value }
+						} else {
+							// No locale wrapping in siblings, just use the value directly
+							finalValue = value
 						}
+					} else {
+						// No parent or parent is not an object, just wrap with current locale
+						finalValue = { [currentLocale]: value }
 					}
+				} else {
+					// Top-level field, wrap with current locale
+					finalValue = { [currentLocale]: value }
 				}
 			}
 		}
@@ -339,85 +355,45 @@ function BlockReferenceFields({
 	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 
 	const getDisplayValue = (blockField: Field) => {
-		let raw = blockFieldsData[blockField.name]
+		const raw = blockFieldsData[blockField.name]
 
 		// Normalize legacy data: if group type has string data, convert to object
 		if (blockField.type === "group" && typeof raw === "string") {
 			return {}
 		}
 
-		// For group fields, unwrap locale-wrapped nested values
-		if (
-			blockField.type === "group" &&
-			raw &&
-			typeof raw === "object" &&
-			!Array.isArray(raw)
-		) {
-			// Check if this is corrupted data with locale keys at the wrong level
-			// e.g., {en: "Reserve", link: {}, text: {}} instead of {text: {en: "Reserve"}, link: {en: ""}}
-			const topLevelKeys = Object.keys(raw)
-			const localeKeys = topLevelKeys.filter(
-				(k) => k.length >= 2 && k.length <= 5 && typeof raw[k] === "string",
-			)
-
-			if (localeKeys.length > 0) {
-				// Remove locale keys and keep only valid field keys
-				const cleaned: any = {}
-				for (const [key, value] of Object.entries(raw)) {
-					// Skip locale keys (2-5 char keys with string values)
-					if (key.length >= 2 && key.length <= 5 && typeof value === "string") {
-						continue
-					}
-					cleaned[key] = value
-				}
-				raw = cleaned
-			}
-
-			// Check if the group's nested fields are locale-wrapped
-			// by checking if all values are objects with locale keys
-			const unwrappedGroup: any = {}
-			for (const [key, value] of Object.entries(raw)) {
-				if (value && typeof value === "object" && !Array.isArray(value)) {
-					// Check if this looks like a locale map (has locale keys like 'en', 'es', etc.)
-					const keys = Object.keys(value)
-					if (
-						keys.length > 0 &&
-						keys.every((k) => k.length >= 2 && k.length <= 5)
-					) {
-						// Unwrap the locale value
-						const unwrappedValue =
-							(value as any)[currentLocale] ??
-							(value as any)[defaultLocale] ??
-							""
-
-						unwrappedGroup[key] = unwrappedValue
-						continue
-					}
-				}
-				unwrappedGroup[key] = value
-			}
-			return unwrappedGroup
+		// For group fields, just return the raw value - let FieldRenderer handle unwrapping
+		if (blockField.type === "group") {
+			return raw
 		}
 
+		// For locale-aware fields (not group, repeater, flexibleBlocks, map)
 		if (
 			hasLocales &&
 			raw &&
 			typeof raw === "object" &&
 			!Array.isArray(raw) &&
-			blockField.type !== "group" &&
 			blockField.type !== "repeater" &&
 			blockField.type !== "flexibleBlocks" &&
 			blockField.type !== "map"
 		) {
-			return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+			return (
+				raw[currentLocale] ??
+				raw[defaultLocale] ??
+				Object.values(raw as Record<string, unknown>).find(
+					(v) => v !== undefined && v !== null && v !== "",
+				) ??
+				""
+			)
 		}
+
+		// For map fields with locale wrapping
 		if (
 			blockField.type === "map" &&
 			hasLocales &&
 			raw &&
 			typeof raw === "object"
 		) {
-			// Handle old data that may have been saved locale-wrapped
 			const keys = Object.keys(raw)
 			if (
 				keys.length > 0 &&
@@ -426,6 +402,7 @@ function BlockReferenceFields({
 				return raw[currentLocale] ?? raw[defaultLocale] ?? null
 			}
 		}
+
 		return raw
 	}
 

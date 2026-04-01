@@ -75,69 +75,29 @@ export function FieldRenderer({
 
 			if (hasLocaleKeys) {
 				if (translatable) {
-					return raw[currentLocale] ?? raw[defaultLocale] ?? ""
+					return (
+						raw[currentLocale] ??
+						raw[defaultLocale] ??
+						Object.values(raw as Record<string, unknown>).find(
+							(v) => v !== undefined && v !== null && v !== "",
+						) ??
+						""
+					)
 				}
-				// Defensive: if value is a locale map (has current/default locale key),
-				// extract it even for non-translatable fields to avoid showing [object Object]
-				const localeValue = raw[currentLocale] ?? raw[defaultLocale]
+				// Defensive: extract locale value even for non-translatable fields
+				// to avoid showing [object Object]. Fallback to any available locale.
+				const localeValue =
+					raw[currentLocale] ??
+					raw[defaultLocale] ??
+					Object.values(raw as Record<string, unknown>).find(
+						(v) => v !== undefined && v !== null && v !== "",
+					)
 				if (localeValue !== undefined) {
 					return localeValue
 				}
 			}
 		}
 		return raw
-	}
-
-	// Helper to unwrap locale-wrapped nested values in group fields
-	const unwrapGroupLocaleValues = (groupValue: any) => {
-		if (
-			!groupValue ||
-			typeof groupValue !== "object" ||
-			Array.isArray(groupValue)
-		) {
-			console.log("  Returning early - not an object")
-			return groupValue
-		}
-
-		// Check if this is corrupted data with locale keys at the wrong level
-		// e.g., {en: "Reserve", link: {}, text: {}} instead of {text: {en: "Reserve"}, link: {en: ""}}
-		const keys = Object.keys(groupValue)
-
-		const localeKeys = keys.filter(
-			(k) =>
-				k.length >= 2 && k.length <= 5 && typeof groupValue[k] === "string",
-		)
-
-		if (localeKeys.length > 0) {
-			// Remove locale keys and keep only valid field keys
-			const cleaned: any = {}
-			for (const [key, value] of Object.entries(groupValue)) {
-				// Skip locale keys (2-5 char keys with string values)
-				if (key.length >= 2 && key.length <= 5 && typeof value === "string") {
-					continue
-				}
-				cleaned[key] = value
-			}
-			groupValue = cleaned
-		}
-
-		const unwrapped: any = {}
-		for (const [key, value] of Object.entries(groupValue)) {
-			if (value && typeof value === "object" && !Array.isArray(value)) {
-				const valueKeys = Object.keys(value)
-				// Check if this looks like a locale map
-				if (
-					valueKeys.length > 0 &&
-					valueKeys.every((k) => k.length >= 2 && k.length <= 5)
-				) {
-					unwrapped[key] =
-						(value as any)[currentLocale] ?? (value as any)[defaultLocale] ?? ""
-					continue
-				}
-			}
-			unwrapped[key] = value
-		}
-		return unwrapped
 	}
 
 	const [previewState] = useAtom(previewAtom)
@@ -159,138 +119,198 @@ export function FieldRenderer({
 
 	// Handle group fields (single nested object)
 	if (field.type === "group") {
-		// Check if this group should be treated as a repeater (array)
-		// by looking at if it has nested fields and is used in a context that expects an array
-		const groupValue = value || {}
+		let groupValue = value || {}
 
-		return (
-			<div
-				data-field-path={field.name}
-				className="rounded-lg border-2 border-grey-200 bg-grey-50 p-4 transition-all duration-200"
-				style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
-			>
-				<div className="mb-3 flex items-center gap-2">
-					<Folder className="h-5 w-5 text-primary" />
-					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
-					<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
-						Group
-					</span>
-				</div>
-				{field.helpText && (
-					<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
-				)}
-				<div
-					className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
-				>
-					{(() => {
-						// Group consecutive small fields together
-						const fieldGroups: any[][] = []
-						let currentGroup: any[] = []
+		// First, check if the entire group is locale-wrapped (e.g., {en: {link: ..., text: ...}})
+		if (
+			groupValue &&
+			typeof groupValue === "object" &&
+			!Array.isArray(groupValue)
+		) {
+			const topKeys = Object.keys(groupValue)
+			// Get expected field names from schema
+			const expectedFieldNames = new Set(field.fields?.map((f) => f.name) || [])
+			// Check if top keys are locale codes AND not expected field names
+			const isGroupLocaleWrapped =
+				topKeys.length > 0 &&
+				topKeys.every(
+					(k) => k.length >= 2 && k.length <= 5 && !expectedFieldNames.has(k),
+				)
 
-						const isSmallField = (fieldType: string) =>
-							[
-								"shortText",
-								"select",
-								"checkbox",
-								"date",
-								"datetime",
-								"time",
-								"number",
-							].includes(fieldType)
-						const isLargeField = (fieldType: string) =>
-							[
-								"richText",
-								"flexibleBlocks",
-								"repeater",
-								"group",
-								"blockReference",
-							].includes(fieldType)
-
-						field.fields?.forEach((nestedField: any, index: number) => {
-							if (isSmallField(nestedField.type)) {
-								currentGroup.push(nestedField)
-								const nextField = field.fields?.[index + 1]
-								if (!nextField || !isSmallField(nextField.type)) {
-									fieldGroups.push([...currentGroup])
-									currentGroup = []
-								}
-							} else {
-								if (currentGroup.length > 0) {
-									fieldGroups.push([...currentGroup])
-									currentGroup = []
-								}
-								fieldGroups.push([nestedField])
+			if (isGroupLocaleWrapped) {
+				// Unwrap the entire group first
+				groupValue =
+					groupValue[currentLocale] ??
+					groupValue[defaultLocale] ??
+					Object.values(groupValue).find(
+						(v) => v !== undefined && v !== null && v !== "",
+					) ??
+					{}
+				// After unwrapping the group, the nested fields are already unwrapped
+				// So we don't need to unwrap them again
+			} else {
+				// Group is not locale-wrapped at top level, but nested fields might be
+				// Unwrap nested locale-wrapped fields within the group
+				if (
+					groupValue &&
+					typeof groupValue === "object" &&
+					!Array.isArray(groupValue)
+				) {
+					const unwrapped: any = {}
+					for (const [key, val] of Object.entries(groupValue)) {
+						if (val && typeof val === "object" && !Array.isArray(val)) {
+							const valKeys = Object.keys(val)
+							// Check if this nested field is locale-wrapped
+							if (
+								valKeys.length > 0 &&
+								valKeys.every((k) => k.length >= 2 && k.length <= 5)
+							) {
+								unwrapped[key] =
+									(val as any)[currentLocale] ??
+									(val as any)[defaultLocale] ??
+									Object.values(val as Record<string, unknown>).find(
+										(v) => v !== undefined && v !== null && v !== "",
+									) ??
+									""
+								continue
 							}
-						})
+						}
+						unwrapped[key] = val
+					}
+					groupValue = unwrapped
+				}
+			}
 
-						return fieldGroups.map((group, groupIndex) => {
-							const isGroupOfSmallFields = group.every((f) =>
-								isSmallField(f.type),
-							)
-							const hasOnlyOneField = group.length === 1
-							const singleField = group[0]
-							const isLarge = hasOnlyOneField && isLargeField(singleField.type)
+			return (
+				<div
+					data-field-path={field.name}
+					className="rounded-lg border-2 border-grey-200 bg-grey-50 p-4 transition-all duration-200"
+					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
+				>
+					<div className="mb-3 flex items-center gap-2">
+						<Folder className="h-5 w-5 text-primary" />
+						<h3 className="font-semibold text-grey-900 text-lg">
+							{field.label}
+						</h3>
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+							Group
+						</span>
+					</div>
+					{field.helpText && (
+						<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
+					)}
+					<div
+						className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
+					>
+						{(() => {
+							// Group consecutive small fields together
+							const fieldGroups: any[][] = []
+							let currentGroup: any[] = []
 
-							if (isGroupOfSmallFields && group.length > 1) {
+							const isSmallField = (fieldType: string) =>
+								[
+									"shortText",
+									"select",
+									"checkbox",
+									"date",
+									"datetime",
+									"time",
+									"number",
+								].includes(fieldType)
+							const isLargeField = (fieldType: string) =>
+								[
+									"richText",
+									"flexibleBlocks",
+									"repeater",
+									"group",
+									"blockReference",
+								].includes(fieldType)
+
+							field.fields?.forEach((nestedField: any, index: number) => {
+								if (isSmallField(nestedField.type)) {
+									currentGroup.push(nestedField)
+									const nextField = field.fields?.[index + 1]
+									if (!nextField || !isSmallField(nextField.type)) {
+										fieldGroups.push([...currentGroup])
+										currentGroup = []
+									}
+								} else {
+									if (currentGroup.length > 0) {
+										fieldGroups.push([...currentGroup])
+										currentGroup = []
+									}
+									fieldGroups.push([nestedField])
+								}
+							})
+
+							return fieldGroups.map((group, groupIndex) => {
+								const isGroupOfSmallFields = group.every((f) =>
+									isSmallField(f.type),
+								)
+								const hasOnlyOneField = group.length === 1
+								const singleField = group[0]
+								const isLarge =
+									hasOnlyOneField && isLargeField(singleField.type)
+
+								if (isGroupOfSmallFields && group.length > 1) {
+									return (
+										<div key={groupIndex} className="space-y-4">
+											{group.map((nestedField: any) => {
+												const nestedPath = `${path}.${nestedField.name}`
+												// Group values are already unwrapped, use directly
+												const nestedValue = groupValue[nestedField.name]
+												return (
+													<FieldRenderer
+														key={nestedField.name}
+														field={nestedField}
+														path={nestedPath}
+														value={nestedValue}
+														onChange={onChange}
+														onAddRepeaterItem={onAddRepeaterItem}
+														onRemoveRepeaterItem={onRemoveRepeaterItem}
+														onMoveRepeaterItem={onMoveRepeaterItem}
+														level={level + 1}
+														allSchemas={allSchemas}
+														contentBySchema={contentBySchema}
+													/>
+												)
+											})}
+										</div>
+									)
+								}
+
+								const nestedField = singleField
+								const nestedPath = `${path}.${nestedField.name}`
+								// Group values are already unwrapped, use directly
+								const nestedValue = groupValue[nestedField.name]
+
 								return (
-									<div key={groupIndex} className="space-y-4">
-										{group.map((nestedField: any) => {
-											const nestedPath = `${path}.${nestedField.name}`
-											const nestedValue = getLocalizedFieldValue(
-												groupValue[nestedField.name],
-												nestedField.translatable,
-											)
-											return (
-												<FieldRenderer
-													key={nestedField.name}
-													field={nestedField}
-													path={nestedPath}
-													value={nestedValue}
-													onChange={onChange}
-													onAddRepeaterItem={onAddRepeaterItem}
-													onRemoveRepeaterItem={onRemoveRepeaterItem}
-													onMoveRepeaterItem={onMoveRepeaterItem}
-													level={level + 1}
-													allSchemas={allSchemas}
-													contentBySchema={contentBySchema}
-												/>
-											)
-										})}
+									<div
+										key={nestedField.name}
+										className={
+											isLarge && !isPreviewActive ? "lg:col-span-2" : ""
+										}
+									>
+										<FieldRenderer
+											field={nestedField}
+											path={nestedPath}
+											value={nestedValue}
+											onChange={onChange}
+											onAddRepeaterItem={onAddRepeaterItem}
+											onRemoveRepeaterItem={onRemoveRepeaterItem}
+											onMoveRepeaterItem={onMoveRepeaterItem}
+											level={level + 1}
+											allSchemas={allSchemas}
+											contentBySchema={contentBySchema}
+										/>
 									</div>
 								)
-							}
-
-							const nestedField = singleField
-							const nestedPath = `${path}.${nestedField.name}`
-							const nestedValue = getLocalizedFieldValue(
-								groupValue[nestedField.name],
-								nestedField.translatable,
-							)
-
-							return (
-								<div
-									key={nestedField.name}
-									className={isLarge && !isPreviewActive ? "lg:col-span-2" : ""}
-								>
-									<FieldRenderer
-										field={nestedField}
-										path={nestedPath}
-										value={nestedValue}
-										onChange={onChange}
-										onAddRepeaterItem={onAddRepeaterItem}
-										onRemoveRepeaterItem={onRemoveRepeaterItem}
-										onMoveRepeaterItem={onMoveRepeaterItem}
-										level={level + 1}
-										allSchemas={allSchemas}
-										contentBySchema={contentBySchema}
-									/>
-								</div>
-							)
-						})
-					})()}
+							})
+						})()}
+					</div>
 				</div>
-			</div>
-		)
+			)
+		}
 	}
 
 	// Handle flexibleBlocks fields
@@ -691,18 +711,14 @@ export function FieldRenderer({
 													<div key={groupIndex} className="space-y-4">
 														{group.map((nestedField: any) => {
 															const nestedPath = `${path}[${index}].${nestedField.name}`
-
-															let rawValue = item?.[nestedField.name]
-
-															// For group fields, unwrap BEFORE getLocalizedFieldValue
-															if (nestedField.type === "group") {
-																rawValue = unwrapGroupLocaleValues(rawValue)
-															}
-
-															const nestedValue = getLocalizedFieldValue(
-																rawValue,
-																nestedField.translatable,
-															)
+															// For group fields, pass raw value - FieldRenderer will handle unwrapping
+															const nestedValue =
+																nestedField.type === "group"
+																	? item?.[nestedField.name]
+																	: getLocalizedFieldValue(
+																			item?.[nestedField.name],
+																			nestedField.translatable,
+																		)
 
 															return (
 																<FieldRenderer
@@ -727,18 +743,14 @@ export function FieldRenderer({
 
 											const nestedField = singleField
 											const nestedPath = `${path}[${index}].${nestedField.name}`
-
-											let rawValue = item?.[nestedField.name]
-
-											// For group fields, unwrap BEFORE getLocalizedFieldValue
-											if (nestedField.type === "group") {
-												rawValue = unwrapGroupLocaleValues(rawValue)
-											}
-
-											const nestedValue = getLocalizedFieldValue(
-												rawValue,
-												nestedField.translatable,
-											)
+											// For group fields, pass raw value - FieldRenderer will handle unwrapping
+											const nestedValue =
+												nestedField.type === "group"
+													? item?.[nestedField.name]
+													: getLocalizedFieldValue(
+															item?.[nestedField.name],
+															nestedField.translatable,
+														)
 
 											return (
 												<div

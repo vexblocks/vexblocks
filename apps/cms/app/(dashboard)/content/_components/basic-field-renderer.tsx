@@ -6,7 +6,7 @@ import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { FileUp, Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import TextareaAutosize from "react-textarea-autosize"
 import type { Field } from "./types"
 
@@ -123,16 +123,24 @@ export function BasicFieldRenderer({
 	isAutoSlugActive,
 }: BasicFieldRendererProps) {
 	const [showMediaSelector, setShowMediaSelector] = useState(false)
+	const hasSetDefault = useRef(false)
 
 	// Pre-fill with schema defaultValue when the field has no value yet
 	useEffect(() => {
 		if (
+			!hasSetDefault.current &&
 			(value === undefined || value === null || value === "") &&
 			field.defaultValue
 		) {
 			onChange(field.defaultValue)
+			hasSetDefault.current = true
 		}
 	}, [value, field.defaultValue, onChange])
+
+	// Reset flag when field changes
+	useEffect(() => {
+		hasSetDefault.current = false
+	}, [])
 
 	// Provide consistent default based on type to prevent uncontrolled component warnings
 	const defaultValue =
