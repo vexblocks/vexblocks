@@ -108,7 +108,33 @@ function BlockReferenceContent({
 			fieldType !== "map" &&
 			fieldType !== "group"
 		) {
-			const currentRaw = getNestedValue(blockFieldsData, relativePath)
+			let currentRaw = getNestedValue(blockFieldsData, relativePath)
+
+			// Clean corrupted data: remove locale keys that shouldn't be at this level
+			// (e.g., {en: "value", text: {...}, link: {...}} should become {text: {...}, link: {...}})
+			if (
+				currentRaw &&
+				typeof currentRaw === "object" &&
+				!Array.isArray(currentRaw)
+			) {
+				const keys = Object.keys(currentRaw)
+				const localeKeys = keys.filter(
+					(k) =>
+						k.length >= 2 && k.length <= 5 && typeof currentRaw[k] === "string",
+				)
+				if (localeKeys.length > 0) {
+					// Remove locale keys, keep only valid field keys
+					const cleaned: any = {}
+					for (const [key, val] of Object.entries(currentRaw)) {
+						if (
+							!(key.length >= 2 && key.length <= 5 && typeof val === "string")
+						) {
+							cleaned[key] = val
+						}
+					}
+					currentRaw = cleaned
+				}
+			}
 
 			// Check if current value is already locale-wrapped
 			const isLocaleWrapped =
@@ -153,7 +179,6 @@ function BlockReferenceContent({
 			relativePath,
 			finalValue,
 		)
-
 		onChange({
 			blockId,
 			blockName,
