@@ -84,7 +84,7 @@ const PRIMITIVE_BLOCK_TYPES: Record<string, string> = {
 	shortText: '{ type: "shortText"; value: string }',
 	longText: '{ type: "longText"; value: string }',
 	richText: '{ type: "richText"; value: string }',
-	url: '{ type: "url"; value: string }',
+	url: '{ type: "url"; value: { url: string; newWindow?: boolean } }',
 	youtubeUrl: '{ type: "youtubeUrl"; value: string }',
 	number: '{ type: "number"; value: number }',
 	boolean: '{ type: "boolean"; value: boolean }',
@@ -110,9 +110,11 @@ function mapFieldType(
 		case "shortText":
 		case "longText":
 		case "richText":
-		case "url":
 		case "youtubeUrl":
 			return "string"
+
+		case "url":
+			return "{ url: string; newWindow?: boolean }"
 
 		case "number":
 			return "number"
@@ -415,7 +417,7 @@ export type FlexibleBlock =
   | { type: "shortText"; value: string }
   | { type: "longText"; value: string }
   | { type: "richText"; value: string }
-  | { type: "url"; value: string }
+  | { type: "url"; value: { url: string; newWindow?: boolean } }
   | { type: "youtubeUrl"; value: string }
   | { type: "number"; value: number }
   | { type: "boolean"; value: boolean }
