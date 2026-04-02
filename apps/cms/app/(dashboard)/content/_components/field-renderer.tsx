@@ -25,6 +25,16 @@ import { BlockPreviewModal } from "./block-preview-modal"
 import { FlexibleBlocksField } from "./flexible-blocks"
 import { useLocale } from "./locale-context"
 import type { Field } from "./types"
+import {
+	getEditorLocalizedValue,
+	getFieldAtPath,
+	getNestedValue,
+	isLocaleKey,
+	isLocaleMap,
+	mergeLocalizedValue,
+	setNestedValue,
+	shouldFieldBeTranslatable,
+} from "./utils"
 
 type FieldRendererProps = {
 	field: Field
@@ -67,37 +77,13 @@ export function FieldRenderer({
 	const { currentLocale, defaultLocale, hasLocales } = useLocale()
 
 	const getLocalizedFieldValue = (raw: any, translatable?: boolean) => {
-		if (hasLocales && raw && typeof raw === "object" && !Array.isArray(raw)) {
-			// Check if this object actually has locale keys (2-5 character keys like 'en', 'es', 'en-US')
-			const keys = Object.keys(raw)
-			const hasLocaleKeys =
-				keys.length > 0 && keys.some((k) => k.length >= 2 && k.length <= 5)
-
-			if (hasLocaleKeys) {
-				if (translatable) {
-					return (
-						raw[currentLocale] ??
-						raw[defaultLocale] ??
-						Object.values(raw as Record<string, unknown>).find(
-							(v) => v !== undefined && v !== null && v !== "",
-						) ??
-						""
-					)
-				}
-				// Defensive: extract locale value even for non-translatable fields
-				// to avoid showing [object Object]. Fallback to any available locale.
-				const localeValue =
-					raw[currentLocale] ??
-					raw[defaultLocale] ??
-					Object.values(raw as Record<string, unknown>).find(
-						(v) => v !== undefined && v !== null && v !== "",
-					)
-				if (localeValue !== undefined) {
-					return localeValue
-				}
-			}
-		}
-		return raw
+		return getEditorLocalizedValue({
+			rawValue: raw,
+			translatable: Boolean(translatable),
+			hasLocales,
+			currentLocale,
+			defaultLocale,
+		})
 	}
 
 	const [previewState] = useAtom(previewAtom)
@@ -119,7 +105,9 @@ export function FieldRenderer({
 
 	// Handle group fields (single nested object)
 	if (field.type === "group") {
-		let groupValue = value || {}
+		const rawGroupValue = value || {}
+		let groupValue = rawGroupValue
+		let isGroupLocaleWrapped = false
 
 		// First, check if the entire group is locale-wrapped (e.g., {en: {link: ..., text: ...}})
 		if (
@@ -131,21 +119,14 @@ export function FieldRenderer({
 			// Get expected field names from schema
 			const expectedFieldNames = new Set(field.fields?.map((f) => f.name) || [])
 			// Check if top keys are locale codes AND not expected field names
-			const isGroupLocaleWrapped =
+			isGroupLocaleWrapped =
 				topKeys.length > 0 &&
-				topKeys.every(
-					(k) => k.length >= 2 && k.length <= 5 && !expectedFieldNames.has(k),
-				)
+				topKeys.every((key) => isLocaleKey(key) && !expectedFieldNames.has(key))
 
 			if (isGroupLocaleWrapped) {
-				// Unwrap the entire group first
-				groupValue =
-					groupValue[currentLocale] ??
-					groupValue[defaultLocale] ??
-					Object.values(groupValue).find(
-						(v) => v !== undefined && v !== null && v !== "",
-					) ??
-					{}
+				// Unwrap the entire group for the current locale — no fallback so each locale
+				// stays visually independent in the editor.
+				groupValue = groupValue[currentLocale] ?? {}
 				// After unwrapping the group, the nested fields are already unwrapped
 				// So we don't need to unwrap them again
 			} else {
@@ -158,27 +139,118 @@ export function FieldRenderer({
 				) {
 					const unwrapped: any = {}
 					for (const [key, val] of Object.entries(groupValue)) {
-						if (val && typeof val === "object" && !Array.isArray(val)) {
-							const valKeys = Object.keys(val)
-							// Check if this nested field is locale-wrapped
-							if (
-								valKeys.length > 0 &&
-								valKeys.every((k) => k.length >= 2 && k.length <= 5)
-							) {
-								unwrapped[key] =
-									(val as any)[currentLocale] ??
-									(val as any)[defaultLocale] ??
-									Object.values(val as Record<string, unknown>).find(
-										(v) => v !== undefined && v !== null && v !== "",
-									) ??
-									""
-								continue
-							}
-						}
-						unwrapped[key] = val
+						unwrapped[key] = getEditorLocalizedValue({
+							rawValue: val,
+							translatable: shouldFieldBeTranslatable(
+								field.fields?.find((nestedField) => nestedField.name === key) ??
+									null,
+								hasLocales,
+							),
+							hasLocales,
+							currentLocale,
+							defaultLocale,
+						})
 					}
 					groupValue = unwrapped
 				}
+			}
+
+			const updateLocaleWrappedGroup = (
+				_relativePath: string,
+				updater: (currentLocaleGroup: any) => any,
+			) => {
+				const currentLocaleGroup =
+					rawGroupValue?.[currentLocale] &&
+					typeof rawGroupValue[currentLocale] === "object" &&
+					!Array.isArray(rawGroupValue[currentLocale])
+						? rawGroupValue[currentLocale]
+						: {}
+				const nextGroupValue = updater(currentLocaleGroup)
+				onChange(path, {
+					...rawGroupValue,
+					[currentLocale]: nextGroupValue,
+				})
+			}
+
+			const handleNestedGroupChange = (fieldPath: string, newValue: any) => {
+				if (!isGroupLocaleWrapped) {
+					onChange(fieldPath, newValue)
+					return
+				}
+
+				const relativePath = fieldPath.replace(`${path}.`, "")
+				updateLocaleWrappedGroup(relativePath, (currentLocaleGroup) =>
+					setNestedValue(currentLocaleGroup, relativePath, newValue),
+				)
+			}
+
+			const handleNestedGroupAddRepeaterItem = (repeaterPath: string) => {
+				if (!isGroupLocaleWrapped) {
+					onAddRepeaterItem?.(repeaterPath)
+					return
+				}
+
+				const relativePath = repeaterPath.replace(`${path}.`, "")
+				updateLocaleWrappedGroup(relativePath, (currentLocaleGroup) => {
+					const currentItems =
+						getNestedValue(currentLocaleGroup, relativePath) || []
+					return setNestedValue(currentLocaleGroup, relativePath, [
+						...currentItems,
+						{},
+					])
+				})
+			}
+
+			const handleNestedGroupRemoveRepeaterItem = (
+				repeaterPath: string,
+				index: number,
+			) => {
+				if (!isGroupLocaleWrapped) {
+					onRemoveRepeaterItem?.(repeaterPath, index)
+					return
+				}
+
+				const relativePath = repeaterPath.replace(`${path}.`, "")
+				updateLocaleWrappedGroup(relativePath, (currentLocaleGroup) => {
+					const currentItems =
+						getNestedValue(currentLocaleGroup, relativePath) || []
+					return setNestedValue(
+						currentLocaleGroup,
+						relativePath,
+						currentItems.filter(
+							(_: unknown, itemIndex: number) => itemIndex !== index,
+						),
+					)
+				})
+			}
+
+			const handleNestedGroupMoveRepeaterItem = (
+				repeaterPath: string,
+				index: number,
+				direction: "up" | "down",
+			) => {
+				if (!isGroupLocaleWrapped) {
+					onMoveRepeaterItem?.(repeaterPath, index, direction)
+					return
+				}
+
+				const relativePath = repeaterPath.replace(`${path}.`, "")
+				updateLocaleWrappedGroup(relativePath, (currentLocaleGroup) => {
+					const currentItems = [
+						...(getNestedValue(currentLocaleGroup, relativePath) || []),
+					]
+					const nextIndex = direction === "up" ? index - 1 : index + 1
+					if (nextIndex < 0 || nextIndex >= currentItems.length) {
+						return currentLocaleGroup
+					}
+
+					;[currentItems[index], currentItems[nextIndex]] = [
+						currentItems[nextIndex],
+						currentItems[index],
+					]
+
+					return setNestedValue(currentLocaleGroup, relativePath, currentItems)
+				})
 			}
 
 			return (
@@ -265,10 +337,14 @@ export function FieldRenderer({
 														field={nestedField}
 														path={nestedPath}
 														value={nestedValue}
-														onChange={onChange}
-														onAddRepeaterItem={onAddRepeaterItem}
-														onRemoveRepeaterItem={onRemoveRepeaterItem}
-														onMoveRepeaterItem={onMoveRepeaterItem}
+														onChange={handleNestedGroupChange}
+														onAddRepeaterItem={handleNestedGroupAddRepeaterItem}
+														onRemoveRepeaterItem={
+															handleNestedGroupRemoveRepeaterItem
+														}
+														onMoveRepeaterItem={
+															handleNestedGroupMoveRepeaterItem
+														}
 														level={level + 1}
 														allSchemas={allSchemas}
 														contentBySchema={contentBySchema}
@@ -295,10 +371,10 @@ export function FieldRenderer({
 											field={nestedField}
 											path={nestedPath}
 											value={nestedValue}
-											onChange={onChange}
-											onAddRepeaterItem={onAddRepeaterItem}
-											onRemoveRepeaterItem={onRemoveRepeaterItem}
-											onMoveRepeaterItem={onMoveRepeaterItem}
+											onChange={handleNestedGroupChange}
+											onAddRepeaterItem={handleNestedGroupAddRepeaterItem}
+											onRemoveRepeaterItem={handleNestedGroupRemoveRepeaterItem}
+											onMoveRepeaterItem={handleNestedGroupMoveRepeaterItem}
 											level={level + 1}
 											allSchemas={allSchemas}
 											contentBySchema={contentBySchema}
@@ -356,6 +432,33 @@ export function FieldRenderer({
 
 		// Initialize block data if not set
 		const blockValue = value || {}
+
+		const handleBlockReferenceFieldChange = (
+			fieldPath: string,
+			newValue: any,
+		) => {
+			const relativePath = fieldPath.replace(`${path}.`, "")
+			const blockField = getFieldAtPath(block.fields, relativePath)
+			const currentRaw = getNestedValue(blockValue, relativePath)
+			const isTranslatableField = shouldFieldBeTranslatable(
+				blockField,
+				hasLocales,
+			)
+			const shouldMergeByLocale =
+				isTranslatableField ||
+				isLocaleMap(currentRaw, { excludeKeys: ["url", "newWindow"] })
+
+			const nextFieldValue = shouldMergeByLocale
+				? mergeLocalizedValue({
+						currentValue: currentRaw,
+						nextValue: newValue,
+						currentLocale,
+						defaultLocale,
+					})
+				: newValue
+
+			onChange(path, setNestedValue(blockValue, relativePath, nextFieldValue))
+		}
 
 		return (
 			<>
@@ -463,7 +566,7 @@ export function FieldRenderer({
 													const blockFieldPath = `${path}.${blockField.name}`
 													const blockFieldValue = getLocalizedFieldValue(
 														blockValue[blockField.name],
-														blockField.translatable,
+														shouldFieldBeTranslatable(blockField, hasLocales),
 													)
 													return (
 														<FieldRenderer
@@ -471,25 +574,7 @@ export function FieldRenderer({
 															field={blockField}
 															path={blockFieldPath}
 															value={blockFieldValue}
-															onChange={(fieldPath, newVal) => {
-																if (
-																	hasLocales &&
-																	currentLocale &&
-																	blockField.translatable &&
-																	fieldPath === blockFieldPath
-																) {
-																	const raw = blockValue[blockField.name]
-																	const merged =
-																		raw &&
-																		typeof raw === "object" &&
-																		!Array.isArray(raw)
-																			? { ...raw, [currentLocale]: newVal }
-																			: { [currentLocale]: newVal }
-																	onChange(fieldPath, merged)
-																} else {
-																	onChange(fieldPath, newVal)
-																}
-															}}
+															onChange={handleBlockReferenceFieldChange}
 															onAddRepeaterItem={onAddRepeaterItem}
 															onRemoveRepeaterItem={onRemoveRepeaterItem}
 															onMoveRepeaterItem={onMoveRepeaterItem}
@@ -507,7 +592,7 @@ export function FieldRenderer({
 									const blockFieldPath = `${path}.${blockField.name}`
 									const blockFieldValue = getLocalizedFieldValue(
 										blockValue[blockField.name],
-										blockField.translatable,
+										shouldFieldBeTranslatable(blockField, hasLocales),
 									)
 
 									return (
@@ -521,25 +606,7 @@ export function FieldRenderer({
 												field={blockField}
 												path={blockFieldPath}
 												value={blockFieldValue}
-												onChange={(fieldPath, newVal) => {
-													if (
-														hasLocales &&
-														currentLocale &&
-														blockField.translatable &&
-														fieldPath === blockFieldPath
-													) {
-														const raw = blockValue[blockField.name]
-														const merged =
-															raw &&
-															typeof raw === "object" &&
-															!Array.isArray(raw)
-																? { ...raw, [currentLocale]: newVal }
-																: { [currentLocale]: newVal }
-														onChange(fieldPath, merged)
-													} else {
-														onChange(fieldPath, newVal)
-													}
-												}}
+												onChange={handleBlockReferenceFieldChange}
 												onAddRepeaterItem={onAddRepeaterItem}
 												onRemoveRepeaterItem={onRemoveRepeaterItem}
 												onMoveRepeaterItem={onMoveRepeaterItem}
@@ -717,7 +784,10 @@ export function FieldRenderer({
 																	? item?.[nestedField.name]
 																	: getLocalizedFieldValue(
 																			item?.[nestedField.name],
-																			nestedField.translatable,
+																			shouldFieldBeTranslatable(
+																				nestedField,
+																				hasLocales,
+																			),
 																		)
 
 															return (
@@ -749,7 +819,10 @@ export function FieldRenderer({
 													? item?.[nestedField.name]
 													: getLocalizedFieldValue(
 															item?.[nestedField.name],
-															nestedField.translatable,
+															shouldFieldBeTranslatable(
+																nestedField,
+																hasLocales,
+															),
 														)
 
 											return (

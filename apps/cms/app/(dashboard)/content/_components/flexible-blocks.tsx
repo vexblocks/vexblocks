@@ -19,6 +19,15 @@ import { BlockPreviewModal } from "./block-preview-modal"
 import { FieldRenderer } from "./field-renderer"
 import { useLocale } from "./locale-context"
 import type { Field } from "./types"
+import {
+	getEditorLocalizedValue,
+	getFieldAtPath,
+	getNestedValue,
+	isLocaleMap,
+	mergeLocalizedValue,
+	setNestedValue,
+	shouldFieldBeTranslatable,
+} from "./utils"
 
 type FlexibleBlockItemProps = {
 	block: { _id: string; type: string; data: any }
@@ -74,121 +83,34 @@ function BlockReferenceContent({
 	// The data for the block fields (excluding the blockId metadata)
 	const blockFieldsData = data?.fields || {}
 
-	// Traverse the block's field schema to find the type of a field at a dotted path
-	const getFieldTypeAtPath = (
-		fields: Field[],
-		parts: string[],
-	): string | null => {
-		const cleanPart = parts[0]?.replace(/\[\d+\]/g, "")
-		if (!cleanPart) return null
-		const field = fields.find((f) => f.name === cleanPart)
-		if (!field) return null
-		if (parts.length === 1) return field.type
-		if (field.fields) return getFieldTypeAtPath(field.fields, parts.slice(1))
-		return null
-	}
-
 	// Handle field changes using path-based updates (supports nested paths like "items[0].details[0].text")
 	const handleFieldChange = (fieldPath: string, value: any) => {
 		// Remove the base path prefix to get the relative path within blockFieldsData
 		const relativePath = fieldPath.replace(`${path}.`, "")
-		const pathParts = relativePath.split(".").filter(Boolean)
-		const fieldType = getFieldTypeAtPath(
+		const blockField = getFieldAtPath(
 			referencedBlock.fields ?? [],
-			pathParts,
+			relativePath,
 		)
+		const currentRaw = getNestedValue(blockFieldsData, relativePath)
+		const isTranslatableField = shouldFieldBeTranslatable(
+			blockField,
+			hasLocales,
+		)
+		const shouldMergeByLocale =
+			isTranslatableField ||
+			isLocaleMap(currentRaw, {
+				excludeKeys: ["url", "newWindow"],
+				requireAllKeys: false,
+			})
 
-		let finalValue = value
-
-		// For fields nested inside groups, check if we need to wrap in locale
-		// by checking if the parent field is a group and has locale-wrapped values
-		if (
-			hasLocales &&
-			currentLocale &&
-			fieldType !== "map" &&
-			fieldType !== "group"
-		) {
-			let currentRaw = getNestedValue(blockFieldsData, relativePath)
-
-			// Clean corrupted data: remove locale keys that shouldn't be at this level
-			// (e.g., {en: "value", text: {...}, link: {...}} should become {text: {...}, link: {...}})
-			if (
-				currentRaw &&
-				typeof currentRaw === "object" &&
-				!Array.isArray(currentRaw)
-			) {
-				const keys = Object.keys(currentRaw)
-				const localeKeys = keys.filter(
-					(k) =>
-						k.length >= 2 && k.length <= 5 && typeof currentRaw[k] === "string",
-				)
-				if (localeKeys.length > 0 && keys.length > localeKeys.length) {
-					// Has both locale keys AND other keys - this is corrupted, clean it
-					const cleaned: any = {}
-					for (const [key, val] of Object.entries(currentRaw)) {
-						if (
-							!(key.length >= 2 && key.length <= 5 && typeof val === "string")
-						) {
-							cleaned[key] = val
-						}
-					}
-					currentRaw = cleaned
-				}
-			}
-
-			// Check if current value is already locale-wrapped
-			const isLocaleWrapped =
-				currentRaw &&
-				typeof currentRaw === "object" &&
-				!Array.isArray(currentRaw) &&
-				Object.keys(currentRaw).length > 0 &&
-				Object.keys(currentRaw).every((k) => k.length >= 2 && k.length <= 5)
-
-			if (isLocaleWrapped) {
-				// Already a locale map — merge current locale in
-				finalValue = { ...currentRaw, [currentLocale]: value }
-			} else if (typeof currentRaw === "string" && currentRaw !== "") {
-				// Plain string (old data pre-i18n) — migrate: preserve old value as
-				// the default locale so switching languages doesn't lose it
-				finalValue = { [defaultLocale]: currentRaw, [currentLocale]: value }
-			} else {
-				// Check if this is a nested field in a group that uses locale wrapping
-				// by checking the parent group
-				const parentPath = pathParts.slice(0, -1).join(".")
-				if (parentPath) {
-					const parentValue = getNestedValue(blockFieldsData, parentPath)
-					if (parentValue && typeof parentValue === "object") {
-						// Check if siblings are locale-wrapped
-						const siblingValues = Object.values(parentValue)
-						const hasLocaleWrappedSiblings = siblingValues.some(
-							(v) =>
-								v &&
-								typeof v === "object" &&
-								!Array.isArray(v) &&
-								Object.keys(v).length > 0 &&
-								Object.keys(v).every((k) => k.length >= 2 && k.length <= 5),
-						)
-						if (hasLocaleWrappedSiblings) {
-							finalValue =
-								currentRaw &&
-								typeof currentRaw === "object" &&
-								!Array.isArray(currentRaw)
-									? { ...currentRaw, [currentLocale]: value }
-									: { [currentLocale]: value }
-						} else {
-							// No locale wrapping in siblings, just use the value directly
-							finalValue = value
-						}
-					} else {
-						// No parent or parent is not an object, just wrap with current locale
-						finalValue = { [currentLocale]: value }
-					}
-				} else {
-					// Top-level field, wrap with current locale
-					finalValue = { [currentLocale]: value }
-				}
-			}
-		}
+		const finalValue = shouldMergeByLocale
+			? mergeLocalizedValue({
+					currentValue: currentRaw,
+					nextValue: value,
+					currentLocale,
+					defaultLocale,
+				})
+			: value
 
 		const updatedFields = setNestedValue(
 			blockFieldsData,
@@ -367,43 +289,14 @@ function BlockReferenceFields({
 			return raw
 		}
 
-		// For locale-aware fields (not group, repeater, flexibleBlocks, map)
-		if (
-			hasLocales &&
-			raw &&
-			typeof raw === "object" &&
-			!Array.isArray(raw) &&
-			blockField.type !== "repeater" &&
-			blockField.type !== "flexibleBlocks" &&
-			blockField.type !== "map"
-		) {
-			return (
-				raw[currentLocale] ??
-				raw[defaultLocale] ??
-				Object.values(raw as Record<string, unknown>).find(
-					(v) => v !== undefined && v !== null && v !== "",
-				) ??
-				""
-			)
-		}
-
-		// For map fields with locale wrapping
-		if (
-			blockField.type === "map" &&
-			hasLocales &&
-			raw &&
-			typeof raw === "object"
-		) {
-			const keys = Object.keys(raw)
-			if (
-				keys.length > 0 &&
-				keys.every((k) => k.length >= 2 && k.length <= 5)
-			) {
-				return raw[currentLocale] ?? raw[defaultLocale] ?? null
-			}
-		}
-
-		return raw
+		return getEditorLocalizedValue({
+			rawValue: raw,
+			translatable: shouldFieldBeTranslatable(blockField, hasLocales),
+			hasLocales,
+			currentLocale,
+			defaultLocale,
+			fallbackToDefaultLocale: blockField.type !== "map",
+		})
 	}
 
 	// Group consecutive small fields together
@@ -500,38 +393,6 @@ function BlockReferenceFields({
 	)
 }
 
-// Helper to get nested value from object
-function getNestedValue(obj: any, path: string): any {
-	const parts = path.split(/[.[\]]/).filter(Boolean)
-	let current = obj
-	for (const part of parts) {
-		if (current === undefined || current === null) return undefined
-		current = current[part]
-	}
-	return current
-}
-
-// Helper to set nested value in object (returns new object)
-function setNestedValue(obj: any, path: string, value: any): any {
-	const parts = path.split(/[.[\]]/).filter(Boolean)
-	const newObj = JSON.parse(JSON.stringify(obj || {}))
-	let current = newObj
-
-	for (let i = 0; i < parts.length - 1; i++) {
-		const part = parts[i]
-		const nextPart = parts[i + 1]
-		const isNextArray = /^\d+$/.test(nextPart)
-
-		if (!(part in current)) {
-			current[part] = isNextArray ? [] : {}
-		}
-		current = current[part]
-	}
-
-	current[parts[parts.length - 1]] = value
-	return newObj
-}
-
 // Block types whose content should be stored per-locale
 const LOCALE_AWARE_BLOCK_TYPES = new Set([
 	"richText",
@@ -575,11 +436,14 @@ export function FlexibleBlockItem({
 
 	// Extract the locale-specific value for display
 	const displayValue = isLocaleAware
-		? normalizedData &&
-			typeof normalizedData === "object" &&
-			!Array.isArray(normalizedData)
-			? (normalizedData[currentLocale] ?? normalizedData[defaultLocale] ?? "")
-			: (normalizedData ?? "")
+		? getEditorLocalizedValue({
+				rawValue: normalizedData,
+				translatable: true,
+				hasLocales,
+				currentLocale,
+				defaultLocale,
+				fallbackToDefaultLocale: false,
+			})
 		: normalizedData
 
 	// Create the field path for this block (e.g., "blocks[0]")

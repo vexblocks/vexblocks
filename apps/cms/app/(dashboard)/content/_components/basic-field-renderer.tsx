@@ -281,10 +281,13 @@ export function BasicFieldRenderer({
 
 		case "url": {
 			const urlValue =
-				typeof defaultValue === "object" && defaultValue !== null
-					? defaultValue
+				typeof value === "object" && value !== null
+					? {
+							url: typeof value.url === "string" ? value.url : "",
+							newWindow: value.newWindow ?? false,
+						}
 					: {
-							url: typeof defaultValue === "string" ? defaultValue : "",
+							url: typeof value === "string" ? value : "",
 							newWindow: false,
 						}
 			const urlPattern = "^(https?://.+|/.*|#.*|mailto:.+|tel:.+)$"

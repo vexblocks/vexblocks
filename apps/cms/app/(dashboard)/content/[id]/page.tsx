@@ -31,7 +31,15 @@ import { LivePreviewPanel } from "../_components/live-preview-panel"
 import { LocaleContext } from "../_components/locale-context"
 import { LocaleSelector } from "../_components/locale-selector"
 import type { Field, LocalizationSettings } from "../_components/types"
-import { getNestedValue, setNestedValue } from "../_components/utils"
+import {
+	getEditorLocalizedValue,
+	getFieldAtPath,
+	getNestedValue,
+	isLocaleMap,
+	mergeLocalizedValue,
+	setNestedValue,
+	shouldFieldBeTranslatable,
+} from "../_components/utils"
 
 // Dynamic import for MediaSelector to avoid SSR issues
 const MediaSelector = dynamic(
@@ -294,60 +302,28 @@ export default function EditContentPage({
 
 	// Helper to check if a field at a path is translatable
 	const isFieldTranslatable = (fieldPath: string): boolean => {
-		if (!hasLocales) return false
-
-		const pathParts = fieldPath.split(".")
-		let currentFields = schema?.fields || []
-		let isTranslatable = false
-
-		for (const part of pathParts) {
-			// Skip array indices like [0]
-			const cleanPart = part.replace(/\[\d+\]/g, "")
-			if (!cleanPart) continue
-
-			const field = currentFields.find((f: Field) => f.name === cleanPart)
-			if (!field) return false
-			// Map fields are never translatable — coordinates don't change per language
-			if (field.type === "map") return false
-			isTranslatable = field.translatable ?? false
-			// Navigate into nested fields
-			if (field.fields) {
-				currentFields = field.fields
-			}
-		}
-
-		return isTranslatable
+		return shouldFieldBeTranslatable(
+			getFieldAtPath(schema?.fields, fieldPath),
+			hasLocales,
+		)
 	}
 
 	// Helper to get localized value
 	const getLocalizedValue = (path: string) => {
 		const rawValue = getNestedValue(contentData, path)
+		const isTranslatable = isFieldTranslatable(path)
 
-		if (!hasLocales || !isFieldTranslatable(path)) {
-			// If locales are disabled but value is a localized object, extract string value
-			if (
-				rawValue &&
-				typeof rawValue === "object" &&
-				!Array.isArray(rawValue)
-			) {
-				// Check if this looks like a localized object (keys are locale codes)
-				const keys = Object.keys(rawValue)
-				const looksLikeLocalized =
-					keys.length > 0 && keys.every((k) => k.length >= 2 && k.length <= 5)
-				if (looksLikeLocalized) {
-					return getStringValue(rawValue)
-				}
-			}
-			return rawValue
+		if (!hasLocales && isLocaleMap(rawValue)) {
+			return getStringValue(rawValue)
 		}
 
-		// For translatable fields, get the value for current locale
-		if (rawValue && typeof rawValue === "object" && !Array.isArray(rawValue)) {
-			return rawValue[currentLocale] ?? rawValue[defaultLocale] ?? ""
-		}
-
-		// Fallback: might be old content without locale structure
-		return rawValue ?? ""
+		return getEditorLocalizedValue({
+			rawValue,
+			translatable: isTranslatable,
+			hasLocales,
+			currentLocale,
+			defaultLocale,
+		})
 	}
 
 	// Helper to set localized value
@@ -379,20 +355,31 @@ export default function EditContentPage({
 		}
 
 		setContentData((prev) => {
-			if (!hasLocales || !isFieldTranslatable(path)) {
+			const isTranslatableSchema = hasLocales && isFieldTranslatable(path)
+			const currentValue = getNestedValue(prev, path)
+
+			// Detect if the value is already structured as locales (handles migration of previously-localized fields)
+			const isAlreadyLocalized = isLocaleMap(currentValue, {
+				excludeKeys: ["url", "newWindow"],
+				requireAllKeys: false,
+			})
+
+			const isTranslatable = isTranslatableSchema || isAlreadyLocalized
+
+			if (!isTranslatable) {
 				return setNestedValue(prev, path, value)
 			}
 
-			// For translatable fields, set value for current locale
-			const currentValue = getNestedValue(prev, path)
-			const localizedValue =
-				currentValue &&
-				typeof currentValue === "object" &&
-				!Array.isArray(currentValue)
-					? { ...currentValue, [currentLocale]: value }
-					: { [currentLocale]: value }
-
-			return setNestedValue(prev, path, localizedValue)
+			return setNestedValue(
+				prev,
+				path,
+				mergeLocalizedValue({
+					currentValue,
+					nextValue: value,
+					currentLocale,
+					defaultLocale,
+				}),
+			)
 		})
 	}
 
@@ -741,8 +728,10 @@ export default function EditContentPage({
 											return (
 												<div key={groupIndex} className="space-y-4">
 													{group.map((field: any) => {
-														const isTranslatable =
-															field.translatable && hasLocales
+														const isTranslatable = shouldFieldBeTranslatable(
+															field,
+															hasLocales,
+														)
 														const value = isTranslatable
 															? getLocalizedValue(field.name)
 															: getNestedValue(contentData, field.name)
@@ -782,7 +771,10 @@ export default function EditContentPage({
 
 										// Single field or large field
 										const field = singleField
-										const isTranslatable = field.translatable && hasLocales
+										const isTranslatable = shouldFieldBeTranslatable(
+											field,
+											hasLocales,
+										)
 										const value =
 											isTranslatable || field.type === "map"
 												? getLocalizedValue(field.name)
