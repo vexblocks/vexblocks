@@ -75,6 +75,54 @@ export function getLocalizedStringValue(
 }
 
 /**
+ * Deep-resolves locale-keyed values in a nested CMS data structure.
+ * Objects where ALL keys are known locale codes are treated as locale-keyed
+ * and resolved to the value for the given locale, with fallbacks.
+ * Arrays are recursively processed. Regular objects recurse into their values.
+ *
+ * @param value - The value to resolve (can be any CMS data structure)
+ * @param locale - The preferred locale code (e.g., "en", "de")
+ * @param knownLocales - List of locale codes to detect locale-keyed objects
+ * @returns The resolved value with all locale objects replaced by their strings
+ *
+ * @example
+ * deepResolveLocale({ en: "Hello", de: "Hallo" }, "de") // => "Hallo"
+ * deepResolveLocale({ title: { en: "Hi", de: "Hallo" } }, "en") // => { title: "Hi" }
+ */
+export function deepResolveLocale(
+	value: unknown,
+	locale: string,
+	knownLocales: readonly string[] = ["en", "de"],
+): unknown {
+	if (value === null || value === undefined) return value
+	if (typeof value !== "object") return value
+	if (Array.isArray(value)) {
+		return value.map((item) => deepResolveLocale(item, locale, knownLocales))
+	}
+	const obj = value as Record<string, unknown>
+	const keys = Object.keys(obj)
+	if (keys.length > 0 && keys.every((k) => knownLocales.includes(k))) {
+		// Locale-keyed object — resolve to current locale with fallbacks
+		return (
+			obj[locale] ??
+			obj[knownLocales[0]] ??
+			Object.values(obj).find((v) => typeof v === "string" && v) ??
+			""
+		)
+	}
+	// Single-key object whose only key is "teext" — CMS schema typo for "text"
+	if (keys.length === 1 && keys[0] === "teext") {
+		return deepResolveLocale(obj.teext, locale, knownLocales)
+	}
+	// Regular object — recurse into values
+	const result: Record<string, unknown> = {}
+	for (const [k, v] of Object.entries(obj)) {
+		result[k] = deepResolveLocale(v, locale, knownLocales)
+	}
+	return result
+}
+
+/**
  * Checks if a value is a localized content object (has locale keys like { en: "...", es: "..." })
  *
  * @param value - The value to check

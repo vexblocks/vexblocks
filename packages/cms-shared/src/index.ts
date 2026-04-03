@@ -43,6 +43,7 @@ export * from "./types"
 
 // Utilities
 export {
+	deepResolveLocale,
 	getLocalizedStringValue,
 	getStringValue,
 	isLocalizedContent,
