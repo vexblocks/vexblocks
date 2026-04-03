@@ -124,9 +124,16 @@ export function FieldRenderer({
 				topKeys.every((key) => isLocaleKey(key) && !expectedFieldNames.has(key))
 
 			if (isGroupLocaleWrapped) {
-				// Unwrap the entire group for the current locale — no fallback so each locale
-				// stays visually independent in the editor.
-				groupValue = groupValue[currentLocale] ?? {}
+				// Unwrap the entire group for the current locale.
+				// If this locale has no value yet, the editor falls back to the default locale.
+				groupValue =
+					getEditorLocalizedValue({
+						rawValue: groupValue,
+						translatable: false,
+						hasLocales,
+						currentLocale,
+						defaultLocale,
+					}) ?? {}
 				// After unwrapping the group, the nested fields are already unwrapped
 				// So we don't need to unwrap them again
 			} else {

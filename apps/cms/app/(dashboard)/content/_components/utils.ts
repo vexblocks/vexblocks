@@ -136,11 +136,19 @@ export function getEditorLocalizedValue({
 
 	if (translatable) {
 		if (isLocaleMap(rawValue, { excludeKeys: ["url", "newWindow"] })) {
-			return rawValue[currentLocale] ?? ""
+			return (
+				rawValue[currentLocale] ??
+				(fallbackToDefaultLocale
+					? (rawValue[defaultLocale] ?? getFirstNonEmptyLocaleValue(rawValue))
+					: undefined) ??
+				""
+			)
 		}
 
 		if (rawValue !== undefined && rawValue !== null && rawValue !== "") {
-			return currentLocale === defaultLocale ? rawValue : ""
+			return currentLocale === defaultLocale || fallbackToDefaultLocale
+				? rawValue
+				: ""
 		}
 
 		return rawValue ?? ""
