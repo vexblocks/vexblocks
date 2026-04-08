@@ -25,6 +25,7 @@ import {
 	getNestedValue,
 	isLocaleMap,
 	mergeLocalizedValue,
+	normalizeFieldsDataForEditor,
 	setNestedValue,
 	shouldFieldBeTranslatable,
 } from "./utils"
@@ -81,7 +82,10 @@ function BlockReferenceContent({
 	}
 
 	// The data for the block fields (excluding the blockId metadata)
-	const blockFieldsData = data?.fields || {}
+	const blockFieldsData = normalizeFieldsDataForEditor(
+		referencedBlock.fields ?? [],
+		data?.fields || {},
+	)
 
 	// Handle field changes using path-based updates (supports nested paths like "items[0].details[0].text")
 	const handleFieldChange = (fieldPath: string, value: any) => {

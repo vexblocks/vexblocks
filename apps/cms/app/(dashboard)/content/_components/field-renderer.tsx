@@ -32,6 +32,7 @@ import {
 	isLocaleKey,
 	isLocaleMap,
 	mergeLocalizedValue,
+	normalizeFieldsDataForEditor,
 	setNestedValue,
 	shouldFieldBeTranslatable,
 } from "./utils"
@@ -438,7 +439,7 @@ export function FieldRenderer({
 		}
 
 		// Initialize block data if not set
-		const blockValue = value || {}
+		const blockValue = normalizeFieldsDataForEditor(block.fields, value || {})
 
 		const handleBlockReferenceFieldChange = (
 			fieldPath: string,
