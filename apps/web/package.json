@@ -23,7 +23,7 @@
 		"@repo/cms-shared": "workspace:*",
 		"@tanstack/react-query": "^5.96.2",
 		"babel-plugin-react-compiler": "19.1.0-rc.3",
-		"better-auth": "1.6.1",
+		"better-auth": "1.5.3",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"compressorjs": "^1.3.0",
