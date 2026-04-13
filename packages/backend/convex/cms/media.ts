@@ -1,5 +1,10 @@
+import {
+	paginationOptsValidator,
+	paginationResultValidator,
+} from "convex/server"
 import { ConvexError, v } from "convex/values"
 import { internal } from "../_generated/api"
+import type { Doc } from "../_generated/dataModel"
 import { internalMutation, mutation, query } from "../_generated/server"
 import { r2 } from "./r2"
 import { getAuthenticatedContentUser } from "./utils"
@@ -28,36 +33,106 @@ const mediaItemValidator = v.object({
  */
 export const list = query({
 	args: {
+		paginationOpts: paginationOptsValidator,
 		search: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())),
+		filterType: v.optional(
+			v.union(v.literal("all"), v.literal("images"), v.literal("files")),
+		),
 	},
-	returns: v.array(mediaItemValidator),
+	returns: paginationResultValidator(mediaItemValidator),
 	handler: async (ctx, args) => {
 		const user = await getAuthenticatedContentUser(ctx)
 		if (!user) {
 			throw new ConvexError("Unauthorized")
 		}
 
-		let mediaItems = await ctx.db.query("cmsMedia").order("desc").collect()
+		const search = args.search?.trim().toLowerCase()
+		const tags = args.tags?.map((tag) => tag.toLowerCase().trim()) ?? []
+		const filterType = args.filterType ?? "all"
+		const hasFilters =
+			Boolean(search) || tags.length > 0 || filterType !== "all"
+		const baseQuery = ctx.db.query("cmsMedia").order("desc")
 
-		// Filter by search term (caption or filename)
-		if (args.search) {
-			const searchLower = args.search.toLowerCase()
-			mediaItems = mediaItems.filter(
-				(item) =>
-					item.caption.toLowerCase().includes(searchLower) ||
-					item.filename.toLowerCase().includes(searchLower),
-			)
+		if (!hasFilters) {
+			return await baseQuery.paginate(args.paginationOpts)
 		}
 
-		// Filter by tags (media must have ALL specified tags)
-		if (args.tags && args.tags.length > 0) {
-			mediaItems = mediaItems.filter((item) =>
-				args.tags!.every((tag) => (item.tags || []).includes(tag)),
-			)
+		const matchesFilters = (item: {
+			caption: string
+			filename: string
+			tags?: string[]
+			storageType?: string
+		}) => {
+			if (filterType === "images" && item.storageType === "r2") {
+				return false
+			}
+
+			if (filterType === "files" && item.storageType !== "r2") {
+				return false
+			}
+
+			if (
+				search &&
+				!item.caption.toLowerCase().includes(search) &&
+				!item.filename.toLowerCase().includes(search)
+			) {
+				return false
+			}
+
+			if (
+				tags.length > 0 &&
+				!tags.every((tag) => (item.tags || []).includes(tag))
+			) {
+				return false
+			}
+
+			return true
 		}
 
-		return mediaItems
+		const collected: Doc<"cmsMedia">[] = []
+		let remainingItems = args.paginationOpts.numItems
+		let nextCursor = args.paginationOpts.cursor
+		let finalResult: Awaited<ReturnType<typeof baseQuery.paginate>> | null =
+			null
+		const maxBatches = 25
+		let batchCount = 0
+
+		while (remainingItems > 0) {
+			batchCount += 1
+			finalResult = await baseQuery.paginate({
+				...args.paginationOpts,
+				cursor: nextCursor,
+				numItems: remainingItems,
+			})
+
+			collected.push(...finalResult.page.filter(matchesFilters))
+			remainingItems = args.paginationOpts.numItems - collected.length
+
+			if (
+				remainingItems <= 0 ||
+				finalResult.isDone ||
+				finalResult.pageStatus === "SplitRequired" ||
+				batchCount >= maxBatches
+			) {
+				break
+			}
+
+			nextCursor = finalResult.continueCursor
+		}
+
+		if (!finalResult) {
+			return {
+				continueCursor: args.paginationOpts.cursor ?? "",
+				isDone: true,
+				page: collected,
+			}
+		}
+
+		return {
+			...finalResult,
+			page: collected,
+		}
 	},
 })
 

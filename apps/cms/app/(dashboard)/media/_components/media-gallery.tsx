@@ -3,9 +3,9 @@
 import { useAtom } from "@lfades/atom"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation, usePaginatedQuery, useQuery } from "convex/react"
 import { AlertTriangle } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
 import { MediaCard } from "./media-card"
@@ -18,6 +18,8 @@ type MediaGalleryProps = {
 	selectedCloudflareId?: string
 	filterType?: "all" | "images" | "files"
 }
+
+const INITIAL_PAGE_SIZE = 24
 
 export function MediaGallery({
 	selectionMode = false,
@@ -40,18 +42,25 @@ export function MediaGallery({
 	// Wait for auth to be initialized before making queries
 	const [auth] = useAtom(authAtom)
 	const isReady = auth.isInitialized && auth.user !== null
+	const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
-	const mediaItems = useQuery(
+	const {
+		results: mediaItems,
+		status,
+		loadMore,
+	} = usePaginatedQuery(
 		api.cms.media.list,
 		isReady
 			? {
 					search: searchTerm || undefined,
 					tags: selectedTags.length > 0 ? selectedTags : undefined,
+					filterType,
 				}
 			: "skip",
+		{ initialNumItems: INITIAL_PAGE_SIZE },
 	)
 
-	// const allTags = useQuery(api.cms.mediaTags.list) // Not currently used
+	const allTags = useQuery(api.cms.mediaTags.list, isReady ? {} : "skip")
 	const updateMedia = useMutation(api.cms.media.update)
 	const removeMedia = useMutation(api.cms.media.remove)
 	const checkReferences = useQuery(
@@ -59,30 +68,28 @@ export function MediaGallery({
 		isReady && deletingMedia ? { mediaId: deletingMedia } : "skip",
 	)
 
-	// Filter by storage type
-	const filteredByType = mediaItems
-		? filterType === "images"
-			? mediaItems.filter((item) => item.storageType !== "r2")
-			: filterType === "files"
-				? mediaItems.filter((item) => item.storageType === "r2")
-				: mediaItems
-		: mediaItems
-
-	// Calculate tag counts from current filtered results
-	const tagCounts = (filteredByType || []).reduce(
-		(acc, item) => {
-			for (const tag of item.tags || []) {
-				acc[tag] = (acc[tag] || 0) + 1
-			}
-			return acc
-		},
-		{} as Record<string, number>,
-	)
-
-	const availableTags = Object.entries(tagCounts).map(([name, count]) => ({
-		name,
-		count,
+	const availableTags = (allTags || []).map((tag) => ({
+		name: tag.name,
+		count: tag.usageCount,
 	}))
+
+	useEffect(() => {
+		const node = loadMoreRef.current
+		if (!node || status !== "CanLoadMore") return
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const entry = entries[0]
+				if (entry?.isIntersecting) {
+					loadMore(INITIAL_PAGE_SIZE)
+				}
+			},
+			{ rootMargin: "300px 0px" },
+		)
+
+		observer.observe(node)
+		return () => observer.disconnect()
+	}, [loadMore, status])
 
 	const handleDelete = async (id: Id<"cmsMedia">) => {
 		setDeletingMedia(id)
@@ -158,14 +165,14 @@ export function MediaGallery({
 			)}
 
 			{/* Gallery Grid */}
-			{filteredByType === undefined ? (
+			{status === "LoadingFirstPage" ? (
 				<div className="flex min-h-[300px] items-center justify-center">
 					<div className="text-center">
 						<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 						<p className="text-grey-500">Loading media...</p>
 					</div>
 				</div>
-			) : filteredByType.length === 0 ? (
+			) : mediaItems.length === 0 ? (
 				<div className="flex min-h-[300px] items-center justify-center rounded-lg border-2 border-grey-200 border-dashed">
 					<div className="text-center text-grey-500">
 						<p className="mb-2 font-medium">No media found</p>
@@ -179,41 +186,57 @@ export function MediaGallery({
 					</div>
 				</div>
 			) : (
-				<div className="columns-2 gap-4 md:columns-3 lg:columns-4">
-					{filteredByType.map((media) => (
-						<MediaCard
-							key={media._id}
-							id={media._id}
-							cloudflareId={media.cloudflareId}
-							caption={media.caption}
-							tags={media.tags || []}
-							width={media.width}
-							height={media.height}
-							size={media.size}
-							mimeType={media.mimeType}
-							storageType={media.storageType}
-							r2Key={media.r2Key}
-							onEdit={() => setEditingMedia(media._id)}
-							onReplace={() =>
-								setReplacingMedia({
-									id: media._id,
-									storageType: media.storageType,
-									caption: media.caption,
-								})
-							}
-							onDelete={() => handleDelete(media._id)}
-							onSelect={() =>
-								handleMediaSelect({
-									id: media._id,
-									cloudflareId: media.cloudflareId,
-								})
-							}
-							isSelected={
-								selectionMode && media.cloudflareId === selectedCloudflareId
-							}
-							selectionMode={selectionMode}
-						/>
-					))}
+				<div>
+					<div className="columns-2 gap-4 md:columns-3 lg:columns-4">
+						{mediaItems.map((media) => (
+							<MediaCard
+								key={media._id}
+								id={media._id}
+								cloudflareId={media.cloudflareId}
+								caption={media.caption}
+								tags={media.tags || []}
+								width={media.width}
+								height={media.height}
+								size={media.size}
+								mimeType={media.mimeType}
+								storageType={media.storageType}
+								r2Key={media.r2Key}
+								onEdit={() => setEditingMedia(media._id)}
+								onReplace={() =>
+									setReplacingMedia({
+										id: media._id,
+										storageType: media.storageType,
+										caption: media.caption,
+									})
+								}
+								onDelete={() => handleDelete(media._id)}
+								onSelect={() =>
+									handleMediaSelect({
+										id: media._id,
+										cloudflareId: media.cloudflareId,
+									})
+								}
+								isSelected={
+									selectionMode && media.cloudflareId === selectedCloudflareId
+								}
+								selectionMode={selectionMode}
+							/>
+						))}
+					</div>
+
+					<div ref={loadMoreRef} className="h-1 w-full" />
+
+					{status === "LoadingMore" && (
+						<div className="mt-6 flex items-center justify-center">
+							<div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+						</div>
+					)}
+
+					{status === "Exhausted" && mediaItems.length > 0 && (
+						<p className="mt-6 text-center text-grey-400 text-sm">
+							You&apos;ve reached the end of the media library
+						</p>
+					)}
 				</div>
 			)}
 
