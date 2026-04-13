@@ -1,8 +1,8 @@
 import { ConvexError, v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction, mutation, query } from "../_generated/server"
-
 import { getAuthenticatedContentUser } from "./utils"
+import vexblocksConfig from "./vexblocks.config"
 
 // ================================
 // HELPERS
@@ -74,17 +74,19 @@ async function getLocalizationSettings(ctx: any): Promise<{
 	defaultLocale: string | null
 	locales: any[]
 }> {
+	const fallbackDefaultLocale = vexblocksConfig.localization.defaultLocale
+
 	const settings = await ctx.db
 		.query("cmsSettings")
 		.withIndex("by_key", (q: any) => q.eq("key", "localization"))
 		.first()
 
 	if (!settings?.value) {
-		return { defaultLocale: null, locales: [] }
+		return { defaultLocale: fallbackDefaultLocale, locales: [] }
 	}
 
 	return {
-		defaultLocale: settings.value.defaultLocale || null,
+		defaultLocale: settings.value.defaultLocale || fallbackDefaultLocale,
 		locales: settings.value.locales || [],
 	}
 }

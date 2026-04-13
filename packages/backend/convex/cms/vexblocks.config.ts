@@ -29,6 +29,17 @@ export interface VexBlocksConfig {
 		 */
 		fromAddress: string
 	}
+
+	/**
+	 * Localization defaults for this project.
+	 * These values are used only as fallbacks when CMS settings are missing.
+	 */
+	localization: {
+		/**
+		 * Default locale used as fallback when no localization settings exist yet.
+		 */
+		defaultLocale: string
+	}
 }
 
 const config: VexBlocksConfig = {
@@ -36,6 +47,9 @@ const config: VexBlocksConfig = {
 	email: {
 		fromName: "VexBlocks",
 		fromAddress: "noreply@julianux.com",
+	},
+	localization: {
+		defaultLocale: "de",
 	},
 }
 
