@@ -100,8 +100,9 @@ function extractTextFromLexical(
 	try {
 		const parsed = JSON.parse(lexicalJson)
 		const root = parsed.root
+		const children = root?.children
 
-		if (!root || !root.children) return ""
+		if (!Array.isArray(children)) return ""
 
 		let text = ""
 		const extractFromNode = (node: {
