@@ -5,7 +5,7 @@ import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react"
 import { AlertTriangle } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { type RefObject, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
 import { MediaCard } from "./media-card"
@@ -17,6 +17,7 @@ type MediaGalleryProps = {
 	onSelect?: (media: { id: Id<"cmsMedia">; cloudflareId: string }) => void
 	selectedCloudflareId?: string
 	filterType?: "all" | "images" | "files"
+	scrollContainerRef?: RefObject<HTMLDivElement | null>
 }
 
 const INITIAL_PAGE_SIZE = 24
@@ -26,6 +27,7 @@ export function MediaGallery({
 	onSelect,
 	selectedCloudflareId,
 	filterType = "all",
+	scrollContainerRef,
 }: MediaGalleryProps) {
 	const [searchTerm, setSearchTerm] = useState("")
 	const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -43,6 +45,8 @@ export function MediaGallery({
 	const [auth] = useAtom(authAtom)
 	const isReady = auth.isInitialized && auth.user !== null
 	const loadMoreRef = useRef<HTMLDivElement | null>(null)
+	const hasActiveFilters =
+		searchTerm.trim().length > 0 || selectedTags.length > 0
 
 	const {
 		results: mediaItems,
@@ -50,14 +54,18 @@ export function MediaGallery({
 		loadMore,
 	} = usePaginatedQuery(
 		api.cms.media.list,
-		isReady
+		isReady && !hasActiveFilters ? {} : "skip",
+		{ initialNumItems: INITIAL_PAGE_SIZE },
+	)
+	const filteredMediaItems = useQuery(
+		api.cms.media.listFiltered,
+		isReady && hasActiveFilters
 			? {
 					search: searchTerm || undefined,
 					tags: selectedTags.length > 0 ? selectedTags : undefined,
 					filterType,
 				}
 			: "skip",
-		{ initialNumItems: INITIAL_PAGE_SIZE },
 	)
 
 	const allTags = useQuery(api.cms.mediaTags.list, isReady ? {} : "skip")
@@ -68,6 +76,18 @@ export function MediaGallery({
 		isReady && deletingMedia ? { mediaId: deletingMedia } : "skip",
 	)
 
+	const galleryItems = hasActiveFilters
+		? (filteredMediaItems ?? [])
+		: mediaItems
+
+	const filteredByType = hasActiveFilters
+		? galleryItems
+		: filterType === "images"
+			? galleryItems.filter((item) => item.storageType !== "r2")
+			: filterType === "files"
+				? galleryItems.filter((item) => item.storageType === "r2")
+				: galleryItems
+
 	const availableTags = (allTags || []).map((tag) => ({
 		name: tag.name,
 		count: tag.usageCount,
@@ -75,7 +95,7 @@ export function MediaGallery({
 
 	useEffect(() => {
 		const node = loadMoreRef.current
-		if (!node || status !== "CanLoadMore") return
+		if (!node || hasActiveFilters || status !== "CanLoadMore") return
 
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -84,12 +104,15 @@ export function MediaGallery({
 					loadMore(INITIAL_PAGE_SIZE)
 				}
 			},
-			{ rootMargin: "300px 0px" },
+			{
+				root: scrollContainerRef?.current ?? null,
+				rootMargin: "300px 0px",
+			},
 		)
 
 		observer.observe(node)
 		return () => observer.disconnect()
-	}, [loadMore, status])
+	}, [hasActiveFilters, loadMore, scrollContainerRef, status])
 
 	const handleDelete = async (id: Id<"cmsMedia">) => {
 		setDeletingMedia(id)
@@ -165,14 +188,15 @@ export function MediaGallery({
 			)}
 
 			{/* Gallery Grid */}
-			{status === "LoadingFirstPage" ? (
+			{(hasActiveFilters && filteredMediaItems === undefined) ||
+			(!hasActiveFilters && status === "LoadingFirstPage") ? (
 				<div className="flex min-h-[300px] items-center justify-center">
 					<div className="text-center">
 						<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 						<p className="text-grey-500">Loading media...</p>
 					</div>
 				</div>
-			) : mediaItems.length === 0 ? (
+			) : filteredByType.length === 0 ? (
 				<div className="flex min-h-[300px] items-center justify-center rounded-lg border-2 border-grey-200 border-dashed">
 					<div className="text-center text-grey-500">
 						<p className="mb-2 font-medium">No media found</p>
@@ -188,7 +212,7 @@ export function MediaGallery({
 			) : (
 				<div>
 					<div className="columns-2 gap-4 md:columns-3 lg:columns-4">
-						{mediaItems.map((media) => (
+						{filteredByType.map((media) => (
 							<MediaCard
 								key={media._id}
 								id={media._id}
@@ -226,17 +250,19 @@ export function MediaGallery({
 
 					<div ref={loadMoreRef} className="h-1 w-full" />
 
-					{status === "LoadingMore" && (
+					{!hasActiveFilters && status === "LoadingMore" && (
 						<div className="mt-6 flex items-center justify-center">
 							<div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 						</div>
 					)}
 
-					{status === "Exhausted" && mediaItems.length > 0 && (
-						<p className="mt-6 text-center text-grey-400 text-sm">
-							You&apos;ve reached the end of the media library
-						</p>
-					)}
+					{!hasActiveFilters &&
+						status === "Exhausted" &&
+						filteredByType.length > 0 && (
+							<p className="mt-6 text-center text-grey-400 text-sm">
+								You&apos;ve reached the end of the media library
+							</p>
+						)}
 				</div>
 			)}
 

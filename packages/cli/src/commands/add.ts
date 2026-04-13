@@ -355,6 +355,9 @@ async function installBackendPackage(
 	} catch {
 		spinner.warn("Could not merge package.json, skipping")
 	}
+
+	spinner.text = "Checking vexblocks.config.ts defaults..."
+	await ensureVexBlocksConfigLocalizationDefaults(targetPath)
 }
 
 function showNextSteps(packages: PackageName[]): void {
@@ -491,4 +494,101 @@ async function mergeSchemaFile(
 	// Write the merged content
 	await fs.writeFile(schemaPath, newContent, "utf-8")
 	spinner.text = "Successfully merged CMS schema"
+}
+
+function findMatchingBraceIndex(
+	content: string,
+	openBraceIndex: number,
+): number {
+	let depth = 0
+
+	for (let i = openBraceIndex; i < content.length; i++) {
+		const char = content[i]
+		if (char === "{") depth += 1
+		if (char === "}") {
+			depth -= 1
+			if (depth === 0) {
+				return i
+			}
+		}
+	}
+
+	return -1
+}
+
+async function ensureVexBlocksConfigLocalizationDefaults(
+	targetPath: string,
+): Promise<void> {
+	const configPath = path.join(
+		targetPath,
+		"convex",
+		"cms",
+		"vexblocks.config.ts",
+	)
+	if (!(await fs.pathExists(configPath))) {
+		return
+	}
+
+	let content = await fs.readFile(configPath, "utf-8")
+	let updated = false
+
+	if (
+		!content.includes("localization?:") &&
+		!content.includes("localization:")
+	) {
+		const interfaceMarker = "export interface VexBlocksConfig {"
+		const interfaceStart = content.indexOf(interfaceMarker)
+
+		if (interfaceStart !== -1) {
+			const interfaceBrace = content.indexOf("{", interfaceStart)
+			const interfaceEnd = findMatchingBraceIndex(content, interfaceBrace)
+
+			if (interfaceEnd !== -1) {
+				const localizationBlock = `
+\t/**
+\t * Localization defaults for this project.
+\t * These values are used only as fallbacks when CMS settings are missing.
+\t */
+\tlocalization?: {
+\t\t/**
+\t\t * Default locale used as fallback when no localization settings exist yet.
+\t\t */
+\t\tdefaultLocale?: string
+\t}
+`
+				content =
+					content.slice(0, interfaceEnd) +
+					localizationBlock +
+					content.slice(interfaceEnd)
+				updated = true
+			}
+		}
+	}
+
+	if (!content.includes("localization:")) {
+		const configMarker = "const config: VexBlocksConfig = {"
+		const configStart = content.indexOf(configMarker)
+
+		if (configStart !== -1) {
+			const configBrace = content.indexOf("{", configStart)
+			const configEnd = findMatchingBraceIndex(content, configBrace)
+
+			if (configEnd !== -1) {
+				const localizationValue = `
+\tlocalization: {
+\t\tdefaultLocale: "de",
+\t},
+`
+				content =
+					content.slice(0, configEnd) +
+					localizationValue +
+					content.slice(configEnd)
+				updated = true
+			}
+		}
+	}
+
+	if (updated) {
+		await fs.writeFile(configPath, content, "utf-8")
+	}
 }

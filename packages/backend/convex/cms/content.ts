@@ -74,7 +74,8 @@ async function getLocalizationSettings(ctx: any): Promise<{
 	defaultLocale: string | null
 	locales: any[]
 }> {
-	const fallbackDefaultLocale = vexblocksConfig.localization.defaultLocale
+	const fallbackDefaultLocale =
+		vexblocksConfig.localization?.defaultLocale ?? null
 
 	const settings = await ctx.db
 		.query("cmsSettings")

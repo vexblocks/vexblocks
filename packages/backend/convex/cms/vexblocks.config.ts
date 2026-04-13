@@ -34,11 +34,11 @@ export interface VexBlocksConfig {
 	 * Localization defaults for this project.
 	 * These values are used only as fallbacks when CMS settings are missing.
 	 */
-	localization: {
+	localization?: {
 		/**
 		 * Default locale used as fallback when no localization settings exist yet.
 		 */
-		defaultLocale: string
+		defaultLocale?: string
 	}
 }
 

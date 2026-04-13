@@ -2,7 +2,7 @@
 
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { Upload as UploadIcon, X } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { FileUploader } from "./file-uploader"
 import { MediaGallery } from "./media-gallery"
 import { MediaUploader } from "./media-uploader"
@@ -21,6 +21,7 @@ export function MediaSelector({
 	filterType = "all",
 }: MediaSelectorProps) {
 	const [view, setView] = useState<"gallery" | "upload">("gallery")
+	const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
 	const isFilesOnly = filterType === "files"
 
@@ -95,13 +96,17 @@ export function MediaSelector({
 				</div>
 
 				{/* Content */}
-				<div className="flex-1 overflow-y-auto bg-grey-50 p-6">
+				<div
+					ref={scrollContainerRef}
+					className="flex-1 overflow-y-auto bg-grey-50 p-6"
+				>
 					{view === "gallery" ? (
 						<MediaGallery
 							selectionMode
 							onSelect={handleSelect}
 							selectedCloudflareId={selectedCloudflareId}
 							filterType={filterType}
+							scrollContainerRef={scrollContainerRef}
 						/>
 					) : isFilesOnly ? (
 						<FileUploader
