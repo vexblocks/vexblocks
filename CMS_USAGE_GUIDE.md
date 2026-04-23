@@ -3,6 +3,7 @@
 ## 📚 Content Types
 
 ### 1. **Global** (Singleton Content)
+
 - **Purpose:** Unique, site-wide content that appears across all pages
 - **Examples:** Header, Footer, Site Settings, Contact Information
 - **Content Limit:** Only **1 published instance** allowed (multiple drafts OK)
@@ -10,21 +11,23 @@
 - **SEO:** Not applicable
 
 **Use cases:**
+
 ```typescript
 // Fetch header content
 const header = await convex.query(api.cms.content.getGlobal, {
-  schemaName: "header"
+	schemaName: "header",
 })
 
 // Fetch footer content
 const footer = await convex.query(api.cms.content.getGlobal, {
-  schemaName: "footer"
+	schemaName: "footer",
 })
 ```
 
 ---
 
 ### 2. **Collection** (Multiple Instances)
+
 - **Purpose:** Repeatable content with multiple entries
 - **Examples:** Blog Posts, Products, Case Studies, Team Members, Landing Pages
 - **Content Limit:** **Unlimited instances**
@@ -32,23 +35,24 @@ const footer = await convex.query(api.cms.content.getGlobal, {
 - **SEO:** Metadata supported
 
 **Use cases:**
+
 ```typescript
 // Fetch all blog posts (with optional limit)
 const blogPosts = await convex.query(api.cms.content.listCollection, {
-  schemaName: "blog_posts",
-  limit: 10 // optional
+	schemaName: "blog_posts",
+	limit: 10, // optional
 })
 
 // Fetch a specific blog post
 const post = await convex.query(api.cms.content.getCollectionItem, {
-  schemaName: "blog_posts",
-  slug: "my-first-post"
+	schemaName: "blog_posts",
+	slug: "my-first-post",
 })
 
 // Fetch a specific page (pages are collections too)
 const aboutPage = await convex.query(api.cms.content.getCollectionItem, {
-  schemaName: "landing_pages",
-  slug: "about"
+	schemaName: "landing_pages",
+	slug: "about",
 })
 ```
 
@@ -59,13 +63,14 @@ const aboutPage = await convex.query(api.cms.content.getCollectionItem, {
 ### Public Queries (for use in web apps)
 
 #### `getGlobal`
+
 Get a single global content by schema name.
 
 ```typescript
 import { api } from "@repo/backend/convex/_generated/api"
 
 const header = await convex.query(api.cms.content.getGlobal, {
-  schemaName: "header"
+	schemaName: "header",
 })
 
 // Returns: content object or null
@@ -76,12 +81,13 @@ const header = await convex.query(api.cms.content.getGlobal, {
 ---
 
 #### `getCollectionItem`
+
 Get a single item from a collection by schema name and slug.
 
 ```typescript
 const post = await convex.query(api.cms.content.getCollectionItem, {
-  schemaName: "blog_posts",
-  slug: "my-first-post"
+	schemaName: "blog_posts",
+	slug: "my-first-post",
 })
 
 // Returns: content object or null
@@ -92,12 +98,13 @@ const post = await convex.query(api.cms.content.getCollectionItem, {
 ---
 
 #### `listCollection`
+
 List all published items in a collection.
 
 ```typescript
 const posts = await convex.query(api.cms.content.listCollection, {
-  schemaName: "blog_posts",
-  limit: 10 // optional
+	schemaName: "blog_posts",
+	limit: 10, // optional
 })
 
 // Returns: array of content objects
@@ -113,21 +120,21 @@ All content objects have the following structure:
 
 ```typescript
 type Content = {
-  _id: Id<"cmsContent">
-  _creationTime: number
-  schemaId: Id<"cmsSchemas">
-  slug?: string // Only for collections
-  status: "draft" | "published"
-  data: Record<string, any> // Your custom fields
-  seo?: {
-    title?: string
-    description?: string
-    ogImage?: string
-  }
-  createdBy: Id<"users">
-  updatedBy: Id<"users">
-  publishedAt?: number
-  updatedAt: number
+	_id: Id<"cmsContent">
+	_creationTime: number
+	schemaId: Id<"cmsSchemas">
+	slug?: string // Only for collections
+	status: "draft" | "published"
+	data: Record<string, any> // Your custom fields
+	seo?: {
+		title?: string
+		description?: string
+		ogImage?: string
+	}
+	createdBy: Id<"users">
+	updatedBy: Id<"users">
+	publishedAt?: number
+	updatedAt: number
 }
 ```
 
@@ -136,6 +143,7 @@ type Content = {
 ## 🎯 Best Practices
 
 ### Schema Naming
+
 - Use snake_case: `blog_posts`, `landing_pages`, `site_settings`
 - Be descriptive: `header` not `h`, `footer` not `f`
 - Plural for collections: `blog_posts`, `products`, `team_members`, `landing_pages`
@@ -143,12 +151,13 @@ type Content = {
 
 ### Content Organization
 
-| Type | Schema Name Example | Use Case |
-|------|---------------------|----------|
-| **Global** | `header`, `footer`, `site_settings` | Site-wide content |
+| Type           | Schema Name Example                       | Use Case                           |
+| -------------- | ----------------------------------------- | ---------------------------------- |
+| **Global**     | `header`, `footer`, `site_settings`       | Site-wide content                  |
 | **Collection** | `blog_posts`, `products`, `landing_pages` | Multiple entries with unique slugs |
 
 ### Slug Format
+
 - Use kebab-case: `my-first-post`, `about-us`, `contact-form`
 - Keep it short and descriptive
 - Avoid special characters
@@ -159,6 +168,7 @@ type Content = {
 ## 📦 Example: Building a Blog
 
 ### Step 1: Create Schema (in CMS Admin)
+
 - **Name:** `blog_posts`
 - **Type:** Collection
 - **Fields:**
@@ -170,6 +180,7 @@ type Content = {
   - `featured_image` (Media)
 
 ### Step 2: Create Content (in CMS Admin)
+
 - Multiple blog posts with unique slugs:
   - `my-first-post`
   - `getting-started-with-nextjs`
@@ -178,6 +189,7 @@ type Content = {
 ### Step 3: Fetch in Web App
 
 **Blog List Page (`/blog`):**
+
 ```typescript
 import { useQuery } from "convex/react"
 import { api } from "@repo/backend/convex/_generated/api"
@@ -203,6 +215,7 @@ export default function BlogPage() {
 ```
 
 **Blog Post Page (`/blog/[slug]`):**
+
 ```typescript
 import { useQuery } from "convex/react"
 import { api } from "@repo/backend/convex/_generated/api"
@@ -232,6 +245,7 @@ export default function BlogPostPage({ params }) {
 When content is published or updated in the CMS, Next.js pages are automatically revalidated using **Incremental Static Regeneration (ISR)**.
 
 ### How it works:
+
 1. Admin publishes/updates content in CMS
 2. Convex triggers `triggerRevalidationAction`
 3. Webhook calls Next.js API at `/api/revalidate`
@@ -240,6 +254,7 @@ When content is published or updated in the CMS, Next.js pages are automatically
    - **Collection:** Revalidates `/{schemaName}` and `/{schemaName}/{slug}`
 
 ### Configuration:
+
 Set these environment variables in your Next.js app:
 
 ```bash
@@ -253,11 +268,13 @@ REVALIDATE_SECRET=your-secret-here
 ## ⚠️ Validation Rules
 
 ### Global Content
+
 - ✅ Multiple drafts allowed
 - ❌ Only 1 published instance per schema
 - ❌ Cannot publish if another published instance exists
 
 ### Collection Content
+
 - ✅ Unlimited instances
 - ❌ Slug must be unique per schema
 - ❌ Slug is required
@@ -269,19 +286,19 @@ REVALIDATE_SECRET=your-secret-here
 ```typescript
 // Global (singleton)
 const header = await convex.query(api.cms.content.getGlobal, {
-  schemaName: "header"
+	schemaName: "header",
 })
 
 // Collection item (one of many)
 const post = await convex.query(api.cms.content.getCollectionItem, {
-  schemaName: "blog_posts",
-  slug: "my-first-post"
+	schemaName: "blog_posts",
+	slug: "my-first-post",
 })
 
 // Collection list (all items)
 const posts = await convex.query(api.cms.content.listCollection, {
-  schemaName: "blog_posts",
-  limit: 10
+	schemaName: "blog_posts",
+	limit: 10,
 })
 ```
 
@@ -289,14 +306,14 @@ const posts = await convex.query(api.cms.content.listCollection, {
 
 ## 📝 Summary Table
 
-| Feature | Global | Collection |
-|---------|--------|------------|
-| **Published Limit** | 1 | Unlimited |
-| **Slug Required** | No | Yes |
-| **Slug Unique** | N/A | Yes (per schema) |
-| **SEO Metadata** | No | Yes |
-| **Use Case** | Headers, Footers | Blog, Products, Pages |
-| **Query Method** | `getGlobal` | `getCollectionItem`, `listCollection` |
+| Feature             | Global           | Collection                            |
+| ------------------- | ---------------- | ------------------------------------- |
+| **Published Limit** | 1                | Unlimited                             |
+| **Slug Required**   | No               | Yes                                   |
+| **Slug Unique**     | N/A              | Yes (per schema)                      |
+| **SEO Metadata**    | No               | Yes                                   |
+| **Use Case**        | Headers, Footers | Blog, Products, Pages                 |
+| **Query Method**    | `getGlobal`      | `getCollectionItem`, `listCollection` |
 
 ---
 

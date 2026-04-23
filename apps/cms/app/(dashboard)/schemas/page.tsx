@@ -1,9 +1,9 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
 import { Grid3x3, Layers, Plus } from "lucide-react"
 import Link from "next/link"
 import { useCachedQuery } from "@/lib/use-cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
 
 export default function SchemasPage() {
 	// Use cached query - shows cached data instantly on navigation
@@ -35,7 +35,7 @@ export default function SchemasPage() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">Schemas</h1>
+					<h1 className="text-3xl font-bold text-primary">Schemas</h1>
 					<p className="mt-2 text-grey-500">
 						Define content types for your CMS
 					</p>
@@ -63,7 +63,7 @@ export default function SchemasPage() {
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-grey-100">
 						<Layers className="h-8 w-8 text-grey-400" />
 					</div>
-					<h3 className="mb-2 font-semibold text-primary text-xl">
+					<h3 className="mb-2 text-xl font-semibold text-primary">
 						No schemas yet
 					</h3>
 					<p className="mb-6 text-grey-500">
@@ -95,7 +95,7 @@ export default function SchemasPage() {
 										{getTypeIcon(schema.type)}
 									</div>
 									<span
-										className={`rounded-full px-3 py-1 font-semibold text-xs ${
+										className={`rounded-full px-3 py-1 text-xs font-semibold ${
 											schema.type === "global"
 												? "bg-purple-light text-purple"
 												: "bg-secondary-light text-primary"
@@ -105,18 +105,18 @@ export default function SchemasPage() {
 									</span>
 								</div>
 
-								<h3 className="mb-2 font-semibold text-primary text-xl group-hover:text-primary-800">
+								<h3 className="mb-2 text-xl font-semibold text-primary group-hover:text-primary-800">
 									{schema.displayName}
 								</h3>
 
 								{schema.description && (
-									<p className="mb-4 line-clamp-2 text-grey-500 text-sm">
+									<p className="mb-4 line-clamp-2 text-sm text-grey-500">
 										{schema.description}
 									</p>
 								)}
 							</Link>
 
-							<div className="flex items-center justify-between border-grey-200 border-t pt-4 text-sm">
+							<div className="flex items-center justify-between border-t border-grey-200 pt-4 text-sm">
 								<span className="text-grey-500">
 									{schema.fields.length} field
 									{schema.fields.length !== 1 ? "s" : ""}
@@ -141,7 +141,7 @@ export default function SchemasPage() {
 							<Grid3x3 className="h-5 w-5 text-purple" />
 							<h4 className="font-semibold text-purple">Global Components</h4>
 						</div>
-						<p className="text-grey-500 text-sm">
+						<p className="text-sm text-grey-500">
 							Singleton content like headers, footers, or site settings
 						</p>
 					</div>
@@ -151,7 +151,7 @@ export default function SchemasPage() {
 							<Layers className="h-5 w-5 text-secondary" />
 							<h4 className="font-semibold text-secondary">Collections</h4>
 						</div>
-						<p className="text-grey-500 text-sm">
+						<p className="text-sm text-grey-500">
 							Repeatable content like blog posts, pages, products, or team
 							members
 						</p>

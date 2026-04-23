@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "cva"
 import { cn } from "@/lib/utils"
 
 const inputVariants = cva(
-	"flex w-full rounded-md border px-3 py-2 text-sm placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:cursor-not-allowed disabled:opacity-50",
+	"flex w-full rounded-md border px-3 py-2 text-sm placeholder:text-gray-500 focus:border-transparent focus:ring-2 focus:ring-teal-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
 	{
 		variants: {
 			variant: {
@@ -23,7 +23,8 @@ const inputVariants = cva(
 )
 
 export interface InputProps
-	extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+	extends
+		Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
 		VariantProps<typeof inputVariants> {
 	icon?: React.ReactNode
 }

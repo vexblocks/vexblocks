@@ -10,7 +10,7 @@ export default function CLIDiffPage() {
 	return (
 		<div className="mx-auto w-full min-w-0">
 			<div className="mb-8 space-y-4">
-				<div className="flex items-center gap-2 text-muted-foreground text-sm">
+				<div className="flex items-center gap-2 text-sm text-muted-foreground">
 					<Link href="/docs" className="hover:text-foreground">
 						Documentation
 					</Link>
@@ -21,10 +21,10 @@ export default function CLIDiffPage() {
 					<ChevronRight className="h-4 w-4" />
 					<span>diff</span>
 				</div>
-				<h1 className="font-bold text-4xl tracking-tight">
+				<h1 className="text-4xl font-bold tracking-tight">
 					<code className="font-mono">diff</code>
 				</h1>
-				<p className="text-muted-foreground text-xl">
+				<p className="text-xl text-muted-foreground">
 					Compare local packages with the latest remote version
 				</p>
 			</div>

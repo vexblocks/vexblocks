@@ -1,9 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { authClient } from "@repo/backend/better-auth/client"
-import { api } from "@repo/backend/convex/_generated/api"
-import { CFImage } from "@repo/cms-shared/src"
 import {
 	FileCode,
 	FileText,
@@ -21,6 +18,9 @@ import { authAtom } from "@/lib/auth-atom"
 import { hasAccess, type UserRole } from "@/lib/permissions"
 import { usePrefetchRoute } from "@/lib/prefetch-queries"
 import { usePublicCachedQuery } from "@/lib/use-cached-query"
+import { authClient } from "@repo/backend/better-auth/client"
+import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared/src"
 
 type NavItem = {
 	href: string
@@ -103,7 +103,7 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 		>
 			{/* Logo */}
 			<div
-				className={`flex items-center border-grey-200 border-b py-4.5 ${
+				className={`flex items-center border-b border-grey-200 py-4.5 ${
 					isCollapsed ? "justify-center px-3" : "gap-3 px-6"
 				}`}
 			>
@@ -126,10 +126,10 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 				)}
 				{!isCollapsed && (
 					<div>
-						<h2 className="font-bold text-grey-900 text-xl">
+						<h2 className="text-grey-900 text-xl font-bold">
 							{settings?.dashboardName || "VexBlocks"}
 						</h2>
-						<p className="text-grey-500 text-xs">Headless CMS</p>
+						<p className="text-xs text-grey-500">Headless CMS</p>
 					</div>
 				)}
 			</div>
@@ -142,7 +142,7 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 					<Link
 						key={item.href}
 						href={item.href}
-						className={`group relative flex items-center rounded-lg text-grey-700 transition-all hover:bg-primary/5 hover:text-primary ${
+						className={`group text-grey-700 relative flex items-center rounded-lg transition-all hover:bg-primary/5 hover:text-primary ${
 							isCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3"
 						}`}
 						onClick={onClose}
@@ -154,10 +154,10 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 						{!isCollapsed && <span className="font-medium">{item.label}</span>}
 						{/* Tooltip on hover when collapsed */}
 						{isCollapsed && (
-							<div className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg bg-grey-900 px-3 py-2 font-medium text-sm text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
+							<div className="bg-grey-900 pointer-events-none absolute left-full z-50 ml-2 hidden rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
 								{item.label}
 								{/* Arrow */}
-								<div className="absolute top-1/2 -left-1 -translate-y-1/2 border-8 border-transparent border-r-grey-900" />
+								<div className="border-r-grey-900 absolute top-1/2 -left-1 -translate-y-1/2 border-8 border-transparent" />
 							</div>
 						)}
 					</Link>
@@ -166,12 +166,12 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 
 			{/* User Section with Logout - Always at bottom */}
 			<div
-				className={`mt-auto border-grey-200 border-t ${isCollapsed ? "p-2" : "p-4"}`}
+				className={`mt-auto border-t border-grey-200 ${isCollapsed ? "p-2" : "p-4"}`}
 			>
 				{!isCollapsed && (
-					<div className="mb-3 rounded-lg bg-grey-50 p-3">
-						<p className="font-medium text-grey-500 text-xs">Signed in as</p>
-						<p className="truncate font-semibold text-grey-900 text-sm">
+					<div className="bg-grey-50 mb-3 rounded-lg p-3">
+						<p className="text-xs font-medium text-grey-500">Signed in as</p>
+						<p className="text-grey-900 truncate text-sm font-semibold">
 							{currentUser.name || currentUser.email}
 						</p>
 					</div>
@@ -179,20 +179,20 @@ export function DashboardSidenav({ isOpen, onClose }: DashboardSidenavProps) {
 				<button
 					type="button"
 					onClick={handleLogout}
-					className={`group relative flex w-full cursor-pointer items-center rounded-lg text-grey-700 transition-all hover:bg-grey-100 ${
+					className={`group text-grey-700 relative flex w-full cursor-pointer items-center rounded-lg transition-all hover:bg-grey-100 ${
 						isCollapsed ? "justify-center p-3" : "gap-2 p-2 pl-2.5"
 					}`}
 					title={isCollapsed ? "Sign Out" : undefined}
 				>
 					<LogOut className="h-4 w-4 shrink-0" />
 					{!isCollapsed && (
-						<span className="font-medium text-sm">Sign Out</span>
+						<span className="text-sm font-medium">Sign Out</span>
 					)}
 					{/* Tooltip on hover when collapsed */}
 					{isCollapsed && (
-						<div className="pointer-events-none absolute left-full z-50 ml-2 hidden whitespace-nowrap rounded-lg bg-grey-900 px-3 py-2 font-medium text-sm text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
+						<div className="bg-grey-900 pointer-events-none absolute left-full z-50 ml-2 hidden rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity group-hover:block group-hover:opacity-100">
 							Sign Out
-							<div className="absolute top-1/2 -left-1 -translate-y-1/2 border-8 border-transparent border-r-grey-900" />
+							<div className="border-r-grey-900 absolute top-1/2 -left-1 -translate-y-1/2 border-8 border-transparent" />
 						</div>
 					)}
 				</button>

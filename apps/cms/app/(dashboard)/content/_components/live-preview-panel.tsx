@@ -1,7 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
 import { useQuery } from "convex/react"
 import {
 	Check,
@@ -19,6 +18,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react"
 import { authAtom } from "@/lib/auth-atom"
 import { previewAtom } from "@/lib/preview-atom"
+import { api } from "@repo/backend/convex/_generated/api"
 
 type PreviewMessage = {
 	type: string
@@ -412,7 +412,7 @@ export function LivePreviewPanel({
 
 	if (!previewUrl) {
 		return (
-			<div className="rounded-lg border border-grey-200 bg-grey-50 p-4">
+			<div className="bg-grey-50 rounded-lg border border-grey-200 p-4">
 				<div className="flex items-center gap-2 text-grey-500">
 					<EyeOff className="h-5 w-5" />
 					<span>
@@ -432,23 +432,23 @@ export function LivePreviewPanel({
 			}`}
 		>
 			{/* Preview Header */}
-			<div className="flex items-center justify-between border-grey-200 border-b px-4 py-2">
+			<div className="flex items-center justify-between border-b border-grey-200 px-4 py-2">
 				<div className="flex items-center gap-3">
 					<div className="flex items-center gap-2">
 						<Eye className="h-4 w-4 text-primary" />
-						<span className="font-medium text-grey-900 text-sm">
+						<span className="text-grey-900 text-sm font-medium">
 							Live Preview
 						</span>
 					</div>
 
 					{/* Status Badge */}
 					{contentStatus === "draft" ? (
-						<span className="flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-orange text-xs">
+						<span className="flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-xs text-orange">
 							<span className="h-1.5 w-1.5 rounded-full bg-orange" />
 							Draft
 						</span>
 					) : (
-						<span className="flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-green text-xs">
+						<span className="flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-xs text-green">
 							<span className="h-1.5 w-1.5 rounded-full bg-green" />
 							Published
 						</span>
@@ -456,13 +456,13 @@ export function LivePreviewPanel({
 
 					{/* Connection Status */}
 					{!isReady && (
-						<span className="flex items-center gap-1 text-grey-500 text-xs">
+						<span className="flex items-center gap-1 text-xs text-grey-500">
 							<span className="h-2 w-2 animate-pulse rounded-full bg-grey-400" />
 							Connecting...
 						</span>
 					)}
 					{isReady && (
-						<span className="flex items-center gap-1 text-grey-500 text-xs">
+						<span className="flex items-center gap-1 text-xs text-grey-500">
 							<span className="h-2 w-2 rounded-full bg-green" />
 							Synced
 						</span>
@@ -476,7 +476,7 @@ export function LivePreviewPanel({
 							type="button"
 							onClick={handlePublish}
 							disabled={isPublishing}
-							className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium text-sm transition-colors ${
+							className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
 								publishSuccess
 									? "bg-green text-white"
 									: "bg-primary text-white hover:bg-primary-800"
@@ -616,7 +616,7 @@ export function LivePreviewPanel({
 					<button
 						type="button"
 						onClick={() => setShowPreview(true)}
-						className="flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 transition-colors hover:bg-grey-50"
+						className="hover:bg-grey-50 flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 					>
 						<Eye className="h-4 w-4" />
 						Show Preview

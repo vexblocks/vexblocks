@@ -1,7 +1,5 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation } from "convex/react"
 import {
 	AlertTriangle,
@@ -23,6 +21,8 @@ import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useCachedQuery } from "@/lib/use-cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 type UserRole = "admin" | "editor" | "developer" | "user"
 
@@ -242,7 +242,7 @@ export default function UsersPage() {
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
 						<Shield className="h-8 w-8 text-red-600" />
 					</div>
-					<h2 className="mb-2 font-bold text-2xl text-red-900">
+					<h2 className="mb-2 text-2xl font-bold text-red-900">
 						Access Denied
 					</h2>
 					<p className="mb-6 text-red-700">
@@ -299,7 +299,7 @@ export default function UsersPage() {
 
 			<div className="mb-8 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">User Management</h1>
+					<h1 className="text-3xl font-bold text-primary">User Management</h1>
 					<p className="mt-2 text-grey-500">
 						Manage user accounts, roles, and permissions
 					</p>
@@ -319,8 +319,8 @@ export default function UsersPage() {
 				<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-grey-500 text-sm">Total Users</p>
-							<p className="mt-1 font-bold text-2xl text-grey-900">
+							<p className="text-sm text-grey-500">Total Users</p>
+							<p className="text-grey-900 mt-1 text-2xl font-bold">
 								{stats.total}
 							</p>
 						</div>
@@ -330,8 +330,8 @@ export default function UsersPage() {
 				<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-grey-500 text-sm">Admins</p>
-							<p className="mt-1 font-bold text-2xl text-red-700">
+							<p className="text-sm text-grey-500">Admins</p>
+							<p className="mt-1 text-2xl font-bold text-red-700">
 								{stats.admins}
 							</p>
 						</div>
@@ -341,8 +341,8 @@ export default function UsersPage() {
 				<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-grey-500 text-sm">Editors</p>
-							<p className="mt-1 font-bold text-2xl text-blue-700">
+							<p className="text-sm text-grey-500">Editors</p>
+							<p className="mt-1 text-2xl font-bold text-blue-700">
 								{stats.editors}
 							</p>
 						</div>
@@ -352,8 +352,8 @@ export default function UsersPage() {
 				<div className="rounded-lg border border-grey-200 bg-white p-4 shadow-sm">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-grey-500 text-sm">Developers</p>
-							<p className="mt-1 font-bold text-2xl text-purple-700">
+							<p className="text-sm text-grey-500">Developers</p>
+							<p className="mt-1 text-2xl font-bold text-purple-700">
 								{stats.developers}
 							</p>
 						</div>
@@ -365,27 +365,27 @@ export default function UsersPage() {
 			{/* Pending Invitations */}
 			{pendingInvitations.length > 0 && (
 				<div className="mb-8">
-					<h2 className="mb-4 font-bold text-grey-900 text-xl">
+					<h2 className="text-grey-900 mb-4 text-xl font-bold">
 						Pending Invitations ({pendingInvitations.length})
 					</h2>
 					<div className="rounded-lg bg-white shadow-md">
 						<div className="overflow-x-auto">
 							<table className="w-full">
-								<thead className="border-grey-200 border-b bg-grey-50">
+								<thead className="bg-grey-50 border-b border-grey-200">
 									<tr>
-										<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+										<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 											Email
 										</th>
-										<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+										<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 											Role
 										</th>
-										<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+										<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 											Invited By
 										</th>
-										<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+										<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 											Sent
 										</th>
-										<th className="px-6 py-3 text-right font-medium text-grey-700 text-xs uppercase tracking-wider">
+										<th className="text-grey-700 px-6 py-3 text-right text-xs font-medium tracking-wider uppercase">
 											Actions
 										</th>
 									</tr>
@@ -393,7 +393,7 @@ export default function UsersPage() {
 								<tbody className="divide-y divide-grey-200">
 									{pendingInvitations.map((invitation) => (
 										<tr key={invitation._id} className="hover:bg-grey-50">
-											<td className="whitespace-nowrap px-6 py-4">
+											<td className="px-6 py-4 whitespace-nowrap">
 												<div className="flex items-center gap-2">
 													<Mail className="h-4 w-4 text-grey-400" />
 													<span className="text-grey-900 text-sm">
@@ -401,22 +401,22 @@ export default function UsersPage() {
 													</span>
 												</div>
 											</td>
-											<td className="whitespace-nowrap px-6 py-4">
+											<td className="px-6 py-4 whitespace-nowrap">
 												<span
-													className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium text-xs ${getRoleBadgeColor(invitation.role)}`}
+													className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${getRoleBadgeColor(invitation.role)}`}
 												>
 													{getRoleIcon(invitation.role)}
 													{invitation.role}
 												</span>
 											</td>
-											<td className="whitespace-nowrap px-6 py-4 text-grey-700 text-sm">
+											<td className="text-grey-700 px-6 py-4 text-sm whitespace-nowrap">
 												{invitation.invitedBy.name ||
 													invitation.invitedBy.email}
 											</td>
-											<td className="whitespace-nowrap px-6 py-4 text-grey-500 text-sm">
+											<td className="px-6 py-4 text-sm whitespace-nowrap text-grey-500">
 												{new Date(invitation.invitedAt).toLocaleDateString()}
 											</td>
-											<td className="whitespace-nowrap px-6 py-4 text-right">
+											<td className="px-6 py-4 text-right whitespace-nowrap">
 												<div className="flex items-center justify-end gap-2">
 													<button
 														type="button"
@@ -455,31 +455,31 @@ export default function UsersPage() {
 
 			{/* Users Table */}
 			<div className="mb-4">
-				<h2 className="font-bold text-grey-900 text-xl">
+				<h2 className="text-grey-900 text-xl font-bold">
 					All Users ({users.length})
 				</h2>
 			</div>
 			<div className="rounded-lg bg-white shadow-md">
 				<div className="overflow-x-auto">
 					<table className="w-full">
-						<thead className="border-grey-200 border-b bg-grey-50">
+						<thead className="bg-grey-50 border-b border-grey-200">
 							<tr>
-								<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+								<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 									User
 								</th>
-								<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+								<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 									Email
 								</th>
-								<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+								<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 									Role
 								</th>
-								<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+								<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 									Status
 								</th>
-								<th className="px-6 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+								<th className="text-grey-700 px-6 py-3 text-left text-xs font-medium tracking-wider uppercase">
 									Joined
 								</th>
-								<th className="px-6 py-3 text-right font-medium text-grey-700 text-xs uppercase tracking-wider">
+								<th className="text-grey-700 px-6 py-3 text-right text-xs font-medium tracking-wider uppercase">
 									Actions
 								</th>
 							</tr>
@@ -487,7 +487,7 @@ export default function UsersPage() {
 						<tbody className="divide-y divide-grey-200">
 							{users.map((user) => (
 								<tr key={user._id} className="hover:bg-grey-50">
-									<td className="whitespace-nowrap px-6 py-4">
+									<td className="px-6 py-4 whitespace-nowrap">
 										<div className="flex items-center gap-3">
 											{user.profilePictureUrl ? (
 												<Image
@@ -498,45 +498,45 @@ export default function UsersPage() {
 													className="size-10 rounded-full object-cover"
 												/>
 											) : (
-												<div className="flex size-10 items-center justify-center rounded-full bg-primary/10 font-medium text-primary text-sm">
+												<div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
 													{(user.name || user.email)[0].toUpperCase()}
 												</div>
 											)}
 											<div>
-												<p className="font-medium text-grey-900 text-sm">
+												<p className="text-grey-900 text-sm font-medium">
 													{user.name || "—"}
 												</p>
 											</div>
 										</div>
 									</td>
-									<td className="whitespace-nowrap px-6 py-4">
+									<td className="px-6 py-4 whitespace-nowrap">
 										<p className="text-grey-700 text-sm">{user.email}</p>
 									</td>
-									<td className="whitespace-nowrap px-6 py-4">
+									<td className="px-6 py-4 whitespace-nowrap">
 										<span
-											className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium text-xs ${getRoleBadgeColor(user.role)}`}
+											className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${getRoleBadgeColor(user.role)}`}
 										>
 											{getRoleIcon(user.role)}
 											{user.role}
 										</span>
 									</td>
-									<td className="whitespace-nowrap px-6 py-4">
+									<td className="px-6 py-4 whitespace-nowrap">
 										{user.isActive !== false ? (
-											<span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 font-medium text-white text-xs">
+											<span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-white">
 												<CheckCircle className="h-3 w-3" />
 												Active
 											</span>
 										) : (
-											<span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 font-medium text-red-700 text-xs">
+											<span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
 												<Ban className="h-3 w-3" />
 												Disabled
 											</span>
 										)}
 									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-grey-500 text-sm">
+									<td className="px-6 py-4 text-sm whitespace-nowrap text-grey-500">
 										{new Date(user._creationTime).toLocaleDateString()}
 									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-right">
+									<td className="px-6 py-4 text-right whitespace-nowrap">
 										<div className="flex items-center justify-end gap-2">
 											<button
 												type="button"
@@ -589,7 +589,7 @@ export default function UsersPage() {
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 					<div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
 						<div className="mb-4 flex items-center justify-between">
-							<h2 className="font-bold text-primary text-xl">
+							<h2 className="text-xl font-bold text-primary">
 								Invite New User
 							</h2>
 							<button
@@ -600,7 +600,7 @@ export default function UsersPage() {
 									setInviteRole("user")
 									setError("")
 								}}
-								className="text-grey-400 hover:text-grey-600"
+								className="hover:text-grey-600 text-grey-400"
 							>
 								<X className="h-5 w-5" />
 							</button>
@@ -608,7 +608,7 @@ export default function UsersPage() {
 
 						{error && (
 							<div className="mb-4 rounded-lg bg-red-50 p-3">
-								<p className="text-error text-sm">{error}</p>
+								<p className="text-sm text-error">{error}</p>
 							</div>
 						)}
 
@@ -616,7 +616,7 @@ export default function UsersPage() {
 							<div>
 								<label
 									htmlFor="invite-email"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Email Address
 								</label>
@@ -626,14 +626,14 @@ export default function UsersPage() {
 									value={inviteEmail}
 									onChange={(e) => setInviteEmail(e.target.value)}
 									placeholder="user@example.com"
-									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								/>
 							</div>
 
 							<div>
 								<label
 									htmlFor="invite-role"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Role
 								</label>
@@ -641,14 +641,14 @@ export default function UsersPage() {
 									id="invite-role"
 									value={inviteRole}
 									onChange={(e) => setInviteRole(e.target.value as UserRole)}
-									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								>
 									<option value="user">User</option>
 									<option value="editor">Editor</option>
 									<option value="developer">Developer</option>
 									<option value="admin">Admin</option>
 								</select>
-								<p className="mt-1 text-grey-500 text-xs">
+								<p className="mt-1 text-xs text-grey-500">
 									Admin: Full access • Editor: Content management • Developer:
 									API access • User: Basic access
 								</p>
@@ -665,7 +665,7 @@ export default function UsersPage() {
 									setError("")
 								}}
 								disabled={loading}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								Cancel
 							</button>
@@ -696,11 +696,11 @@ export default function UsersPage() {
 			{editingUser && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 					<div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-						<h2 className="mb-4 font-bold text-primary text-xl">Edit User</h2>
+						<h2 className="mb-4 text-xl font-bold text-primary">Edit User</h2>
 
 						{error && (
 							<div className="mb-4 rounded-lg bg-red-50 p-3">
-								<p className="text-error text-sm">{error}</p>
+								<p className="text-sm text-error">{error}</p>
 							</div>
 						)}
 
@@ -708,7 +708,7 @@ export default function UsersPage() {
 							<div>
 								<label
 									htmlFor="edit-name"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Name
 								</label>
@@ -718,14 +718,14 @@ export default function UsersPage() {
 									value={editName}
 									onChange={(e) => setEditName(e.target.value)}
 									placeholder="User Name"
-									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								/>
 							</div>
 
 							<div>
 								<label
 									htmlFor="edit-role"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Role
 								</label>
@@ -733,14 +733,14 @@ export default function UsersPage() {
 									id="edit-role"
 									value={editRole}
 									onChange={(e) => setEditRole(e.target.value as UserRole)}
-									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+									className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								>
 									<option value="user">User</option>
 									<option value="editor">Editor</option>
 									<option value="developer">Developer</option>
 									<option value="admin">Admin</option>
 								</select>
-								<p className="mt-1 text-grey-500 text-xs">
+								<p className="mt-1 text-xs text-grey-500">
 									Admin: Full access • Editor: Content management • Developer:
 									API access • User: Basic access
 								</p>
@@ -755,7 +755,7 @@ export default function UsersPage() {
 									setError("")
 								}}
 								disabled={loading}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								Cancel
 							</button>
@@ -780,18 +780,18 @@ export default function UsersPage() {
 							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-error-light/20">
 								<AlertTriangle className="h-6 w-6 text-error" />
 							</div>
-							<h3 className="font-semibold text-lg text-primary">
+							<h3 className="text-lg font-semibold text-primary">
 								Delete User
 							</h3>
 						</div>
 
 						{error && (
 							<div className="mb-4 rounded-lg bg-red-50 p-3">
-								<p className="text-error text-sm">{error}</p>
+								<p className="text-sm text-error">{error}</p>
 							</div>
 						)}
 
-						<p className="mb-6 text-grey-600">
+						<p className="text-grey-600 mb-6">
 							Are you sure you want to delete{" "}
 							<strong>{deletingUser.email}</strong>? This action cannot be
 							undone.
@@ -805,7 +805,7 @@ export default function UsersPage() {
 									setError("")
 								}}
 								disabled={loading}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								Cancel
 							</button>
@@ -830,18 +830,18 @@ export default function UsersPage() {
 							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-error-light/20">
 								<AlertTriangle className="h-6 w-6 text-error" />
 							</div>
-							<h3 className="font-semibold text-lg text-primary">
+							<h3 className="text-lg font-semibold text-primary">
 								Delete Invitation
 							</h3>
 						</div>
 
 						{error && (
 							<div className="mb-4 rounded-lg bg-red-50 p-3">
-								<p className="text-error text-sm">{error}</p>
+								<p className="text-sm text-error">{error}</p>
 							</div>
 						)}
 
-						<p className="mb-6 text-grey-600">
+						<p className="text-grey-600 mb-6">
 							Are you sure you want to delete the invitation for{" "}
 							<strong>{deletingInvitation.email}</strong>?
 						</p>
@@ -854,7 +854,7 @@ export default function UsersPage() {
 									setError("")
 								}}
 								disabled={loading}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								Cancel
 							</button>

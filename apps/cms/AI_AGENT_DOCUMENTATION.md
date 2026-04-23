@@ -117,6 +117,7 @@ The agent has access to:
 - **Schema field structures** to validate content data
 
 This allows the agent to:
+
 - Understand your current CMS structure
 - Validate field types before creating/updating content
 - Suggest appropriate field configurations
@@ -217,28 +218,28 @@ logger.error("Error", error)
 import { atom } from "@lfades/atom"
 
 // Available atoms
-currentChatIdAtom    // Current chat session ID
-messagesAtom         // Chat messages
-isLoadingAtom        // Loading state
+currentChatIdAtom // Current chat session ID
+messagesAtom // Chat messages
+isLoadingAtom // Loading state
 recentOperationsAtom // Recent tool operations
-cachedSchemaIdsAtom  // Accessed schema IDs
-chatSessionsAtom     // All chat sessions
-chatErrorAtom        // Error state
+cachedSchemaIdsAtom // Accessed schema IDs
+chatSessionsAtom // All chat sessions
+chatErrorAtom // Error state
 ```
 
 #### Chat Persistence (`lib/ai-chat/use-chat-persistence.ts`)
 
 ```typescript
 const {
-  currentChatId,
-  messages,
-  sessions,
-  createChat,
-  addMessage,
-  updateTitle,
-  deleteChat,
-  loadChat,
-  startNewChat,
+	currentChatId,
+	messages,
+	sessions,
+	createChat,
+	addMessage,
+	updateTitle,
+	deleteChat,
+	loadChat,
+	startNewChat,
 } = useChatPersistence()
 ```
 
@@ -246,14 +247,14 @@ const {
 
 ```typescript
 tool({
-  description: "Tool description for the LLM",
-  inputSchema: z.object({
-    param: z.string().describe("Parameter description"),
-  }),
-  execute: async ({ param }) => {
-    // Tool implementation
-    return { success: true, data: result }
-  },
+	description: "Tool description for the LLM",
+	inputSchema: z.object({
+		param: z.string().describe("Parameter description"),
+	}),
+	execute: async ({ param }) => {
+		// Tool implementation
+		return { success: true, data: result }
+	},
 })
 ```
 
@@ -295,6 +296,7 @@ tool({
 ## Future Enhancements
 
 Potential improvements:
+
 - [ ] Add media/file upload capabilities
 - [ ] Support for bulk operations
 - [ ] Schema migration suggestions
@@ -305,16 +307,19 @@ Potential improvements:
 ## Troubleshooting
 
 ### Agent not responding
+
 - Check Convex connection
 - Verify GOOGLE_GEMINI_API_KEY is set
 - Check browser console for errors
 
 ### Tool execution fails
+
 - Verify user authentication
 - Check Convex API permissions
 - Review error messages in response
 
 ### Schema updates not working
+
 - Ensure double confirmation was provided
 - Check that userConfirmed parameter is true
 - Verify schema ID is correct
@@ -322,6 +327,7 @@ Potential improvements:
 ## Support
 
 For issues or questions:
+
 1. Check the Convex dashboard for API errors
 2. Review browser console logs
 3. Check the generated types are up to date

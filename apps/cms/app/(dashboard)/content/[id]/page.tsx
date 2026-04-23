@@ -1,9 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -26,6 +23,9 @@ import { useSidebar } from "@/contexts/sidebar-context"
 import { authAtom } from "@/lib/auth-atom"
 import { getCleanErrorMessage } from "@/lib/error-utils"
 import { sanitizeData } from "@/lib/sanitize-data"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import { FieldRenderer } from "../_components/field-renderer"
 import { LivePreviewPanel } from "../_components/live-preview-panel"
 import { LocaleContext } from "../_components/locale-context"
@@ -200,7 +200,7 @@ export default function EditContentPage({
 	const [isAutoSlugActive, setIsAutoSlugActive] = useState(false)
 
 	// Reset state when navigating to a different content item
-	// biome-ignore lint/correctness/useExhaustiveDependencies: id is intentionally used as a trigger to reset state
+	// oxlint-disable-next-line react/exhaustive-deps
 	useEffect(() => {
 		lastAutoSlugRef.current = null
 		setIsAutoSlugActive(false)
@@ -525,7 +525,7 @@ export default function EditContentPage({
 	if (content === null || schema === null) {
 		return (
 			<div className="text-center">
-				<h1 className="mb-4 font-bold text-2xl text-primary">
+				<h1 className="mb-4 text-2xl font-bold text-primary">
 					Content Not Found
 				</h1>
 				<Link href={backUrl} className="text-primary hover:underline">
@@ -555,7 +555,7 @@ export default function EditContentPage({
 								href={getPublicPageUrl() ?? "#"}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="inline-flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 inline-flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								<ExternalLink className="h-4 w-4" />
 								View Page
@@ -569,7 +569,7 @@ export default function EditContentPage({
 								className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-colors ${
 									showPreview
 										? "bg-primary text-white"
-										: "border border-grey-300 text-grey-700 hover:bg-grey-50"
+										: "text-grey-700 hover:bg-grey-50 border border-grey-300"
 								}`}
 							>
 								<Eye className="h-4 w-4" />
@@ -588,13 +588,13 @@ export default function EditContentPage({
 				</div>
 
 				<div className="mb-6">
-					<h1 className="font-bold text-2xl text-primary">Edit Content</h1>
-					<p className="mt-1 text-grey-500 text-sm">{schema.displayName}</p>
+					<h1 className="text-2xl font-bold text-primary">Edit Content</h1>
+					<p className="mt-1 text-sm text-grey-500">{schema.displayName}</p>
 				</div>
 
 				{error && (
 					<div className="mb-6 rounded-lg bg-error-light/10 p-4">
-						<p className="text-error text-sm">{error}</p>
+						<p className="text-sm text-error">{error}</p>
 					</div>
 				)}
 
@@ -606,7 +606,7 @@ export default function EditContentPage({
 								<div className="flex h-12 w-12 items-center justify-center rounded-full bg-error-light/20">
 									<AlertTriangle className="h-6 w-6 text-error" />
 								</div>
-								<h3 className="font-semibold text-lg text-primary">
+								<h3 className="text-lg font-semibold text-primary">
 									Delete Content
 								</h3>
 							</div>
@@ -663,11 +663,11 @@ export default function EditContentPage({
 						{/* Content Fields */}
 						<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
 							<div className="mb-4 flex items-center justify-between">
-								<h2 className="font-semibold text-lg text-primary">
+								<h2 className="text-lg font-semibold text-primary">
 									Content Fields
 								</h2>
 								{hasLocales && currentLocale && (
-									<span className="rounded-full bg-blue-100 px-3 py-1 font-mono text-blue-700 text-xs uppercase">
+									<span className="rounded-full bg-blue-100 px-3 py-1 font-mono text-xs text-blue-700 uppercase">
 										{currentLocale}
 									</span>
 								)}
@@ -743,7 +743,7 @@ export default function EditContentPage({
 																data-field-path={field.name}
 															>
 																{isTranslatable && (
-																	<div className="absolute top-0 right-0 z-10 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
+																	<div className="absolute top-0 right-0 z-10 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
 																		Translatable
 																	</div>
 																)}
@@ -787,7 +787,7 @@ export default function EditContentPage({
 												data-field-path={field.name}
 											>
 												{isTranslatable && (
-													<div className="absolute top-0 right-0 z-10 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
+													<div className="absolute top-0 right-0 z-10 rounded-tr-lg rounded-bl-lg bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
 														Translatable
 													</div>
 												)}
@@ -814,7 +814,7 @@ export default function EditContentPage({
 						{/* SEO */}
 						{schema.type !== "global" && !schema.isSimple && (
 							<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
-								<h2 className="mb-4 font-semibold text-lg text-primary">
+								<h2 className="mb-4 text-lg font-semibold text-primary">
 									SEO Metadata
 								</h2>
 								<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -823,7 +823,7 @@ export default function EditContentPage({
 										<div>
 											<label
 												htmlFor="seo-title"
-												className="mb-2 block font-medium text-grey-500 text-sm"
+												className="mb-2 block text-sm font-medium text-grey-500"
 											>
 												SEO Title
 											</label>
@@ -838,13 +838,13 @@ export default function EditContentPage({
 													}))
 												}
 												placeholder="Page title for search engines"
-												className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+												className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 											/>
 										</div>
 										<div>
 											<label
 												htmlFor="seo-description"
-												className="mb-1 block font-medium text-grey-500 text-sm"
+												className="mb-1 block text-sm font-medium text-grey-500"
 											>
 												SEO Description
 											</label>
@@ -860,23 +860,23 @@ export default function EditContentPage({
 												placeholder="Page description for search engines"
 												minRows={2}
 												maxRows={6}
-												className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+												className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 											/>
 										</div>
 									</div>
 
 									{/* Right Column - OG Image */}
 									<div>
-										<div className="mb-2 block font-medium text-grey-500 text-sm">
+										<div className="mb-2 block text-sm font-medium text-grey-500">
 											OG Image
 										</div>
-										<p className="mb-2 text-grey-400 text-xs">
+										<p className="mb-2 text-xs text-grey-400">
 											Optional image for social media sharing
 										</p>
 										<div className="space-y-4">
 											{seoOgImage ? (
 												<div className="inline-flex w-full flex-col items-center">
-													<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+													<div className="group bg-grey-50 relative max-w-md overflow-hidden rounded-lg border border-grey-300 transition-all hover:border-primary hover:shadow-md">
 														<div className="relative overflow-hidden bg-grey-100">
 															<CFImage
 																assetId={seoOgImage}
@@ -895,11 +895,11 @@ export default function EditContentPage({
 																<X className="h-4 w-4" />
 															</button>
 														</div>
-														<div className="border-grey-200 border-t bg-white p-3">
+														<div className="border-t border-grey-200 bg-white p-3">
 															<button
 																type="button"
 																onClick={() => setShowMediaSelector(true)}
-																className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+																className="text-grey-700 w-full rounded-lg bg-grey-100 px-4 py-2 text-sm font-medium transition-colors hover:bg-grey-200"
 															>
 																Change Image
 															</button>
@@ -910,16 +910,16 @@ export default function EditContentPage({
 												<button
 													type="button"
 													onClick={() => setShowMediaSelector(true)}
-													className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
+													className="group bg-grey-50 flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-grey-300 p-4 transition-all hover:border-primary hover:bg-primary/5"
 												>
 													<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
 														<ImageIcon className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
 													</div>
 													<div className="text-center">
-														<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+														<p className="text-grey-700 text-sm font-medium transition-colors group-hover:text-primary">
 															Select from Media Library
 														</p>
-														<p className="mt-1 text-grey-500 text-xs">
+														<p className="mt-1 text-xs text-grey-500">
 															Click to browse and choose an image
 														</p>
 													</div>
@@ -947,7 +947,7 @@ export default function EditContentPage({
 
 						{/* Status */}
 						<div className="rounded-sm border border-grey-200 bg-white p-4 shadow-md">
-							<h2 className="mb-4 font-semibold text-lg text-primary">
+							<h2 className="mb-4 text-lg font-semibold text-primary">
 								Publication Status
 							</h2>
 							<div className="flex gap-4">
@@ -962,7 +962,7 @@ export default function EditContentPage({
 									/>
 									<div>
 										<div className="font-medium text-primary">Draft</div>
-										<div className="text-grey-500 text-sm">
+										<div className="text-sm text-grey-500">
 											Save as draft (not visible publicly)
 										</div>
 									</div>
@@ -978,7 +978,7 @@ export default function EditContentPage({
 									/>
 									<div>
 										<div className="font-medium text-primary">Published</div>
-										<div className="text-grey-500 text-sm">
+										<div className="text-sm text-grey-500">
 											Publish immediately (visible publicly)
 										</div>
 									</div>

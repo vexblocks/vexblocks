@@ -1,10 +1,10 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation } from "convex/react"
 import { Check, X } from "lucide-react"
 import { useState } from "react"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 type Schema = {
 	_id: string
@@ -86,12 +86,12 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 			<div className="w-full max-w-2xl rounded-lg bg-white shadow-xl">
 				{/* Header */}
-				<div className="flex items-center justify-between border-grey-200 border-b p-6">
+				<div className="flex items-center justify-between border-b border-grey-200 p-6">
 					<div>
-						<h2 className="font-semibold text-primary text-xl">
+						<h2 className="text-xl font-semibold text-primary">
 							Configure View
 						</h2>
-						<p className="mt-1 text-grey-500 text-sm">
+						<p className="mt-1 text-sm text-grey-500">
 							Customize how {schema.displayName} content is displayed
 						</p>
 					</div>
@@ -108,7 +108,7 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 				<div className="max-h-[60vh] overflow-y-auto p-6">
 					{error && (
 						<div className="mb-4 rounded-lg bg-red-50 p-4">
-							<p className="text-error text-sm">{error}</p>
+							<p className="text-sm text-error">{error}</p>
 						</div>
 					)}
 
@@ -117,18 +117,18 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 						<div>
 							<label
 								htmlFor="preview-field"
-								className="mb-2 block font-medium text-grey-700 text-sm"
+								className="text-grey-700 mb-2 block text-sm font-medium"
 							>
 								Main Preview Field
 							</label>
-							<p className="mb-3 text-grey-500 text-sm">
+							<p className="mb-3 text-sm text-grey-500">
 								Select which field to display in the main content column
 							</p>
 							<select
 								id="preview-field"
 								value={previewField}
 								onChange={(e) => setPreviewField(e.target.value)}
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="text-grey-700 w-full rounded-lg border border-grey-300 px-4 py-2 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							>
 								<option value="">Auto (first text field)</option>
 								{displayableFields.map((field) => (
@@ -141,10 +141,10 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 
 						{/* Additional Fields */}
 						<div>
-							<div className="mb-2 block font-medium text-grey-700 text-sm">
+							<div className="text-grey-700 mb-2 block text-sm font-medium">
 								Additional Columns
 							</div>
-							<p className="mb-3 text-grey-500 text-sm">
+							<p className="mb-3 text-sm text-grey-500">
 								Select up to 3 additional fields to show as columns (max 3)
 							</p>
 							<div className="space-y-2">
@@ -162,7 +162,7 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 												isSelected
 													? "border-primary bg-primary/5"
 													: isDisabled
-														? "border-grey-200 bg-grey-50 opacity-50"
+														? "bg-grey-50 border-grey-200 opacity-50"
 														: "border-grey-200 hover:border-grey-300"
 											}`}
 										>
@@ -176,10 +176,10 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 												{isSelected && <Check className="h-3 w-3 text-white" />}
 											</div>
 											<div className="flex-1">
-												<div className="font-medium text-grey-900 text-sm">
+												<div className="text-grey-900 text-sm font-medium">
 													{field.label}
 												</div>
-												<div className="text-grey-500 text-xs">
+												<div className="text-xs text-grey-500">
 													{field.name} • {field.type}
 												</div>
 											</div>
@@ -188,7 +188,7 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 								})}
 							</div>
 							{additionalFields.length >= 3 && (
-								<p className="mt-2 text-orange text-xs">
+								<p className="mt-2 text-xs text-orange">
 									Maximum of 3 additional fields reached
 								</p>
 							)}
@@ -197,11 +197,11 @@ export function ViewConfigModal({ schema, onClose }: ViewConfigModalProps) {
 				</div>
 
 				{/* Footer */}
-				<div className="flex items-center justify-end gap-3 border-grey-200 border-t p-6">
+				<div className="flex items-center justify-end gap-3 border-t border-grey-200 p-6">
 					<button
 						type="button"
 						onClick={onClose}
-						className="rounded-lg border border-grey-300 px-6 py-2 text-grey-700 transition-colors hover:bg-grey-100"
+						className="text-grey-700 rounded-lg border border-grey-300 px-6 py-2 transition-colors hover:bg-grey-100"
 					>
 						Cancel
 					</button>

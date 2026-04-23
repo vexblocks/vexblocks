@@ -24,7 +24,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<div className="flex min-h-screen bg-grey-50">
+		<div className="bg-grey-50 flex min-h-screen">
 			{isMobileOpen && (
 				<div
 					role="button"

@@ -1,13 +1,13 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, useQuery } from "convex/react"
 import { Edit2, Plus, Save, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 type TagManagerProps = {
 	onClose?: () => void
@@ -87,12 +87,12 @@ export function TagManager({ onClose }: TagManagerProps) {
 	return (
 		<div className="rounded-lg bg-white p-6 shadow-md">
 			<div className="mb-4 flex items-center justify-between">
-				<h2 className="font-semibold text-lg text-primary">Manage Tags</h2>
+				<h2 className="text-lg font-semibold text-primary">Manage Tags</h2>
 				{onClose && (
 					<button
 						type="button"
 						onClick={onClose}
-						className="text-grey-500 hover:text-grey-700"
+						className="hover:text-grey-700 text-grey-500"
 					>
 						<X className="h-5 w-5" />
 					</button>
@@ -115,7 +115,7 @@ export function TagManager({ onClose }: TagManagerProps) {
 								}
 							}}
 							placeholder="Enter tag name..."
-							className="flex-1 rounded-lg border border-grey-300 px-3 py-2 text-grey-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							className="flex-1 rounded-lg border border-grey-300 px-3 py-2 text-grey-500 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 						/>
 						<button
 							type="button"
@@ -139,7 +139,7 @@ export function TagManager({ onClose }: TagManagerProps) {
 					<button
 						type="button"
 						onClick={() => setIsCreating(true)}
-						className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-grey-300 border-dashed px-4 py-2 text-grey-500 transition-colors hover:border-primary hover:text-primary"
+						className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-2 text-grey-500 transition-colors hover:border-primary hover:text-primary"
 					>
 						<Plus className="h-4 w-4" />
 						Create New Tag
@@ -150,11 +150,11 @@ export function TagManager({ onClose }: TagManagerProps) {
 			{/* Tags List */}
 			<div className="space-y-2">
 				{tags === undefined ? (
-					<div className="py-8 text-center text-grey-500 text-sm">
+					<div className="py-8 text-center text-sm text-grey-500">
 						Loading tags...
 					</div>
 				) : tags.length === 0 ? (
-					<div className="py-8 text-center text-grey-500 text-sm">
+					<div className="py-8 text-center text-sm text-grey-500">
 						No tags yet. Create one to get started.
 					</div>
 				) : (
@@ -166,7 +166,7 @@ export function TagManager({ onClose }: TagManagerProps) {
 							return (
 								<div
 									key={tag._id}
-									className="flex items-center gap-2 rounded-lg border border-grey-200 bg-grey-50 p-3"
+									className="bg-grey-50 flex items-center gap-2 rounded-lg border border-grey-200 p-3"
 								>
 									{isEditing ? (
 										<>
@@ -178,7 +178,7 @@ export function TagManager({ onClose }: TagManagerProps) {
 													if (e.key === "Enter") handleUpdate(tag._id)
 													if (e.key === "Escape") cancelEditing()
 												}}
-												className="flex-1 rounded border border-grey-300 px-2 py-1 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+												className="flex-1 rounded border border-grey-300 px-2 py-1 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none"
 											/>
 											<button
 												type="button"
@@ -197,10 +197,10 @@ export function TagManager({ onClose }: TagManagerProps) {
 										</>
 									) : (
 										<>
-											<span className="flex-1 font-medium text-grey-900 text-sm">
+											<span className="text-grey-900 flex-1 text-sm font-medium">
 												{tag.name}
 											</span>
-											<span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary text-xs">
+											<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
 												{tag.usageCount} uses
 											</span>
 											<button

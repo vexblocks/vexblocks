@@ -1,0 +1,80 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["react", "unicorn", "typescript", "oxc", "jsx-a11y", "nextjs"],
+	"env": {
+		"builtin": true,
+		"browser": true,
+		"node": true
+	},
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/.next/**",
+		"**/.vercel/**",
+		"**/.turbo/**",
+		"**/dist/**",
+		"**/build/**",
+		"**/coverage/**",
+		"**/public/**",
+		"**/convex/_generated/**",
+		"convex/_generated/**",
+		"packages/backend/convex/_generated/**",
+		"packages/cms-shared/src/types/generated.ts",
+		"**/types/generated.ts",
+		"**/next-env.d.ts"
+	],
+	"rules": {
+		"no-unused-vars": [
+			"warn",
+			{
+				"argsIgnorePattern": "^_",
+				"caughtErrorsIgnorePattern": "^_",
+				"destructuredArrayIgnorePattern": "^_",
+				"ignoreRestSiblings": true,
+				"varsIgnorePattern": "^_"
+			}
+		],
+		"default-param-last": "error",
+		"jsx_a11y/click-events-have-key-events": "off",
+		"jsx_a11y/label-has-associated-control": "off",
+		"jsx_a11y/media-has-caption": "off",
+		"jsx_a11y/no-autofocus": "off",
+		"jsx_a11y/prefer-tag-over-role": "off",
+		"nextjs/no-img-element": "warn",
+		"no-param-reassign": "off",
+		"react/exhaustive-deps": [
+			"error",
+			{
+				"additionalHooks": "(useHydrate|useSubscribe)"
+			}
+		],
+		"react/no-array-index-key": "off",
+		"react/self-closing-comp": "error",
+		"typescript/no-confusing-void-expression": "off",
+		"typescript/no-explicit-any": "off",
+		"typescript/no-non-null-assertion": "off",
+		"typescript/prefer-as-const": "error",
+		"typescript/prefer-enum-initializers": "error",
+		"unicorn/no-document-cookie": "warn"
+	},
+	"settings": {
+		"jsx-a11y": {
+			"polymorphicPropName": "as",
+			"components": {},
+			"attributes": {}
+		},
+		"next": {
+			"rootDir": ["apps/web/", "apps/cms/"]
+		},
+		"react": {
+			"version": "19.2.5",
+			"formComponents": [],
+			"linkComponents": [
+				{
+					"name": "Link",
+					"linkAttribute": "href"
+				}
+			],
+			"componentWrapperFunctions": []
+		}
+	}
+}

@@ -36,7 +36,7 @@ export function BlogFilters({ tags }: BlogFiltersProps) {
 			<Link
 				href="/blog"
 				className={cn(
-					"cursor-pointer rounded px-3 py-2 font-medium text-sm transition-all",
+					"cursor-pointer rounded px-3 py-2 text-sm font-medium transition-all",
 					currentTags.length === 0
 						? "bg-blue-200 text-blue-900"
 						: "text-dark-700 hover:bg-blue-200/40",
@@ -52,7 +52,7 @@ export function BlogFilters({ tags }: BlogFiltersProps) {
 						key={tag._id}
 						href={buildTagUrl(tag._id)}
 						className={cn(
-							"cursor-pointer rounded px-5 py-2 font-medium text-sm transition-all",
+							"cursor-pointer rounded px-5 py-2 text-sm font-medium transition-all",
 							isSelected
 								? "bg-blue-200 text-blue-900"
 								: "text-dark-700 hover:bg-blue-200/40",

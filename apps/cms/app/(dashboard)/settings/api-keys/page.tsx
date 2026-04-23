@@ -1,7 +1,5 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation } from "convex/react"
 import {
 	AlertTriangle,
@@ -18,6 +16,8 @@ import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useCachedQuery } from "@/lib/use-cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 type ApiKey = {
 	_id: Id<"cmsApiKeys">
@@ -117,7 +117,7 @@ export default function ApiKeysPage() {
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
 						<Shield className="h-8 w-8 text-red-600" />
 					</div>
-					<h2 className="mb-2 font-bold text-2xl text-red-900">
+					<h2 className="mb-2 text-2xl font-bold text-red-900">
 						Access Denied
 					</h2>
 					<p className="mb-6 text-red-700">
@@ -163,7 +163,7 @@ export default function ApiKeysPage() {
 
 			<div className="mb-8 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">API Keys</h1>
+					<h1 className="text-3xl font-bold text-primary">API Keys</h1>
 					<p className="mt-2 text-grey-500">
 						Manage API keys for external REST API access
 					</p>
@@ -183,12 +183,12 @@ export default function ApiKeysPage() {
 
 			{/* REST API info */}
 			<div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 p-4">
-				<p className="font-medium text-blue-900 text-sm">REST API Endpoints</p>
-				<div className="mt-2 space-y-1 font-mono text-blue-700 text-xs">
+				<p className="text-sm font-medium text-blue-900">REST API Endpoints</p>
+				<div className="mt-2 space-y-1 font-mono text-xs text-blue-700">
 					<p>GET /api/v1/content/:schema</p>
 					<p>GET /api/v1/content/:schema/:id</p>
 				</div>
-				<p className="mt-2 text-blue-700 text-xs">
+				<p className="mt-2 text-xs text-blue-700">
 					Authenticate with{" "}
 					<code className="rounded bg-blue-100 px-1">
 						Authorization: Bearer {"<key>"}
@@ -198,35 +198,35 @@ export default function ApiKeysPage() {
 
 			{/* Active keys */}
 			<div className="mb-8">
-				<h2 className="mb-4 font-semibold text-grey-900 text-lg">
+				<h2 className="text-grey-900 mb-4 text-lg font-semibold">
 					Active Keys ({activeKeys.length})
 				</h2>
 				{activeKeys.length === 0 ? (
-					<div className="rounded-lg border border-grey-300 border-dashed p-8 text-center">
+					<div className="rounded-lg border border-dashed border-grey-300 p-8 text-center">
 						<Key className="mx-auto mb-3 h-10 w-10 text-grey-300" />
-						<p className="text-grey-500 text-sm">No active API keys</p>
-						<p className="mt-1 text-grey-400 text-xs">
+						<p className="text-sm text-grey-500">No active API keys</p>
+						<p className="mt-1 text-xs text-grey-400">
 							Create a key to enable external REST API access
 						</p>
 					</div>
 				) : (
 					<div className="rounded-lg bg-white shadow-sm">
 						<table className="w-full">
-							<thead className="border-grey-200 border-b bg-grey-50">
+							<thead className="bg-grey-50 border-b border-grey-200">
 								<tr>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Name
 									</th>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Key Prefix
 									</th>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Created
 									</th>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Last Used
 									</th>
-									<th className="px-5 py-3 text-right font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-right text-xs font-medium tracking-wider uppercase">
 										Actions
 									</th>
 								</tr>
@@ -235,19 +235,19 @@ export default function ApiKeysPage() {
 								{activeKeys.map((key) => (
 									<tr key={key._id} className="hover:bg-grey-50">
 										<td className="px-5 py-4">
-											<span className="font-medium text-grey-900 text-sm">
+											<span className="text-grey-900 text-sm font-medium">
 												{key.name}
 											</span>
 										</td>
 										<td className="px-5 py-4">
-											<code className="rounded bg-grey-100 px-2 py-0.5 text-grey-600 text-xs">
+											<code className="text-grey-600 rounded bg-grey-100 px-2 py-0.5 text-xs">
 												{key.keyPrefix}
 											</code>
 										</td>
-										<td className="px-5 py-4 text-grey-500 text-sm">
+										<td className="px-5 py-4 text-sm text-grey-500">
 											{new Date(key.createdAt).toLocaleDateString()}
 										</td>
-										<td className="px-5 py-4 text-grey-500 text-sm">
+										<td className="px-5 py-4 text-sm text-grey-500">
 											{key.lastUsedAt
 												? new Date(key.lastUsedAt).toLocaleDateString()
 												: "Never"}
@@ -258,7 +258,7 @@ export default function ApiKeysPage() {
 													type="button"
 													onClick={() => handleRevoke(key._id, key.name)}
 													disabled={loading}
-													className="rounded px-3 py-1.5 text-amber-600 text-xs transition-colors hover:bg-amber-50 disabled:opacity-50"
+													className="rounded px-3 py-1.5 text-xs text-amber-600 transition-colors hover:bg-amber-50 disabled:opacity-50"
 													title="Revoke key"
 												>
 													Revoke
@@ -285,23 +285,23 @@ export default function ApiKeysPage() {
 			{/* Revoked keys */}
 			{revokedKeys.length > 0 && (
 				<div>
-					<h2 className="mb-4 font-semibold text-grey-500 text-lg">
+					<h2 className="mb-4 text-lg font-semibold text-grey-500">
 						Revoked Keys ({revokedKeys.length})
 					</h2>
 					<div className="rounded-lg bg-white opacity-60 shadow-sm">
 						<table className="w-full">
-							<thead className="border-grey-200 border-b bg-grey-50">
+							<thead className="bg-grey-50 border-b border-grey-200">
 								<tr>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Name
 									</th>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Key Prefix
 									</th>
-									<th className="px-5 py-3 text-left font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-left text-xs font-medium tracking-wider uppercase">
 										Revoked
 									</th>
-									<th className="px-5 py-3 text-right font-medium text-grey-700 text-xs uppercase tracking-wider">
+									<th className="text-grey-700 px-5 py-3 text-right text-xs font-medium tracking-wider uppercase">
 										Actions
 									</th>
 								</tr>
@@ -310,16 +310,16 @@ export default function ApiKeysPage() {
 								{revokedKeys.map((key) => (
 									<tr key={key._id}>
 										<td className="px-5 py-4">
-											<span className="text-grey-500 text-sm line-through">
+											<span className="text-sm text-grey-500 line-through">
 												{key.name}
 											</span>
 										</td>
 										<td className="px-5 py-4">
-											<code className="rounded bg-grey-100 px-2 py-0.5 text-grey-400 text-xs">
+											<code className="rounded bg-grey-100 px-2 py-0.5 text-xs text-grey-400">
 												{key.keyPrefix}
 											</code>
 										</td>
-										<td className="px-5 py-4 text-grey-400 text-sm">
+										<td className="px-5 py-4 text-sm text-grey-400">
 											{key.revokedAt
 												? new Date(key.revokedAt).toLocaleDateString()
 												: "—"}
@@ -348,7 +348,7 @@ export default function ApiKeysPage() {
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 					<div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
 						<div className="mb-4 flex items-center justify-between">
-							<h2 className="font-bold text-primary text-xl">New API Key</h2>
+							<h2 className="text-xl font-bold text-primary">New API Key</h2>
 							<button
 								type="button"
 								onClick={() => {
@@ -356,7 +356,7 @@ export default function ApiKeysPage() {
 									setNewKeyName("")
 									setError("")
 								}}
-								className="text-grey-400 hover:text-grey-600"
+								className="hover:text-grey-600 text-grey-400"
 							>
 								<X className="h-5 w-5" />
 							</button>
@@ -364,14 +364,14 @@ export default function ApiKeysPage() {
 
 						{error && (
 							<div className="mb-4 rounded-lg bg-red-50 p-3">
-								<p className="text-error text-sm">{error}</p>
+								<p className="text-sm text-error">{error}</p>
 							</div>
 						)}
 
 						<div>
 							<label
 								htmlFor="key-name"
-								className="mb-1 block font-medium text-grey-700 text-sm"
+								className="text-grey-700 mb-1 block text-sm font-medium"
 							>
 								Key Name
 							</label>
@@ -382,9 +382,9 @@ export default function ApiKeysPage() {
 								onChange={(e) => setNewKeyName(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleCreate()}
 								placeholder="e.g. Production, Python client"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							/>
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								A descriptive label to identify where this key is used
 							</p>
 						</div>
@@ -398,7 +398,7 @@ export default function ApiKeysPage() {
 									setError("")
 								}}
 								disabled={loading}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								Cancel
 							</button>
@@ -430,19 +430,19 @@ export default function ApiKeysPage() {
 							<div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
 								<Check className="h-5 w-5 text-green-600" />
 							</div>
-							<h2 className="font-bold text-primary text-xl">
+							<h2 className="text-xl font-bold text-primary">
 								Key Created: {createdKey.name}
 							</h2>
 						</div>
 
 						<div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-							<p className="font-medium text-amber-800 text-sm">
+							<p className="text-sm font-medium text-amber-800">
 								Copy this key now — it will not be shown again.
 							</p>
 						</div>
 
-						<div className="flex items-center gap-2 rounded-lg border border-grey-200 bg-grey-50 p-3">
-							<code className="flex-1 break-all text-grey-800 text-sm">
+						<div className="bg-grey-50 flex items-center gap-2 rounded-lg border border-grey-200 p-3">
+							<code className="text-grey-800 flex-1 text-sm break-all">
 								{createdKey.rawKey}
 							</code>
 							<button
@@ -480,10 +480,10 @@ export default function ApiKeysPage() {
 							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-error-light/20">
 								<AlertTriangle className="h-6 w-6 text-error" />
 							</div>
-							<h3 className="font-semibold text-lg text-primary">Delete Key</h3>
+							<h3 className="text-lg font-semibold text-primary">Delete Key</h3>
 						</div>
 
-						<p className="mb-6 text-grey-600">
+						<p className="text-grey-600 mb-6">
 							Are you sure you want to permanently delete{" "}
 							<strong>"{deletingKey.name}"</strong>? This cannot be undone.
 						</p>
@@ -493,7 +493,7 @@ export default function ApiKeysPage() {
 								type="button"
 								onClick={() => setDeletingKey(null)}
 								disabled={loading}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 transition-colors"
 							>
 								Cancel
 							</button>

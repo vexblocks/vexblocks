@@ -1,8 +1,8 @@
 "use client"
 
+import { useQuery } from "convex/react"
 import type { BlogTagsContent } from "@repo/cms-shared"
 import { getStringValue } from "@repo/cms-shared"
-import { useQuery } from "convex/react"
 import { api } from "vexblocks-backend/convex/_generated/api"
 import type { Id } from "vexblocks-backend/convex/_generated/dataModel"
 
@@ -41,7 +41,7 @@ function TagItem({ tag }: { tag: string | BlogTagsContent }) {
 	if (!tagName) return null
 
 	return (
-		<span className="rounded-full bg-dark-100 px-3 py-2 font-medium text-gray-900 text-sm">
+		<span className="rounded-full bg-dark-100 px-3 py-2 text-sm font-medium text-gray-900">
 			{tagName}
 		</span>
 	)

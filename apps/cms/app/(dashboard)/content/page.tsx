@@ -1,14 +1,14 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import { Copy, Edit, Eye, FileText, Plus, Search, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useCachedQuery } from "@/lib/use-cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import { ContentSidebar } from "./_components/content-sidebar"
 import { ViewConfigModal } from "./_components/view-config-modal"
 
@@ -184,7 +184,7 @@ export default function ContentPage() {
 					{/* Header */}
 					<div className="mb-6 flex items-center justify-between">
 						<div>
-							<h1 className="font-bold text-3xl text-primary">
+							<h1 className="text-3xl font-bold text-primary">
 								{selectedSchema?.displayName || "Content"}
 							</h1>
 							<p className="mt-2 text-grey-500">
@@ -197,7 +197,7 @@ export default function ContentPage() {
 									<button
 										type="button"
 										onClick={() => setShowViewConfig(true)}
-										className="inline-flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 text-grey-700 transition-colors hover:bg-grey-100"
+										className="text-grey-700 inline-flex items-center gap-2 rounded-lg border border-grey-300 px-4 py-2 transition-colors hover:bg-grey-100"
 									>
 										<Settings className="h-5 w-5" />
 										Configure View
@@ -224,7 +224,7 @@ export default function ContentPage() {
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
 									placeholder="Search content..."
-									className="w-full rounded-lg border border-grey-300 py-2 pr-4 pl-10 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+									className="w-full rounded-lg border border-grey-300 py-2 pr-4 pl-10 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								/>
 							</div>
 
@@ -280,7 +280,7 @@ export default function ContentPage() {
 							<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-grey-100">
 								<FileText className="h-8 w-8 text-grey-400" />
 							</div>
-							<h3 className="mb-2 font-semibold text-primary text-xl">
+							<h3 className="mb-2 text-xl font-semibold text-primary">
 								No content yet
 							</h3>
 							<p className="mb-6 text-grey-500">
@@ -304,7 +304,7 @@ export default function ContentPage() {
 								<table className="w-full">
 									<thead className="bg-grey-100">
 										<tr>
-											<th className="px-6 py-3 text-left font-semibold text-grey-500 text-xs uppercase">
+											<th className="px-6 py-3 text-left text-xs font-semibold text-grey-500 uppercase">
 												{previewFieldName
 													? selectedSchema?.fields.find(
 															(f) => f.name === previewFieldName,
@@ -314,23 +314,23 @@ export default function ContentPage() {
 											{additionalFields.map((field: any) => (
 												<th
 													key={field.name}
-													className="px-6 py-3 text-left font-semibold text-grey-500 text-xs uppercase"
+													className="px-6 py-3 text-left text-xs font-semibold text-grey-500 uppercase"
 												>
 													{field.label}
 												</th>
 											))}
-											<th className="px-6 py-3 text-left font-semibold text-grey-500 text-xs uppercase">
+											<th className="px-6 py-3 text-left text-xs font-semibold text-grey-500 uppercase">
 												Status
 											</th>
 											{slugField && (
-												<th className="px-6 py-3 text-left font-semibold text-grey-500 text-xs uppercase">
+												<th className="px-6 py-3 text-left text-xs font-semibold text-grey-500 uppercase">
 													Slug
 												</th>
 											)}
-											<th className="px-6 py-3 text-left font-semibold text-grey-500 text-xs uppercase">
+											<th className="px-6 py-3 text-left text-xs font-semibold text-grey-500 uppercase">
 												Updated
 											</th>
-											<th className="px-6 py-3 text-right font-semibold text-grey-500 text-xs uppercase">
+											<th className="px-6 py-3 text-right text-xs font-semibold text-grey-500 uppercase">
 												Actions
 											</th>
 										</tr>
@@ -348,7 +348,7 @@ export default function ContentPage() {
 															{getStringValue(previewText) || "Untitled"}
 														</div>
 														{item.seo?.title && (
-															<div className="text-grey-500 text-sm">
+															<div className="text-sm text-grey-500">
 																{getStringValue(item.seo.title)}
 															</div>
 														)}
@@ -356,7 +356,7 @@ export default function ContentPage() {
 													{additionalFields.map((field: any) => (
 														<td
 															key={field.name}
-															className="px-6 py-4 text-grey-700 text-sm"
+															className="text-grey-700 px-6 py-4 text-sm"
 														>
 															{(() => {
 																const value = getFieldValue(item, field.name)
@@ -391,7 +391,7 @@ export default function ContentPage() {
 													))}
 													<td className="px-6 py-4">
 														<span
-															className={`inline-flex rounded-full px-2 py-1 font-semibold text-xs ${
+															className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
 																item.status === "published"
 																	? "bg-green-light text-green"
 																	: "bg-orange-light text-orange"
@@ -401,7 +401,7 @@ export default function ContentPage() {
 														</span>
 													</td>
 													{slugField && (
-														<td className="px-6 py-4 text-grey-500 text-sm">
+														<td className="px-6 py-4 text-sm text-grey-500">
 															{getStringValue(item.data[slugField.name]) ? (
 																<code className="rounded bg-grey-100 px-2 py-1 font-mono text-xs">
 																	/{getStringValue(item.data[slugField.name])}
@@ -411,7 +411,7 @@ export default function ContentPage() {
 															)}
 														</td>
 													)}
-													<td className="px-6 py-4 text-grey-500 text-sm">
+													<td className="px-6 py-4 text-sm text-grey-500">
 														{new Date(item.updatedAt).toLocaleDateString()}
 													</td>
 													<td className="px-6 py-4 text-right">

@@ -1,14 +1,14 @@
 "use client"
 
 import { useUploadFile } from "@convex-dev/r2/react"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import Compressor from "compressorjs"
 import { useMutation } from "convex/react"
 import { RefreshCw, Upload } from "lucide-react"
 import { nanoid } from "nanoid"
 import { useState } from "react"
 import { toast } from "sonner"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 type ReplaceMediaDialogProps = {
 	mediaId: Id<"cmsMedia">
@@ -187,15 +187,15 @@ export function ReplaceMediaDialog({
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 			<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-				<h3 className="mb-1 font-semibold text-lg text-primary">
+				<h3 className="mb-1 text-lg font-semibold text-primary">
 					Replace {isR2 ? "File" : "Image"}
 				</h3>
-				<p className="mb-4 text-grey-500 text-sm">
+				<p className="mb-4 text-sm text-grey-500">
 					Current:{" "}
-					<span className="font-medium text-grey-900">{currentCaption}</span>
+					<span className="text-grey-900 font-medium">{currentCaption}</span>
 				</p>
 
-				<div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 text-sm">
+				<div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
 					The existing file will be permanently deleted from Cloudflare after
 					replacement.
 					{!isR2 &&
@@ -205,17 +205,17 @@ export function ReplaceMediaDialog({
 				<div className="space-y-4">
 					{/* File input */}
 					<div>
-						<div className="mb-2 block font-medium text-grey-500 text-sm">
+						<div className="mb-2 block text-sm font-medium text-grey-500">
 							New {isR2 ? "File" : "Image"}{" "}
 							<span className="text-error">*</span>
 						</div>
 						<div className="flex items-center gap-4">
 							<label
 								htmlFor="replace-file-input"
-								className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed px-4 py-3 transition-colors hover:border-primary"
+								className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-3 transition-colors hover:border-primary"
 							>
 								<Upload className="h-5 w-5 text-grey-500" />
-								<span className="text-grey-500 text-sm">
+								<span className="text-sm text-grey-500">
 									{file
 										? file.name
 										: `Choose ${isR2 ? "a file" : "an image"}...`}
@@ -235,7 +235,7 @@ export function ReplaceMediaDialog({
 							/>
 						</div>
 						{file && (
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								{file.type || "Unknown type"} — {formatFileSize(file.size)}
 							</p>
 						)}
@@ -244,7 +244,7 @@ export function ReplaceMediaDialog({
 					{/* Image preview */}
 					{!isR2 && previewUrl && (
 						<div className="rounded-lg border border-grey-300 p-4">
-							{/* biome-ignore lint/performance/noImgElement: Preview uses blob URL */}
+							{/* oxlint-disable-next-line nextjs/no-img-element */}
 							<img
 								src={previewUrl}
 								alt="Preview"
@@ -262,7 +262,7 @@ export function ReplaceMediaDialog({
 									style={{ width: `${uploadProgress}%` }}
 								/>
 							</div>
-							<p className="text-grey-500 text-xs">
+							<p className="text-xs text-grey-500">
 								{uploadProgress}% uploaded
 							</p>
 						</div>

@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils"
 const textVariants = cva("", {
 	variants: {
 		variant: {
-			body: "font-normal leading-7",
-			small: "font-normal text-sm leading-relaxed",
-			caption: "font-medium text-xs uppercase tracking-wider",
-			lead: "font-normal text-lg leading-8 md:text-xl md:leading-9",
+			body: "leading-7 font-normal",
+			small: "text-sm leading-relaxed font-normal",
+			caption: "text-xs font-medium tracking-wider uppercase",
+			lead: "text-lg leading-8 font-normal md:text-xl md:leading-9",
 		},
 		size: {
 			xs: "text-xs",

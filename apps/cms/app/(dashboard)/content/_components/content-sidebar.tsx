@@ -39,13 +39,13 @@ export function ContentSidebar({
 		switch (type) {
 			case "global":
 				return (
-					<span className="rounded-full bg-purple-100 px-2 py-0.5 text-purple-700 text-xs">
+					<span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700">
 						Global
 					</span>
 				)
 			case "collection":
 				return (
-					<span className="rounded-full bg-green-100 px-2 py-0.5 text-green-700 text-xs">
+					<span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
 						Collection
 					</span>
 				)
@@ -82,15 +82,15 @@ export function ContentSidebar({
 
 			{/* Sidebar */}
 			<aside
-				className={`fixed top-0 left-0 z-40 h-full w-64 transform border-grey-200 border-r bg-white transition-transform lg:relative lg:translate-x-0 ${
+				className={`fixed top-0 left-0 z-40 h-full w-64 transform border-r border-grey-200 bg-white transition-transform lg:relative lg:translate-x-0 ${
 					isOpen ? "translate-x-0" : "-translate-x-full"
 				}`}
 			>
 				<div className="flex h-full flex-col">
 					{/* Header */}
-					<div className="border-grey-200 border-b p-4">
-						<h2 className="font-semibold text-grey-900 text-lg">Schemas</h2>
-						<p className="text-grey-500 text-sm">Select a content type</p>
+					<div className="border-b border-grey-200 p-4">
+						<h2 className="text-grey-900 text-lg font-semibold">Schemas</h2>
+						<p className="text-sm text-grey-500">Select a content type</p>
 					</div>
 
 					{/* Schema List */}
@@ -99,7 +99,7 @@ export function ContentSidebar({
 							{/* Collections */}
 							{groupedSchemas.collection.length > 0 && (
 								<div>
-									<h3 className="mb-2 flex items-center gap-2 text-grey-500 text-xs uppercase tracking-wide">
+									<h3 className="mb-2 flex items-center gap-2 text-xs tracking-wide text-grey-500 uppercase">
 										<Folder className="h-3 w-3" />
 										Collections
 									</h3>
@@ -131,7 +131,7 @@ export function ContentSidebar({
 							{/* Globals */}
 							{groupedSchemas.global.length > 0 && (
 								<div>
-									<h3 className="mb-2 flex items-center gap-2 text-grey-500 text-xs uppercase tracking-wide">
+									<h3 className="mb-2 flex items-center gap-2 text-xs tracking-wide text-grey-500 uppercase">
 										<Globe className="h-3 w-3" />
 										Globals
 									</h3>

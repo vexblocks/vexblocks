@@ -126,19 +126,19 @@ export function DocsSearchDialog({
 					/>
 				</div>
 				{results.length > 0 && (
-					<div className="max-h-[400px] overflow-y-auto overflow-x-hidden">
+					<div className="max-h-[400px] overflow-x-hidden overflow-y-auto">
 						<div className="p-2">
 							{results.map((result, index) => (
 								<button
 									type="button"
 									key={index}
 									onClick={() => handleSelect(result.href)}
-									className="relative flex w-full cursor-pointer select-none items-center gap-3 rounded-md px-4 py-3 text-left text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+									className="relative flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-left text-sm transition-colors outline-none select-none hover:bg-accent hover:text-accent-foreground"
 								>
 									<File className="h-4 w-4 shrink-0 opacity-70" />
 									<div className="flex flex-col items-start gap-0.5">
 										<span className="font-medium">{result.title}</span>
-										<span className="text-muted-foreground text-xs">
+										<span className="text-xs text-muted-foreground">
 											{result.category}
 										</span>
 									</div>
@@ -148,12 +148,12 @@ export function DocsSearchDialog({
 					</div>
 				)}
 				{query && results.length === 0 && (
-					<div className="py-12 text-center text-muted-foreground text-sm">
+					<div className="py-12 text-center text-sm text-muted-foreground">
 						No results found.
 					</div>
 				)}
 				{!query && (
-					<div className="p-4 text-center text-muted-foreground text-sm">
+					<div className="p-4 text-center text-sm text-muted-foreground">
 						Type to search documentation...
 					</div>
 				)}

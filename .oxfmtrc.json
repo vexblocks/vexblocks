@@ -1,0 +1,63 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"tabWidth": 2,
+	"printWidth": 80,
+	"singleQuote": false,
+	"jsxSingleQuote": false,
+	"quoteProps": "as-needed",
+	"trailingComma": "all",
+	"semi": false,
+	"arrowParens": "always",
+	"bracketSameLine": false,
+	"bracketSpacing": true,
+	"singleAttributePerLine": false,
+	"sortImports": {
+		"internalPattern": ["@/", "@repo/", "@vexblocks/", "vexblocks-"],
+		"newlinesBetween": false,
+		"groups": [
+			"builtin",
+			"external",
+			["internal", "subpath"],
+			["parent", "sibling", "index"],
+			"style",
+			"unknown"
+		]
+	},
+	"sortTailwindcss": {
+		"functions": ["cn", "clsx", "cva", "twMerge", "classNames"],
+		"stylesheet": "./apps/web/styles/config.css"
+	},
+	"sortPackageJson": false,
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/.next/**",
+		"**/.vercel/**",
+		"**/.turbo/**",
+		"**/dist/**",
+		"**/build/**",
+		"**/coverage/**",
+		"**/public",
+		"**/.vscode",
+		"**/pnpm-lock.yaml",
+		"**/package-lock.json",
+		"**/yarn.lock",
+		"**/convex/_generated/**",
+		"convex/_generated/**",
+		"packages/backend/convex/_generated/**",
+		"packages/cms-shared/src/types/generated.ts",
+		"**/types/generated.ts",
+		"**/next-env.d.ts"
+	],
+	"overrides": [
+		{
+			"files": ["apps/cms/**/*.{js,jsx,ts,tsx,mjs,cjs}"],
+			"options": {
+				"sortTailwindcss": {
+					"functions": ["cn", "clsx", "cva", "twMerge", "classNames"],
+					"stylesheet": "./apps/cms/styles/config.css"
+				}
+			}
+		}
+	]
+}

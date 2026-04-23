@@ -1,8 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useQuery } from "convex/react"
 import {
 	ArrowDown,
@@ -20,6 +18,8 @@ import {
 	setBlockCollapsed,
 } from "@/lib/block-collapse-cookie"
 import { previewAtom } from "@/lib/preview-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { BlockPreviewModal } from "./block-preview-modal"
 import { FlexibleBlocksField } from "./flexible-blocks"
@@ -264,20 +264,20 @@ export function FieldRenderer({
 			return (
 				<div
 					data-field-path={field.name}
-					className="rounded-lg border-2 border-grey-200 bg-grey-50 p-4 transition-all duration-200"
+					className="bg-grey-50 rounded-lg border-2 border-grey-200 p-4 transition-all duration-200"
 					style={{ marginLeft: level > 0 ? `${level}rem` : "0" }}
 				>
 					<div className="mb-3 flex items-center gap-2">
 						<Folder className="h-5 w-5 text-primary" />
-						<h3 className="font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 text-lg font-semibold">
 							{field.label}
 						</h3>
-						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
 							Group
 						</span>
 					</div>
 					{field.helpText && (
-						<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
+						<p className="mb-2 text-sm text-grey-500">{field.helpText}</p>
 					)}
 					<div
 						className={`grid grid-cols-1 gap-4 ${isPreviewActive ? "" : "lg:grid-cols-2"}`}
@@ -422,17 +422,17 @@ export function FieldRenderer({
 				>
 					<div className="mb-3 flex items-center gap-2">
 						<Layers className="h-5 w-5 text-blue-600" />
-						<h3 className="font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 text-lg font-semibold">
 							{field.label}
 						</h3>
-						<span className="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-600 text-xs">
+						<span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600">
 							Block Reference
 						</span>
-						{field.required && <span className="text-error text-sm">*</span>}
+						{field.required && <span className="text-sm text-error">*</span>}
 					</div>
 					<div className="rounded-lg border border-blue-300 bg-white p-4 text-center">
 						<div className="mb-2 inline-block h-6 w-6 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-						<p className="text-grey-500 text-sm">Loading block...</p>
+						<p className="text-sm text-grey-500">Loading block...</p>
 					</div>
 				</div>
 			)
@@ -479,19 +479,19 @@ export function FieldRenderer({
 					>
 						<div className="flex items-center gap-2">
 							<Layers className="h-5 w-5 text-blue-600" />
-							<h3 className="font-semibold text-grey-900 text-lg">
+							<h3 className="text-grey-900 text-lg font-semibold">
 								{field.label}
 							</h3>
-							<span className="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-600 text-xs">
+							<span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600">
 								Block: {block.displayName}
 							</span>
-							{field.required && <span className="text-error text-sm">*</span>}
+							{field.required && <span className="text-sm text-error">*</span>}
 						</div>
 						<div className="flex items-center gap-2">
 							<button
 								type="button"
 								onClick={handleToggleCollapse}
-								className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-all hover:bg-blue-50"
+								className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-sm text-blue-700 transition-all hover:bg-blue-50"
 								title={isCollapsed ? "Expand block" : "Collapse block"}
 							>
 								<ChevronDown
@@ -503,7 +503,7 @@ export function FieldRenderer({
 								<button
 									type="button"
 									onClick={() => setShowPreviewModal(true)}
-									className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-50"
+									className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-sm text-blue-700 transition-colors hover:bg-blue-50"
 									title="View block preview"
 								>
 									<Eye className="h-4 w-4" />
@@ -513,7 +513,7 @@ export function FieldRenderer({
 						</div>
 					</div>
 					{field.helpText && !isCollapsed && (
-						<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
+						<p className="mb-2 text-sm text-grey-500">{field.helpText}</p>
 					)}
 					{!isCollapsed && (
 						<div
@@ -654,13 +654,13 @@ export function FieldRenderer({
 				<div className="mb-2 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Layers className="h-5 w-5 text-primary" />
-						<h3 className="font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 text-lg font-semibold">
 							{field.label}
 						</h3>
-						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
 							Repeater
 						</span>
-						{field.required && <span className="text-error text-sm">*</span>}
+						{field.required && <span className="text-sm text-error">*</span>}
 					</div>
 					<button
 						type="button"
@@ -672,12 +672,12 @@ export function FieldRenderer({
 					</button>
 				</div>
 				{field.helpText && (
-					<p className="mb-2 text-grey-500 text-sm">{field.helpText}</p>
+					<p className="mb-2 text-sm text-grey-500">{field.helpText}</p>
 				)}
 
 				{items.length === 0 ? (
-					<div className="rounded-lg border-2 border-grey-300 border-dashed bg-white p-8 text-center">
-						<p className="text-grey-400 text-sm">
+					<div className="rounded-lg border-2 border-dashed border-grey-300 bg-white p-8 text-center">
+						<p className="text-sm text-grey-400">
 							No items yet. Click "Add Item" to get started.
 						</p>
 					</div>
@@ -689,7 +689,7 @@ export function FieldRenderer({
 								className="rounded-lg border border-grey-300 bg-white p-1.5 shadow-sm"
 							>
 								<div className="mb-2 flex items-center justify-between">
-									<h4 className="font-medium text-grey-700 text-sm">
+									<h4 className="text-grey-700 text-sm font-medium">
 										Item #{index + 1}
 									</h4>
 									<div className="flex items-center gap-2">
@@ -882,7 +882,7 @@ export function FieldRenderer({
 		>
 			<label
 				htmlFor={fieldId}
-				className="mb-2 block font-medium text-grey-500 text-sm"
+				className="mb-2 block text-sm font-medium text-grey-500"
 			>
 				{field.label}
 				{field.required && <span className="text-error"> *</span>}
@@ -902,7 +902,7 @@ export function FieldRenderer({
 				isAutoSlugActive={field.isSlug ? isAutoSlugActive : undefined}
 			/>
 			{field.helpText && (
-				<p className="mt-1 text-grey-400 text-xs">{field.helpText}</p>
+				<p className="mt-1 text-xs text-grey-400">{field.helpText}</p>
 			)}
 		</div>
 	)

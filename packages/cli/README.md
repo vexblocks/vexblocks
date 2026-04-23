@@ -65,13 +65,13 @@ npx @vexblocks/cli add cms --overwrite
 
 **Available packages:**
 
-| Package   | Description                                    | Path                      |
-| --------- | ---------------------------------------------- | ------------------------- |
-| `cms`     | CMS Dashboard (Next.js admin interface)        | `apps/cms`                |
-| `backend` | Convex backend with CMS functions              | `packages/backend`        |
-| `shared`  | Shared utilities and preview SDK               | `packages/cms-shared`     |
-| `types`   | TypeScript type generator                      | `packages/type-generator` |
-| `all`     | All packages                                   | -                         |
+| Package   | Description                             | Path                      |
+| --------- | --------------------------------------- | ------------------------- |
+| `cms`     | CMS Dashboard (Next.js admin interface) | `apps/cms`                |
+| `backend` | Convex backend with CMS functions       | `packages/backend`        |
+| `shared`  | Shared utilities and preview SDK        | `packages/cms-shared`     |
+| `types`   | TypeScript type generator               | `packages/type-generator` |
+| `all`     | All packages                            | -                         |
 
 ### `@vexblocks/cli upgrade`
 
@@ -178,12 +178,12 @@ import { defineSchema } from "convex/server"
 import { cmsSchemaExports } from "./schema.cms"
 
 export default defineSchema({
-  // Your existing tables
-  products,
-  orders,
-  
-  // VexBlocks CMS tables
-  ...cmsSchemaExports,
+	// Your existing tables
+	products,
+	orders,
+
+	// VexBlocks CMS tables
+	...cmsSchemaExports,
 })
 ```
 

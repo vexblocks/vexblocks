@@ -1,6 +1,6 @@
+import Link from "next/link"
 import type { BlogPostsContent } from "@repo/cms-shared"
 import { CFImage, getStringValue } from "@repo/cms-shared"
-import Link from "next/link"
 
 type FeaturedPostProps = {
 	post: BlogPostsContent
@@ -52,22 +52,22 @@ export function FeaturedPost({ post, authorName }: FeaturedPostProps) {
 				{/* Content */}
 				<div className="flex flex-col justify-center">
 					<div className="mb-3 inline-flex items-center gap-2">
-						<span className="rounded-full bg-purple-100 px-3 py-1 font-medium text-purple-700 text-sm">
+						<span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
 							Featured
 						</span>
 					</div>
 
-					<h2 className="mb-4 font-normal font-serif text-3xl text-gray-900 transition-colors group-hover:text-purple-600 md:text-4xl lg:text-5xl">
+					<h2 className="mb-4 font-serif text-3xl font-normal text-gray-900 transition-colors group-hover:text-purple-600 md:text-4xl lg:text-5xl">
 						{title}
 					</h2>
 
 					{shortDescription && (
-						<p className="mb-6 line-clamp-3 text-gray-600 text-lg">
+						<p className="mb-6 line-clamp-3 text-lg text-gray-600">
 							{shortDescription}
 						</p>
 					)}
 
-					<div className="flex items-center gap-4 text-gray-500 text-sm">
+					<div className="flex items-center gap-4 text-sm text-gray-500">
 						{authorName && <span className="font-medium">{authorName}</span>}
 						<time dateTime={new Date(post._creationTime).toISOString()}>
 							{new Date(post._creationTime).toLocaleDateString("en-US", {

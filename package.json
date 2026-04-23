@@ -20,15 +20,18 @@
 		"start": "turbo run start --parallel",
 		"start:web": "turbo run start --filter=web",
 		"start:admin": "turbo run start --filter=admin",
-		"lint": "turbo run lint",
-		"lint:fix": "biome lint . --apply",
-		"format:fix": "biome format . --write",
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix",
+		"format": "oxfmt",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt",
 		"typecheck": "turbo run typecheck",
 		"cli:dev": "pnpm --filter @vexblocks/cli dev",
 		"release:cli": "pnpm build:cli && pnpm --filter @vexblocks/cli publish"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.10",
+		"oxfmt": "^0.46.0",
+		"oxlint": "^1.61.0",
 		"turbo": "^2.9.5"
 	}
 }

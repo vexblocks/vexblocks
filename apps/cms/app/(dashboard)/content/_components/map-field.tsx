@@ -202,12 +202,12 @@ function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
 			</div>
 
 			{value ? (
-				<div className="flex items-start justify-between gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
+				<div className="bg-grey-50 flex items-start justify-between gap-3 rounded-lg border border-grey-200 p-3">
 					<div className="flex min-w-0 items-start gap-2">
 						<MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 						<div className="min-w-0">
-							<p className="truncate text-grey-700 text-sm">{value.address}</p>
-							<p className="mt-0.5 font-mono text-grey-400 text-xs">
+							<p className="text-grey-700 truncate text-sm">{value.address}</p>
+							<p className="mt-0.5 font-mono text-xs text-grey-400">
 								{value.lat.toFixed(6)}, {value.lng.toFixed(6)}
 							</p>
 						</div>
@@ -222,7 +222,7 @@ function MapEditorInner({ value, onChange }: MapFieldEditorProps) {
 					</button>
 				</div>
 			) : (
-				<p className="text-center text-grey-400 text-xs">
+				<p className="text-center text-xs text-grey-400">
 					Search for an address or click on the map to place a marker
 				</p>
 			)}

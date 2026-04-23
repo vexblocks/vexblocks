@@ -1,12 +1,12 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import { CFImage } from "@repo/cms-shared"
 import { Layers, Plus, ZoomIn } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { useCachedQuery } from "@/lib/use-cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 
 export default function BlocksPage() {
 	const {
@@ -59,7 +59,7 @@ export default function BlocksPage() {
 			<div>
 				<div className="mb-6 flex items-center justify-between">
 					<div>
-						<h1 className="font-bold text-3xl text-primary">Reusable Blocks</h1>
+						<h1 className="text-3xl font-bold text-primary">Reusable Blocks</h1>
 						<p className="mt-2 text-grey-500">
 							{blocks.length} block{blocks.length !== 1 ? "s" : ""} available
 						</p>
@@ -67,9 +67,9 @@ export default function BlocksPage() {
 				</div>
 
 				{blocks.length === 0 ? (
-					<div className="rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-12 text-center">
+					<div className="bg-grey-50 rounded-lg border-2 border-dashed border-grey-300 p-12 text-center">
 						<Layers className="mx-auto mb-4 h-12 w-12 text-grey-400" />
-						<h3 className="mb-2 font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 mb-2 text-lg font-semibold">
 							No blocks yet
 						</h3>
 						<p className="mb-4 text-grey-500">
@@ -88,9 +88,9 @@ export default function BlocksPage() {
 						{Object.entries(categorizedBlocks).map(
 							([category, categoryBlocks]) => (
 								<div key={category}>
-									<h2 className="mb-3 font-semibold text-base text-grey-700">
+									<h2 className="text-grey-700 mb-3 text-base font-semibold">
 										{category}
-										<span className="ml-2 font-normal text-grey-400 text-sm">
+										<span className="ml-2 text-sm font-normal text-grey-400">
 											({categoryBlocks.length})
 										</span>
 									</h2>
@@ -118,14 +118,14 @@ export default function BlocksPage() {
 																	e.stopPropagation()
 																	setPreviewBlock(block)
 																}}
-																className="absolute top-1.5 right-1.5 rounded-md bg-black/40 p-1.5 text-white opacity-0 transition-opacity hover:bg-black/60 group-hover:opacity-100"
+																className="absolute top-1.5 right-1.5 rounded-md bg-black/40 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60"
 																aria-label="View full image"
 															>
 																<ZoomIn className="h-3.5 w-3.5" />
 															</button>
 														</div>
 													) : (
-														<div className="flex h-24 w-full items-center justify-center bg-grey-50">
+														<div className="bg-grey-50 flex h-24 w-full items-center justify-center">
 															<Layers className="h-10 w-10 text-grey-300" />
 														</div>
 													)}
@@ -134,28 +134,28 @@ export default function BlocksPage() {
 															{block.icon && (
 																<span className="text-sm">{block.icon}</span>
 															)}
-															<h3 className="font-semibold text-grey-900 text-sm leading-tight group-hover:text-primary">
+															<h3 className="text-grey-900 text-sm leading-tight font-semibold group-hover:text-primary">
 																{block.displayName}
 															</h3>
 														</div>
-														<p className="text-grey-400 text-xs">
+														<p className="text-xs text-grey-400">
 															{block.fields.length} field
 															{block.fields.length !== 1 ? "s" : ""}
 														</p>
 														{block.description && (
-															<p className="mt-1 line-clamp-2 text-grey-500 text-xs">
+															<p className="mt-1 line-clamp-2 text-xs text-grey-500">
 																{block.description}
 															</p>
 														)}
 													</div>
 												</Link>
-												<div className="flex items-center justify-between border-grey-200 border-t px-3 py-2">
-													<code className="rounded bg-grey-100 px-1.5 py-0.5 font-mono text-grey-600 text-xs">
+												<div className="flex items-center justify-between border-t border-grey-200 px-3 py-2">
+													<code className="text-grey-600 rounded bg-grey-100 px-1.5 py-0.5 font-mono text-xs">
 														{block.name}
 													</code>
 													<Link
 														href={`/blocks/${block._id}?mode=edit`}
-														className="font-medium text-primary text-xs hover:underline"
+														className="text-xs font-medium text-primary hover:underline"
 													>
 														Edit →
 													</Link>
@@ -204,10 +204,10 @@ export default function BlocksPage() {
 							{previewBlock?.icon && (
 								<span className="text-lg">{previewBlock.icon}</span>
 							)}
-							<span className="font-semibold text-grey-900">
+							<span className="text-grey-900 font-semibold">
 								{previewBlock?.displayName}
 							</span>
-							<code className="rounded bg-grey-100 px-2 py-0.5 font-mono text-grey-500 text-xs">
+							<code className="rounded bg-grey-100 px-2 py-0.5 font-mono text-xs text-grey-500">
 								{previewBlock?.name}
 							</code>
 						</div>

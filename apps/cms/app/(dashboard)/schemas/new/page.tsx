@@ -1,8 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	ArrowDown,
@@ -31,6 +29,8 @@ import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-
 import { SelectOptionsInput } from "@/components/atoms/select-options-input"
 import { authAtom } from "@/lib/auth-atom"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
+import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 
 // Utility function to generate field name from label
 function generateFieldName(label: string): string {
@@ -162,11 +162,11 @@ function BlockReferenceSelectorNew({
 
 	return (
 		<div className="md:col-span-2">
-			<div className="mb-1 block font-medium text-grey-500 text-xs">
+			<div className="mb-1 block text-xs font-medium text-grey-500">
 				Select Reusable Block <span className="text-error">*</span>
 			</div>
 			{selectedBlock ? (
-				<div className="flex items-center gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
+				<div className="bg-grey-50 flex items-center gap-3 rounded-lg border border-grey-200 p-3">
 					{selectedBlock.previewImage ? (
 						<CFImage
 							assetId={selectedBlock.previewImage}
@@ -182,15 +182,15 @@ function BlockReferenceSelectorNew({
 						</div>
 					)}
 					<div className="flex-1">
-						<p className="font-medium text-grey-900">
+						<p className="text-grey-900 font-medium">
 							{selectedBlock.displayName}
 						</p>
-						<p className="text-grey-500 text-xs">{selectedBlock.name}</p>
+						<p className="text-xs text-grey-500">{selectedBlock.name}</p>
 					</div>
 					<button
 						type="button"
 						onClick={() => setShowBlockSelector(true)}
-						className="rounded-lg border border-grey-300 bg-white px-3 py-1.5 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+						className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 bg-white px-3 py-1.5 text-sm transition-colors"
 					>
 						Change
 					</button>
@@ -199,14 +199,14 @@ function BlockReferenceSelectorNew({
 				<button
 					type="button"
 					onClick={() => setShowBlockSelector(true)}
-					className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-4 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+					className="bg-grey-50 text-grey-600 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-4 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
 				>
 					<Layers className="h-5 w-5" />
 					Click to select a block
 				</button>
 			)}
 			{availableBlocks.length === 0 && (
-				<p className="mt-1 text-grey-400 text-xs">
+				<p className="mt-1 text-xs text-grey-400">
 					No reusable blocks available.{" "}
 					<Link href="/blocks/new" className="text-primary underline">
 						Create one first
@@ -285,16 +285,16 @@ const FieldEditor = ({
 			<div className={`rounded-lg border ${borderColor} ${bgColor} p-4`}>
 				<div className="mb-3 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<span className="font-medium text-grey-500 text-sm">
+						<span className="text-sm font-medium text-grey-500">
 							Field #{index + 1}
 							{depth > 0 && (
-								<span className="ml-2 text-grey-400 text-xs">
+								<span className="ml-2 text-xs text-grey-400">
 									(Nested level {depth})
 								</span>
 							)}
 						</span>
 						{(field.type === "group" || field.type === "repeater") && (
-							<span className="rounded-full bg-primary/10 px-2 py-1 font-medium text-primary text-xs">
+							<span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
 								{field.type === "group" ? "Group" : "Repeater"}
 							</span>
 						)}
@@ -338,7 +338,7 @@ const FieldEditor = ({
 					<div>
 						<label
 							htmlFor={`field-label-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Label
 						</label>
@@ -365,7 +365,7 @@ const FieldEditor = ({
 					<div className="relative pb-6">
 						<label
 							htmlFor={`field-name-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Field Name
 						</label>
@@ -394,15 +394,15 @@ const FieldEditor = ({
 						/>
 						<div className="absolute top-full left-0 -mt-3">
 							{isDuplicate ? (
-								<p className="text-red-500 text-xs">
+								<p className="text-xs text-red-500">
 									⚠️ Duplicate field name - must be unique
 								</p>
 							) : field.name && !validateFieldName(field.name) ? (
-								<p className="text-red-500 text-xs">
+								<p className="text-xs text-red-500">
 									Only lowercase letters, numbers, and underscores allowed
 								</p>
 							) : !field.nameManuallyEdited && field.label ? (
-								<p className="text-blue-600 text-xs">
+								<p className="text-xs text-blue-600">
 									✨ Auto-generated from "Label"
 								</p>
 							) : null}
@@ -412,7 +412,7 @@ const FieldEditor = ({
 					<div>
 						<label
 							htmlFor={`field-type-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Type
 						</label>
@@ -460,7 +460,7 @@ const FieldEditor = ({
 							)}
 						</select>
 						{depth >= 4 && (
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								Group and Repeater types not available at this nesting level
 							</p>
 						)}
@@ -486,7 +486,7 @@ const FieldEditor = ({
 								}
 								className="h-4 w-4 rounded border-grey-300"
 							/>
-							<span className="text-grey-500 text-sm">Required</span>
+							<span className="text-sm text-grey-500">Required</span>
 						</label>
 						{hasLocales && isTranslatableFieldType(field.type) && (
 							<label
@@ -506,7 +506,7 @@ const FieldEditor = ({
 									}
 									className="h-4 w-4 rounded border-grey-300 accent-blue-600"
 								/>
-								<span className="text-blue-700 text-sm">Translatable</span>
+								<span className="text-sm text-blue-700">Translatable</span>
 							</label>
 						)}
 					</div>
@@ -515,7 +515,7 @@ const FieldEditor = ({
 						<div className="md:col-span-2">
 							<label
 								htmlFor={`field-options-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
+								className="mb-1 block text-xs font-medium text-grey-500"
 							>
 								Options (comma separated)
 							</label>
@@ -535,7 +535,7 @@ const FieldEditor = ({
 						<div className="md:col-span-2">
 							<label
 								htmlFor={`field-default-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
+								className="mb-1 block text-xs font-medium text-grey-500"
 							>
 								Default Value
 							</label>
@@ -597,7 +597,7 @@ const FieldEditor = ({
 						<div className="md:col-span-2">
 							<label
 								htmlFor={`field-referenceSchema-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
+								className="mb-1 block text-xs font-medium text-grey-500"
 							>
 								Reference Schema <span className="text-error">*</span>
 							</label>
@@ -626,14 +626,14 @@ const FieldEditor = ({
 									))}
 							</select>
 							{allSchemas.length === 0 && (
-								<p className="mt-1 text-grey-400 text-xs">
+								<p className="mt-1 text-xs text-grey-400">
 									No schemas available.{" "}
 									<Link href="/schemas/new" className="text-primary underline">
 										Create one first
 									</Link>
 								</p>
 							)}
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								{field.type === "reference"
 									? "Enter the schema name to reference (e.g., 'authors' for author selection)"
 									: "Enter the schema name to reference (e.g., 'tags' for selecting multiple tags)"}
@@ -644,7 +644,7 @@ const FieldEditor = ({
 					{field.type === "flexibleBlocks" && (
 						<div className="space-y-3 md:col-span-2">
 							<div>
-								<div className="mb-2 block font-medium text-grey-500 text-xs">
+								<div className="mb-2 block text-xs font-medium text-grey-500">
 									Allowed Block Types (leave empty for all types)
 								</div>
 								<div className="grid grid-cols-2 gap-2 rounded border border-grey-300 p-3 md:grid-cols-3">
@@ -723,7 +723,7 @@ const FieldEditor = ({
 							<div>
 								<label
 									htmlFor={`field-maxBlocks-${field.id}`}
-									className="mb-1 block font-medium text-grey-500 text-xs"
+									className="mb-1 block text-xs font-medium text-grey-500"
 								>
 									Maximum Blocks (optional)
 								</label>
@@ -782,7 +782,7 @@ const FieldEditor = ({
 								/>
 								<label
 									htmlFor={`field-isSlug-${field.id}`}
-									className="cursor-pointer text-blue-800 text-sm"
+									className="cursor-pointer text-sm text-blue-800"
 								>
 									<strong>Use as Slug Field</strong> - Auto-generate
 									URL-friendly slugs
@@ -793,7 +793,7 @@ const FieldEditor = ({
 								<div>
 									<label
 										htmlFor={`field-slugSource-${field.id}`}
-										className="mb-1 block font-medium text-grey-500 text-xs"
+										className="mb-1 block text-xs font-medium text-grey-500"
 									>
 										Slug Source Field <span className="text-error">*</span>
 									</label>
@@ -823,7 +823,7 @@ const FieldEditor = ({
 												</option>
 											))}
 									</select>
-									<p className="mt-1 text-blue-600 text-xs">
+									<p className="mt-1 text-xs text-blue-600">
 										The slug will be auto-generated from the selected field
 										(e.g., "My Post Title" → "my-post-title")
 									</p>
@@ -835,7 +835,7 @@ const FieldEditor = ({
 					<div className="md:col-span-2">
 						<label
 							htmlFor={`field-help-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Help Text
 						</label>
@@ -861,14 +861,14 @@ const FieldEditor = ({
 				{/* Nested fields for group and repeater */}
 				{(field.type === "group" || field.type === "repeater") && (
 					<div className="mt-4 space-y-3">
-						<div className="flex items-center justify-between border-grey-200 border-t pt-4">
-							<h4 className="font-medium text-grey-700 text-sm">
+						<div className="flex items-center justify-between border-t border-grey-200 pt-4">
+							<h4 className="text-grey-700 text-sm font-medium">
 								{field.type === "group" ? "Group Fields" : "Repeater Fields"}
 							</h4>
 							<button
 								type="button"
 								onClick={() => onAddNestedField(field.id, parentPath)}
-								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/20"
+								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-xs text-primary transition-colors hover:bg-primary/20"
 								disabled={depth >= 4}
 							>
 								<Plus className="h-3 w-3" />
@@ -898,8 +898,8 @@ const FieldEditor = ({
 								))}
 							</div>
 						) : (
-							<div className="rounded border-2 border-grey-300 border-dashed p-4 text-center">
-								<p className="text-grey-400 text-xs">
+							<div className="rounded border-2 border-dashed border-grey-300 p-4 text-center">
+								<p className="text-xs text-grey-400">
 									No nested fields yet. Click "Add Nested Field" to add one.
 								</p>
 							</div>
@@ -1382,7 +1382,7 @@ export default function NewSchemaPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl text-primary">Create New Schema</h1>
+				<h1 className="text-3xl font-bold text-primary">Create New Schema</h1>
 				<p className="mt-2 text-grey-500">
 					Define a new content type for your CMS
 				</p>
@@ -1390,14 +1390,14 @@ export default function NewSchemaPage() {
 
 			{error && (
 				<div className="mb-6 rounded-lg bg-error-light/10 p-4">
-					<p className="text-error text-sm">{error}</p>
+					<p className="text-sm text-error">{error}</p>
 				</div>
 			)}
 
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Basic Info */}
 				<div className="rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-lg text-primary">
+					<h2 className="mb-4 text-lg font-semibold text-primary">
 						Basic Information
 					</h2>
 
@@ -1405,7 +1405,7 @@ export default function NewSchemaPage() {
 						<div>
 							<label
 								htmlFor="schema-display-name"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Display Name <span className="text-error">*</span>
 							</label>
@@ -1415,7 +1415,7 @@ export default function NewSchemaPage() {
 								value={displayName}
 								onChange={(e) => handleDisplayNameChange(e.target.value)}
 								placeholder="Blog Posts"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								required
 							/>
 						</div>
@@ -1423,7 +1423,7 @@ export default function NewSchemaPage() {
 						<div className="relative pb-6">
 							<label
 								htmlFor="schema-name"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Schema Name <span className="text-error">*</span>
 							</label>
@@ -1443,7 +1443,7 @@ export default function NewSchemaPage() {
 									setName(sanitizedName)
 								}}
 								placeholder="blog_posts"
-								className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+								className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none ${
 									!validateFieldName(name) && name
 										? "border-red-500"
 										: "border-grey-300"
@@ -1452,15 +1452,15 @@ export default function NewSchemaPage() {
 							/>
 							<div className="absolute top-full left-0 -mt-3">
 								{name && !validateFieldName(name) ? (
-									<p className="text-red-500 text-xs">
+									<p className="text-xs text-red-500">
 										Only lowercase letters, numbers, and underscores allowed
 									</p>
 								) : !hasEditedName && displayName ? (
-									<p className="text-blue-600 text-xs">
+									<p className="text-xs text-blue-600">
 										✨ Auto-generated from "Display Name"
 									</p>
 								) : (
-									<p className="text-grey-400 text-xs">
+									<p className="text-xs text-grey-400">
 										Unique identifier (lowercase, underscores only)
 									</p>
 								)}
@@ -1470,7 +1470,7 @@ export default function NewSchemaPage() {
 						<div>
 							<label
 								htmlFor="schema-type"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Type <span className="text-error">*</span>
 							</label>
@@ -1478,12 +1478,12 @@ export default function NewSchemaPage() {
 								id="schema-type"
 								value={type}
 								onChange={(e) => setType(e.target.value as any)}
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							>
 								<option value="collection">Collection</option>
 								<option value="global">Global Component</option>
 							</select>
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								{type === "global" &&
 									"Single instance content (header, footer, settings)"}
 								{type === "collection" &&
@@ -1494,7 +1494,7 @@ export default function NewSchemaPage() {
 						<div>
 							<label
 								htmlFor="schema-description"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Description
 							</label>
@@ -1504,13 +1504,13 @@ export default function NewSchemaPage() {
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Describe what this schema is for..."
 								rows={3}
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							/>
 						</div>
 					</div>
 					{type === "collection" && (
-						<div className="border-grey-200 border-t pt-4">
-							<h3 className="mb-3 font-medium text-grey-700">Simple Schema</h3>
+						<div className="border-t border-grey-200 pt-4">
+							<h3 className="text-grey-700 mb-3 font-medium">Simple Schema</h3>
 							<div className="flex items-center gap-4">
 								<label className="relative inline-flex cursor-pointer items-center">
 									<input
@@ -1519,13 +1519,13 @@ export default function NewSchemaPage() {
 										onChange={(e) => setIsSimple(e.target.checked)}
 										className="peer sr-only"
 									/>
-									<div className="peer h-6 w-11 rounded-full bg-grey-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20" />
+									<div className="peer h-6 w-11 rounded-full bg-grey-200 peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/20 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
 								</label>
-								<span className="font-medium text-grey-700">
+								<span className="text-grey-700 font-medium">
 									Enable Simple Mode
 								</span>
 							</div>
-							<p className="mt-2 text-grey-500 text-sm">
+							<p className="mt-2 text-sm text-grey-500">
 								Disables SEO metadata fields on content entries for this schema.
 							</p>
 						</div>
@@ -1535,7 +1535,7 @@ export default function NewSchemaPage() {
 				{/* Fields */}
 				<div className="rounded-lg bg-white p-6 shadow">
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-lg text-primary">
+						<h2 className="text-lg font-semibold text-primary">
 							Fields <span className="text-error">*</span>
 						</h2>
 						<button
@@ -1549,7 +1549,7 @@ export default function NewSchemaPage() {
 					</div>
 
 					{fields.length === 0 ? (
-						<div className="rounded-lg border-2 border-grey-300 border-dashed p-8 text-center">
+						<div className="rounded-lg border-2 border-dashed border-grey-300 p-8 text-center">
 							<p className="text-grey-500">
 								No fields yet. Click "Add Field" to get started.
 							</p>
@@ -1579,7 +1579,7 @@ export default function NewSchemaPage() {
 				</div>
 
 				{/* Fixed bottom bar with action buttons */}
-				<div className="fixed right-0 bottom-0 left-0 z-50 border-grey-200 border-t bg-white shadow-lg">
+				<div className="fixed right-0 bottom-0 left-0 z-50 border-t border-grey-200 bg-white shadow-lg">
 					<div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
 						<button
 							type="button"

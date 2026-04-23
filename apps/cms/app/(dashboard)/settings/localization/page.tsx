@@ -1,6 +1,5 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
 import { useMutation } from "convex/react"
 import {
 	AlertTriangle,
@@ -15,6 +14,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useCachedQuery } from "@/lib/use-cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
 
 type Locale = {
 	code: string
@@ -197,7 +197,7 @@ export default function LocalizationSettingsPage() {
 				</Link>
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="font-bold text-3xl text-primary">Localization</h1>
+						<h1 className="text-3xl font-bold text-primary">Localization</h1>
 						<p className="mt-2 text-grey-500">
 							Configure languages for your content
 						</p>
@@ -223,7 +223,7 @@ export default function LocalizationSettingsPage() {
 							<h4 className="font-semibold text-blue-900">
 								No locales configured
 							</h4>
-							<p className="mt-1 text-blue-700 text-sm">
+							<p className="mt-1 text-sm text-blue-700">
 								Your CMS currently operates in single-language mode. Add locales
 								below to enable multi-language content. Fields marked as
 								"translatable" in your schemas will support multiple languages.
@@ -236,13 +236,13 @@ export default function LocalizationSettingsPage() {
 			{/* Current Locales */}
 			<div className="mb-6 rounded-lg bg-white p-6 shadow">
 				<div className="mb-4 flex items-center justify-between">
-					<h2 className="font-semibold text-grey-900 text-lg">
+					<h2 className="text-grey-900 text-lg font-semibold">
 						Active Locales
 					</h2>
 					<button
 						type="button"
 						onClick={() => setShowAddForm(true)}
-						className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-primary text-sm transition-colors hover:bg-primary/20"
+						className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary transition-colors hover:bg-primary/20"
 					>
 						<Plus className="h-4 w-4" />
 						Add Custom Locale
@@ -250,7 +250,7 @@ export default function LocalizationSettingsPage() {
 				</div>
 
 				{locales.length === 0 ? (
-					<div className="rounded-lg border-2 border-grey-200 border-dashed p-8 text-center">
+					<div className="rounded-lg border-2 border-dashed border-grey-200 p-8 text-center">
 						<Globe className="mx-auto mb-3 h-12 w-12 text-grey-300" />
 						<p className="text-grey-500">
 							No locales added yet. Add a locale to enable multi-language
@@ -269,22 +269,22 @@ export default function LocalizationSettingsPage() {
 								}`}
 							>
 								<div className="flex items-center gap-3">
-									<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-grey-100 font-mono font-semibold text-grey-700 text-sm uppercase">
+									<div className="text-grey-700 flex h-10 w-10 items-center justify-center rounded-lg bg-grey-100 font-mono text-sm font-semibold uppercase">
 										{locale.code}
 									</div>
 									<div>
 										<div className="flex items-center gap-2">
-											<span className="font-medium text-grey-900">
+											<span className="text-grey-900 font-medium">
 												{locale.name}
 											</span>
 											{locale.code === defaultLocale && (
-												<span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary text-xs">
+												<span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
 													<Star className="h-3 w-3" />
 													Default
 												</span>
 											)}
 										</div>
-										<span className="text-grey-500 text-sm">{locale.code}</span>
+										<span className="text-sm text-grey-500">{locale.code}</span>
 									</div>
 								</div>
 								<div className="flex items-center gap-2">
@@ -292,7 +292,7 @@ export default function LocalizationSettingsPage() {
 										<button
 											type="button"
 											onClick={() => handleSetDefault(locale.code)}
-											className="rounded-lg border border-grey-300 px-3 py-1.5 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+											className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-3 py-1.5 text-sm transition-colors"
 										>
 											Set as Default
 										</button>
@@ -315,7 +315,7 @@ export default function LocalizationSettingsPage() {
 			{/* Quick Add */}
 			{availableQuickLocales.length > 0 && (
 				<div className="mb-6 rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-grey-900 text-lg">
+					<h2 className="text-grey-900 mb-4 text-lg font-semibold">
 						Quick Add Common Locales
 					</h2>
 					<div className="flex flex-wrap gap-2">
@@ -326,7 +326,7 @@ export default function LocalizationSettingsPage() {
 								onClick={() => handleQuickAdd(locale)}
 								className="flex items-center gap-2 rounded-lg border border-grey-200 px-3 py-2 text-sm transition-colors hover:border-primary hover:bg-primary/5"
 							>
-								<span className="font-mono text-grey-500 text-xs uppercase">
+								<span className="font-mono text-xs text-grey-500 uppercase">
 									{locale.code}
 								</span>
 								<span className="text-grey-700">{locale.name}</span>
@@ -340,14 +340,14 @@ export default function LocalizationSettingsPage() {
 			{showAddForm && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 					<div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-						<h3 className="mb-4 font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 mb-4 text-lg font-semibold">
 							Add Custom Locale
 						</h3>
 						<div className="space-y-4">
 							<div>
 								<label
 									htmlFor="locale-code"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Locale Code <span className="text-red-500">*</span>
 								</label>
@@ -362,7 +362,7 @@ export default function LocalizationSettingsPage() {
 									className="w-full rounded-lg border border-grey-300 px-3 py-2 text-sm"
 									maxLength={10}
 								/>
-								<p className="mt-1 text-grey-500 text-xs">
+								<p className="mt-1 text-xs text-grey-500">
 									Use ISO 639-1 codes (e.g., en, es, fr) or with region (e.g.,
 									en-US, pt-BR)
 								</p>
@@ -370,7 +370,7 @@ export default function LocalizationSettingsPage() {
 							<div>
 								<label
 									htmlFor="locale-name"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Display Name <span className="text-red-500">*</span>
 								</label>
@@ -392,7 +392,7 @@ export default function LocalizationSettingsPage() {
 									setNewLocaleCode("")
 									setNewLocaleName("")
 								}}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors"
 							>
 								Cancel
 							</button>
@@ -416,11 +416,11 @@ export default function LocalizationSettingsPage() {
 							<div className="rounded-full bg-red-100 p-2">
 								<AlertTriangle className="h-5 w-5 text-red-600" />
 							</div>
-							<h3 className="font-semibold text-grey-900 text-lg">
+							<h3 className="text-grey-900 text-lg font-semibold">
 								Remove Locale?
 							</h3>
 						</div>
-						<p className="mb-6 text-grey-600">
+						<p className="text-grey-600 mb-6">
 							Are you sure you want to remove this locale? Existing translations
 							for this locale will remain in the database but won't be editable
 							until the locale is re-added.
@@ -429,7 +429,7 @@ export default function LocalizationSettingsPage() {
 							<button
 								type="button"
 								onClick={() => setShowDeleteConfirm(null)}
-								className="rounded-lg border border-grey-300 px-4 py-2 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-4 py-2 text-sm transition-colors"
 							>
 								Cancel
 							</button>
@@ -446,11 +446,11 @@ export default function LocalizationSettingsPage() {
 			)}
 
 			{/* Help Section */}
-			<div className="rounded-lg border border-grey-200 bg-grey-50 p-6">
-				<h3 className="mb-2 font-semibold text-grey-900">
+			<div className="bg-grey-50 rounded-lg border border-grey-200 p-6">
+				<h3 className="text-grey-900 mb-2 font-semibold">
 					How Localization Works
 				</h3>
-				<ul className="space-y-2 text-grey-600 text-sm">
+				<ul className="text-grey-600 space-y-2 text-sm">
 					<li className="flex items-start gap-2">
 						<span className="mt-1 text-primary">•</span>
 						<span>

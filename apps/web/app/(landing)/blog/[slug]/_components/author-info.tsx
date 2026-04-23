@@ -1,9 +1,9 @@
 "use client"
 
-import type { ContentAuthorsContent } from "@repo/cms-shared"
-import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { useState } from "react"
+import type { ContentAuthorsContent } from "@repo/cms-shared"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import { api } from "vexblocks-backend/convex/_generated/api"
 import type { Id } from "vexblocks-backend/convex/_generated/dataModel"
 
@@ -58,7 +58,7 @@ export function AuthorInfo({ author: authorData }: AuthorInfoProps) {
 						/>
 					</div>
 				) : (
-					<div className="flex size-full items-center justify-center bg-linar-to-br from-purple-500 to-blue-500 font-semibold text-2xl text-white">
+					<div className="bg-linar-to-br flex size-full items-center justify-center from-purple-500 to-blue-500 text-2xl font-semibold text-white">
 						{initials}
 					</div>
 				)}
@@ -66,11 +66,11 @@ export function AuthorInfo({ author: authorData }: AuthorInfoProps) {
 
 			{/* Author Details */}
 			<div className="flex flex-col gap-1">
-				<p className="font-medium text-2xl text-gray-900 tracking-tight">
+				<p className="text-2xl font-medium tracking-tight text-gray-900">
 					{authorName}
 				</p>
 				{(author.data.job_title || author.data.company_name) && (
-					<p className="text-gray-600 text-lg">
+					<p className="text-lg text-gray-600">
 						{[
 							getStringValue(author.data.job_title),
 							getStringValue(author.data.company_name),

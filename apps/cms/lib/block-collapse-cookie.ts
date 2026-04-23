@@ -21,6 +21,6 @@ export function setBlockCollapsed(blockId: string, collapsed: boolean) {
 	}
 	const expires = new Date()
 	expires.setDate(expires.getDate() + 7)
-	// biome-ignore lint/suspicious/noDocumentCookie: CookieStore API not available in all environments
+	// oxlint-disable-next-line unicorn/no-document-cookie
 	document.cookie = `${COOKIE_KEY}=${encodeURIComponent(JSON.stringify([...ids]))}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
 }

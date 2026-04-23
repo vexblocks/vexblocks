@@ -1,13 +1,13 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage, getStringValue } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { FileUp, Image as ImageIcon, RefreshCw, X } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import TextareaAutosize from "react-textarea-autosize"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 import type { Field } from "./types"
 
 const MapFieldEditor = dynamic(
@@ -51,17 +51,17 @@ function FilePreview({
 
 	return (
 		<div className="inline-flex w-full flex-col items-center">
-			<div className="group relative max-w-md overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+			<div className="group bg-grey-50 relative max-w-md overflow-hidden rounded-lg border border-grey-300 transition-all hover:border-primary hover:shadow-md">
 				<div className="flex items-center gap-3 p-4">
 					<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
 						<FileUp className="h-5 w-5 text-primary" />
 					</div>
 					<div className="min-w-0 flex-1">
-						<p className="truncate font-medium text-grey-700 text-sm">
+						<p className="text-grey-700 truncate text-sm font-medium">
 							{media?.caption || "Loading..."}
 						</p>
 						{media && (
-							<p className="text-grey-400 text-xs">
+							<p className="text-xs text-grey-400">
 								{ext && (
 									<span className="mr-1 font-medium uppercase">{ext}</span>
 								)}
@@ -78,11 +78,11 @@ function FilePreview({
 						<X className="h-4 w-4" />
 					</button>
 				</div>
-				<div className="border-grey-200 border-t bg-white p-3">
+				<div className="border-t border-grey-200 bg-white p-3">
 					<button
 						type="button"
 						onClick={onChangeFile}
-						className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+						className="text-grey-700 w-full rounded-lg bg-grey-100 px-4 py-2 text-sm font-medium transition-colors hover:bg-grey-200"
 					>
 						Change File
 					</button>
@@ -159,7 +159,7 @@ export function BasicFieldRenderer({
 						onChange={(e) => onChange(e.target.value)}
 						placeholder={field.defaultValue ?? field.helpText}
 						required={field.required}
-						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+						className={`w-full rounded-lg border px-4 py-2 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none ${
 							field.isSlug
 								? "border-blue-300 bg-blue-50 text-blue-900"
 								: "border-grey-300 text-grey-500"
@@ -167,7 +167,7 @@ export function BasicFieldRenderer({
 					/>
 					{field.isSlug && field.slugSource && (
 						<div className="mt-1 flex items-center gap-2">
-							<p className="text-blue-600 text-xs">
+							<p className="text-xs text-blue-600">
 								{isAutoSlugActive ? (
 									<>✨ Auto-generating from "{field.slugSource}"</>
 								) : (
@@ -178,7 +178,7 @@ export function BasicFieldRenderer({
 								<button
 									type="button"
 									onClick={onRegenerateSlug}
-									className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-700 text-xs transition-colors marker:text-xs hover:bg-blue-200"
+									className="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700 transition-colors marker:text-xs hover:bg-blue-200"
 									title="Regenerate slug from source field"
 								>
 									<RefreshCw className="h-3 w-3" />
@@ -201,7 +201,7 @@ export function BasicFieldRenderer({
 						required={field.required}
 						minRows={1}
 						maxRows={10}
-						className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						className="w-full resize-none rounded-lg border border-grey-300 px-3 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 					/>
 				</div>
 			)
@@ -225,7 +225,7 @@ export function BasicFieldRenderer({
 					onChange={(e) => onChange(Number.parseFloat(e.target.value))}
 					placeholder={field.helpText}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			)
 
@@ -251,7 +251,7 @@ export function BasicFieldRenderer({
 					value={defaultValue}
 					onChange={(e) => onChange(e.target.value)}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			)
 
@@ -263,7 +263,7 @@ export function BasicFieldRenderer({
 					value={defaultValue}
 					onChange={(e) => onChange(e.target.value)}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			)
 
@@ -275,7 +275,7 @@ export function BasicFieldRenderer({
 					value={defaultValue}
 					onChange={(e) => onChange(e.target.value)}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			)
 
@@ -303,13 +303,13 @@ export function BasicFieldRenderer({
 						placeholder={field.helpText || "https://example.com"}
 						required={field.required}
 						pattern={urlPattern}
-						className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:outline-none focus:ring-2 ${
+						className={`w-full rounded-lg border px-4 py-2 text-grey-500 transition-colors focus:ring-2 focus:outline-none ${
 							isInvalid
 								? "border-red-400 focus:border-red-400 focus:ring-red-400/20"
 								: "border-grey-300 focus:border-primary focus:ring-primary/20"
 						}`}
 					/>
-					<p className="text-grey-400 text-xs leading-relaxed">
+					<p className="text-xs leading-relaxed text-grey-400">
 						Accepted formats:{" "}
 						<span className="font-mono">https://example.com</span> ·{" "}
 						<span className="font-mono">/about</span> ·{" "}
@@ -318,11 +318,11 @@ export function BasicFieldRenderer({
 						<span className="font-mono">tel:+1234567890</span>
 					</p>
 					{isInvalid && (
-						<p className="text-red-500 text-xs">
+						<p className="text-xs text-red-500">
 							Invalid URL format. Please use one of the accepted formats above.
 						</p>
 					)}
-					<label className="flex cursor-pointer items-center gap-2 text-grey-500 text-sm">
+					<label className="flex cursor-pointer items-center gap-2 text-sm text-grey-500">
 						<input
 							type="checkbox"
 							checked={urlValue.newWindow ?? false}
@@ -352,10 +352,10 @@ export function BasicFieldRenderer({
 						required={field.required}
 						pattern="^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+$"
 						title="Enter a YouTube video URL"
-						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 					/>
 					{defaultValue && (
-						<div className="rounded-lg border border-grey-200 bg-grey-50 p-2">
+						<div className="bg-grey-50 rounded-lg border border-grey-200 p-2">
 							<p className="text-grey-600 text-xs">Preview:</p>
 							<div className="mt-2 aspect-video w-full overflow-hidden rounded">
 								<iframe
@@ -380,7 +380,7 @@ export function BasicFieldRenderer({
 					value={defaultValue}
 					onChange={(e) => onChange(e.target.value)}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				>
 					<option value="">Select an option...</option>
 					{field.options?.map((option: string) => (
@@ -397,7 +397,7 @@ export function BasicFieldRenderer({
 					<div className="space-y-4">
 						{value ? (
 							<div className="inline-flex w-full flex-col items-center">
-								<div className="group relative max-w-40 overflow-hidden rounded-lg border border-grey-300 bg-grey-50 transition-all hover:border-primary hover:shadow-md">
+								<div className="group bg-grey-50 relative max-w-40 overflow-hidden rounded-lg border border-grey-300 transition-all hover:border-primary hover:shadow-md">
 									<div className="relative overflow-hidden bg-grey-100">
 										<CFImage
 											assetId={value}
@@ -416,11 +416,11 @@ export function BasicFieldRenderer({
 											<X className="h-4 w-4" />
 										</button>
 									</div>
-									<div className="border-grey-200 border-t bg-white p-3">
+									<div className="border-t border-grey-200 bg-white p-3">
 										<button
 											type="button"
 											onClick={() => setShowMediaSelector(true)}
-											className="w-full rounded-lg bg-grey-100 px-4 py-2 font-medium text-grey-700 text-sm transition-colors hover:bg-grey-200"
+											className="text-grey-700 w-full rounded-lg bg-grey-100 px-4 py-2 text-sm font-medium transition-colors hover:bg-grey-200"
 										>
 											Change Image
 										</button>
@@ -431,16 +431,16 @@ export function BasicFieldRenderer({
 							<button
 								type="button"
 								onClick={() => setShowMediaSelector(true)}
-								className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
+								className="group bg-grey-50 flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-grey-300 p-4 transition-all hover:border-primary hover:bg-primary/5"
 							>
 								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
 									<ImageIcon className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
 								</div>
 								<div className="text-center">
-									<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+									<p className="text-grey-700 text-sm font-medium transition-colors group-hover:text-primary">
 										Select from Media Library
 									</p>
-									<p className="mt-1 text-grey-500 text-xs">
+									<p className="mt-1 text-xs text-grey-500">
 										Click to browse and choose an image
 									</p>
 								</div>
@@ -479,16 +479,16 @@ export function BasicFieldRenderer({
 							<button
 								type="button"
 								onClick={() => setShowMediaSelector(true)}
-								className="group flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-4 transition-all hover:border-primary hover:bg-primary/5"
+								className="group bg-grey-50 flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-grey-300 p-4 transition-all hover:border-primary hover:bg-primary/5"
 							>
 								<div className="flex h-16 w-16 items-center justify-center rounded-full bg-grey-100 transition-colors group-hover:bg-primary/10">
 									<FileUp className="h-8 w-8 text-grey-400 transition-colors group-hover:text-primary" />
 								</div>
 								<div className="text-center">
-									<p className="font-medium text-grey-700 text-sm transition-colors group-hover:text-primary">
+									<p className="text-grey-700 text-sm font-medium transition-colors group-hover:text-primary">
 										Select from File Library
 									</p>
-									<p className="mt-1 text-grey-500 text-xs">
+									<p className="mt-1 text-xs text-grey-500">
 										Click to browse and choose a file
 									</p>
 								</div>
@@ -535,7 +535,7 @@ export function BasicFieldRenderer({
 					value={value || ""}
 					onChange={(e) => onChange(e.target.value || null)}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				>
 					<option value="">Select {referencedSchema.displayName}...</option>
 					{referencedContent.map((item: any) => {
@@ -581,7 +581,7 @@ export function BasicFieldRenderer({
 				<div className="space-y-2">
 					<div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border border-grey-300 p-3">
 						{referencedContent.length === 0 ? (
-							<p className="text-grey-400 text-sm">
+							<p className="text-sm text-grey-400">
 								No {referencedSchema.displayName} available. Create some first.
 							</p>
 						) : (
@@ -597,7 +597,7 @@ export function BasicFieldRenderer({
 								return (
 									<label
 										key={item._id}
-										className="flex cursor-pointer items-center gap-3 rounded border border-grey-200 p-2 transition-colors hover:bg-grey-50"
+										className="hover:bg-grey-50 flex cursor-pointer items-center gap-3 rounded border border-grey-200 p-2 transition-colors"
 									>
 										<input
 											type="checkbox"
@@ -620,7 +620,7 @@ export function BasicFieldRenderer({
 						)}
 					</div>
 					{selectedIds.length > 0 && (
-						<p className="text-grey-400 text-xs">
+						<p className="text-xs text-grey-400">
 							{selectedIds.length} {referencedSchema.displayName} selected
 						</p>
 					)}
@@ -637,7 +637,7 @@ export function BasicFieldRenderer({
 					onChange={(e) => onChange(e.target.value)}
 					placeholder={field.helpText}
 					required={field.required}
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			)
 	}

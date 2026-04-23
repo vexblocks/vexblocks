@@ -27,7 +27,7 @@ export function DashboardHeader({
 	const firstName = currentUser.name?.split(" ")[0] || "Admin"
 
 	return (
-		<header className="sticky top-0 z-30 border-grey-200 border-b bg-white/80 backdrop-blur-sm">
+		<header className="sticky top-0 z-30 border-b border-grey-200 bg-white/80 backdrop-blur-sm">
 			<div className="flex items-center justify-between px-4 py-4 lg:px-8">
 				<div className="flex items-center gap-4">
 					<button
@@ -43,10 +43,10 @@ export function DashboardHeader({
 						)}
 					</button>
 					<div>
-						<h2 className="font-semibold text-grey-900 text-lg">
+						<h2 className="text-grey-900 text-lg font-semibold">
 							Welcome back, {firstName}!
 						</h2>
-						<p className="text-grey-500 text-sm">
+						<p className="text-sm text-grey-500">
 							Manage your content and schemas
 						</p>
 					</div>

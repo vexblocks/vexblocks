@@ -1,12 +1,12 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { Layers, Search, X } from "lucide-react"
 import { useState } from "react"
 import { authAtom } from "@/lib/auth-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 
 type Block = {
 	_id: string
@@ -74,19 +74,19 @@ export function BlockSelectorDialog({
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 			<div className="flex h-[95vh] w-full max-w-[95vw] flex-col rounded-lg bg-white shadow-xl">
 				{/* Header */}
-				<div className="flex items-center justify-between border-grey-200 border-b px-6 py-4">
-					<h2 className="font-semibold text-primary text-xl">{title}</h2>
+				<div className="flex items-center justify-between border-b border-grey-200 px-6 py-4">
+					<h2 className="text-xl font-semibold text-primary">{title}</h2>
 					<button
 						type="button"
 						onClick={onClose}
-						className="text-grey-500 transition-colors hover:text-grey-700"
+						className="hover:text-grey-700 text-grey-500 transition-colors"
 					>
 						<X className="h-6 w-6" />
 					</button>
 				</div>
 
 				{/* Search */}
-				<div className="border-grey-200 border-b px-6 py-3">
+				<div className="border-b border-grey-200 px-6 py-3">
 					<div className="relative">
 						<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-grey-400" />
 						<input
@@ -94,13 +94,13 @@ export function BlockSelectorDialog({
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
 							placeholder="Search blocks..."
-							className="w-full rounded-lg border border-grey-300 py-2 pr-4 pl-10 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							className="w-full rounded-lg border border-grey-300 py-2 pr-4 pl-10 text-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 						/>
 					</div>
 				</div>
 
 				{/* Content */}
-				<div className="flex-1 overflow-y-auto bg-grey-50 p-6">
+				<div className="bg-grey-50 flex-1 overflow-y-auto p-6">
 					{blocks === undefined ? (
 						<div className="flex min-h-50 items-center justify-center">
 							<div className="text-center">
@@ -124,7 +124,7 @@ export function BlockSelectorDialog({
 							{Object.entries(filteredGroups).map(
 								([category, categoryBlocks]) => (
 									<div key={category}>
-										<h3 className="mb-3 font-semibold text-grey-700">
+										<h3 className="text-grey-700 mb-3 font-semibold">
 											{category}
 										</h3>
 										<div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -175,23 +175,23 @@ export function BlockSelectorDialog({
 
 													{/* Block Info */}
 													<div className="flex flex-1 flex-col p-4">
-														<h4 className="mb-1 font-semibold text-grey-900 group-hover:text-primary">
+														<h4 className="text-grey-900 mb-1 font-semibold group-hover:text-primary">
 															{block.displayName}
 														</h4>
 														{block.description ? (
-															<p className="line-clamp-2 flex-1 text-grey-500 text-sm">
+															<p className="line-clamp-2 flex-1 text-sm text-grey-500">
 																{block.description}
 															</p>
 														) : (
-															<p className="line-clamp-2 flex-1 text-grey-400 text-sm italic">
+															<p className="line-clamp-2 flex-1 text-sm text-grey-400 italic">
 																No description
 															</p>
 														)}
 														<div className="mt-2 flex items-center justify-between">
-															<code className="rounded bg-grey-100 px-2 py-0.5 font-mono text-grey-600 text-xs">
+															<code className="text-grey-600 rounded bg-grey-100 px-2 py-0.5 font-mono text-xs">
 																{block.name}
 															</code>
-															<span className="text-grey-400 text-xs">
+															<span className="text-xs text-grey-400">
 																{block.fields.length} field
 																{block.fields.length !== 1 ? "s" : ""}
 															</span>
@@ -208,8 +208,8 @@ export function BlockSelectorDialog({
 				</div>
 
 				{/* Footer */}
-				<div className="border-grey-200 border-t bg-white px-6 py-4">
-					<div className="flex items-center justify-between text-grey-500 text-sm">
+				<div className="border-t border-grey-200 bg-white px-6 py-4">
+					<div className="flex items-center justify-between text-sm text-grey-500">
 						<p>Click on a block to select it</p>
 						<button
 							type="button"

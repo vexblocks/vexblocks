@@ -1,6 +1,6 @@
 {
 	"name": "@vexblocks/cli",
-	"version": "2.1.7",
+	"version": "2.1.8",
 	"description": "CLI for adding VexBlocks Headless CMS to your Turborepo project",
 	"keywords": [
 		"cms",
@@ -38,7 +38,7 @@
 	"scripts": {
 		"build": "tsup src/index.ts --format esm --dts --clean",
 		"dev": "tsup src/index.ts --format esm --dts --watch",
-		"lint": "biome check .",
+		"lint": "oxlint",
 		"typecheck": "tsc --noEmit",
 		"prepublishOnly": "pnpm run build"
 	},

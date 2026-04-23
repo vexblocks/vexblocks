@@ -1,7 +1,7 @@
+import { Container } from "@/components/atoms/container"
 import type { BlogPostsContent } from "@repo/cms-shared"
 import { getStringValue } from "@repo/cms-shared"
 import type { Id } from "vexblocks-backend/convex/_generated/dataModel"
-import { Container } from "@/components/atoms/container"
 import { AuthorInfo } from "./author-info"
 import { PostContentBlocks } from "./post-content-blocks"
 import { PostTags } from "./post-tags"
@@ -30,10 +30,10 @@ export function Post({ post, slug, schemaId }: PostProps) {
 			<div className="bg-white px-4 py-20 md:px-0">
 				<Container>
 					<div className="py-20 text-center">
-						<h1 className="mb-4 font-normal font-serif text-4xl text-gray-900">
+						<h1 className="mb-4 font-serif text-4xl font-normal text-gray-900">
 							Post not found
 						</h1>
-						<p className="text-gray-600 text-lg">
+						<p className="text-lg text-gray-600">
 							The post you're looking for doesn't exist or has been removed.
 						</p>
 					</div>
@@ -53,7 +53,7 @@ export function Post({ post, slug, schemaId }: PostProps) {
 				<div className="mx-auto max-w-[1000px]">
 					{/* Header */}
 					<header className="mb-7 lg:mb-10" data-cms-field="title">
-						<h1 className="font-normal font-serif text-3xl text-gray-900 leading-tight tracking-tight md:text-6xl lg:text-5xl">
+						<h1 className="font-serif text-3xl leading-tight font-normal tracking-tight text-gray-900 md:text-6xl lg:text-5xl">
 							{title}
 						</h1>
 					</header>
@@ -75,7 +75,7 @@ export function Post({ post, slug, schemaId }: PostProps) {
 							)}
 						</div>
 
-						<div className="border-gray-300 border-t" />
+						<div className="border-t border-gray-300" />
 
 						{post.data.author && <AuthorInfo author={post.data.author} />}
 					</div>

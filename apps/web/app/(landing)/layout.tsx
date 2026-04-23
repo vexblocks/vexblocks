@@ -1,7 +1,7 @@
-import { PreviewBanner, PreviewProvider, VisualEditing } from "@repo/cms-shared"
 import { Toaster } from "sonner"
 import { Footer } from "@/components/organisms/footer"
 import { StickyHeader } from "@/components/organisms/sticky-header"
+import { PreviewBanner, PreviewProvider, VisualEditing } from "@repo/cms-shared"
 
 export default function LandingLayout({
 	children,

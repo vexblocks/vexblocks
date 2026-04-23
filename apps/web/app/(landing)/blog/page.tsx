@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { HeroSection } from "@/components/molecules/hero-section"
-
 import {
 	NavbarThemeInitializer,
 	SectionColorDetector,

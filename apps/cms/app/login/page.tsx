@@ -2,9 +2,6 @@
 
 import { convexQuery } from "@convex-dev/react-query"
 import { useAtom } from "@lfades/atom"
-import { authClient } from "@repo/backend/better-auth/client"
-import { api } from "@repo/backend/convex/_generated/api"
-import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "@tanstack/react-query"
 import { OTPInput, type SlotProps } from "input-otp"
 import { Shield } from "lucide-react"
@@ -13,6 +10,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useRef, useState, useTransition } from "react"
 import { authAtom } from "@/lib/auth-atom"
 import { cn } from "@/lib/utils"
+import { authClient } from "@repo/backend/better-auth/client"
+import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 
 type ExtendedSlotProps = SlotProps & {
 	hasError?: boolean
@@ -26,7 +26,7 @@ function Slot(props: ExtendedSlotProps) {
 			className={cn(
 				"relative flex h-14 w-12 items-center justify-center text-[1.2rem]",
 				"rounded-lg border-2 transition-all duration-300",
-				"border-grey-300 bg-grey-50",
+				"bg-grey-50 border-grey-300",
 				"hover:border-grey-400 hover:bg-grey-100",
 				{
 					"border-primary bg-primary/5 ring-2 ring-primary/20": props.isActive,
@@ -35,7 +35,7 @@ function Slot(props: ExtendedSlotProps) {
 			)}
 		>
 			{props.char ? (
-				<div className="font-bold text-grey-900">{props.char}</div>
+				<div className="text-grey-900 font-bold">{props.char}</div>
 			) : (
 				<div className="relative flex h-full w-full items-center justify-center">
 					{showCaret && (
@@ -235,11 +235,11 @@ function AdminLoginContent() {
 						{isLoading ? (
 							<div className="mx-auto mb-1 h-9 w-48 animate-pulse rounded-lg bg-grey-200" />
 						) : (
-							<h2 className="mb-1 font-bold text-3xl text-grey-900">
+							<h2 className="text-grey-900 mb-1 text-3xl font-bold">
 								{dashboardName}
 							</h2>
 						)}
-						<p className="mb-2 font-medium text-primary text-sm">
+						<p className="mb-2 text-sm font-medium text-primary">
 							Headless CMS
 						</p>
 					</div>
@@ -249,15 +249,15 @@ function AdminLoginContent() {
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
 							<Shield className="h-8 w-8 text-orange-600" />
 						</div>
-						<h2 className="mb-2 font-bold text-orange-900 text-xl">
+						<h2 className="mb-2 text-xl font-bold text-orange-900">
 							Access Pending
 						</h2>
-						<p className="mb-4 text-orange-700 text-sm">
+						<p className="mb-4 text-sm text-orange-700">
 							Your account is registered but doesn't have admin access yet.
 							Please wait for an administrator to grant you access.
 						</p>
 						<div className="rounded-lg bg-white p-3">
-							<p className="font-medium text-grey-700 text-xs">
+							<p className="text-grey-700 text-xs font-medium">
 								Logged in as: <strong>{authState.user.email}</strong>
 							</p>
 						</div>
@@ -270,13 +270,13 @@ function AdminLoginContent() {
 							await authClient.signOut()
 							router.refresh()
 						}}
-						className="w-full rounded-lg border-2 border-grey-300 bg-white px-4 py-3 font-medium text-grey-700 transition-colors hover:bg-grey-50"
+						className="text-grey-700 hover:bg-grey-50 w-full rounded-lg border-2 border-grey-300 bg-white px-4 py-3 font-medium transition-colors"
 					>
 						Sign Out
 					</button>
 
 					<div className="mt-6 rounded-lg bg-grey-100 p-4">
-						<p className="text-center text-grey-500 text-sm">
+						<p className="text-center text-sm text-grey-500">
 							💡 Contact your system administrator to request admin access
 						</p>
 					</div>
@@ -315,14 +315,14 @@ function AdminLoginContent() {
 						{isLoading ? (
 							<div className="mx-auto mb-1 h-9 w-48 animate-pulse rounded-lg bg-grey-200" />
 						) : (
-							<h2 className="mb-1 font-bold text-3xl text-grey-900">
+							<h2 className="text-grey-900 mb-1 text-3xl font-bold">
 								{dashboardName}
 							</h2>
 						)}
-						<p className="mb-2 font-medium text-primary text-sm">
+						<p className="mb-2 text-sm font-medium text-primary">
 							Headless CMS
 						</p>
-						<p className="text-grey-500 text-sm">
+						<p className="text-sm text-grey-500">
 							Sign in to access the admin panel
 						</p>
 					</div>
@@ -330,7 +330,7 @@ function AdminLoginContent() {
 					{/* Error Messages */}
 					{error === "unauthorized" && (
 						<div className="mb-4 rounded-lg bg-red-50 p-4">
-							<p className="text-red-600 text-sm">
+							<p className="text-sm text-red-600">
 								You don't have admin access. Please contact an administrator.
 							</p>
 						</div>
@@ -338,7 +338,7 @@ function AdminLoginContent() {
 
 					{error === "insufficient_permissions" && (
 						<div className="mb-4 rounded-lg bg-red-50 p-4">
-							<p className="text-red-600 text-sm">
+							<p className="text-sm text-red-600">
 								You don't have permission to access the CMS. Please contact an
 								administrator to request access.
 							</p>
@@ -347,7 +347,7 @@ function AdminLoginContent() {
 
 					{errorMessage && (
 						<div className="mb-4 rounded-lg bg-red-50 p-4">
-							<p className="text-red-600 text-sm">{errorMessage}</p>
+							<p className="text-sm text-red-600">{errorMessage}</p>
 						</div>
 					)}
 
@@ -355,7 +355,7 @@ function AdminLoginContent() {
 						<div>
 							<label
 								htmlFor="email"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Email Address
 							</label>
@@ -367,7 +367,7 @@ function AdminLoginContent() {
 								placeholder="admin@example.com"
 								required
 								autoComplete="email"
-								className="w-full rounded-lg border border-grey-300 px-4 py-3 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-3 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								disabled={isPending}
 							/>
 						</div>
@@ -382,7 +382,7 @@ function AdminLoginContent() {
 					</form>
 
 					<div className="mt-8 rounded-lg bg-grey-100 p-4">
-						<p className="text-center text-grey-500 text-sm">
+						<p className="text-center text-sm text-grey-500">
 							🔒 Only administrators can access this area. If you need access,
 							please contact your system administrator.
 						</p>
@@ -416,10 +416,10 @@ function AdminLoginContent() {
 							/>
 						)}
 					</div>
-					<h1 className="mb-2 font-bold text-2xl text-grey-900">
+					<h1 className="text-grey-900 mb-2 text-2xl font-bold">
 						Enter verification code
 					</h1>
-					<p className="text-grey-500 text-sm">
+					<p className="text-sm text-grey-500">
 						We sent a 6-digit code to{" "}
 						<strong className="text-grey-800">{email}</strong>
 					</p>
@@ -427,7 +427,7 @@ function AdminLoginContent() {
 
 				{errorMessage && (
 					<div className="mb-6 rounded-lg bg-red-50 p-4">
-						<p className="text-red-600 text-sm">{errorMessage}</p>
+						<p className="text-sm text-red-600">{errorMessage}</p>
 					</div>
 				)}
 
@@ -491,7 +491,7 @@ function AdminLoginContent() {
 					<div>
 						<button
 							type="button"
-							className="text-grey-500 text-sm hover:text-grey-800 hover:underline"
+							className="hover:text-grey-800 text-sm text-grey-500 hover:underline"
 							onClick={() => {
 								setIsEmailSent(false)
 								setOtp("")
@@ -504,7 +504,7 @@ function AdminLoginContent() {
 				</div>
 
 				<div className="mt-8 rounded-lg bg-grey-100 p-4">
-					<p className="text-center text-grey-500 text-sm">
+					<p className="text-center text-sm text-grey-500">
 						🔒 Only administrators can access this area.
 					</p>
 				</div>

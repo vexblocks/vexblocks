@@ -1,9 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -26,6 +23,9 @@ import { BlockSelectorDialog } from "@/app/(dashboard)/blocks/_components/block-
 import { SelectOptionsInput } from "@/components/atoms/select-options-input"
 import { authAtom } from "@/lib/auth-atom"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
 
 // Utility function to generate field name from label
 function generateFieldName(label: string): string {
@@ -152,11 +152,11 @@ function BlockReferenceSelector({
 
 	return (
 		<div className="mt-4">
-			<div className="mb-1 block font-medium text-grey-700 text-sm">
+			<div className="text-grey-700 mb-1 block text-sm font-medium">
 				Select Reusable Block <span className="text-error">*</span>
 			</div>
 			{selectedBlock ? (
-				<div className="flex items-center gap-3 rounded-lg border border-grey-200 bg-grey-50 p-3">
+				<div className="bg-grey-50 flex items-center gap-3 rounded-lg border border-grey-200 p-3">
 					{selectedBlock.previewImage ? (
 						<CFImage
 							assetId={selectedBlock.previewImage}
@@ -172,15 +172,15 @@ function BlockReferenceSelector({
 						</div>
 					)}
 					<div className="flex-1">
-						<p className="font-medium text-grey-900">
+						<p className="text-grey-900 font-medium">
 							{selectedBlock.displayName}
 						</p>
-						<p className="text-grey-500 text-xs">{selectedBlock.name}</p>
+						<p className="text-xs text-grey-500">{selectedBlock.name}</p>
 					</div>
 					<button
 						type="button"
 						onClick={() => setShowBlockSelector(true)}
-						className="rounded-lg border border-grey-300 bg-white px-3 py-1.5 text-grey-700 text-sm transition-colors hover:bg-grey-50"
+						className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 bg-white px-3 py-1.5 text-sm transition-colors"
 					>
 						Change
 					</button>
@@ -189,14 +189,14 @@ function BlockReferenceSelector({
 				<button
 					type="button"
 					onClick={() => setShowBlockSelector(true)}
-					className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-4 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+					className="bg-grey-50 text-grey-600 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-4 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
 				>
 					<Layers className="h-5 w-5" />
 					Click to select a block
 				</button>
 			)}
 			{availableBlocks.length === 0 && (
-				<p className="mt-1 text-grey-400 text-xs">
+				<p className="mt-1 text-xs text-grey-400">
 					No reusable blocks available.{" "}
 					<Link href="/blocks/new" className="text-primary underline">
 						Create one first
@@ -283,11 +283,11 @@ function FieldEditor({
 			<div className="mb-4 flex items-start justify-between">
 				<div className="flex items-center gap-2">
 					{getFieldIcon(field.type)}
-					<h3 className="font-semibold text-grey-900">
+					<h3 className="text-grey-900 font-semibold">
 						Field #{path[path.length - 1] + 1}
 					</h3>
 					{(field.type === "group" || field.type === "repeater") && (
-						<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
 							{field.type === "group" ? "Group" : "Repeater"}
 						</span>
 					)}
@@ -331,7 +331,7 @@ function FieldEditor({
 				<div>
 					<label
 						htmlFor={`field-label-${field.id}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
+						className="text-grey-700 mb-1 block text-sm font-medium"
 					>
 						Label
 					</label>
@@ -357,11 +357,11 @@ function FieldEditor({
 				<div className="relative pb-6">
 					<label
 						htmlFor={`field-name-${field.id}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
+						className="text-grey-700 mb-1 block text-sm font-medium"
 					>
 						Field Name
 						{isNameLocked && (
-							<span className="ml-1 text-grey-500 text-xs">(locked)</span>
+							<span className="ml-1 text-xs text-grey-500">(locked)</span>
 						)}
 					</label>
 					<input
@@ -390,19 +390,19 @@ function FieldEditor({
 					/>
 					<div className="absolute top-full left-0 -mt-3">
 						{isNameLocked ? (
-							<p className="text-grey-500 text-xs">
+							<p className="text-xs text-grey-500">
 								Field name cannot be changed to prevent data loss
 							</p>
 						) : isDuplicate ? (
-							<p className="text-red-500 text-xs">
+							<p className="text-xs text-red-500">
 								⚠️ Duplicate field name - must be unique
 							</p>
 						) : field.name && !validateFieldName(field.name) ? (
-							<p className="text-red-500 text-xs">
+							<p className="text-xs text-red-500">
 								Only lowercase letters, numbers, and underscores allowed
 							</p>
 						) : !field.nameManuallyEdited && field.label ? (
-							<p className="text-blue-600 text-xs">
+							<p className="text-xs text-blue-600">
 								✨ Auto-generated from "Label"
 							</p>
 						) : null}
@@ -414,7 +414,7 @@ function FieldEditor({
 				<div>
 					<label
 						htmlFor={`field-type-${field.id}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
+						className="text-grey-700 mb-1 block text-sm font-medium"
 					>
 						Type
 					</label>
@@ -478,7 +478,7 @@ function FieldEditor({
 								}
 								className="h-4 w-4 accent-blue-600"
 							/>
-							<span className="text-blue-700 text-sm">Translatable</span>
+							<span className="text-sm text-blue-700">Translatable</span>
 						</label>
 					)}
 				</div>
@@ -488,7 +488,7 @@ function FieldEditor({
 				<div className="mt-4">
 					<label
 						htmlFor={`field-options-${field.id}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
+						className="text-grey-700 mb-1 block text-sm font-medium"
 					>
 						Options (comma-separated)
 					</label>
@@ -506,7 +506,7 @@ function FieldEditor({
 				<div className="mt-4">
 					<label
 						htmlFor={`field-default-${field.id}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
+						className="text-grey-700 mb-1 block text-sm font-medium"
 					>
 						Default Value
 					</label>
@@ -562,7 +562,7 @@ function FieldEditor({
 				<div className="mt-4">
 					<label
 						htmlFor={`field-referenceSchema-${path.join("-")}`}
-						className="mb-1 block font-medium text-grey-700 text-sm"
+						className="text-grey-700 mb-1 block text-sm font-medium"
 					>
 						Reference Schema <span className="text-error">*</span>
 					</label>
@@ -585,14 +585,14 @@ function FieldEditor({
 							))}
 					</select>
 					{allSchemas.length === 0 && (
-						<p className="mt-1 text-grey-400 text-xs">
+						<p className="mt-1 text-xs text-grey-400">
 							No schemas available.{" "}
 							<Link href="/schemas/new" className="text-primary underline">
 								Create one first
 							</Link>
 						</p>
 					)}
-					<p className="mt-1 text-grey-400 text-xs">
+					<p className="mt-1 text-xs text-grey-400">
 						{field.type === "reference"
 							? "Select a schema to reference (e.g., 'authors' for author selection)"
 							: "Select a schema to reference (e.g., 'tags' for selecting multiple tags)"}
@@ -603,7 +603,7 @@ function FieldEditor({
 			{field.type === "flexibleBlocks" && (
 				<div className="mt-4 space-y-3">
 					<div>
-						<div className="mb-2 block font-medium text-grey-700 text-sm">
+						<div className="text-grey-700 mb-2 block text-sm font-medium">
 							Allowed Block Types (leave empty for all)
 						</div>
 						<div className="grid grid-cols-2 gap-2 rounded border border-grey-300 p-3 md:grid-cols-3">
@@ -676,7 +676,7 @@ function FieldEditor({
 					<div>
 						<label
 							htmlFor={`field-maxBlocks-${path.join("-")}`}
-							className="mb-1 block font-medium text-grey-700 text-sm"
+							className="text-grey-700 mb-1 block text-sm font-medium"
 						>
 							Maximum Blocks (optional)
 						</label>
@@ -726,7 +726,7 @@ function FieldEditor({
 						/>
 						<label
 							htmlFor={`field-isSlug-${path.join("-")}`}
-							className="cursor-pointer text-blue-800 text-sm"
+							className="cursor-pointer text-sm text-blue-800"
 						>
 							<strong>Use as Slug Field</strong> - Auto-generate URL-friendly
 							slugs
@@ -737,7 +737,7 @@ function FieldEditor({
 						<div>
 							<label
 								htmlFor={`field-slugSource-${path.join("-")}`}
-								className="mb-1 block font-medium text-grey-700 text-sm"
+								className="text-grey-700 mb-1 block text-sm font-medium"
 							>
 								Slug Source Field <span className="text-error">*</span>
 							</label>
@@ -763,7 +763,7 @@ function FieldEditor({
 										</option>
 									))}
 							</select>
-							<p className="mt-1 text-blue-600 text-xs">
+							<p className="mt-1 text-xs text-blue-600">
 								The slug will be auto-generated from the selected field (e.g.,
 								"My Post Title" → "my-post-title")
 							</p>
@@ -775,7 +775,7 @@ function FieldEditor({
 			<div className="mt-4">
 				<label
 					htmlFor={`field-help-${field.id}`}
-					className="mb-1 block font-medium text-grey-700 text-sm"
+					className="text-grey-700 mb-1 block text-sm font-medium"
 				>
 					Help Text (optional)
 				</label>
@@ -795,13 +795,13 @@ function FieldEditor({
 					<button
 						type="button"
 						onClick={() => onAddNestedField(path)}
-						className="flex items-center gap-2 rounded bg-primary/10 px-3 py-2 font-medium text-primary text-sm transition-colors hover:bg-primary/20"
+						className="flex items-center gap-2 rounded bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
 					>
 						<Plus className="h-4 w-4" />
 						Add Nested Field
 					</button>
 					{level === 3 && (
-						<p className="mt-2 text-grey-500 text-xs">
+						<p className="mt-2 text-xs text-grey-500">
 							Maximum nesting level (3) reached
 						</p>
 					)}
@@ -811,7 +811,7 @@ function FieldEditor({
 			{/* Render nested fields */}
 			{hasNestedFields && (
 				<div className="mt-4 space-y-3">
-					<h4 className="font-medium text-grey-700 text-sm">
+					<h4 className="text-grey-700 text-sm font-medium">
 						Nested Fields ({field.fields?.length})
 					</h4>
 					{field.fields?.map((nestedField, index) => (
@@ -1285,7 +1285,7 @@ export default function SchemaDetailPage({
 
 			<div className="mb-6 flex items-start justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">
+					<h1 className="text-3xl font-bold text-primary">
 						{schema.displayName}
 					</h1>
 					<p className="mt-2 text-grey-500">
@@ -1332,7 +1332,7 @@ export default function SchemaDetailPage({
 										setIsSimple(schema.isSimple ?? false)
 									}
 								}}
-								className="rounded border border-grey-300 px-4 py-2 text-grey-700 hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded border border-grey-300 px-4 py-2"
 							>
 								Cancel
 							</button>
@@ -1352,7 +1352,7 @@ export default function SchemaDetailPage({
 
 			{error && (
 				<div className="mb-6 rounded-lg bg-red-50 p-4">
-					<p className="text-error text-sm">{error}</p>
+					<p className="text-sm text-error">{error}</p>
 				</div>
 			)}
 
@@ -1362,9 +1362,9 @@ export default function SchemaDetailPage({
 					<div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
 						<div className="mb-4 flex items-center gap-3">
 							<AlertTriangle className="h-6 w-6 text-error" />
-							<h2 className="font-bold text-xl">Delete Schema?</h2>
+							<h2 className="text-xl font-bold">Delete Schema?</h2>
 						</div>
-						<p className="mb-6 text-grey-600">
+						<p className="text-grey-600 mb-6">
 							Are you sure you want to delete this schema? This action cannot be
 							undone. All content entries associated with this schema will also
 							be permanently deleted.
@@ -1373,7 +1373,7 @@ export default function SchemaDetailPage({
 							<button
 								type="button"
 								onClick={() => setShowDeleteConfirm(false)}
-								className="rounded border border-grey-300 px-4 py-2 text-grey-700 hover:bg-grey-50"
+								className="text-grey-700 hover:bg-grey-50 rounded border border-grey-300 px-4 py-2"
 							>
 								Cancel
 							</button>
@@ -1392,13 +1392,13 @@ export default function SchemaDetailPage({
 
 			<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 				<div className="mb-6">
-					<h2 className="mb-4 font-semibold text-xl">Basic Information</h2>
+					<h2 className="mb-4 text-xl font-semibold">Basic Information</h2>
 					{editing ? (
 						<div className="space-y-4">
 							<div>
 								<label
 									htmlFor="edit-display-name"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Display Name
 								</label>
@@ -1413,7 +1413,7 @@ export default function SchemaDetailPage({
 							<div>
 								<label
 									htmlFor="edit-description"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Description
 								</label>
@@ -1443,8 +1443,8 @@ export default function SchemaDetailPage({
 
 				{/* Simple Schema */}
 				{editing && (
-					<div className="mb-6 border-grey-200 border-t pt-6">
-						<h2 className="mb-4 font-semibold text-xl">Simple Schema</h2>
+					<div className="mb-6 border-t border-grey-200 pt-6">
+						<h2 className="mb-4 text-xl font-semibold">Simple Schema</h2>
 						<div className="flex items-center gap-4">
 							<label className="relative inline-flex cursor-pointer items-center">
 								<input
@@ -1453,13 +1453,13 @@ export default function SchemaDetailPage({
 									onChange={(e) => setIsSimple(e.target.checked)}
 									className="peer sr-only"
 								/>
-								<div className="peer h-6 w-11 rounded-full bg-grey-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20" />
+								<div className="peer h-6 w-11 rounded-full bg-grey-200 peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/20 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
 							</label>
-							<span className="font-medium text-grey-700">
+							<span className="text-grey-700 font-medium">
 								Enable Simple Mode
 							</span>
 						</div>
-						<p className="mt-2 text-grey-500 text-sm">
+						<p className="mt-2 text-sm text-grey-500">
 							Disables SEO metadata fields on content entries for this schema.
 						</p>
 					</div>
@@ -1467,8 +1467,8 @@ export default function SchemaDetailPage({
 
 				{/* Preview Configuration */}
 				{editing && (
-					<div className="mb-6 border-grey-200 border-t pt-6">
-						<h2 className="mb-4 font-semibold text-xl">Live Preview</h2>
+					<div className="mb-6 border-t border-grey-200 pt-6">
+						<h2 className="mb-4 text-xl font-semibold">Live Preview</h2>
 						<div className="space-y-4">
 							<div className="flex items-center gap-4">
 								<label className="relative inline-flex cursor-pointer items-center">
@@ -1478,16 +1478,16 @@ export default function SchemaDetailPage({
 										onChange={(e) => setPreviewEnabled(e.target.checked)}
 										className="peer sr-only"
 									/>
-									<div className="peer h-6 w-11 rounded-full bg-grey-200 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20" />
+									<div className="peer h-6 w-11 rounded-full bg-grey-200 peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/20 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-grey-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
 								</label>
-								<span className="font-medium text-grey-700">
+								<span className="text-grey-700 font-medium">
 									Enable Live Preview
 								</span>
 							</div>
 							<div>
 								<label
 									htmlFor="preview-url-pattern"
-									className="mb-1 block font-medium text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm font-medium"
 								>
 									Preview URL Pattern
 								</label>
@@ -1499,7 +1499,7 @@ export default function SchemaDetailPage({
 									placeholder="/content-library/{slug}"
 									className="w-full rounded border border-grey-300 px-3 py-2 text-sm"
 								/>
-								<p className="mt-1 text-grey-500 text-xs">
+								<p className="mt-1 text-xs text-grey-500">
 									Use{" "}
 									<code className="rounded bg-grey-100 px-1">{"{slug}"}</code>{" "}
 									or{" "}
@@ -1518,15 +1518,15 @@ export default function SchemaDetailPage({
 
 				{/* Show preview config in read mode */}
 				{!editing && schema.previewConfig?.urlPattern && (
-					<div className="mb-6 border-grey-200 border-t pt-6">
-						<h2 className="mb-4 font-semibold text-xl">Live Preview</h2>
+					<div className="mb-6 border-t border-grey-200 pt-6">
+						<h2 className="mb-4 text-xl font-semibold">Live Preview</h2>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
 								<span
 									className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
 										schema.previewConfig.enabled
 											? "bg-green-100 text-green-700"
-											: "bg-grey-100 text-grey-600"
+											: "text-grey-600 bg-grey-100"
 									}`}
 								>
 									{schema.previewConfig.enabled ? "Enabled" : "Disabled"}
@@ -1544,7 +1544,7 @@ export default function SchemaDetailPage({
 
 				<div>
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-xl">Fields</h2>
+						<h2 className="text-xl font-semibold">Fields</h2>
 						{editing && (
 							<button
 								type="button"
@@ -1587,12 +1587,12 @@ export default function SchemaDetailPage({
 													</h3>
 													{(field.type === "group" ||
 														field.type === "repeater") && (
-														<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+														<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
 															{field.type === "group" ? "Group" : "Repeater"}
 														</span>
 													)}
 												</div>
-												<div className="mt-1 flex items-center gap-3 text-grey-500 text-sm">
+												<div className="mt-1 flex items-center gap-3 text-sm text-grey-500">
 													<code className="rounded bg-grey-100 px-2 py-0.5 font-mono">
 														{field.name}
 													</code>
@@ -1607,20 +1607,20 @@ export default function SchemaDetailPage({
 													)}
 												</div>
 												{field.helpText && (
-													<p className="mt-1 text-grey-400 text-sm">
+													<p className="mt-1 text-sm text-grey-400">
 														{field.helpText}
 													</p>
 												)}
 												{/* Render nested fields in read-only mode */}
 												{field.fields && field.fields.length > 0 && (
 													<div className="mt-3 ml-6 space-y-2">
-														<p className="font-medium text-grey-700 text-xs">
+														<p className="text-grey-700 text-xs font-medium">
 															Nested Fields:
 														</p>
 														{field.fields.map((nestedField, nestedIndex) => (
 															<div
 																key={`${field.id}-nested-${nestedIndex}`}
-																className="rounded bg-grey-50 p-2 text-sm"
+																className="bg-grey-50 rounded p-2 text-sm"
 															>
 																<div className="flex items-center gap-2">
 																	<code className="rounded bg-white px-2 py-0.5 font-mono text-xs">
@@ -1649,11 +1649,11 @@ export default function SchemaDetailPage({
 
 			{/* Ready to add content section */}
 			{!editing && (
-				<div className="mt-8 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 p-8 text-center">
-					<h3 className="mb-2 font-semibold text-grey-900 text-lg">
+				<div className="bg-grey-50 mt-8 rounded-lg border-2 border-dashed border-grey-300 p-8 text-center">
+					<h3 className="text-grey-900 mb-2 text-lg font-semibold">
 						Ready to add content?
 					</h3>
-					<p className="mb-4 text-grey-600">
+					<p className="text-grey-600 mb-4">
 						Start creating content entries for this schema
 					</p>
 					<Link
@@ -1668,7 +1668,7 @@ export default function SchemaDetailPage({
 			{/* Fixed bottom bar with action buttons (only in edit mode) */}
 			{editing && (
 				<>
-					<div className="fixed right-0 bottom-0 left-0 z-50 border-grey-200 border-t bg-white shadow-lg">
+					<div className="fixed right-0 bottom-0 left-0 z-50 border-t border-grey-200 bg-white shadow-lg">
 						<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 							<button
 								type="button"
@@ -1710,7 +1710,7 @@ export default function SchemaDetailPage({
 											setIsSimple(schema.isSimple ?? false)
 										}
 									}}
-									className="rounded-lg border border-grey-300 px-6 py-3 text-grey-700 hover:bg-grey-50"
+									className="text-grey-700 hover:bg-grey-50 rounded-lg border border-grey-300 px-6 py-3"
 								>
 									Cancel
 								</button>

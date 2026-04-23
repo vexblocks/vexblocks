@@ -17,7 +17,7 @@ export default function MediaPage() {
 			{/* Header */}
 			<div className="mb-6 flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-3xl text-primary">Media Center</h1>
+					<h1 className="text-3xl font-bold text-primary">Media Center</h1>
 					<p className="mt-2 text-grey-500">
 						Manage images and media files for your content
 					</p>
@@ -42,7 +42,7 @@ export default function MediaPage() {
 				<button
 					type="button"
 					onClick={() => setShowFileUploader(true)}
-					className="inline-flex items-center gap-2 rounded-full border border-grey-300 bg-white px-6 py-4 text-primary shadow-lg transition-colors hover:bg-grey-50"
+					className="hover:bg-grey-50 inline-flex items-center gap-2 rounded-full border border-grey-300 bg-white px-6 py-4 text-primary shadow-lg transition-colors"
 				>
 					<FileUp className="h-5 w-5" />
 					Upload File
@@ -61,7 +61,7 @@ export default function MediaPage() {
 			{showUploader && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 					<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-						<h2 className="mb-4 font-semibold text-lg text-primary">
+						<h2 className="mb-4 text-lg font-semibold text-primary">
 							Upload New Image
 						</h2>
 						<MediaUploader
@@ -77,10 +77,10 @@ export default function MediaPage() {
 			{showFileUploader && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 					<div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-						<h2 className="mb-4 font-semibold text-lg text-primary">
+						<h2 className="mb-4 text-lg font-semibold text-primary">
 							Upload File to R2
 						</h2>
-						<p className="mb-4 text-grey-400 text-sm">
+						<p className="mb-4 text-sm text-grey-400">
 							Upload any file type (PDF, video, documents, etc.) up to 50MB.
 						</p>
 						<FileUploader

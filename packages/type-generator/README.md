@@ -45,14 +45,14 @@ For each schema (e.g., `blog_posts`), generates:
 
 ```typescript
 export type BlogPostsContent = {
-  _id: string
-  _creationTime: number
-  schemaId: string
-  slug?: string
-  status: "draft" | "published"
-  data: {
-    // Your schema fields here
-  }
+	_id: string
+	_creationTime: number
+	schemaId: string
+	slug?: string
+	status: "draft" | "published"
+	data: {
+		// Your schema fields here
+	}
 }
 ```
 
@@ -67,16 +67,14 @@ export type CMSContentBySchema<T> = T extends "blog_posts" ? BlogPostsContent : 
 ## Usage in Apps
 
 ```typescript
-import type { BlogPostsContent, CMSContentBySchema } from '@repo/cms-shared'
+import type { BlogPostsContent, CMSContentBySchema } from "@repo/cms-shared"
 
 // Use specific type
 const post: BlogPostsContent = await fetchPost()
 
 // Use dynamic type
-function getContent<T extends CMSSchemaName>(
-  schema: T
-): CMSContentBySchema<T> {
-  // ...
+function getContent<T extends CMSSchemaName>(schema: T): CMSContentBySchema<T> {
+	// ...
 }
 ```
 

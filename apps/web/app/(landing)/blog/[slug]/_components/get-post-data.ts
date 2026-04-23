@@ -1,8 +1,8 @@
+import { cacheLife, cacheTag } from "next/cache"
+import { cachedQuery } from "@/lib/cached-query"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { BlogPostsContent } from "@repo/cms-shared"
-import { cacheLife, cacheTag } from "next/cache"
 import type { Id } from "vexblocks-backend/convex/_generated/dataModel"
-import { cachedQuery } from "@/lib/cached-query"
 
 export type PostData = {
 	post: BlogPostsContent | null

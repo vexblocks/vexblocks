@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import { ArrowRightIcon } from "../icons/arrow-right"
 
 const buttonVariants = cva(
-	"group inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+	"group inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition-all focus:ring-2 focus:ring-teal-500/50 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
 	{
 		variants: {
 			variant: {
@@ -51,7 +51,7 @@ export function Button({
 			{showArrow && (
 				<ArrowRightIcon className="relative top-px h-4 w-4 transition-transform group-hover:translate-x-1" />
 			)}
-			{icon && icon}
+			{icon ? icon : null}
 		</button>
 	)
 }

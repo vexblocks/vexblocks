@@ -1,8 +1,8 @@
-import { ConvexError } from "convex/values"
 import {
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions"
+import { ConvexError } from "convex/values"
 import { mutation, query } from "../_generated/server"
 import { getAuthenticatedUser } from "./utils"
 

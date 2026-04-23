@@ -1,6 +1,6 @@
-import type { Metadata } from "next"
-import "@/styles/config.css"
 import { GeistSans } from "geist/font/sans"
+import "@/styles/config.css"
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import { Toaster } from "sonner"
 import { AuthProvider } from "@/components/providers/auth-provider"

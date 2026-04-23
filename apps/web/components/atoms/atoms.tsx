@@ -28,7 +28,7 @@ export function Link({
 			{showArrow && (
 				<ArrowRightIcon className="relative top-px h-4 w-4 transition-transform group-hover:translate-x-1" />
 			)}
-			{icon && icon}
+			{icon ? icon : null}
 		</NextLink>
 	)
 }

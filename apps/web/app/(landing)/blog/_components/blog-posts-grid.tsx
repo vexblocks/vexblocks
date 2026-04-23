@@ -15,7 +15,7 @@ export function BlogPostsGrid({ posts, tags }: BlogPostsGridProps) {
 	if (posts.length === 0) {
 		return (
 			<div className="py-20 text-center">
-				<p className="text-gray-500 text-lg">
+				<p className="text-lg text-gray-500">
 					No posts found. Try selecting different tags.
 				</p>
 			</div>

@@ -1,5 +1,3 @@
-import { api } from "@repo/backend/convex/_generated/api"
-import { getStringValue } from "@repo/cms-shared"
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import {
@@ -7,6 +5,8 @@ import {
 	SectionColorDetector,
 } from "@/components/wrappers"
 import { cachedQuery } from "@/lib/cached-query"
+import { api } from "@repo/backend/convex/_generated/api"
+import { getStringValue } from "@repo/cms-shared"
 import { CachedPost, DynamicPost } from "./_components"
 
 const SITE_URL = "https://www.vexblocks.com"

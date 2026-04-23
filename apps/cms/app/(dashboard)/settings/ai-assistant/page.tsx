@@ -14,17 +14,17 @@ import {
 
 export default function AIAssistantDocsPage() {
 	return (
-		<div className="min-h-screen bg-linear-to-b from-grey-50 to-white">
+		<div className="from-grey-50 min-h-screen bg-linear-to-b to-white">
 			<div className="mx-auto max-w-5xl px-6 py-10">
 				{/* Header */}
 				<header className="mb-12 text-center">
 					<div className="mb-6 inline-flex items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary/80 p-4 shadow-lg shadow-primary/20">
 						<Bot className="h-10 w-10 text-white" />
 					</div>
-					<h1 className="mb-3 font-bold text-4xl text-primary tracking-tight">
+					<h1 className="mb-3 text-4xl font-bold tracking-tight text-primary">
 						AI Assistant
 					</h1>
-					<p className="mx-auto max-w-2xl text-grey-500 text-lg">
+					<p className="mx-auto max-w-2xl text-lg text-grey-500">
 						Your intelligent CMS companion powered by AI. Manage schemas and
 						content through natural language conversations.
 					</p>
@@ -214,7 +214,7 @@ export default function AIAssistantDocsPage() {
 							<div className="rounded-xl bg-amber-100 p-2.5">
 								<Lightbulb className="h-6 w-6 text-amber-600" />
 							</div>
-							<h2 className="font-semibold text-grey-900 text-xl">
+							<h2 className="text-grey-900 text-xl font-semibold">
 								Tips for Best Results
 							</h2>
 						</div>
@@ -277,7 +277,7 @@ function SectionHeader({
 		<div className="flex items-start gap-4">
 			<div className="rounded-xl bg-primary/10 p-3 text-primary">{icon}</div>
 			<div>
-				<h2 className="font-semibold text-grey-900 text-xl">{title}</h2>
+				<h2 className="text-grey-900 text-xl font-semibold">{title}</h2>
 				<p className="mt-1 text-grey-500">{subtitle}</p>
 			</div>
 		</div>
@@ -304,7 +304,7 @@ function FeatureCard({
 			<div className={`mb-4 inline-flex rounded-xl p-3 ${variant.icon}`}>
 				{icon}
 			</div>
-			<h3 className="mb-2 font-semibold text-grey-900 text-lg">{title}</h3>
+			<h3 className="text-grey-900 mb-2 text-lg font-semibold">{title}</h3>
 			<p className="text-grey-600 leading-relaxed">{description}</p>
 		</div>
 	)
@@ -323,14 +323,14 @@ function CommandExample({
 	return (
 		<div className="rounded-2xl border border-grey-200 bg-white p-5 shadow-sm">
 			<div className="mb-4 flex items-center gap-2">
-				<div className="rounded-lg bg-grey-100 p-2 text-grey-600">{icon}</div>
-				<h3 className="font-semibold text-grey-900">{category}</h3>
+				<div className="text-grey-600 rounded-lg bg-grey-100 p-2">{icon}</div>
+				<h3 className="text-grey-900 font-semibold">{category}</h3>
 			</div>
 			<div className="space-y-2">
 				{examples.map((example) => (
 					<div
 						key={example}
-						className="rounded-xl bg-grey-50 px-4 py-3 font-mono text-grey-700 text-sm leading-relaxed"
+						className="bg-grey-50 text-grey-700 rounded-xl px-4 py-3 font-mono text-sm leading-relaxed"
 					>
 						&quot;{example}&quot;
 					</div>
@@ -354,8 +354,8 @@ function SafetyItem({
 				<Shield className="h-4 w-4 text-emerald-600" />
 			</div>
 			<div>
-				<h4 className="font-medium text-grey-900">{title}</h4>
-				<p className="mt-0.5 text-grey-600 text-sm">{description}</p>
+				<h4 className="text-grey-900 font-medium">{title}</h4>
+				<p className="text-grey-600 mt-0.5 text-sm">{description}</p>
 			</div>
 		</div>
 	)
@@ -378,18 +378,18 @@ function ToolCategory({
 		<div className={`rounded-2xl border ${variant.border} ${variant.bg} p-6`}>
 			<div className="mb-5 flex items-center gap-3">
 				<div className={`rounded-xl p-2.5 ${variant.icon}`}>{icon}</div>
-				<h3 className="font-semibold text-grey-900 text-lg">{title}</h3>
+				<h3 className="text-grey-900 text-lg font-semibold">{title}</h3>
 			</div>
 			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 				{tools.map((tool) => (
 					<div key={tool.name} className="rounded-xl bg-white/80 p-4 shadow-sm">
 						<div className="mb-1 flex items-center gap-2">
 							<div className={`h-2 w-2 rounded-full ${variant.accent}`} />
-							<span className="font-medium text-grey-900 text-sm">
+							<span className="text-grey-900 text-sm font-medium">
 								{tool.name}
 							</span>
 						</div>
-						<p className="text-grey-500 text-sm">{tool.description}</p>
+						<p className="text-sm text-grey-500">{tool.description}</p>
 					</div>
 				))}
 			</div>

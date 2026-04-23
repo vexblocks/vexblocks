@@ -14,7 +14,7 @@ export function DocsHeader() {
 			<div className="container flex h-16 max-w-screen-2xl items-center px-8">
 				<div className="mr-8 flex">
 					<Link href="/" className="mr-8 flex items-center space-x-2">
-						<span className="font-bold text-xl">VexBlocks</span>
+						<span className="text-xl font-bold">VexBlocks</span>
 					</Link>
 					<nav className="hidden items-center gap-8 text-sm md:flex">
 						<Link
@@ -42,11 +42,11 @@ export function DocsHeader() {
 						<button
 							type="button"
 							onClick={() => setSearchOpen(true)}
-							className="relative flex h-10 w-full items-center gap-3 rounded-lg border border-input bg-background px-3 text-muted-foreground text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:pr-12 md:w-80 lg:w-96"
+							className="relative flex h-10 w-full items-center gap-3 rounded-lg border border-input bg-background px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:pr-12 md:w-80 lg:w-96"
 						>
 							<Search className="h-4 w-4 shrink-0" />
 							<span className="flex-1 text-left">Search documentation...</span>
-							<kbd className="pointer-events-none absolute right-2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-2 font-medium font-mono text-[11px] opacity-100 sm:flex">
+							<kbd className="pointer-events-none absolute right-2 hidden h-6 items-center gap-1 rounded border bg-muted px-2 font-mono text-[11px] font-medium opacity-100 select-none sm:flex">
 								<span className="text-xs">⌘</span>K
 							</kbd>
 						</button>

@@ -59,7 +59,7 @@ export function PreviewBanner({ className = "" }: PreviewBannerProps) {
 				</span>
 			)}
 			<span className="text-white/80">•</span>
-			<span className="text-white/80 text-xs">
+			<span className="text-xs text-white/80">
 				Changes from the CMS editor are reflected here in real-time
 			</span>
 		</div>

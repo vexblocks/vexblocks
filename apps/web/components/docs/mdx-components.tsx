@@ -10,7 +10,7 @@ export const H2 = ({ children, className, ...props }: HeadingProps) => {
 		<h2
 			id={id}
 			className={cn(
-				"mt-12 scroll-mt-24 border-b pb-3 font-bold text-3xl tracking-tight first:mt-0",
+				"mt-12 scroll-mt-24 border-b pb-3 text-3xl font-bold tracking-tight first:mt-0",
 				className,
 			)}
 			{...props}
@@ -27,7 +27,7 @@ export const H3 = ({ children, className, ...props }: HeadingProps) => {
 		<h3
 			id={id}
 			className={cn(
-				"mt-8 scroll-mt-24 font-semibold text-2xl tracking-tight",
+				"mt-8 scroll-mt-24 text-2xl font-semibold tracking-tight",
 				className,
 			)}
 			{...props}
@@ -65,7 +65,7 @@ export const InlineCode = ({
 	return (
 		<code
 			className={cn(
-				"relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono font-semibold text-sm",
+				"relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
 				className,
 			)}
 			{...props}
@@ -107,7 +107,7 @@ export const Steps = ({ children }: { children: React.ReactNode }) => {
 export const Step = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<div className="relative mb-12 ml-4 [counter-increment:step]">
-			<div className="absolute -left-[2.2rem] flex h-8 w-8 items-center justify-center rounded-full border-4 border-background bg-muted font-medium font-mono text-sm">
+			<div className="absolute -left-[2.2rem] flex h-8 w-8 items-center justify-center rounded-full border-4 border-background bg-muted font-mono text-sm font-medium">
 				<span className="before:content-[counter(step)]" />
 			</div>
 			<div className="pl-2">{children}</div>

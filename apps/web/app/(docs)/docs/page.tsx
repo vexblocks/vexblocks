@@ -6,10 +6,10 @@ export default function DocsPage() {
 	return (
 		<div className="mx-auto w-full min-w-0">
 			<div className="mb-8 space-y-4">
-				<h1 className="font-bold text-4xl tracking-tight">
+				<h1 className="text-4xl font-bold tracking-tight">
 					Welcome to VexBlocks
 				</h1>
-				<p className="text-muted-foreground text-xl">
+				<p className="text-xl text-muted-foreground">
 					A modern, type-safe headless CMS built with Convex, Next.js, and
 					TypeScript.
 				</p>
@@ -29,7 +29,7 @@ export default function DocsPage() {
 								Quick Start
 								<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
 							</h3>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-sm text-muted-foreground">
 								Get started with VexBlocks in minutes
 							</p>
 						</div>
@@ -49,7 +49,7 @@ export default function DocsPage() {
 								CLI Reference
 								<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
 							</h3>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-sm text-muted-foreground">
 								Learn about the VexBlocks CLI commands
 							</p>
 						</div>
@@ -71,7 +71,7 @@ export default function DocsPage() {
 							<Shield className="h-6 w-6" />
 						</div>
 						<h3 className="mb-2 font-semibold">Type Safety</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-muted-foreground">
 							Full TypeScript support with auto-generated types from your
 							schemas. Catch errors at compile time, not runtime.
 						</p>
@@ -82,7 +82,7 @@ export default function DocsPage() {
 							<Zap className="h-6 w-6" />
 						</div>
 						<h3 className="mb-2 font-semibold">Real-time Updates</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-muted-foreground">
 							Built on Convex, your content updates in real-time across all
 							connected clients without polling.
 						</p>
@@ -93,7 +93,7 @@ export default function DocsPage() {
 							<Puzzle className="h-6 w-6" />
 						</div>
 						<h3 className="mb-2 font-semibold">Flexible Schemas</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-muted-foreground">
 							Define custom content schemas with various field types including
 							text, media, references, and more.
 						</p>
@@ -104,7 +104,7 @@ export default function DocsPage() {
 							<Code2 className="h-6 w-6" />
 						</div>
 						<h3 className="mb-2 font-semibold">Developer Experience</h3>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-muted-foreground">
 							Powerful CLI tools, visual editing, and a modern dashboard make
 							development a breeze.
 						</p>

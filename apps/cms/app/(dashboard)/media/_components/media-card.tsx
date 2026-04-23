@@ -1,10 +1,6 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage } from "@repo/cms-shared/src"
 import { useAction } from "convex/react"
-
 import {
 	Check,
 	Download,
@@ -21,6 +17,9 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared/src"
 
 type MediaCardProps = {
 	id: Id<"cmsMedia">
@@ -151,7 +150,7 @@ export function MediaCard({
 					<div className="flex flex-col items-center gap-2">
 						<FileIcon className="h-12 w-12 text-grey-400" />
 						{fileExtension && (
-							<span className="rounded bg-grey-200 px-2 py-0.5 font-medium text-grey-600 text-xs uppercase">
+							<span className="text-grey-600 rounded bg-grey-200 px-2 py-0.5 text-xs font-medium uppercase">
 								{fileExtension}
 							</span>
 						)}
@@ -229,7 +228,7 @@ export function MediaCard({
 
 			{/* Info */}
 			<div className="p-3">
-				<h3 className="truncate font-medium text-grey-900 text-sm">
+				<h3 className="text-grey-900 truncate text-sm font-medium">
 					{caption}
 				</h3>
 
@@ -239,13 +238,13 @@ export function MediaCard({
 						{tags.slice(0, 3).map((tag) => (
 							<span
 								key={tag}
-								className="rounded-full bg-primary/10 px-2 py-0.5 text-primary text-xs"
+								className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
 							>
 								{tag}
 							</span>
 						))}
 						{tags.length > 3 && (
-							<span className="rounded-full bg-grey-100 px-2 py-0.5 text-grey-500 text-xs">
+							<span className="rounded-full bg-grey-100 px-2 py-0.5 text-xs text-grey-500">
 								+{tags.length - 3}
 							</span>
 						)}
@@ -253,7 +252,7 @@ export function MediaCard({
 				)}
 
 				{/* Meta Info */}
-				<div className="mt-2 flex items-center justify-between text-grey-500 text-xs">
+				<div className="mt-2 flex items-center justify-between text-xs text-grey-500">
 					<span>
 						{isR2File
 							? mimeType.split("/")[1] || "file"

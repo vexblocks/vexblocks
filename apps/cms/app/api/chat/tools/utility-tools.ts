@@ -1,8 +1,8 @@
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { tool } from "ai"
 import { z } from "zod"
 import { fetchAuthQuery } from "@/lib/auth-server"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import {
 	getCachedSchema,
 	getCachedSchemas,

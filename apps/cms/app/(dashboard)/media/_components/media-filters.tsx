@@ -50,13 +50,13 @@ export function MediaFilters({
 						value={searchInput}
 						onChange={(e) => handleSearchChange(e.target.value)}
 						placeholder="Search by caption or filename..."
-						className="w-full rounded-lg border border-grey-300 py-2 pr-4 pl-10 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						className="w-full rounded-lg border border-grey-300 py-2 pr-4 pl-10 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 					/>
 					{searchInput && (
 						<button
 							type="button"
 							onClick={() => handleSearchChange("")}
-							className="absolute top-1/2 right-3 -translate-y-1/2 text-grey-400 hover:text-grey-600"
+							className="hover:text-grey-600 absolute top-1/2 right-3 -translate-y-1/2 text-grey-400"
 						>
 							<X className="h-5 w-5" />
 						</button>
@@ -67,14 +67,14 @@ export function MediaFilters({
 				{availableTags.length > 0 && (
 					<div>
 						<div className="mb-2 flex items-center justify-between">
-							<p className="font-medium text-grey-500 text-sm">
+							<p className="text-sm font-medium text-grey-500">
 								Filter by Tags
 							</p>
 							{hasActiveFilters && (
 								<button
 									type="button"
 									onClick={handleClearFilters}
-									className="text-primary text-xs hover:underline"
+									className="text-xs text-primary hover:underline"
 								>
 									Clear all
 								</button>
@@ -91,7 +91,7 @@ export function MediaFilters({
 										className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm transition-colors ${
 											isSelected
 												? "bg-primary text-white"
-												: "bg-grey-100 text-grey-700 hover:bg-grey-200"
+												: "text-grey-700 bg-grey-100 hover:bg-grey-200"
 										}`}
 									>
 										{tag.name}
@@ -99,7 +99,7 @@ export function MediaFilters({
 											className={`rounded-full px-1.5 py-0.5 text-xs ${
 												isSelected
 													? "bg-white/20 text-white"
-													: "bg-grey-200 text-grey-600"
+													: "text-grey-600 bg-grey-200"
 											}`}
 										>
 											{tag.count}
@@ -114,16 +114,16 @@ export function MediaFilters({
 				{/* Active Filters Summary */}
 				{hasActiveFilters && (
 					<div className="flex items-center gap-2 rounded border border-primary/20 bg-primary/5 p-2">
-						<span className="font-medium text-primary text-xs">
+						<span className="text-xs font-medium text-primary">
 							Active filters:
 						</span>
 						{searchInput && (
-							<span className="rounded bg-white px-2 py-0.5 text-grey-700 text-xs">
+							<span className="text-grey-700 rounded bg-white px-2 py-0.5 text-xs">
 								Search: "{searchInput}"
 							</span>
 						)}
 						{selectedTags.length > 0 && (
-							<span className="rounded bg-white px-2 py-0.5 text-grey-700 text-xs">
+							<span className="text-grey-700 rounded bg-white px-2 py-0.5 text-xs">
 								{selectedTags.length} tag{selectedTags.length > 1 ? "s" : ""}
 							</span>
 						)}

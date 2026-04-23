@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center gap-1 rounded-md font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2",
+	"inline-flex items-center justify-center gap-1 rounded-md font-medium transition-all focus:ring-2 focus:ring-offset-2 focus:outline-none",
 	{
 		variants: {
 			variant: {
@@ -46,7 +46,7 @@ export function Button({
 		>
 			<span className="leading-4">{children}</span>
 			{showArrow && <ArrowRight className="h-4 w-4" />}
-			{icon && icon}
+			{icon ? icon : null}
 		</button>
 	)
 }

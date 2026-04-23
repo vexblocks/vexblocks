@@ -39,7 +39,7 @@ export function PostContentBlocks({ blocks }: PostContentBlocksProps) {
 						return (
 							<div
 								key={blockKey}
-								className="post-content text-gray-900 text-lg leading-[1.6] tracking-[0.36px]"
+								className="post-content text-lg leading-[1.6] tracking-[0.36px] text-gray-900"
 							>
 								<LexicalRenderer
 									content={value as string}
@@ -72,7 +72,7 @@ export function PostContentBlocks({ blocks }: PostContentBlocksProps) {
 						return (
 							<p
 								key={blockKey}
-								className="text-gray-900 text-lg leading-[1.6] tracking-[0.36px]"
+								className="text-lg leading-[1.6] tracking-[0.36px] text-gray-900"
 								data-cms-field={fieldPath}
 							>
 								{getStringValue(value as string)}
@@ -106,7 +106,7 @@ export function PostContentBlocks({ blocks }: PostContentBlocksProps) {
 						return (
 							<time
 								key={blockKey}
-								className="block text-gray-600 text-lg"
+								className="block text-lg text-gray-600"
 								data-cms-field={fieldPath}
 							>
 								{new Date(value as string).toLocaleDateString("en-US", {
@@ -121,7 +121,7 @@ export function PostContentBlocks({ blocks }: PostContentBlocksProps) {
 						return (
 							<div
 								key={blockKey}
-								className="text-gray-900 text-lg"
+								className="text-lg text-gray-900"
 								data-cms-field={fieldPath}
 							>
 								{value ? "Yes" : "No"}
@@ -132,7 +132,7 @@ export function PostContentBlocks({ blocks }: PostContentBlocksProps) {
 						return (
 							<div
 								key={blockKey}
-								className="text-gray-900 text-lg"
+								className="text-lg text-gray-900"
 								data-cms-field={fieldPath}
 							>
 								{getStringValue(value as string)}

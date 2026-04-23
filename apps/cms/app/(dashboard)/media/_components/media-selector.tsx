@@ -1,8 +1,8 @@
 "use client"
 
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { Upload as UploadIcon, X } from "lucide-react"
 import { useRef, useState } from "react"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { FileUploader } from "./file-uploader"
 import { MediaGallery } from "./media-gallery"
 import { MediaUploader } from "./media-uploader"
@@ -55,19 +55,19 @@ export function MediaSelector({
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 			<div className="flex h-[90vh] w-full max-w-6xl flex-col rounded-lg bg-white shadow-xl">
 				{/* Header */}
-				<div className="flex items-center justify-between border-grey-200 border-b bg-white px-6 py-4">
+				<div className="flex items-center justify-between border-b border-grey-200 bg-white px-6 py-4">
 					<div className="flex items-center gap-4">
-						<h2 className="font-semibold text-primary text-xl">
+						<h2 className="text-xl font-semibold text-primary">
 							{isFilesOnly ? "Select File" : "Select Media"}
 						</h2>
 						<div className="flex gap-2">
 							<button
 								type="button"
 								onClick={() => setView("gallery")}
-								className={`rounded-lg px-4 py-2 font-medium text-sm transition-colors ${
+								className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
 									view === "gallery"
 										? "bg-primary text-white"
-										: "bg-grey-100 text-grey-700 hover:bg-grey-200"
+										: "text-grey-700 bg-grey-100 hover:bg-grey-200"
 								}`}
 							>
 								{isFilesOnly ? "File Library" : "Media Library"}
@@ -75,10 +75,10 @@ export function MediaSelector({
 							<button
 								type="button"
 								onClick={() => setView("upload")}
-								className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-colors ${
+								className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
 									view === "upload"
 										? "bg-primary text-white"
-										: "bg-grey-100 text-grey-700 hover:bg-grey-200"
+										: "text-grey-700 bg-grey-100 hover:bg-grey-200"
 								}`}
 							>
 								<UploadIcon className="h-4 w-4" />
@@ -89,7 +89,7 @@ export function MediaSelector({
 					<button
 						type="button"
 						onClick={onClose}
-						className="text-grey-500 transition-colors hover:text-grey-700"
+						className="hover:text-grey-700 text-grey-500 transition-colors"
 					>
 						<X className="h-6 w-6" />
 					</button>
@@ -98,7 +98,7 @@ export function MediaSelector({
 				{/* Content */}
 				<div
 					ref={scrollContainerRef}
-					className="flex-1 overflow-y-auto bg-grey-50 p-6"
+					className="bg-grey-50 flex-1 overflow-y-auto p-6"
 				>
 					{view === "gallery" ? (
 						<MediaGallery
@@ -123,8 +123,8 @@ export function MediaSelector({
 				</div>
 
 				{/* Footer */}
-				<div className="border-grey-200 border-t bg-white px-6 py-4">
-					<div className="flex items-center justify-between text-grey-500 text-sm">
+				<div className="border-t border-grey-200 bg-white px-6 py-4">
+					<div className="flex items-center justify-between text-sm text-grey-500">
 						<p>
 							{view === "gallery"
 								? isFilesOnly

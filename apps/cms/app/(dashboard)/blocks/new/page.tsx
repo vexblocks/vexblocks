@@ -1,7 +1,5 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
-import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	ArrowDown,
@@ -18,6 +16,8 @@ import { useCallback, useState } from "react"
 import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selector"
 import { sanitizeData } from "@/lib/sanitize-data"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
+import { api } from "@repo/backend/convex/_generated/api"
+import { CFImage } from "@repo/cms-shared"
 
 type FieldType =
 	| "shortText"
@@ -126,21 +126,21 @@ const FieldEditor = ({
 			<div className={`rounded-lg border ${borderColor} ${bgColor} p-4`}>
 				<div className="mb-3 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<span className="font-medium text-grey-500 text-sm">
+						<span className="text-sm font-medium text-grey-500">
 							Field #{index + 1}
 							{depth > 0 && (
-								<span className="ml-2 text-grey-400 text-xs">
+								<span className="ml-2 text-xs text-grey-400">
 									(Nested level {depth})
 								</span>
 							)}
 						</span>
 						{field.type === "group" && (
-							<span className="rounded-full bg-primary/10 px-2 py-1 font-medium text-primary text-xs">
+							<span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
 								Group
 							</span>
 						)}
 						{field.type === "repeater" && (
-							<span className="rounded-full bg-green-100 px-2 py-1 font-medium text-green-700 text-xs">
+							<span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
 								Repeater
 							</span>
 						)}
@@ -180,7 +180,7 @@ const FieldEditor = ({
 					<div>
 						<label
 							htmlFor={`field-label-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Label
 						</label>
@@ -197,7 +197,7 @@ const FieldEditor = ({
 					<div className="relative pb-6">
 						<label
 							htmlFor={`field-name-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Field Name
 						</label>
@@ -211,7 +211,7 @@ const FieldEditor = ({
 						/>
 						<div className="absolute top-full left-0 -mt-3">
 							{!hasEditedName && field.label && (
-								<p className="text-blue-600 text-xs">
+								<p className="text-xs text-blue-600">
 									✨ Auto-generated from "Label"
 								</p>
 							)}
@@ -221,7 +221,7 @@ const FieldEditor = ({
 					<div>
 						<label
 							htmlFor={`field-type-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Type
 						</label>
@@ -259,7 +259,7 @@ const FieldEditor = ({
 							{depth < 4 && <option value="repeater">Repeater (Array)</option>}
 						</select>
 						{depth >= 4 && (
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								Group type not available at this nesting level
 							</p>
 						)}
@@ -285,7 +285,7 @@ const FieldEditor = ({
 								}
 								className="h-4 w-4 rounded border-grey-300"
 							/>
-							<span className="text-grey-500 text-sm">Required</span>
+							<span className="text-sm text-grey-500">Required</span>
 						</label>
 					</div>
 
@@ -293,7 +293,7 @@ const FieldEditor = ({
 						<div className="md:col-span-2">
 							<label
 								htmlFor={`field-options-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
+								className="mb-1 block text-xs font-medium text-grey-500"
 							>
 								Options (comma separated)
 							</label>
@@ -326,7 +326,7 @@ const FieldEditor = ({
 						<div className="md:col-span-2">
 							<label
 								htmlFor={`field-default-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
+								className="mb-1 block text-xs font-medium text-grey-500"
 							>
 								Default Value
 							</label>
@@ -388,7 +388,7 @@ const FieldEditor = ({
 						<div className="md:col-span-2">
 							<label
 								htmlFor={`field-referenceSchema-${field.id}`}
-								className="mb-1 block font-medium text-grey-500 text-xs"
+								className="mb-1 block text-xs font-medium text-grey-500"
 							>
 								Reference Schema <span className="text-error">*</span>
 							</label>
@@ -414,14 +414,14 @@ const FieldEditor = ({
 									))}
 							</select>
 							{allSchemas.length === 0 && (
-								<p className="mt-1 text-grey-400 text-xs">
+								<p className="mt-1 text-xs text-grey-400">
 									No schemas available.{" "}
 									<Link href="/schemas/new" className="text-primary underline">
 										Create one first
 									</Link>
 								</p>
 							)}
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								{field.type === "reference"
 									? "Select a schema to reference (e.g., 'authors' for author selection)"
 									: "Select a schema to reference (e.g., 'tags' for selecting multiple tags)"}
@@ -432,7 +432,7 @@ const FieldEditor = ({
 					<div className="md:col-span-2">
 						<label
 							htmlFor={`field-help-${field.id}`}
-							className="mb-1 block font-medium text-grey-500 text-xs"
+							className="mb-1 block text-xs font-medium text-grey-500"
 						>
 							Help Text
 						</label>
@@ -458,14 +458,14 @@ const FieldEditor = ({
 				{/* Nested fields for group/repeater */}
 				{(field.type === "group" || field.type === "repeater") && (
 					<div className="mt-4 space-y-3">
-						<div className="flex items-center justify-between border-grey-200 border-t pt-4">
-							<h4 className="font-medium text-grey-700 text-sm">
+						<div className="flex items-center justify-between border-t border-grey-200 pt-4">
+							<h4 className="text-grey-700 text-sm font-medium">
 								{field.type === "repeater" ? "Item Fields" : "Group Fields"}
 							</h4>
 							<button
 								type="button"
 								onClick={() => onAddNestedField(field.id, parentPath)}
-								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/20"
+								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-xs text-primary transition-colors hover:bg-primary/20"
 								disabled={depth >= 4}
 							>
 								<Plus className="h-3 w-3" />
@@ -492,8 +492,8 @@ const FieldEditor = ({
 								))}
 							</div>
 						) : (
-							<div className="rounded border-2 border-grey-300 border-dashed p-4 text-center">
-								<p className="text-grey-400 text-xs">
+							<div className="rounded border-2 border-dashed border-grey-300 p-4 text-center">
+								<p className="text-xs text-grey-400">
 									No nested fields yet. Click "Add Nested Field" to add one.
 								</p>
 							</div>
@@ -918,7 +918,7 @@ export default function NewBlockPage() {
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl text-primary">
+				<h1 className="text-3xl font-bold text-primary">
 					Create Reusable Block
 				</h1>
 				<p className="mt-2 text-grey-500">
@@ -928,14 +928,14 @@ export default function NewBlockPage() {
 
 			{error && (
 				<div className="mb-6 rounded-lg bg-error-light/10 p-4">
-					<p className="text-error text-sm">{error}</p>
+					<p className="text-sm text-error">{error}</p>
 				</div>
 			)}
 
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Basic Info */}
 				<div className="rounded-lg bg-white p-6 shadow">
-					<h2 className="mb-4 font-semibold text-lg text-primary">
+					<h2 className="mb-4 text-lg font-semibold text-primary">
 						Basic Information
 					</h2>
 
@@ -943,7 +943,7 @@ export default function NewBlockPage() {
 						<div>
 							<label
 								htmlFor="block-display-name"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Display Name <span className="text-error">*</span>
 							</label>
@@ -953,7 +953,7 @@ export default function NewBlockPage() {
 								value={displayName}
 								onChange={(e) => handleDisplayNameChange(e.target.value)}
 								placeholder="Call to Action"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								required
 							/>
 						</div>
@@ -961,7 +961,7 @@ export default function NewBlockPage() {
 						<div className="relative pb-6">
 							<label
 								htmlFor="block-name"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Block Name <span className="text-error">*</span>
 							</label>
@@ -971,16 +971,16 @@ export default function NewBlockPage() {
 								value={name}
 								onChange={(e) => handleNameChange(e.target.value)}
 								placeholder="call_to_action"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 								required
 							/>
 							<div className="absolute top-full left-0 -mt-3">
 								{!hasEditedName && displayName ? (
-									<p className="text-blue-600 text-xs">
+									<p className="text-xs text-blue-600">
 										✨ Auto-generated from "Display Name"
 									</p>
 								) : (
-									<p className="text-grey-400 text-xs">
+									<p className="text-xs text-grey-400">
 										Unique identifier (lowercase, underscores only)
 									</p>
 								)}
@@ -990,7 +990,7 @@ export default function NewBlockPage() {
 						<div>
 							<label
 								htmlFor="block-description"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Description
 							</label>
@@ -1000,14 +1000,14 @@ export default function NewBlockPage() {
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Describe what this block is for..."
 								rows={3}
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							/>
 						</div>
 
 						<div>
 							<label
 								htmlFor="block-category"
-								className="mb-2 block font-medium text-grey-500 text-sm"
+								className="mb-2 block text-sm font-medium text-grey-500"
 							>
 								Category
 							</label>
@@ -1017,15 +1017,15 @@ export default function NewBlockPage() {
 								value={category}
 								onChange={(e) => setCategory(e.target.value)}
 								placeholder="Marketing"
-								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							/>
 						</div>
 
 						<div>
-							<div className="mb-2 block font-medium text-grey-500 text-sm">
+							<div className="mb-2 block text-sm font-medium text-grey-500">
 								Preview Image (optional)
 							</div>
-							<p className="mb-2 text-grey-400 text-xs">
+							<p className="mb-2 text-xs text-grey-400">
 								Add an image to help users visually identify this block when
 								selecting it
 							</p>
@@ -1051,7 +1051,7 @@ export default function NewBlockPage() {
 								<button
 									type="button"
 									onClick={() => setShowMediaSelector(true)}
-									className="flex items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-3 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+									className="bg-grey-50 text-grey-600 flex items-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-3 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
 								>
 									<ImageIcon className="h-5 w-5" />
 									Select Preview Image
@@ -1064,13 +1064,13 @@ export default function NewBlockPage() {
 				{/* Fields */}
 				<div className="mb-24 rounded-lg bg-white p-6 shadow">
 					<div className="mb-4 flex items-center justify-between">
-						<h2 className="font-semibold text-lg text-primary">
+						<h2 className="text-lg font-semibold text-primary">
 							Fields <span className="text-error">*</span>
 						</h2>
 					</div>
 
 					{fields.length === 0 ? (
-						<div className="rounded-lg border-2 border-grey-300 border-dashed p-8 text-center">
+						<div className="rounded-lg border-2 border-dashed border-grey-300 p-8 text-center">
 							<p className="text-grey-500">
 								No fields yet. Click "Add Field" to get started.
 							</p>
@@ -1097,7 +1097,7 @@ export default function NewBlockPage() {
 				</div>
 
 				{/* Floating Action Buttons */}
-				<div className="fixed inset-x-0 bottom-0 z-10 border-grey-200 border-t bg-white p-4 shadow-lg">
+				<div className="fixed inset-x-0 bottom-0 z-10 border-t border-grey-200 bg-white p-4 shadow-lg">
 					<div className="mx-auto flex max-w-4xl items-center justify-between">
 						<button
 							type="button"

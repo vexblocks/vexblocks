@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils"
 const textVariants = cva("", {
 	variants: {
 		variant: {
-			body: "font-normal leading-[22px] tracking-[0.32px]",
-			small: "font-normal leading-[14px]",
-			caption: "font-normal leading-[22px] tracking-[0.32px]",
+			body: "leading-[22px] font-normal tracking-[0.32px]",
+			small: "leading-[14px] font-normal",
+			caption: "leading-[22px] font-normal tracking-[0.32px]",
 		},
 		size: {
 			sm: "text-sm",

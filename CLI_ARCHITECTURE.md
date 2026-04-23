@@ -25,12 +25,14 @@ npx @vexblocks/cli init
 ```
 
 **Prompts:**
+
 1. Is this a new project or existing Turborepo? (new/existing)
 2. Project name (if new)
 3. Do you want to use TypeScript? (always yes, just confirmation)
 4. Do you want to add the CMS now? (y/n)
 
 **Actions (new project):**
+
 - Creates Turborepo structure
 - Sets up `package.json` with workspaces
 - Creates `turbo.json`
@@ -38,6 +40,7 @@ npx @vexblocks/cli init
 - Installs base dependencies
 
 **Actions (existing project):**
+
 - Validates Turborepo structure
 - Creates `vexblocks.json` manifest
 - Shows next steps
@@ -90,6 +93,7 @@ npx @vexblocks/cli upgrade --check   # Check for updates without upgrading
 ```
 
 **Process:**
+
 1. Reads `vexblocks.json` manifest
 2. Fetches latest versions from registry
 3. For each outdated package:
@@ -182,34 +186,34 @@ vexblocks/
 
 ```json
 {
-  "$schema": "https://vexblocks.com/schema/vexblocks.json",
-  "version": "1.0.0",
-  "packages": {
-    "cms": {
-      "version": "1.2.0",
-      "installedAt": "2024-12-08T00:00:00Z",
-      "path": "apps/cms"
-    },
-    "backend": {
-      "version": "1.2.0",
-      "installedAt": "2024-12-08T00:00:00Z",
-      "path": "packages/backend",
-      "config": {
-        "mergedSchema": true,
-        "existingSchemaPath": "packages/backend/convex/schema.ts"
-      }
-    },
-    "shared": {
-      "version": "1.2.0",
-      "installedAt": "2024-12-08T00:00:00Z",
-      "path": "packages/cms-shared"
-    },
-    "types": {
-      "version": "1.2.0",
-      "installedAt": "2024-12-08T00:00:00Z",
-      "path": "packages/type-generator"
-    }
-  }
+	"$schema": "https://vexblocks.com/schema/vexblocks.json",
+	"version": "1.0.0",
+	"packages": {
+		"cms": {
+			"version": "1.2.0",
+			"installedAt": "2024-12-08T00:00:00Z",
+			"path": "apps/cms"
+		},
+		"backend": {
+			"version": "1.2.0",
+			"installedAt": "2024-12-08T00:00:00Z",
+			"path": "packages/backend",
+			"config": {
+				"mergedSchema": true,
+				"existingSchemaPath": "packages/backend/convex/schema.ts"
+			}
+		},
+		"shared": {
+			"version": "1.2.0",
+			"installedAt": "2024-12-08T00:00:00Z",
+			"path": "packages/cms-shared"
+		},
+		"types": {
+			"version": "1.2.0",
+			"installedAt": "2024-12-08T00:00:00Z",
+			"path": "packages/type-generator"
+		}
+	}
 }
 ```
 
@@ -217,54 +221,47 @@ vexblocks/
 
 ```json
 {
-  "version": "1.2.0",
-  "packages": {
-    "cms": {
-      "version": "1.2.0",
-      "files": [
-        { "path": "app/**/*", "checksum": "abc123" },
-        { "path": "components/**/*", "checksum": "def456" }
-      ],
-      "dependencies": {
-        "@convex-dev/better-auth": "0.9.11",
-        "convex": "^1.30.0",
-        "next": "16.0.7",
-        "lexical": "^0.38.2"
-      },
-      "peerDependencies": ["backend", "shared"]
-    },
-    "backend": {
-      "version": "1.2.0",
-      "files": [
-        { "path": "convex/cms/**/*", "checksum": "ghi789" },
-        { "path": "convex/schema.cms.ts", "checksum": "jkl012" },
-        { "path": "better-auth/**/*", "checksum": "mno345" }
-      ]
-    },
-    "shared": {
-      "version": "1.2.0",
-      "files": [
-        { "path": "src/**/*", "checksum": "pqr678" }
-      ]
-    },
-    "types": {
-      "version": "1.2.0",
-      "files": [
-        { "path": "src/**/*", "checksum": "stu901" }
-      ]
-    }
-  },
-  "changelog": {
-    "1.2.0": [
-      "Added multi-language support",
-      "Fixed media upload bug",
-      "New flexible blocks feature"
-    ],
-    "1.1.0": [
-      "Added preview mode",
-      "Performance improvements"
-    ]
-  }
+	"version": "1.2.0",
+	"packages": {
+		"cms": {
+			"version": "1.2.0",
+			"files": [
+				{ "path": "app/**/*", "checksum": "abc123" },
+				{ "path": "components/**/*", "checksum": "def456" }
+			],
+			"dependencies": {
+				"@convex-dev/better-auth": "0.9.11",
+				"convex": "^1.30.0",
+				"next": "16.0.7",
+				"lexical": "^0.38.2"
+			},
+			"peerDependencies": ["backend", "shared"]
+		},
+		"backend": {
+			"version": "1.2.0",
+			"files": [
+				{ "path": "convex/cms/**/*", "checksum": "ghi789" },
+				{ "path": "convex/schema.cms.ts", "checksum": "jkl012" },
+				{ "path": "better-auth/**/*", "checksum": "mno345" }
+			]
+		},
+		"shared": {
+			"version": "1.2.0",
+			"files": [{ "path": "src/**/*", "checksum": "pqr678" }]
+		},
+		"types": {
+			"version": "1.2.0",
+			"files": [{ "path": "src/**/*", "checksum": "stu901" }]
+		}
+	},
+	"changelog": {
+		"1.2.0": [
+			"Added multi-language support",
+			"Fixed media upload bug",
+			"New flexible blocks feature"
+		],
+		"1.1.0": ["Added preview mode", "Performance improvements"]
+	}
 }
 ```
 
@@ -275,6 +272,7 @@ vexblocks/
 ### Current `schema.ts` (full, not distributed)
 
 Contains:
+
 - `users` table (CMS users)
 - `todos` table (example, not CMS)
 - CMS tables (cmsSchemas, cmsContent, cmsMedia, etc.)
@@ -282,6 +280,7 @@ Contains:
 ### New `schema.cms.ts` (distributed)
 
 Contains ONLY CMS tables that get merged:
+
 - `cmsSchemas`
 - `cmsContent`
 - `cmsMedia`
@@ -294,17 +293,18 @@ Contains ONLY CMS tables that get merged:
 When developer already has a Convex project:
 
 **Their existing `schema.ts`:**
+
 ```typescript
 import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
 
 const products = defineTable({
-  name: v.string(),
-  price: v.number(),
+	name: v.string(),
+	price: v.number(),
 })
 
 export default defineSchema({
-  products,
+	products,
 })
 ```
 
@@ -316,34 +316,34 @@ import { v } from "convex/values"
 
 // User's existing tables
 const products = defineTable({
-  name: v.string(),
-  price: v.number(),
+	name: v.string(),
+	price: v.number(),
 })
 
 // === VEXBLOCKS CMS TABLES (DO NOT EDIT) ===
 // These tables are managed by VexBlocks CLI
 // Run `npx @vexblocks/cli upgrade` to update
-import { 
-  cmsSchemas, 
-  cmsContent, 
-  cmsMedia, 
-  cmsMediaTags, 
-  cmsBlocks, 
-  cmsSettings,
-  users as cmsUsers 
+import {
+	cmsSchemas,
+	cmsContent,
+	cmsMedia,
+	cmsMediaTags,
+	cmsBlocks,
+	cmsSettings,
+	users as cmsUsers,
 } from "./schema.cms"
 // === END VEXBLOCKS CMS TABLES ===
 
 export default defineSchema({
-  products,
-  // VexBlocks CMS
-  cmsSchemas,
-  cmsContent,
-  cmsMedia,
-  cmsMediaTags,
-  cmsBlocks,
-  cmsSettings,
-  users: cmsUsers, // CMS requires users table
+	products,
+	// VexBlocks CMS
+	cmsSchemas,
+	cmsContent,
+	cmsMedia,
+	cmsMediaTags,
+	cmsBlocks,
+	cmsSettings,
+	users: cmsUsers, // CMS requires users table
 })
 ```
 
@@ -359,12 +359,14 @@ export default defineSchema({
 - Free, simple, transparent
 
 **Pros:**
+
 - Simple setup
 - Transparent (users can see source)
 - No npm publish step for templates
 - Git-based versioning
 
 **Cons:**
+
 - Depends on GitHub availability
 - Slightly slower than npm
 
@@ -374,10 +376,12 @@ export default defineSchema({
 - CLI downloads and extracts from npm
 
 **Pros:**
+
 - Faster downloads (CDN)
 - Standard versioning
 
 **Cons:**
+
 - More complex publish workflow
 - Less transparent
 
@@ -393,6 +397,7 @@ export default defineSchema({
 Since developers shouldn't edit `cms`, `cms-shared`, and `type-generator`:
 
 1. **Visual indicator**: Add a header comment to all files:
+
    ```typescript
    /**
     * @vexblocks-managed
@@ -469,12 +474,14 @@ FRONTEND_URL=http://localhost:3000
 ## Version 1.0 Scope
 
 **MVP Features:**
+
 - `init` - Create new Turborepo project
 - `add cms|backend|shared|types|all` - Add packages
 - `upgrade` - Update to latest version
 - `diff` - Show changes
 
 **Post-MVP:**
+
 - `eject` - Remove VexBlocks management (convert to regular files)
 - `doctor` - Diagnose issues
 - Plugin system for custom blocks

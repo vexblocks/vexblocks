@@ -7,7 +7,6 @@ import { useState } from "react"
 import { useNavbarTheme } from "@/contexts/navbar-theme-context"
 import { Container } from "../atoms/container"
 import { ArrowRightIcon } from "../icons/arrow-right"
-
 import {
 	NavigationMenu,
 	NavigationMenuContent,
@@ -55,7 +54,7 @@ export function Navbar() {
 		<header
 			className={`relative flex w-full items-center justify-center px-4 py-4 transition-colors duration-300 md:px-10 lg:px-20 ${
 				isDark
-					? "border-gray-800 border-b bg-black"
+					? "border-b border-gray-800 bg-black"
 					: "bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.08)]"
 			} ${additionalClasses}`}
 		>
@@ -63,7 +62,7 @@ export function Navbar() {
 				{/* Logo */}
 				<Link href="/" className="flex items-center">
 					<span
-						className={`font-semibold text-[20px] leading-normal tracking-[-0.5px] transition-colors duration-300 md:text-[25px] ${
+						className={`text-[20px] leading-normal font-semibold tracking-[-0.5px] transition-colors duration-300 md:text-[25px] ${
 							isDark ? "text-white" : "text-gray-900"
 						}`}
 					>
@@ -105,10 +104,10 @@ export function Navbar() {
 										<li key={item.title}>
 											<NavigationMenuLink asChild>
 												<Link href={item.href}>
-													<div className="font-medium text-sm leading-none">
+													<div className="text-sm leading-none font-medium">
 														{item.title}
 													</div>
-													<p className="line-clamp-2 text-muted-foreground text-sm leading-snug">
+													<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
 														{item.description}
 													</p>
 												</Link>
@@ -139,7 +138,7 @@ export function Navbar() {
 				<div className="hidden lg:flex">
 					<Link
 						href="/cms"
-						className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-teal-600 to-teal-700 px-4 py-2 font-medium text-sm text-white leading-4 shadow-sm transition-all hover:from-teal-700 hover:to-teal-800 hover:shadow-md"
+						className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-teal-600 to-teal-700 px-4 py-2 text-sm leading-4 font-medium text-white shadow-sm transition-all hover:from-teal-700 hover:to-teal-800 hover:shadow-md"
 					>
 						<span>Get Started</span>
 						<ArrowRightIcon className="relative top-px h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -175,7 +174,7 @@ export function Navbar() {
 						{/* Blog */}
 						<Link
 							href="/blog"
-							className={`flex min-h-[44px] cursor-pointer touch-manipulation items-center border-gray-200 border-b py-3 font-semibold text-sm transition-colors active:opacity-70 ${
+							className={`flex min-h-[44px] cursor-pointer touch-manipulation items-center border-b border-gray-200 py-3 text-sm font-semibold transition-colors active:opacity-70 ${
 								isDark ? "text-white" : "text-dark-900"
 							}`}
 							onClick={() => setMobileMenuOpen(false)}
@@ -184,14 +183,14 @@ export function Navbar() {
 						</Link>
 
 						{/* Documentation with submenu */}
-						<div className="flex flex-col border-gray-200 border-b pb-2">
+						<div className="flex flex-col border-b border-gray-200 pb-2">
 							<button
 								type="button"
 								onClick={() => toggleSection("docs")}
 								className="flex w-full items-center justify-between py-2 text-left"
 							>
 								<span
-									className={`font-semibold text-sm transition-colors duration-300 ${
+									className={`text-sm font-semibold transition-colors duration-300 ${
 										isDark ? "text-white" : "text-dark-900"
 									}`}
 								>
@@ -213,13 +212,13 @@ export function Navbar() {
 											onClick={() => setMobileMenuOpen(false)}
 										>
 											<span
-												className={`font-medium text-sm ${
+												className={`text-sm font-medium ${
 													isDark ? "text-white" : "text-dark-900"
 												}`}
 											>
 												{item.title}
 											</span>
-											<span className="text-muted-foreground text-xs">
+											<span className="text-xs text-muted-foreground">
 												{item.description}
 											</span>
 										</Link>
@@ -231,7 +230,7 @@ export function Navbar() {
 						{/* About */}
 						<Link
 							href="/about"
-							className={`flex min-h-[44px] cursor-pointer touch-manipulation items-center border-gray-200 border-b py-3 font-semibold text-sm transition-colors active:opacity-70 ${
+							className={`flex min-h-[44px] cursor-pointer touch-manipulation items-center border-b border-gray-200 py-3 text-sm font-semibold transition-colors active:opacity-70 ${
 								isDark ? "text-white" : "text-dark-900"
 							}`}
 							onClick={() => setMobileMenuOpen(false)}
@@ -243,7 +242,7 @@ export function Navbar() {
 						<div className="mt-4">
 							<Link
 								href="/cms"
-								className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-teal-600 to-teal-700 px-3 py-2 font-medium text-sm text-white leading-4 shadow-sm hover:shadow-md"
+								className="group flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-linear-to-b from-teal-600 to-teal-700 px-3 py-2 text-sm leading-4 font-medium text-white shadow-sm hover:shadow-md"
 								onClick={() => setMobileMenuOpen(false)}
 							>
 								<span>Get Started</span>

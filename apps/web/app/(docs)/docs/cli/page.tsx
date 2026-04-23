@@ -10,15 +10,15 @@ export default function CLIOverviewPage() {
 	return (
 		<div className="mx-auto w-full min-w-0">
 			<div className="mb-8 space-y-4">
-				<div className="flex items-center gap-2 text-muted-foreground text-sm">
+				<div className="flex items-center gap-2 text-sm text-muted-foreground">
 					<Link href="/docs" className="hover:text-foreground">
 						Documentation
 					</Link>
 					<ChevronRight className="h-4 w-4" />
 					<span>CLI Reference</span>
 				</div>
-				<h1 className="font-bold text-4xl tracking-tight">VexBlocks CLI</h1>
-				<p className="text-muted-foreground text-xl">
+				<h1 className="text-4xl font-bold tracking-tight">VexBlocks CLI</h1>
+				<p className="text-xl text-muted-foreground">
 					Command-line interface for managing your VexBlocks projects
 				</p>
 			</div>
@@ -59,12 +59,12 @@ export default function CLIOverviewPage() {
 					>
 						<div className="mb-2 flex items-center gap-2">
 							<Terminal className="h-5 w-5" />
-							<h3 className="font-mono font-semibold text-lg">init</h3>
+							<h3 className="font-mono text-lg font-semibold">init</h3>
 						</div>
-						<p className="mb-3 text-muted-foreground text-sm">
+						<p className="mb-3 text-sm text-muted-foreground">
 							Initialize a new VexBlocks project with Turborepo structure
 						</p>
-						<code className="text-muted-foreground text-xs">
+						<code className="text-xs text-muted-foreground">
 							npx @vexblocks/cli init
 						</code>
 					</Link>
@@ -75,13 +75,13 @@ export default function CLIOverviewPage() {
 					>
 						<div className="mb-2 flex items-center gap-2">
 							<Terminal className="h-5 w-5" />
-							<h3 className="font-mono font-semibold text-lg">add</h3>
+							<h3 className="font-mono text-lg font-semibold">add</h3>
 						</div>
-						<p className="mb-3 text-muted-foreground text-sm">
+						<p className="mb-3 text-sm text-muted-foreground">
 							Add VexBlocks packages (CMS, backend, shared utilities) to your
 							project
 						</p>
-						<code className="text-muted-foreground text-xs">
+						<code className="text-xs text-muted-foreground">
 							npx @vexblocks/cli add [package]
 						</code>
 					</Link>
@@ -92,12 +92,12 @@ export default function CLIOverviewPage() {
 					>
 						<div className="mb-2 flex items-center gap-2">
 							<Terminal className="h-5 w-5" />
-							<h3 className="font-mono font-semibold text-lg">upgrade</h3>
+							<h3 className="font-mono text-lg font-semibold">upgrade</h3>
 						</div>
-						<p className="mb-3 text-muted-foreground text-sm">
+						<p className="mb-3 text-sm text-muted-foreground">
 							Upgrade VexBlocks packages to the latest version
 						</p>
-						<code className="text-muted-foreground text-xs">
+						<code className="text-xs text-muted-foreground">
 							npx @vexblocks/cli upgrade
 						</code>
 					</Link>
@@ -108,13 +108,13 @@ export default function CLIOverviewPage() {
 					>
 						<div className="mb-2 flex items-center gap-2">
 							<Terminal className="h-5 w-5" />
-							<h3 className="font-mono font-semibold text-lg">diff</h3>
+							<h3 className="font-mono text-lg font-semibold">diff</h3>
 						</div>
-						<p className="mb-3 text-muted-foreground text-sm">
+						<p className="mb-3 text-sm text-muted-foreground">
 							Compare your local packages with the latest version from the
 							repository
 						</p>
-						<code className="text-muted-foreground text-xs">
+						<code className="text-xs text-muted-foreground">
 							npx @vexblocks/cli diff
 						</code>
 					</Link>

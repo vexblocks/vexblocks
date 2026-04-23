@@ -44,10 +44,10 @@ export function StickyHeader() {
 				className={`fixed top-0 right-0 left-0 z-50 w-full transition-all duration-200 ${
 					hasScrolled
 						? isDark
-							? "border-gray-800 border-b bg-black/95 backdrop-blur-sm"
+							? "border-b border-gray-800 bg-black/95 backdrop-blur-sm"
 							: "border-b bg-white/95 shadow-sm backdrop-blur-sm"
 						: isDark
-							? "border-gray-800 border-b bg-black"
+							? "border-b border-gray-800 bg-black"
 							: "bg-white"
 				}`}
 			>

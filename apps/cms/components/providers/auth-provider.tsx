@@ -1,9 +1,9 @@
 "use client"
 
-import { api } from "@repo/backend/convex/_generated/api"
 import { useQuery } from "convex/react"
 import { type PropsWithChildren, useEffect } from "react"
 import { authAtom } from "@/lib/auth-atom"
+import { api } from "@repo/backend/convex/_generated/api"
 
 /**
  * AuthProvider - Initializes and syncs the auth atom with Convex

@@ -10,17 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.4] - 2025-01-05
 
 ### Added
+
 - Configuration file system with `vexblocks.config.ts` for customizable app settings
 - Example configuration file `vexblocks.config.example.ts` for CLI users
 - TypeScript type definitions for VexBlocks configuration
 
 ### Changed
+
 - Decoupled email configuration from hardcoded values to `vexblocks.config.ts`
 - App name now configurable via `vexblocks.config.ts` (used in email subjects)
 - Email sender (from name and address) now configurable via `vexblocks.config.ts`
 - Updated `.gitignore` to exclude `vexblocks.config.ts` from version control
 
 ### Fixed
+
 - Removed Cloudflare API URL duplication in `mediaActions.ts`
 - Removed hardcoded "VexBlocks" branding from email templates
 
@@ -29,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### CMS Dashboard (`apps/cms`)
+
 - Schema builder with 15+ field types
 - Content management with drafts and publishing
 - Media library with Cloudflare Images integration
@@ -40,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Appearance settings (light/dark mode)
 
 #### Backend (`packages/backend`)
+
 - Convex backend with all CMS functions
 - Better Auth integration with email OTP
 - Schema tables: cmsSchemas, cmsContent, cmsMedia, cmsMediaTags, cmsBlocks, cmsSettings
@@ -48,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cloudflare Images upload/delete actions
 
 #### Shared Utilities (`packages/cms-shared`)
+
 - `CFImage` component for Cloudflare Images
 - `LexicalRenderer` for rich text rendering
 - Preview SDK with PostMessage communication
@@ -56,12 +62,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Utility functions for localized content
 
 #### Type Generator (`packages/type-generator`)
+
 - Automatic TypeScript type generation from CMS schemas
 - CLI command: `pnpm generate-types`
 - Support for all field types including nested structures
 - Reference type resolution
 
 ### Field Types Supported
+
 - `shortText` - Single line text with optional slug generation
 - `longText` - Multi-line text
 - `richText` - WYSIWYG editor with Lexical
@@ -80,6 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `blockReference` - Reusable block components
 
 ### Content Types
+
 - **Global** - Singleton content (headers, footers)
 - **Collection** - Repeatable content (blog posts, pages, products)
 

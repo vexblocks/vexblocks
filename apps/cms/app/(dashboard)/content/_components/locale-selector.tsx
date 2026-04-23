@@ -28,7 +28,7 @@ export function LocaleSelector({
 					key={locale.code}
 					type="button"
 					onClick={() => onChange(locale.code)}
-					className={`relative rounded-md px-3 py-1.5 font-medium text-sm transition-all ${
+					className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
 						currentLocale === locale.code
 							? "bg-primary text-white"
 							: "text-grey-600 hover:bg-grey-100"

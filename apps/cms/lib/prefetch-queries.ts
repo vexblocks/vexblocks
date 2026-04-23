@@ -1,7 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query"
-import { api } from "@repo/backend/convex/_generated/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback } from "react"
+import { api } from "@repo/backend/convex/_generated/api"
 
 /**
  * Map of routes to their required queries for prefetching

@@ -1,9 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage } from "@repo/cms-shared"
 import { useQuery } from "convex/react"
 import { ChevronDown, Copy, Eye, Layers, Plus, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -14,6 +11,9 @@ import {
 	setBlockCollapsed,
 } from "@/lib/block-collapse-cookie"
 import { previewAtom } from "@/lib/preview-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
 import { BasicFieldRenderer } from "./basic-field-renderer"
 import { BlockPreviewModal } from "./block-preview-modal"
 import { FieldRenderer } from "./field-renderer"
@@ -75,7 +75,7 @@ function BlockReferenceContent({
 			<div className="flex items-center justify-center rounded-lg border border-blue-300 bg-blue-50 p-4">
 				<div className="flex items-center gap-2">
 					<div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-					<span className="text-blue-600 text-sm">Loading block...</span>
+					<span className="text-sm text-blue-600">Loading block...</span>
 				</div>
 			</div>
 		)
@@ -208,17 +208,17 @@ function BlockReferenceContent({
 							</div>
 						)}
 						<div>
-							<p className="font-medium text-blue-900 text-sm">
+							<p className="text-sm font-medium text-blue-900">
 								{referencedBlock.displayName}
 							</p>
-							<p className="text-blue-600 text-xs">{referencedBlock.name}</p>
+							<p className="text-xs text-blue-600">{referencedBlock.name}</p>
 						</div>
 					</div>
 					{referencedBlock.previewImage && (
 						<button
 							type="button"
 							onClick={() => setShowPreviewModal(true)}
-							className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-blue-700 text-sm transition-colors hover:bg-blue-50"
+							className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-sm text-blue-700 transition-colors hover:bg-blue-50"
 							title="View block preview"
 						>
 							<Eye className="h-4 w-4" />
@@ -504,12 +504,12 @@ export function FlexibleBlockItem({
 				className={`flex items-center justify-between ${isCollapsed ? "" : "mb-3"}`}
 			>
 				<div className="flex min-w-0 flex-1 items-center gap-2">
-					<span className="rounded bg-purple-100 px-2 py-0.5 font-mono text-purple-600 text-xs">
+					<span className="rounded bg-purple-100 px-2 py-0.5 font-mono text-xs text-purple-600">
 						{isBlockReference ? "blockReference" : block.type}
 					</span>
-					<span className="text-grey-500 text-xs">Block #{index + 1}</span>
+					<span className="text-xs text-grey-500">Block #{index + 1}</span>
 					{isBlockReference && block.data?.blockName && (
-						<span className="truncate text-blue-600 text-xs">
+						<span className="truncate text-xs text-blue-600">
 							· {block.data.blockName}
 						</span>
 					)}
@@ -518,7 +518,7 @@ export function FlexibleBlockItem({
 					<button
 						type="button"
 						onClick={handleToggleCollapse}
-						className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-2.5 py-1 text-purple-700 text-xs transition-all hover:bg-purple-50"
+						className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-2.5 py-1 text-xs text-purple-700 transition-all hover:bg-purple-50"
 						title={isCollapsed ? "Expand block" : "Collapse block"}
 					>
 						<ChevronDown
@@ -795,18 +795,18 @@ export function FlexibleBlocksField({
 			<div ref={headerRef} className="mb-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Layers className="h-5 w-5 text-purple-600" />
-					<h3 className="font-semibold text-grey-900 text-lg">{field.label}</h3>
-					<span className="rounded-full bg-purple-100 px-2 py-0.5 font-medium text-purple-600 text-xs">
+					<h3 className="text-grey-900 text-lg font-semibold">{field.label}</h3>
+					<span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-600">
 						Flexible Blocks
 					</span>
-					{field.required && <span className="text-error text-sm">*</span>}
+					{field.required && <span className="text-sm text-error">*</span>}
 				</div>
 				{canAddMore && (
 					<div className="relative">
 						<button
 							type="button"
 							onClick={() => setShowAddMenu(!showAddMenu)}
-							className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-1.5 text-purple-600 text-sm transition-colors hover:bg-purple-50"
+							className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-1.5 text-sm text-purple-600 transition-colors hover:bg-purple-50"
 						>
 							<Plus className="h-4 w-4" />
 							Add Block
@@ -827,14 +827,14 @@ export function FlexibleBlocksField({
 											key={type}
 											type="button"
 											onClick={() => handleAddBlockType(type)}
-											className="flex w-full items-center gap-2 px-4 py-2 text-left text-grey-700 text-sm transition-colors hover:bg-grey-50"
+											className="text-grey-700 hover:bg-grey-50 flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors"
 										>
 											{type === "blockReference" && (
 												<Layers className="h-4 w-4 text-purple-500" />
 											)}
 											<span>{typeLabels[type] || type}</span>
 											{type === "blockReference" && (
-												<span className="ml-auto text-grey-400 text-xs">→</span>
+												<span className="ml-auto text-xs text-grey-400">→</span>
 											)}
 										</button>
 									))}
@@ -845,18 +845,18 @@ export function FlexibleBlocksField({
 				)}
 			</div>
 			{field.helpText && (
-				<p className="mb-4 text-grey-500 text-sm">{field.helpText}</p>
+				<p className="mb-4 text-sm text-grey-500">{field.helpText}</p>
 			)}
 			{field.maxBlocks && (
-				<p className="mb-4 text-grey-500 text-xs">
+				<p className="mb-4 text-xs text-grey-500">
 					Maximum: {field.maxBlocks} blocks ({blocks.length}/{field.maxBlocks}{" "}
 					used)
 				</p>
 			)}
 
 			{blocks.length === 0 ? (
-				<div className="rounded-lg border-2 border-grey-300 border-dashed bg-white p-8 text-center">
-					<p className="text-grey-400 text-sm">
+				<div className="rounded-lg border-2 border-dashed border-grey-300 bg-white p-8 text-center">
+					<p className="text-sm text-grey-400">
 						No blocks yet. Click "Add Block" to add content.
 					</p>
 				</div>
@@ -906,7 +906,7 @@ export function FlexibleBlocksField({
 							<button
 								type="button"
 								onClick={() => setShowBottomAddMenu(!showBottomAddMenu)}
-								className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-2 text-purple-600 text-sm shadow-lg transition-colors hover:bg-purple-50"
+								className="flex items-center gap-2 rounded-lg border border-purple-300 bg-white px-3 py-2 text-sm text-purple-600 shadow-lg transition-colors hover:bg-purple-50"
 							>
 								<Plus className="h-4 w-4" />
 								Add Block
@@ -925,14 +925,14 @@ export function FlexibleBlocksField({
 												key={type}
 												type="button"
 												onClick={() => handleAddBlockType(type)}
-												className="flex w-full items-center gap-2 px-4 py-2 text-left text-grey-700 text-sm transition-colors hover:bg-grey-50"
+												className="text-grey-700 hover:bg-grey-50 flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors"
 											>
 												{type === "blockReference" && (
 													<Layers className="h-4 w-4 text-purple-500" />
 												)}
 												<span>{typeLabels[type] || type}</span>
 												{type === "blockReference" && (
-													<span className="ml-auto text-grey-400 text-xs">
+													<span className="ml-auto text-xs text-grey-400">
 														→
 													</span>
 												)}

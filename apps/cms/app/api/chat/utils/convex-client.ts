@@ -1,6 +1,6 @@
+import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server"
 import { api } from "@repo/backend/convex/_generated/api"
 import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server"
 
 // ================================
 // RETRY LOGIC

@@ -1,7 +1,7 @@
 "use client"
 
-import { CFImage } from "@repo/cms-shared"
 import { X } from "lucide-react"
+import { CFImage } from "@repo/cms-shared"
 
 type BlockPreviewModalProps = {
 	isOpen: boolean
@@ -34,12 +34,12 @@ export function BlockPreviewModal({
 				className="relative max-h-[95vh] w-full max-w-6xl overflow-auto rounded-lg bg-white shadow-2xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<div className="sticky top-0 z-10 flex items-center justify-between border-grey-200 border-b bg-white px-4 py-3">
+				<div className="sticky top-0 z-10 flex items-center justify-between border-b border-grey-200 bg-white px-4 py-3">
 					<div>
-						<h3 className="font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 text-lg font-semibold">
 							{blockDisplayName}
 						</h3>
-						<p className="text-grey-500 text-sm">Block Preview</p>
+						<p className="text-sm text-grey-500">Block Preview</p>
 					</div>
 					<button
 						type="button"

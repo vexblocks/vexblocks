@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache"
+import { cachedQuery } from "@/lib/cached-query"
 import { api } from "@repo/backend/convex/_generated/api"
 import type {
 	BlogPostsContent,
@@ -5,8 +7,6 @@ import type {
 	ContentAuthorsContent,
 } from "@repo/cms-shared"
 import { getStringValue } from "@repo/cms-shared"
-import { cacheLife, cacheTag } from "next/cache"
-import { cachedQuery } from "@/lib/cached-query"
 
 export type BlogData = {
 	featuredPost: BlogPostsContent | null

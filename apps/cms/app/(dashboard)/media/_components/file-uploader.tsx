@@ -2,13 +2,13 @@
 
 import { useUploadFile } from "@convex-dev/r2/react"
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, useQuery } from "convex/react"
 import { FileUp, Upload } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 type FileUploaderProps = {
 	onUploadComplete?: (media: { id: Id<"cmsMedia"> }) => void
@@ -125,16 +125,16 @@ export function FileUploader({
 		<div className="space-y-4">
 			{/* File Upload */}
 			<div>
-				<div className="mb-2 block font-medium text-grey-500 text-sm">
+				<div className="mb-2 block text-sm font-medium text-grey-500">
 					File <span className="text-error">*</span>
 				</div>
 				<div className="flex items-center gap-4">
 					<label
 						htmlFor="file-upload-r2"
-						className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed px-4 py-3 transition-colors hover:border-primary"
+						className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-3 transition-colors hover:border-primary"
 					>
 						<FileUp className="h-5 w-5 text-grey-500" />
-						<span className="text-grey-500 text-sm">
+						<span className="text-sm text-grey-500">
 							{file ? file.name : "Choose a file..."}
 						</span>
 					</label>
@@ -148,7 +148,7 @@ export function FileUploader({
 					/>
 				</div>
 				{file && (
-					<p className="mt-1 text-grey-400 text-xs">
+					<p className="mt-1 text-xs text-grey-400">
 						{file.type || "Unknown type"} - {formatFileSize(file.size)}
 					</p>
 				)}
@@ -163,7 +163,7 @@ export function FileUploader({
 							style={{ width: `${uploadProgress}%` }}
 						/>
 					</div>
-					<p className="text-grey-500 text-xs">{uploadProgress}% uploaded</p>
+					<p className="text-xs text-grey-500">{uploadProgress}% uploaded</p>
 				</div>
 			)}
 
@@ -171,7 +171,7 @@ export function FileUploader({
 			<div>
 				<label
 					htmlFor="caption-r2"
-					className="mb-2 block font-medium text-grey-500 text-sm"
+					className="mb-2 block text-sm font-medium text-grey-500"
 				>
 					Caption / Name <span className="text-error">*</span>
 				</label>
@@ -181,16 +181,16 @@ export function FileUploader({
 					value={caption}
 					onChange={(e) => setCaption(e.target.value)}
 					placeholder="Descriptive name for this file"
-					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+					className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 					disabled={isUploading}
 				/>
 			</div>
 
 			{/* Tags */}
 			<div>
-				<p className="mb-2 block font-medium text-grey-500 text-sm">Tags</p>
+				<p className="mb-2 block text-sm font-medium text-grey-500">Tags</p>
 				{!availableTags || availableTags.length === 0 ? (
-					<p className="text-grey-400 text-sm">
+					<p className="text-sm text-grey-400">
 						No tags available. Create tags in the "Manage Tags" dialog first.
 					</p>
 				) : (
@@ -199,7 +199,7 @@ export function FileUploader({
 							<label
 								key={tag._id}
 								htmlFor={`tag-r2-${tag._id}`}
-								className="flex cursor-pointer items-center gap-2 rounded-lg border border-grey-200 px-4 py-2 transition-colors hover:bg-grey-50"
+								className="hover:bg-grey-50 flex cursor-pointer items-center gap-2 rounded-lg border border-grey-200 px-4 py-2 transition-colors"
 							>
 								<input
 									id={`tag-r2-${tag._id}`}
@@ -209,9 +209,9 @@ export function FileUploader({
 									disabled={isUploading}
 									className="h-4 w-4 rounded border-grey-300 text-primary transition-colors focus:ring-2 focus:ring-primary/20"
 								/>
-								<span className="text-grey-500 text-sm">{tag.name}</span>
+								<span className="text-sm text-grey-500">{tag.name}</span>
 								{tag.usageCount > 0 && (
-									<span className="ml-auto text-grey-400 text-xs">
+									<span className="ml-auto text-xs text-grey-400">
 										{tag.usageCount} {tag.usageCount === 1 ? "use" : "uses"}
 									</span>
 								)}

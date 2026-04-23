@@ -67,7 +67,7 @@ export default function SettingsPage() {
 	return (
 		<div className="mx-auto max-w-6xl">
 			<div className="mb-8">
-				<h1 className="font-bold text-3xl text-primary">Settings</h1>
+				<h1 className="text-3xl font-bold text-primary">Settings</h1>
 				<p className="mt-2 text-grey-500">
 					Manage your CMS configuration and preferences
 				</p>
@@ -85,15 +85,15 @@ export default function SettingsPage() {
 								{card.icon}
 							</div>
 							{card.badge && (
-								<span className="rounded-full bg-primary/10 px-2 py-1 font-medium text-primary text-xs">
+								<span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
 									{card.badge}
 								</span>
 							)}
 						</div>
-						<h3 className="mb-2 font-semibold text-grey-900 text-lg">
+						<h3 className="text-grey-900 mb-2 text-lg font-semibold">
 							{card.title}
 						</h3>
-						<p className="text-grey-500 text-sm">{card.description}</p>
+						<p className="text-sm text-grey-500">{card.description}</p>
 					</Link>
 				))}
 			</div>
@@ -108,7 +108,7 @@ export default function SettingsPage() {
 						<h4 className="mb-1 font-semibold text-blue-900">
 							Need Help with Settings?
 						</h4>
-						<p className="text-blue-700 text-sm">
+						<p className="text-sm text-blue-700">
 							Each setting is designed to give you full control over your CMS.
 							Click on any card to configure specific features.
 						</p>

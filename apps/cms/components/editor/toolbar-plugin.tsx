@@ -193,7 +193,7 @@ export default function ToolbarPlugin() {
 	}, [showColorPicker])
 
 	return (
-		<div className="flex flex-wrap items-center gap-1 border-grey-200 border-b p-2">
+		<div className="flex flex-wrap items-center gap-1 border-b border-grey-200 p-2">
 			{/* Undo/Redo */}
 			<button
 				type="button"
@@ -267,7 +267,7 @@ export default function ToolbarPlugin() {
 
 				{showColorPicker && (
 					<div className="absolute top-full left-0 z-10 mt-1 rounded-lg border border-grey-300 bg-white p-3 shadow-lg">
-						<div className="mb-2 font-medium text-grey-700 text-sm">
+						<div className="text-grey-700 mb-2 text-sm font-medium">
 							Text Color
 						</div>
 						<div className="grid grid-cols-6 gap-2">
@@ -308,7 +308,7 @@ export default function ToolbarPlugin() {
 								/>
 							))}
 						</div>
-						<div className="mt-3 flex items-center gap-2 border-grey-200 border-t pt-3">
+						<div className="mt-3 flex items-center gap-2 border-t border-grey-200 pt-3">
 							<input
 								type="color"
 								onChange={(e) => applyColor(e.target.value)}

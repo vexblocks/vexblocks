@@ -27,7 +27,7 @@ export default function HomePage() {
 							<br />
 							<span className="text-teal-700">Built for Convex</span>
 						</Heading>
-						<Text className="mx-auto mb-8 max-w-2xl text-gray-600 text-xl">
+						<Text className="mx-auto mb-8 max-w-2xl text-xl text-gray-600">
 							VexBlocks is a powerful, type-safe headless CMS built on Convex
 							and Next.js. Create, manage, and deliver content with real-time
 							updates and zero configuration.
@@ -51,7 +51,7 @@ export default function HomePage() {
 						<Heading as="h2" className="mb-4 text-4xl">
 							Everything you need to manage content
 						</Heading>
-						<Text className="text-gray-600 text-lg">
+						<Text className="text-lg text-gray-600">
 							Built with modern tools and best practices
 						</Text>
 					</div>
@@ -193,14 +193,14 @@ export default function HomePage() {
 						<Heading as="h2" className="mb-4 text-4xl">
 							Three Content Types, Infinite Possibilities
 						</Heading>
-						<Text className="text-gray-600 text-lg">
+						<Text className="text-lg text-gray-600">
 							Choose the right content type for your use case
 						</Text>
 					</div>
 
 					<div className="grid gap-8 md:grid-cols-3">
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-sm text-teal-700">GLOBAL</div>
+							<div className="mb-2 text-sm font-bold text-teal-700">GLOBAL</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Singleton Content
 							</Heading>
@@ -208,7 +208,7 @@ export default function HomePage() {
 								Unique, site-wide content that appears across all pages. Perfect
 								for headers, footers, and site settings.
 							</Text>
-							<ul className="space-y-2 text-gray-600 text-sm">
+							<ul className="space-y-2 text-sm text-gray-600">
 								<li className="flex items-start gap-2">
 									<span className="mt-1 text-teal-700">✓</span>
 									<span>Only 1 published instance</span>
@@ -225,7 +225,7 @@ export default function HomePage() {
 						</div>
 
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-sm text-teal-700">PAGE</div>
+							<div className="mb-2 text-sm font-bold text-teal-700">PAGE</div>
 							<Heading as="h3" className="mb-4 text-2xl">
 								Unique Pages
 							</Heading>
@@ -233,7 +233,7 @@ export default function HomePage() {
 								Static pages with unique content per slug. Ideal for About,
 								Contact, and landing pages.
 							</Text>
-							<ul className="space-y-2 text-gray-600 text-sm">
+							<ul className="space-y-2 text-sm text-gray-600">
 								<li className="flex items-start gap-2">
 									<span className="mt-1 text-teal-700">✓</span>
 									<span>1 instance per unique slug</span>
@@ -250,7 +250,7 @@ export default function HomePage() {
 						</div>
 
 						<div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-							<div className="mb-2 font-bold text-sm text-teal-700">
+							<div className="mb-2 text-sm font-bold text-teal-700">
 								COLLECTION
 							</div>
 							<Heading as="h3" className="mb-4 text-2xl">
@@ -260,7 +260,7 @@ export default function HomePage() {
 								Repeatable content with multiple entries. Perfect for blog
 								posts, products, and team members.
 							</Text>
-							<ul className="space-y-2 text-gray-600 text-sm">
+							<ul className="space-y-2 text-sm text-gray-600">
 								<li className="flex items-start gap-2">
 									<span className="mt-1 text-teal-700">✓</span>
 									<span>Unlimited instances</span>
@@ -286,7 +286,7 @@ export default function HomePage() {
 						<Heading as="h2" size="4xl" color="light" className="mb-4">
 							Ready to build something amazing?
 						</Heading>
-						<Text className="mb-8 text-teal-100 text-xl">
+						<Text className="mb-8 text-xl text-teal-100">
 							See VexBlocks in action with our blog demo, or start building your
 							own content-driven application today.
 						</Text>

@@ -1,13 +1,13 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react"
 import { AlertTriangle } from "lucide-react"
 import { type RefObject, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import { MediaCard } from "./media-card"
 import { MediaFilters } from "./media-filters"
 import { ReplaceMediaDialog } from "./replace-media-dialog"
@@ -158,7 +158,7 @@ export function MediaGallery({
 						placeholder="Search by caption or filename..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
-						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 					/>
 					{availableTags.length > 0 && (
 						<div className="flex flex-wrap gap-2">
@@ -176,7 +176,7 @@ export function MediaGallery({
 									className={`rounded-full px-3 py-1 text-sm transition-colors ${
 										selectedTags.includes(tag.name)
 											? "bg-primary text-white"
-											: "bg-grey-100 text-grey-700 hover:bg-grey-200"
+											: "text-grey-700 bg-grey-100 hover:bg-grey-200"
 									}`}
 								>
 									{tag.name} ({tag.count})
@@ -197,7 +197,7 @@ export function MediaGallery({
 					</div>
 				</div>
 			) : filteredByType.length === 0 ? (
-				<div className="flex min-h-[300px] items-center justify-center rounded-lg border-2 border-grey-200 border-dashed">
+				<div className="flex min-h-[300px] items-center justify-center rounded-lg border-2 border-dashed border-grey-200">
 					<div className="text-center text-grey-500">
 						<p className="mb-2 font-medium">No media found</p>
 						<p className="text-sm">
@@ -259,7 +259,7 @@ export function MediaGallery({
 					{!hasActiveFilters &&
 						status === "Exhausted" &&
 						filteredByType.length > 0 && (
-							<p className="mt-6 text-center text-grey-400 text-sm">
+							<p className="mt-6 text-center text-sm text-grey-400">
 								You&apos;ve reached the end of the media library
 							</p>
 						)}
@@ -294,7 +294,7 @@ export function MediaGallery({
 							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-error/10">
 								<AlertTriangle className="h-6 w-6 text-error" />
 							</div>
-							<h3 className="font-semibold text-lg text-primary">
+							<h3 className="text-lg font-semibold text-primary">
 								Delete Media
 							</h3>
 						</div>
@@ -307,14 +307,14 @@ export function MediaGallery({
 									This media is being used in {checkReferences.referenceCount}{" "}
 									content item(s):
 								</p>
-								<ul className="mb-6 max-h-40 space-y-2 overflow-y-auto rounded border border-grey-200 bg-grey-50 p-3">
+								<ul className="bg-grey-50 mb-6 max-h-40 space-y-2 overflow-y-auto rounded border border-grey-200 p-3">
 									{checkReferences.references.map((ref) => (
 										<li key={ref.contentId} className="text-grey-700 text-sm">
 											• {ref.schemaName}: {ref.contentTitle}
 										</li>
 									))}
 								</ul>
-								<p className="mb-6 text-error text-sm">
+								<p className="mb-6 text-sm text-error">
 									Please remove all references before deleting this media.
 								</p>
 							</>
@@ -430,14 +430,14 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 			<div className="w-full max-w-2xl rounded-lg bg-white p-6">
-				<h3 className="mb-4 font-semibold text-lg text-primary">Edit Media</h3>
+				<h3 className="mb-4 text-lg font-semibold text-primary">Edit Media</h3>
 
 				<div className="space-y-4">
 					{/* Caption */}
 					<div>
 						<label
 							htmlFor="edit-caption"
-							className="mb-2 block font-medium text-grey-500 text-sm"
+							className="mb-2 block text-sm font-medium text-grey-500"
 						>
 							Caption / Name <span className="text-error">*</span>
 						</label>
@@ -446,7 +446,7 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 							type="text"
 							value={caption}
 							onChange={(e) => setCaption(e.target.value)}
-							className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 						/>
 					</div>
 
@@ -454,7 +454,7 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 					<div>
 						<label
 							htmlFor="edit-alt"
-							className="mb-2 block font-medium text-grey-500 text-sm"
+							className="mb-2 block text-sm font-medium text-grey-500"
 						>
 							Alt Text
 						</label>
@@ -463,7 +463,7 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 							type="text"
 							value={alt}
 							onChange={(e) => setAlt(e.target.value)}
-							className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							className="w-full rounded-lg border border-grey-300 px-4 py-2 text-grey-500 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 						/>
 					</div>
 
@@ -471,7 +471,7 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 					<div>
 						<label
 							htmlFor="edit-tags"
-							className="mb-2 block font-medium text-grey-500 text-sm"
+							className="mb-2 block text-sm font-medium text-grey-500"
 						>
 							Tags
 						</label>
@@ -488,7 +488,7 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 									}
 								}}
 								placeholder="Add a tag"
-								className="flex-1 rounded-lg border border-grey-300 px-4 py-2 text-grey-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+								className="flex-1 rounded-lg border border-grey-300 px-4 py-2 text-grey-500 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							/>
 							<button
 								type="button"
@@ -503,7 +503,7 @@ function EditMediaDialog({ mediaId, onClose, onSave }: EditMediaDialogProps) {
 								{tags.map((tag) => (
 									<span
 										key={tag}
-										className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-primary text-sm"
+										className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
 									>
 										{tag}
 										<button

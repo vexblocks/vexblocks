@@ -1,9 +1,9 @@
-import type { BlogPostsContent } from "@repo/cms-shared"
-import { CFImage, getStringValue } from "@repo/cms-shared"
 import Link from "next/link"
 import { Heading } from "@/components/atoms/heading"
 import { Text } from "@/components/atoms/text"
 import { ArrowRightIcon } from "@/components/icons/arrow-right"
+import type { BlogPostsContent } from "@repo/cms-shared"
+import { CFImage, getStringValue } from "@repo/cms-shared"
 
 type BlogPostCardProps = {
 	post: BlogPostsContent
@@ -60,24 +60,24 @@ export function BlogPostCard({ post, tagName }: BlogPostCardProps) {
 					{/* Tag and Read Time */}
 					<div className="flex items-center gap-2">
 						{tagName && (
-							<span className="rounded-lg bg-blue-200 px-2 py-1 font-medium text-blue-900 text-sm">
+							<span className="rounded-lg bg-blue-200 px-2 py-1 text-sm font-medium text-blue-900">
 								{tagName}
 							</span>
 						)}
-						<span className="font-medium text-base text-dark-700 leading-normal">
+						<span className="text-base leading-normal font-medium text-dark-700">
 							{calculateReadingTime(post)}
 						</span>
 					</div>
 
 					<Heading
 						size="xl"
-						className="font-medium font-sans text-gray-900 leading-5.5 transition-colors group-hover:text-blue-700"
+						className="font-sans leading-5.5 font-medium text-gray-900 transition-colors group-hover:text-blue-700"
 					>
 						{title}
 					</Heading>
 
 					{shortDescription && (
-						<Text className="line-clamp-3 text-dark-700 leading-5.5">
+						<Text className="line-clamp-3 leading-5.5 text-dark-700">
 							{shortDescription}
 						</Text>
 					)}

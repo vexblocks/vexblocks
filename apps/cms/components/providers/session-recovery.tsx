@@ -1,7 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { authClient } from "@repo/backend/better-auth/client"
 import { usePathname } from "next/navigation"
 import {
 	type PropsWithChildren,
@@ -11,6 +10,7 @@ import {
 	useState,
 } from "react"
 import { authAtom } from "@/lib/auth-atom"
+import { authClient } from "@repo/backend/better-auth/client"
 
 const SESSION_TIMEOUT_MS = 10000 // 10 seconds timeout for loading check
 const NO_USER_DELAY_MS = 3000 // 3 seconds delay before showing expired session UI
@@ -171,10 +171,10 @@ export function SessionRecovery({ children }: PropsWithChildren) {
 					<div className="mb-4 text-center">
 						<span className="text-4xl">{isExpired ? "🔐" : "⚠️"}</span>
 					</div>
-					<h2 className="mb-2 text-center font-semibold text-gray-900 text-xl">
+					<h2 className="mb-2 text-center text-xl font-semibold text-gray-900">
 						{isExpired ? "Session Expired" : "Session Issue Detected"}
 					</h2>
-					<p className="mb-6 text-center text-gray-600 text-sm">
+					<p className="mb-6 text-center text-sm text-gray-600">
 						{isExpired
 							? "Your session has expired or is invalid. Please sign in again to continue."
 							: "The app is taking too long to load. This might be caused by a corrupted session."}

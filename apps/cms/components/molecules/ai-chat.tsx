@@ -30,7 +30,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 	// Auto-scroll to bottom when messages change
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-	})
+	}, [messages])
 
 	// Focus input when chat opens
 	useEffect(() => {
@@ -48,23 +48,23 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 			setInputHeight(newHeight)
 			inputRef.current.style.height = `${newHeight}px`
 		}
-	})
+	}, [input])
 
 	if (!isOpen) return null
 
 	return (
 		<div className="fixed right-6 bottom-6 z-50 flex h-150 w-105 flex-col rounded-xl border border-grey-200 bg-white shadow-[0px_8px_32px_rgba(0,0,0,0.12)]">
 			{/* Header */}
-			<div className="flex items-center justify-between border-grey-200 border-b px-4 py-3">
+			<div className="flex items-center justify-between border-b border-grey-200 px-4 py-3">
 				<div className="flex items-center gap-2">
 					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-b from-secondary to-secondary-dark">
 						<Bot className="h-5 w-5 text-white" />
 					</div>
 					<div>
-						<h3 className="font-semibold text-primary text-sm">
+						<h3 className="text-sm font-semibold text-primary">
 							CMS Assistant
 						</h3>
-						<p className="text-grey-500 text-xs">
+						<p className="text-xs text-grey-500">
 							Ask me anything about your CMS
 						</p>
 					</div>
@@ -86,10 +86,10 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 						<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-grey-100">
 							<Bot className="h-6 w-6 text-secondary" />
 						</div>
-						<h4 className="mb-2 font-semibold text-base text-primary">
+						<h4 className="mb-2 text-base font-semibold text-primary">
 							Welcome to CMS Assistant
 						</h4>
-						<p className="text-grey-500 text-sm leading-relaxed">
+						<p className="text-sm leading-relaxed text-grey-500">
 							I can help you manage schemas, create content, explain features,
 							and answer questions about your CMS.
 						</p>
@@ -116,7 +116,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 										: "bg-grey-100 text-primary",
 								)}
 							>
-								<div className="wrap-break-words whitespace-pre-wrap text-sm leading-relaxed">
+								<div className="wrap-break-words text-sm leading-relaxed whitespace-pre-wrap">
 									{message.parts?.map((part, i) => {
 										if (part.type === "text") {
 											return <span key={`${message.id}-${i}`}>{part.text}</span>
@@ -167,7 +167,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 													return (
 														<div
 															key={`${message.id}-${i}`}
-															className="my-1 rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-red-700 text-xs"
+															className="my-1 rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700"
 														>
 															<span className="font-medium">{toolName}:</span>{" "}
 															{errorText || "An error occurred"}
@@ -177,7 +177,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 													return (
 														<div
 															key={`${message.id}-${i}`}
-															className="my-1 rounded-md border border-grey-200 bg-grey-50 px-2 py-1.5 text-grey-600 text-xs"
+															className="bg-grey-50 text-grey-600 my-1 rounded-md border border-grey-200 px-2 py-1.5 text-xs"
 														>
 															<span className="font-medium">{toolName}</span>{" "}
 															<span className="italic">executing...</span>
@@ -191,7 +191,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 							</div>
 							{message.role === "user" && (
 								<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-grey-300">
-									<span className="font-semibold text-primary text-xs">
+									<span className="text-xs font-semibold text-primary">
 										You
 									</span>
 								</div>
@@ -219,8 +219,8 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 							<AlertCircle className="h-4 w-4 text-red-500" />
 						</div>
 						<div className="max-w-70 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-							<p className="font-medium text-red-700 text-sm">Error</p>
-							<p className="mt-1 text-red-600 text-xs">
+							<p className="text-sm font-medium text-red-700">Error</p>
+							<p className="mt-1 text-xs text-red-600">
 								{error.message || "Something went wrong. Please try again."}
 							</p>
 						</div>
@@ -232,7 +232,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 			{/* Input */}
 			<form
 				onSubmit={handleSubmit}
-				className="border-grey-200 border-t p-3"
+				className="border-t border-grey-200 p-3"
 				style={{ minHeight: inputHeight + 24 }}
 			>
 				<div className="flex items-end gap-2">
@@ -247,7 +247,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 							}
 						}}
 						placeholder="Type your message..."
-						className="flex-1 resize-none rounded-lg border border-grey-200 px-3 py-2 text-primary text-sm transition-all placeholder:text-grey-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-secondary"
+						className="flex-1 resize-none rounded-lg border border-grey-200 px-3 py-2 text-sm text-primary transition-all placeholder:text-grey-400 focus:border-transparent focus:ring-2 focus:ring-secondary focus:outline-none"
 						rows={1}
 						disabled={isLoading}
 					/>
@@ -260,7 +260,7 @@ export function AIChat({ isOpen, onClose }: AIChatProps) {
 						<Send className="h-4 w-4" />
 					</button>
 				</div>
-				<p className="mt-2 text-grey-400 text-xs">
+				<p className="mt-2 text-xs text-grey-400">
 					Press Enter to send, Shift + Enter for new line
 				</p>
 			</form>

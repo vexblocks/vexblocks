@@ -86,7 +86,7 @@ export function TableOfContents() {
 		<div className="hidden xl:block">
 			<div className="sticky top-24 -mt-10 max-h-[calc(100vh-6rem)] overflow-y-auto pt-10">
 				<div className="space-y-3">
-					<p className="font-semibold text-sm">On This Page</p>
+					<p className="text-sm font-semibold">On This Page</p>
 					<nav>
 						<ul className="m-0 list-none space-y-2">
 							{headings.map((heading) => (

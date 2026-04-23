@@ -1,8 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
 import Compressor from "compressorjs"
 import { useMutation, useQuery } from "convex/react"
 import { CheckCircle2, Loader2, Upload, X, XCircle } from "lucide-react"
@@ -10,6 +8,8 @@ import { nanoid } from "nanoid"
 import { useCallback, useState } from "react"
 import { toast } from "sonner"
 import { authAtom } from "@/lib/auth-atom"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 
@@ -339,13 +339,13 @@ export function MediaUploader({
 					<Upload
 						className={`mb-2 text-grey-400 ${queue.length > 0 ? "h-6 w-6" : "h-10 w-10"}`}
 					/>
-					<p className="font-medium text-grey-500 text-sm">
+					<p className="text-sm font-medium text-grey-500">
 						{isDragging
 							? "Drop images here"
 							: "Drag images or a folder here, or click to browse"}
 					</p>
 					{!isDragging && (
-						<p className="mt-1 text-grey-400 text-xs">
+						<p className="mt-1 text-xs text-grey-400">
 							PNG, JPEG, WebP, AVIF, GIF — max 10 MB each
 						</p>
 					)}
@@ -362,7 +362,7 @@ export function MediaUploader({
 								}`}
 							>
 								{/* Thumbnail */}
-								{/* biome-ignore lint/performance/noImgElement: blob URL preview */}
+								{/* oxlint-disable-next-line nextjs/no-img-element */}
 								<img
 									src={item.previewUrl}
 									alt=""
@@ -378,7 +378,7 @@ export function MediaUploader({
 										item.status === "uploading" || item.status === "done"
 									}
 									placeholder="Caption..."
-									className="min-w-0 flex-1 rounded border border-grey-200 bg-white px-2 py-1 text-grey-700 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 disabled:bg-grey-100 disabled:text-grey-400"
+									className="text-grey-700 min-w-0 flex-1 rounded border border-grey-200 bg-white px-2 py-1 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none disabled:bg-grey-100 disabled:text-grey-400"
 								/>
 
 								{/* Status icon */}
@@ -400,7 +400,7 @@ export function MediaUploader({
 										type="button"
 										onClick={() => removeFromQueue(item.localId)}
 										disabled={isUploading}
-										className="shrink-0 rounded p-1 text-grey-400 transition-colors hover:bg-grey-200 hover:text-grey-700 disabled:opacity-50"
+										className="hover:text-grey-700 shrink-0 rounded p-1 text-grey-400 transition-colors hover:bg-grey-200 disabled:opacity-50"
 										title="Remove"
 									>
 										<X className="h-4 w-4" />
@@ -415,9 +415,9 @@ export function MediaUploader({
 
 				{/* Tags */}
 				<div>
-					<p className="mb-2 block font-medium text-grey-500 text-sm">Tags</p>
+					<p className="mb-2 block text-sm font-medium text-grey-500">Tags</p>
 					{!availableTags || availableTags.length === 0 ? (
-						<p className="text-grey-400 text-sm">
+						<p className="text-sm text-grey-400">
 							No tags available. Create tags in the "Manage Tags" dialog first.
 						</p>
 					) : (
@@ -426,7 +426,7 @@ export function MediaUploader({
 								<label
 									key={tag._id}
 									htmlFor={`tag-${tag._id}`}
-									className="flex cursor-pointer items-center gap-2 rounded-lg border border-grey-200 px-4 py-2 transition-colors hover:bg-grey-50"
+									className="hover:bg-grey-50 flex cursor-pointer items-center gap-2 rounded-lg border border-grey-200 px-4 py-2 transition-colors"
 								>
 									<input
 										id={`tag-${tag._id}`}
@@ -436,9 +436,9 @@ export function MediaUploader({
 										disabled={isUploading}
 										className="h-4 w-4 rounded border-grey-300 text-primary transition-colors focus:ring-2 focus:ring-primary/20"
 									/>
-									<span className="text-grey-500 text-sm">{tag.name}</span>
+									<span className="text-sm text-grey-500">{tag.name}</span>
 									{tag.usageCount > 0 && (
-										<span className="ml-auto text-grey-400 text-xs">
+										<span className="ml-auto text-xs text-grey-400">
 											{tag.usageCount} {tag.usageCount === 1 ? "use" : "uses"}
 										</span>
 									)}

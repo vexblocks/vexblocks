@@ -1,9 +1,6 @@
 "use client"
 
 import { useAtom } from "@lfades/atom"
-import { api } from "@repo/backend/convex/_generated/api"
-import type { Id } from "@repo/backend/convex/_generated/dataModel"
-import { CFImage } from "@repo/cms-shared"
 import { useMutation, useQuery } from "convex/react"
 import {
 	AlertTriangle,
@@ -23,6 +20,9 @@ import { MediaSelector } from "@/app/(dashboard)/media/_components/media-selecto
 import { authAtom } from "@/lib/auth-atom"
 import { sanitizeData } from "@/lib/sanitize-data"
 import { triggerTypeGeneration } from "@/lib/use-type-generation"
+import { api } from "@repo/backend/convex/_generated/api"
+import type { Id } from "@repo/backend/convex/_generated/dataModel"
+import { CFImage } from "@repo/cms-shared"
 
 type FieldType =
 	| "shortText"
@@ -76,15 +76,15 @@ function FieldViewItem({ field, depth = 0 }: { field: Field; depth?: number }) {
 						{field.type}
 					</span>
 					{field.required && (
-						<span className="text-error text-xs">Required</span>
+						<span className="text-xs text-error">Required</span>
 					)}
 				</div>
 				{field.helpText && (
-					<p className="mt-1 text-grey-500 text-sm">{field.helpText}</p>
+					<p className="mt-1 text-sm text-grey-500">{field.helpText}</p>
 				)}
 				{(field.type === "reference" || field.type === "multiReference") &&
 					field.referenceSchema && (
-						<p className="mt-1 text-grey-500 text-sm">
+						<p className="mt-1 text-sm text-grey-500">
 							Schema:{" "}
 							<code className="rounded bg-grey-100 px-1.5 py-0.5 text-xs">
 								{field.referenceSchema}
@@ -96,8 +96,8 @@ function FieldViewItem({ field, depth = 0 }: { field: Field; depth?: number }) {
 				{(field.type === "group" || field.type === "repeater") &&
 					field.fields &&
 					field.fields.length > 0 && (
-						<div className="mt-3 space-y-2 border-grey-200 border-t pt-3">
-							<p className="font-medium text-grey-600 text-xs">
+						<div className="mt-3 space-y-2 border-t border-grey-200 pt-3">
+							<p className="text-grey-600 text-xs font-medium">
 								{field.type === "repeater" ? "Item Fields:" : "Nested Fields:"}
 							</p>
 							{field.fields.map((nestedField) => (
@@ -175,21 +175,21 @@ function SimpleFieldEditor({
 		<div className={`rounded-lg border ${borderColor} ${bgColor} p-4`}>
 			<div className="mb-3 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<span className="font-medium text-grey-700 text-sm">
+					<span className="text-grey-700 text-sm font-medium">
 						Field #{index + 1}
 						{depth > 0 && (
-							<span className="ml-2 text-grey-400 text-xs">
+							<span className="ml-2 text-xs text-grey-400">
 								(Nested level {depth})
 							</span>
 						)}
 					</span>
 					{field.type === "group" && (
-						<span className="rounded-full bg-primary/10 px-2 py-1 font-medium text-primary text-xs">
+						<span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
 							Group
 						</span>
 					)}
 					{field.type === "repeater" && (
-						<span className="rounded-full bg-green-100 px-2 py-1 font-medium text-green-700 text-xs">
+						<span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
 							Repeater
 						</span>
 					)}
@@ -229,7 +229,7 @@ function SimpleFieldEditor({
 				<div>
 					<label
 						htmlFor={`field-label-${field.id}`}
-						className="mb-1 block text-grey-600 text-xs"
+						className="text-grey-600 mb-1 block text-xs"
 					>
 						Label
 					</label>
@@ -245,7 +245,7 @@ function SimpleFieldEditor({
 				<div className="relative pb-6">
 					<label
 						htmlFor={`field-name-${field.id}`}
-						className="mb-1 block text-grey-600 text-xs"
+						className="text-grey-600 mb-1 block text-xs"
 					>
 						Field Name
 					</label>
@@ -259,7 +259,7 @@ function SimpleFieldEditor({
 					/>
 					<div className="absolute top-full left-0 mt-1">
 						{!hasEditedName && field.label && (
-							<p className="text-blue-600 text-xs">
+							<p className="text-xs text-blue-600">
 								✨ Auto-generated from "Label"
 							</p>
 						)}
@@ -268,7 +268,7 @@ function SimpleFieldEditor({
 				<div>
 					<label
 						htmlFor={`field-type-${field.id}`}
-						className="mb-1 block text-grey-600 text-xs"
+						className="text-grey-600 mb-1 block text-xs"
 					>
 						Type
 					</label>
@@ -317,7 +317,7 @@ function SimpleFieldEditor({
 						{depth < 4 && <option value="repeater">Repeater (Array)</option>}
 					</select>
 					{depth >= 4 && (
-						<p className="mt-1 text-grey-400 text-xs">
+						<p className="mt-1 text-xs text-grey-400">
 							Group type not available at this nesting level
 						</p>
 					)}
@@ -339,7 +339,7 @@ function SimpleFieldEditor({
 					<div className="md:col-span-2">
 						<label
 							htmlFor={`field-options-${field.id}`}
-							className="mb-1 block text-grey-600 text-xs"
+							className="text-grey-600 mb-1 block text-xs"
 						>
 							Options (comma-separated)
 						</label>
@@ -367,7 +367,7 @@ function SimpleFieldEditor({
 					<div className="md:col-span-2">
 						<label
 							htmlFor={`field-default-${field.id}`}
-							className="mb-1 block text-grey-600 text-xs"
+							className="text-grey-600 mb-1 block text-xs"
 						>
 							Default Value
 						</label>
@@ -428,7 +428,7 @@ function SimpleFieldEditor({
 					<div className="md:col-span-2">
 						<label
 							htmlFor={`field-referenceSchema-${field.id}`}
-							className="mb-1 block text-grey-600 text-xs"
+							className="text-grey-600 mb-1 block text-xs"
 						>
 							Reference Schema <span className="text-error">*</span>
 						</label>
@@ -450,14 +450,14 @@ function SimpleFieldEditor({
 								))}
 						</select>
 						{allSchemas.length === 0 && (
-							<p className="mt-1 text-grey-400 text-xs">
+							<p className="mt-1 text-xs text-grey-400">
 								No schemas available.{" "}
 								<Link href="/schemas/new" className="text-primary underline">
 									Create one first
 								</Link>
 							</p>
 						)}
-						<p className="mt-1 text-grey-400 text-xs">
+						<p className="mt-1 text-xs text-grey-400">
 							{field.type === "reference"
 								? "Select a schema to reference (e.g., 'authors' for author selection)"
 								: "Select a schema to reference (e.g., 'tags' for selecting multiple tags)"}
@@ -467,7 +467,7 @@ function SimpleFieldEditor({
 				<div className="md:col-span-2">
 					<label
 						htmlFor={`field-help-${field.id}`}
-						className="mb-1 block text-grey-600 text-xs"
+						className="text-grey-600 mb-1 block text-xs"
 					>
 						Help Text (optional)
 					</label>
@@ -487,15 +487,15 @@ function SimpleFieldEditor({
 			{/* Nested fields for group/repeater */}
 			{(field.type === "group" || field.type === "repeater") && (
 				<div className="mt-4 space-y-3">
-					<div className="flex items-center justify-between border-grey-200 border-t pt-4">
-						<h4 className="font-medium text-grey-700 text-sm">
+					<div className="flex items-center justify-between border-t border-grey-200 pt-4">
+						<h4 className="text-grey-700 text-sm font-medium">
 							{field.type === "repeater" ? "Item Fields" : "Group Fields"}
 						</h4>
 						{onAddNestedField && (
 							<button
 								type="button"
 								onClick={() => onAddNestedField(index)}
-								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/20"
+								className="flex items-center gap-1 rounded bg-primary/10 px-3 py-1.5 text-xs text-primary transition-colors hover:bg-primary/20"
 							>
 								<Plus className="h-3 w-3" />
 								Add Nested Field
@@ -564,8 +564,8 @@ function SimpleFieldEditor({
 							))}
 						</div>
 					) : (
-						<div className="rounded border-2 border-grey-300 border-dashed p-4 text-center">
-							<p className="text-grey-400 text-xs">
+						<div className="rounded border-2 border-dashed border-grey-300 p-4 text-center">
+							<p className="text-xs text-grey-400">
 								No nested fields yet. Click "Add Nested Field" to add one.
 							</p>
 						</div>
@@ -883,7 +883,7 @@ export default function BlockDetailPage({
 			</div>
 
 			<div className="mb-6">
-				<h1 className="font-bold text-3xl text-primary">{block.displayName}</h1>
+				<h1 className="text-3xl font-bold text-primary">{block.displayName}</h1>
 				{block.category && (
 					<p className="mt-2 text-grey-500">{block.category}</p>
 				)}
@@ -891,7 +891,7 @@ export default function BlockDetailPage({
 
 			{error && (
 				<div className="mb-6 rounded-lg bg-red-50 p-4">
-					<p className="text-error text-sm">{error}</p>
+					<p className="text-sm text-error">{error}</p>
 				</div>
 			)}
 
@@ -901,9 +901,9 @@ export default function BlockDetailPage({
 					<div className="w-full max-w-md rounded-lg bg-white p-6">
 						<div className="mb-4 flex items-center gap-3">
 							<AlertTriangle className="h-6 w-6 text-error" />
-							<h2 className="font-bold text-xl">Delete Block?</h2>
+							<h2 className="text-xl font-bold">Delete Block?</h2>
 						</div>
-						<p className="mb-6 text-grey-600">
+						<p className="text-grey-600 mb-6">
 							Are you sure? Content using this block will retain the data but
 							won't be editable.
 						</p>
@@ -930,13 +930,13 @@ export default function BlockDetailPage({
 
 			<div className="rounded-sm border border-grey-200 bg-white p-6 shadow-md">
 				<div className="mb-6">
-					<h2 className="mb-4 font-semibold text-xl">Basic Information</h2>
+					<h2 className="mb-4 text-xl font-semibold">Basic Information</h2>
 					{editing ? (
 						<div className="space-y-4">
 							<div>
 								<label
 									htmlFor="edit-display-name"
-									className="mb-1 block text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm"
 								>
 									Display Name
 								</label>
@@ -951,7 +951,7 @@ export default function BlockDetailPage({
 							<div>
 								<label
 									htmlFor="edit-description"
-									className="mb-1 block text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm"
 								>
 									Description
 								</label>
@@ -966,7 +966,7 @@ export default function BlockDetailPage({
 							<div>
 								<label
 									htmlFor="edit-category"
-									className="mb-1 block text-grey-700 text-sm"
+									className="text-grey-700 mb-1 block text-sm"
 								>
 									Category
 								</label>
@@ -979,10 +979,10 @@ export default function BlockDetailPage({
 								/>
 							</div>
 							<div>
-								<span className="mb-1 block text-grey-700 text-sm">
+								<span className="text-grey-700 mb-1 block text-sm">
 									Preview Image (optional)
 								</span>
-								<p className="mb-2 text-grey-500 text-xs">
+								<p className="mb-2 text-xs text-grey-500">
 									Add an image to help users visually identify this block when
 									selecting it
 								</p>
@@ -1008,7 +1008,7 @@ export default function BlockDetailPage({
 									<button
 										type="button"
 										onClick={() => setShowMediaSelector(true)}
-										className="flex items-center gap-2 rounded-lg border-2 border-grey-300 border-dashed bg-grey-50 px-4 py-3 text-grey-600 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+										className="bg-grey-50 text-grey-600 flex items-center gap-2 rounded-lg border-2 border-dashed border-grey-300 px-4 py-3 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
 									>
 										<ImageIcon className="h-5 w-5" />
 										Select Preview Image
@@ -1029,7 +1029,7 @@ export default function BlockDetailPage({
 							)}
 							{block.previewImage && (
 								<div className="mt-3">
-									<span className="font-medium text-grey-600">Preview:</span>
+									<span className="text-grey-600 font-medium">Preview:</span>
 									<div className="mt-2">
 										<CFImage
 											assetId={block.previewImage}
@@ -1048,7 +1048,7 @@ export default function BlockDetailPage({
 
 				<div>
 					<div className="mb-4">
-						<h2 className="font-semibold text-xl">Fields</h2>
+						<h2 className="text-xl font-semibold">Fields</h2>
 					</div>
 					<div className="space-y-3">
 						{editing
@@ -1074,7 +1074,7 @@ export default function BlockDetailPage({
 			</div>
 
 			{/* Fixed bottom action bar */}
-			<div className="fixed inset-x-0 bottom-0 z-10 border-grey-200 border-t bg-white p-4 shadow-lg">
+			<div className="fixed inset-x-0 bottom-0 z-10 border-t border-grey-200 bg-white p-4 shadow-lg">
 				<div className="mx-auto flex max-w-4xl items-center justify-between">
 					{editing ? (
 						<>

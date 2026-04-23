@@ -2,10 +2,10 @@
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
 import { ConvexQueryClient } from "@convex-dev/react-query"
-import { authClient } from "@repo/backend/better-auth/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ConvexReactClient } from "convex/react"
 import type { PropsWithChildren } from "react"
+import { authClient } from "@repo/backend/better-auth/client"
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL
 if (!convexUrl) {

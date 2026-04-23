@@ -11,16 +11,16 @@ export default function AccountDisabledPage() {
 					</div>
 				</div>
 
-				<h1 className="mb-2 text-center font-semibold text-2xl text-grey-900">
+				<h1 className="text-grey-900 mb-2 text-center text-2xl font-semibold">
 					Account Disabled
 				</h1>
 
-				<p className="mb-6 text-center text-grey-600">
+				<p className="text-grey-600 mb-6 text-center">
 					Your account has been disabled by an administrator. You no longer have
 					access to the VexBlocks CMS.
 				</p>
 
-				<div className="rounded-lg border border-grey-200 bg-grey-50 p-4">
+				<div className="bg-grey-50 rounded-lg border border-grey-200 p-4">
 					<p className="text-grey-700 text-sm">
 						If you believe this is a mistake, please contact your system
 						administrator for assistance.
@@ -28,7 +28,7 @@ export default function AccountDisabledPage() {
 				</div>
 
 				<div className="mt-6 text-center">
-					<Link href="/login" className="text-primary text-sm hover:underline">
+					<Link href="/login" className="text-sm text-primary hover:underline">
 						Return to Sign In
 					</Link>
 				</div>

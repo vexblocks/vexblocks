@@ -6,15 +6,15 @@ export default function InstallationPage() {
 	return (
 		<div className="mx-auto w-full min-w-0">
 			<div className="mb-8 space-y-4">
-				<div className="flex items-center gap-2 text-muted-foreground text-sm">
+				<div className="flex items-center gap-2 text-sm text-muted-foreground">
 					<Link href="/docs" className="hover:text-foreground">
 						Documentation
 					</Link>
 					<ChevronRight className="h-4 w-4" />
 					<span>Installation</span>
 				</div>
-				<h1 className="font-bold text-4xl tracking-tight">Installation</h1>
-				<p className="text-muted-foreground text-xl">
+				<h1 className="text-4xl font-bold tracking-tight">Installation</h1>
+				<p className="text-xl text-muted-foreground">
 					Get VexBlocks up and running in your project
 				</p>
 			</div>
@@ -29,7 +29,7 @@ export default function InstallationPage() {
 					</div>
 					<div>
 						<div className="font-medium">Node.js 18.17 or higher</div>
-						<div className="text-muted-foreground text-sm">
+						<div className="text-sm text-muted-foreground">
 							Check with <code className="text-xs">node --version</code>
 						</div>
 					</div>
@@ -41,7 +41,7 @@ export default function InstallationPage() {
 					</div>
 					<div>
 						<div className="font-medium">pnpm 9.0 or higher</div>
-						<div className="text-muted-foreground text-sm">
+						<div className="text-sm text-muted-foreground">
 							Install with <code className="text-xs">npm install -g pnpm</code>
 						</div>
 					</div>
@@ -53,7 +53,7 @@ export default function InstallationPage() {
 					</div>
 					<div>
 						<div className="font-medium">Git</div>
-						<div className="text-muted-foreground text-sm">
+						<div className="text-sm text-muted-foreground">
 							For version control
 						</div>
 					</div>
