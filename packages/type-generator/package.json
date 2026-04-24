@@ -9,10 +9,10 @@
 		"lint": "oxlint"
 	},
 	"dependencies": {
-		"convex": "^1.34.1"
+		"convex": "^1.36.1"
 	},
 	"devDependencies": {
-		"@types/node": "^25.5.2",
+		"@types/node": "^25.6.0",
 		"vexblocks-backend": "workspace:*",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
