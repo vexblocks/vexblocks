@@ -1,6 +1,6 @@
 {
 	"name": "@vexblocks/cli",
-	"version": "2.1.9",
+	"version": "2.2.0",
 	"description": "CLI for adding VexBlocks Headless CMS to your Turborepo project",
 	"keywords": [
 		"cms",

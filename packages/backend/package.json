@@ -9,11 +9,11 @@
 		"lint": "oxlint"
 	},
 	"dependencies": {
-		"@convex-dev/better-auth": "^0.11.5",
+		"@convex-dev/better-auth": "^0.12.1",
 		"@convex-dev/migrations": "^0.3.4",
 		"@convex-dev/r2": "^0.10.1",
 		"@convex-dev/resend": "^0.2.3",
-		"better-auth": "1.5.3",
+		"better-auth": "1.6.9",
 		"convex": "^1.36.1",
 		"convex-helpers": "^0.1.115",
 		"next": "16.2.4",
@@ -21,7 +21,7 @@
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.17.24",
-		"@types/node": "^25.5.2",
+		"@types/node": "^25.6.0",
 		"typescript": "^5.9.3"
 	}
 }
