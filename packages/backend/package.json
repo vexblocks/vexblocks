@@ -9,19 +9,19 @@
 		"lint": "oxlint"
 	},
 	"dependencies": {
-		"@convex-dev/better-auth": "^0.12.1",
+		"@convex-dev/better-auth": "^0.12.2",
 		"@convex-dev/migrations": "^0.3.4",
 		"@convex-dev/r2": "^0.10.1",
 		"@convex-dev/resend": "^0.2.3",
 		"better-auth": "1.6.9",
-		"convex": "^1.36.1",
-		"convex-helpers": "^0.1.115",
-		"next": "16.2.4",
-		"zod": "^4.3.6"
+		"convex": "^1.37.0",
+		"convex-helpers": "^0.1.116",
+		"next": "16.2.6",
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.17.24",
-		"@types/node": "^25.6.0",
+		"@types/node": "^25.6.2",
 		"typescript": "^5.9.3"
 	}
 }

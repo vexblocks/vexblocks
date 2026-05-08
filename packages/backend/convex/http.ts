@@ -102,16 +102,6 @@ http.route({
 				)
 			}
 
-			// Determine paths to revalidate
-			const pathsToRevalidate: string[] = []
-
-			if (schema.type === "global") {
-				pathsToRevalidate.push("/")
-			} else if (schema.type === "collection" && content.slug) {
-				pathsToRevalidate.push(`/${schema.name}/${content.slug}`)
-				pathsToRevalidate.push(`/${schema.name}`)
-			}
-
 			// Get Next.js revalidation endpoint
 			const revalidateEndpoint = process.env.NEXT_PUBLIC_REVALIDATE_ENDPOINT
 			if (!revalidateEndpoint) {
@@ -127,48 +117,43 @@ http.route({
 				)
 			}
 
-			// Call Next.js revalidation API for each path
-			const results: Array<{ path: string; success: boolean; error?: string }> =
-				[]
+			const response = await fetch(`${revalidateEndpoint}/api/revalidate`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					contentId,
+					secret: revalidateSecret,
+					slug: content.slug,
+					schemaName: schema.name,
+					schemaType: schema.type,
+					urlPattern: schema.previewConfig?.urlPattern,
+				}),
+			})
 
-			for (const path of pathsToRevalidate) {
-				try {
-					const response = await fetch(`${revalidateEndpoint}/api/revalidate`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${revalidateSecret}`,
-						},
-						body: JSON.stringify({ path }),
-					})
-
-					if (!response.ok) {
-						const errorText = await response.text()
-						results.push({
-							path,
-							success: false,
-							error: errorText,
-						})
-					} else {
-						results.push({
-							path,
-							success: true,
-						})
-					}
-				} catch (error) {
-					results.push({
-						path,
-						success: false,
-						error: error instanceof Error ? error.message : "Unknown error",
-					})
-				}
+			if (!response.ok) {
+				const errorText = await response.text()
+				return new Response(
+					JSON.stringify({
+						error: "Revalidation Failed",
+						message: errorText,
+						revalidated: false,
+					}),
+					{
+						status: 502,
+						headers: { "Content-Type": "application/json" },
+					},
+				)
 			}
+
+			const result = await response.json()
 
 			return new Response(
 				JSON.stringify({
 					message: "Revalidation completed",
 					revalidated: true,
-					results,
+					result,
 					timestamp: Date.now(),
 				}),
 				{
