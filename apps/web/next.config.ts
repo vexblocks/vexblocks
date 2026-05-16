@@ -4,9 +4,11 @@ const nextConfig: NextConfig = {
 	cacheComponents: true,
 	experimental: {
 		externalDir: true,
-		browserDebugInfoInTerminal: true,
 		globalNotFound: true,
 		typedEnv: true,
+	},
+	logging: {
+		browserToTerminal: true,
 	},
 	images: {
 		// Configure allowed image qualities to fix build warnings

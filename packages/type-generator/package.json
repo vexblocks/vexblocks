@@ -9,12 +9,12 @@
 		"lint": "oxlint"
 	},
 	"dependencies": {
-		"convex": "^1.37.0"
+		"convex": "^1.39.1"
 	},
 	"devDependencies": {
-		"@types/node": "^25.6.2",
+		"@types/node": "^25.8.0",
 		"vexblocks-backend": "workspace:*",
-		"tsx": "^4.21.0",
+		"tsx": "^4.22.0",
 		"typescript": "^5.9.3"
 	}
 }
